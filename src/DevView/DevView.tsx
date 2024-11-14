@@ -1,0 +1,128 @@
+import { View, StyleSheet, Text, StatusBar, Vibration, BackHandler, Platform, AppState, AppStateStatus, FlatList, ScrollView  } from "react-native";
+import { Item, MessageType, Objective, ObjectiveList, Pattern, PopMessage, Step, UserPrefs, Views } from "./../Types";
+import { FontPalette } from "../../fonts/Font";
+import { ThemePalette, colorPalette, dark } from "./../Colors";
+import { useUserContext } from "./../Contexts/UserContext";
+import React, { useEffect, useState } from "react";
+import { objectivesApi } from "./../Requests/RequestFactory";
+import PopMessageView from "./../Log/PopMessageView";
+import PopMessageContainer from "./../Log/PopMessageContainer";
+import Loading from "../Loading/Loading";
+import { useLogContext } from "../Contexts/LogContext";
+import PressImage from "../PressImage/PressImage";
+import PressText from "../PressText/PressText";
+export interface MainProps{
+  syncObjectivesList: (objList?: ObjectiveList)=>void,
+}
+
+const DevView = (props: MainProps) => {
+  const { log, consoleLogs, deleteLog } = useLogContext();
+  const { syncObjectivesList } = props;
+
+  const [isSyncing, setIsSyncing] = useState<boolean>(false);
+
+  useEffect(()=>{
+  }, []);
+
+  const clear = () => {
+    deleteLog();
+  }
+
+  const testSync = async () => {
+    // setIsSyncing(true);
+
+    // let first:ObjectiveList = {
+    //   Objectives: [],
+    //   Items: [],
+    //   DeleteObjectives: [],
+    //   DeleteItems: [],
+    // }
+
+    // const data = await syncObjectivesList(first);
+
+    // if(data){
+    // }
+    // else{
+    // }
+
+    // setIsSyncing(false);
+  }
+
+  const s = StyleSheet.create({
+    devContainer:{
+      flex: 1,
+      alignItems: 'center',
+      paddingVertical: 20,
+      paddingHorizontal: 10,
+    },
+    imageContainer: {
+      height: 40,
+      width: 40,
+      margin: 5,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    image:{
+      height: 20,
+      width: 20,
+      tintColor: colorPalette.beige,
+    },
+    devButtonRow:{
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      minHeight: 50,
+    },
+    devButton:{
+      height: 50,
+      paddingHorizontal: 10,
+      margin: 5,
+
+      justifyContent: 'center',
+      alignItems: 'center',
+
+      backgroundColor: colorPalette.bluedarker,
+
+      borderColor: colorPalette.beige,
+      borderWidth: 1,
+      borderStyle: 'solid',
+      borderRadius: 5,
+    },
+    devButtonText:{
+      color: colorPalette.beige,
+      flexWrap: 'wrap',
+    },
+    devScrollMessages:{
+      width: '100%',
+      maxWidth: '100%',
+      marginVertical: 5,
+      marginHorizontal: 2,
+
+      borderColor: 'black',
+      borderWidth: 1,
+      borderStyle: 'solid',
+      borderRadius: 5,
+    },
+    devMessages:{
+      color: colorPalette.beige,
+    },
+  }); 
+
+  return(
+    <View style={s.devContainer}>
+      <ScrollView style={s.devScrollMessages}>
+        <Text style={s.devMessages}>{consoleLogs}</Text>
+      </ScrollView>
+      <View style={s.devButtonRow}>
+        <PressImage style={s.image} pressStyle={s.imageContainer} source={require('../../public/images/trash.png')} onPress={clear}></PressImage>
+        {/* {isSyncing?
+          <Loading theme={dark}></Loading>
+          :
+          <PressText style={s.devButton} textStyle={s.devButtonText} onPress={testSync} text="Test async"></PressText>
+        } */}
+      </View>
+    </View>
+  )
+}
+
+export default DevView;
