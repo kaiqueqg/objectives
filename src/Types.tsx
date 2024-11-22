@@ -20,7 +20,7 @@ export interface Objective {
   IsShowingCheckedStep?: boolean,
 }
 
-export enum ItemType{ Step, Wait, Question, Note, Location, Divider, Grocery, Unknown }
+export enum ItemType{ Step, Wait, Question, Note, Location, Divider, Grocery, Medicine, ItemFake, Unknown }
 
 export interface ItemViewProps {
   objTheme: ObjectivePallete,
@@ -73,6 +73,15 @@ export interface Grocery extends Item {
   Quantity?: number,
   Unit?: string,
   GoodPrice?: string,
+}
+
+export interface Medicine extends Item{
+  Title: string,
+  IsChecked: boolean,
+  Quantity?: number,
+  Unit?: string,
+  Purpose?: string,
+  Components?: string[],
 }
 
 export interface User{

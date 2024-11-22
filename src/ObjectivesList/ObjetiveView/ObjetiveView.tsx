@@ -1,7 +1,7 @@
 import { View, StyleSheet, Pressable, Vibration, Alert, FlatList, Text, Image } from "react-native";
 import { useUserContext } from "../../Contexts/UserContext";
 import { colorPalette, getObjTheme } from "../../Colors";
-import { Item, ItemType, Note, Objective, Question, Step, Views, Wait, Location, Divider, Grocery, Pattern, MessageType } from "../../Types";
+import { Item, ItemType, Note, Objective, Question, Step, Views, Wait, Location, Divider, Grocery, Pattern, MessageType, Medicine } from "../../Types";
 import QuestionView from "./QuestionView/QuestionView";
 import PressImage from "../../PressImage/PressImage";
 import { useEffect, useState } from "react";
@@ -11,10 +11,12 @@ import WaitView from "./WaitView/WaitView";
 import NoteView from "./NoteView/NoteView";
 import LocationView from "./LocationView/LocationView";
 import DividerView from "./DividerView/DividerView";
-import GroceryView from "./Grocery/Grocery";
+import GroceryView from "./GroceryView/Grocery";
 import * as ExpoLocation from 'expo-location';
 import { useLogContext } from "../../Contexts/LogContext";
 import { useStorageContext } from "../../Contexts/StorageContext";
+import MedicineView from "./MedicineView/Medicine";
+import ItemFakeView from "./ItemFakeView/ItemFakeView";
 
 export interface ObjectiveViewProps {
   obj: Objective,
@@ -195,6 +197,21 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       LastModified: (new Date()).toISOString(),
       Title: '',
       IsChecked: false,
+    }, pos);
+  }
+
+  const addNewMedicine = async (pos?:number) => {
+    if(!user) return log.err('No user.');
+
+    addNewItem({
+      UserIdObjectiveId: user.UserId + obj.ObjectiveId,
+      ItemId: await storage.randomId(),
+      Type: ItemType.Medicine,
+      Pos: pos?pos:items.length,
+      LastModified: (new Date()).toISOString(),
+      Title: '',
+      IsChecked: false,
+
     }, pos);
   }
 
@@ -417,6 +434,12 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
 
   const getList = () => {
     let filteredItems:Item[] = [];
+
+    if(isEditingPos && isEndingPos){
+      const itemFake:Item = {ItemId: '-', LastModified: '', Pos: -1, Type: ItemType.ItemFake, UserIdObjectiveId: '-'}
+      filteredItems.push(itemFake)
+    }
+
     let isDividerOpen = true;
     for(let i = 0; i < items.length; i++){
       let current = items[i];
@@ -471,6 +494,9 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     else if(item.Type === ItemType.Grocery){
       rtnItem = <GroceryView key={item.ItemId} isEditingPos={isEditingPos} isEndingPos={isEndingPos} isSelected={itemSelected?true:false} loadMyItems={loadItems} objTheme={o} grocery={item as Grocery} onDeleteItem={onDeleteItem} ></GroceryView>
     }
+    else if(item.Type === ItemType.Medicine){
+      rtnItem = <MedicineView key={item.ItemId} isEditingPos={isEditingPos} isEndingPos={isEndingPos} isSelected={itemSelected?true:false} loadMyItems={loadItems} objTheme={o} medicine={item as Medicine} onDeleteItem={onDeleteItem} ></MedicineView>
+    }
     else if(item.Type === ItemType.Location){
       rtnItem = <LocationView key={item.ItemId} isEditingPos={isEditingPos} isEndingPos={isEndingPos} isSelected={itemSelected?true:false} loadMyItems={loadItems} objTheme={o} location={item as Location} onDeleteItem={onDeleteItem} ></LocationView>
     }
@@ -482,6 +508,9 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     }
     else if(item.Type === ItemType.Wait){
       rtnItem = <WaitView key={item.ItemId} isEditingPos={isEditingPos} isEndingPos={isEndingPos} isSelected={itemSelected?true:false} loadMyItems={loadItems} objTheme={o} wait={item as Wait} onDeleteItem={onDeleteItem} ></WaitView>
+    }
+    else if(item.Type === ItemType.ItemFake){
+      rtnItem = <ItemFakeView objTheme={o}></ItemFakeView>
     }
     else{
       return <View style={{height:700}}></View>
@@ -653,6 +682,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
           <PressImage pressStyle={s.imageContainer} style={s.image} onPress={addNewDivider} source={require('../../../public/images/minus.png')}></PressImage>
           <PressImage pressStyle={s.imageContainer} style={s.image} onPress={addNewWait} source={require('../../../public/images/wait.png')}></PressImage>
           <PressImage pressStyle={s.imageContainer} style={s.image} onPress={addNewGrocery} source={require('../../../public/images/grocery-filled.png')}></PressImage>
+          <PressImage pressStyle={s.imageContainer} style={s.image} onPress={addNewMedicine} source={require('../../../public/images/medicine.png')}></PressImage>
           <PressImage pressStyle={s.imageContainer} style={s.image} onPress={addNewLocation} source={require('../../../public/images/location-filled.png')}></PressImage>
           <PressImage pressStyle={s.imageContainer} style={s.image} onPress={addNewQuestion} source={require('../../../public/images/questionfilled.png')}></PressImage>
           <PressImage pressStyle={s.imageContainer} style={s.image} onPress={addNewNote} source={require('../../../public/images/note.png')}></PressImage>

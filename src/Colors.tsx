@@ -157,6 +157,7 @@ export type ObjectivePallete = {
   doneicontintlocation: string,
   doneicontintdivider: string,
   doneicontintgrocery: string,
+  doneicontintmedicine: string,
   
   cancelicontint: string,
   
@@ -168,6 +169,7 @@ export type ObjectivePallete = {
   trashicontintlocation: string,
   trashicontintdivider: string,
   trashicontintgrocery: string,
+  trashicontintmedicine: string,
   
   objbk: string,
   objtitle: string,
@@ -196,6 +198,10 @@ export type ObjectivePallete = {
   grocerybk: string,
   grocerytext: string,
   grocerytextfade: string,
+
+  medicinebk: string,
+  medicinetext: string,
+  medicinetextfade: string,
 }
 
 export const darkBlue: ObjectivePallete = {
@@ -215,6 +221,7 @@ export const darkBlue: ObjectivePallete = {
   doneicontintlocation: colorPalette.green,
   doneicontintdivider: colorPalette.green,
   doneicontintgrocery: colorPalette.green,
+  doneicontintmedicine: colorPalette.green,
   
   cancelicontint: colorPalette.beige,
   
@@ -226,6 +233,7 @@ export const darkBlue: ObjectivePallete = {
   trashicontintlocation: colorPalette.red,
   trashicontintdivider: colorPalette.red,
   trashicontintgrocery: colorPalette.red,
+  trashicontintmedicine: colorPalette.red,
   
   objbk: '#113a58',
   objtitle: colorPalette.beige,
@@ -255,6 +263,9 @@ export const darkBlue: ObjectivePallete = {
   grocerytext: colorPalette.beige,
   grocerytextfade: colorPalette.grey,
 
+  medicinebk: '#035a9c',
+  medicinetext: colorPalette.beige,
+  medicinetextfade: colorPalette.grey,
 }
 
 export const darkRed: ObjectivePallete = {
@@ -274,6 +285,7 @@ export const darkRed: ObjectivePallete = {
   doneicontintlocation: colorPalette.greendarker,
   doneicontintdivider: colorPalette.greendarker,
   doneicontintgrocery: colorPalette.greendarker,
+  doneicontintmedicine: colorPalette.greendarker,
   
   cancelicontint: colorPalette.black,
   
@@ -285,6 +297,7 @@ export const darkRed: ObjectivePallete = {
   trashicontintlocation: colorPalette.reddarker,
   trashicontintdivider: colorPalette.reddarker,
   trashicontintgrocery: colorPalette.reddarker,
+  trashicontintmedicine: colorPalette.reddarker,
   
   objbk: '#620000',
   objtitle: colorPalette.beige,
@@ -313,6 +326,10 @@ export const darkRed: ObjectivePallete = {
   grocerybk: '#942020',
   grocerytext: colorPalette.beige,
   grocerytextfade: colorPalette.black,
+
+  medicinebk: '#942020',
+  medicinetext: colorPalette.beige,
+  medicinetextfade: colorPalette.black,
 }
 
 export const darkGreen: ObjectivePallete = {
@@ -333,6 +350,7 @@ export const darkGreen: ObjectivePallete = {
   doneicontintlocation: colorPalette.greendarker,
   doneicontintdivider: colorPalette.greendarker,
   doneicontintgrocery: colorPalette.greendarker,
+  doneicontintmedicine: colorPalette.greendarker,
 
   cancelicontint: colorPalette.black,
 
@@ -344,6 +362,7 @@ export const darkGreen: ObjectivePallete = {
   trashicontintlocation: colorPalette.reddarker,
   trashicontintdivider: colorPalette.reddarker,
   trashicontintgrocery: colorPalette.reddarker,
+  trashicontintmedicine: colorPalette.reddarker,
   
   objbk: '#538253',
   objtitle: colorPalette.black,
@@ -371,6 +390,10 @@ export const darkGreen: ObjectivePallete = {
   grocerybk: '#a8e3a8',
   grocerytext: colorPalette.black,
   grocerytextfade: colorPalette.greylighty,
+
+  medicinebk: '#a8e3a8',
+  medicinetext: colorPalette.black,
+  medicinetextfade: colorPalette.greylighty,
 }
 
 export const darkWhite: ObjectivePallete = {
@@ -390,6 +413,7 @@ export const darkWhite: ObjectivePallete = {
   doneicontintlocation: colorPalette.greendarker,
   doneicontintdivider: colorPalette.greendarker,
   doneicontintgrocery: colorPalette.greendarker,
+  doneicontintmedicine: colorPalette.greendarker,
   
   cancelicontint: colorPalette.black,
   
@@ -401,6 +425,7 @@ export const darkWhite: ObjectivePallete = {
   trashicontintlocation: colorPalette.reddarker,
   trashicontintdivider: colorPalette.reddarker,
   trashicontintgrocery: colorPalette.reddarker,
+  trashicontintmedicine: colorPalette.reddarker,
   
   objbk: colorPalette.beige,
   objtitle: colorPalette.black,
@@ -429,6 +454,10 @@ export const darkWhite: ObjectivePallete = {
   grocerybk: '#D8AE7E',
   grocerytext: colorPalette.black,
   grocerytextfade: colorPalette.greylighty,
+
+  medicinebk: '#D8AE7E',
+  medicinetext: colorPalette.black,
+  medicinetextfade: colorPalette.greylighty,
 }
 
 export const noTheme: ObjectivePallete = {
@@ -448,6 +477,7 @@ export const noTheme: ObjectivePallete = {
   doneicontintlocation: colorPalette.greenlight,
   doneicontintdivider: colorPalette.greenlight,
   doneicontintgrocery: colorPalette.greenlight,
+  doneicontintmedicine: colorPalette.greenlight,
 
   cancelicontint: colorPalette.beige,
 
@@ -459,6 +489,7 @@ export const noTheme: ObjectivePallete = {
   trashicontintlocation: colorPalette.redlight,
   trashicontintdivider: colorPalette.redlight,
   trashicontintgrocery: colorPalette.redlight,
+  trashicontintmedicine: colorPalette.redlight,
   
   objbk: colorPalette.bluedark,
   objtitle: colorPalette.beige,
@@ -487,6 +518,10 @@ export const noTheme: ObjectivePallete = {
   grocerybk: colorPalette.bluedarkerdarker,
   grocerytext: colorPalette.beige,
   grocerytextfade: colorPalette.grey,
+
+  medicinebk: colorPalette.bluedarkerdarker,
+  medicinetext: colorPalette.beige,
+  medicinetextfade: colorPalette.grey,
 }
 
   export const getObjTheme = (t: string): ObjectivePallete => {
