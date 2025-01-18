@@ -1,7 +1,7 @@
-import { View, StyleSheet, Pressable, Vibration, Alert, FlatList, Text, Image } from "react-native";
+import { View, StyleSheet, Pressable, Vibration, Alert, FlatList, Text } from "react-native";
 import { useUserContext } from "../../Contexts/UserContext";
 import { colorPalette, getObjTheme } from "../../Colors";
-import { Item, ItemType, Note, Objective, Question, Step, Views, Wait, Location, Divider, Grocery, Pattern, MessageType, Medicine } from "../../Types";
+import { Item, ItemType, Note, Objective, Question, Step, Views, Wait, Location, Divider, Grocery, Pattern, MessageType, Medicine, Exercise, Weekdays, StepImportance } from "../../Types";
 import QuestionView from "./QuestionView/QuestionView";
 import PressImage from "../../PressImage/PressImage";
 import { useEffect, useState } from "react";
@@ -15,8 +15,11 @@ import GroceryView from "./GroceryView/Grocery";
 import * as ExpoLocation from 'expo-location';
 import { useLogContext } from "../../Contexts/LogContext";
 import { useStorageContext } from "../../Contexts/StorageContext";
-import MedicineView from "./MedicineView/Medicine";
+import MedicineView from "./MedicineView/MedicineView";
 import ItemFakeView from "./ItemFakeView/ItemFakeView";
+import PressText from "../../PressText/PressText";
+import React from "react";
+import ExerciseView from "./ExerciseView/ExerciseView";
 
 export interface ObjectiveViewProps {
   obj: Objective,
@@ -31,6 +34,9 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     objectives, putObjective, deleteObjective, 
     currentObjectiveId, deleteCurrentObjectiveId, 
     writeItems, readItems, putItems, deleteItem,
+    putAvailableTags, removeAvailableTags,
+    putSelectedTags, removeSelectedTags,
+    selectedTags, writeSelectedTags,
     currentView, writeCurrentView } = useUserContext();
     const { obj } = props;
   const o = getObjTheme(props.obj.Theme);
@@ -38,13 +44,12 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
   const [items, setItems] = useState<Item[]>([]);
   const [isItemsOpen, setIsItemsOpen] = useState<boolean>(false);
   const [isItemOpenLocked, setIsItemOpenLocked] = useState<boolean>(false);
+  const [isTagOpen, setIsTagOpen] = useState<boolean>(false);
   const [isPaletteOpen, setIsPaletteOpen] = useState<boolean>(false);
   const [isEditingTitle, setIsEditingTitle] = useState<boolean>(false);
   const [isEditingPos, setIsEditingPos] = useState<boolean>(false);
   const [isEndingPos, setIsEndingPos] = useState<boolean>(false);
   const [itemsSelected, setItemsSelected] = useState<Item[]>([]);
-
-  let itemsToChangePos:Item[] = [];
 
   useEffect(() => {
     load();
@@ -215,6 +220,28 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     }, pos);
   }
 
+  const addNewExercise = async (pos?:number) => {
+    if(!user) return log.err('No user.');
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    addNewItem({
+      UserIdObjectiveId: user.UserId + obj.ObjectiveId,
+      ItemId: await storage.randomId(),
+      Type: ItemType.Exercise,
+      Pos: pos?pos:items.length,
+      LastModified: (new Date()).toISOString(),
+      Title: '',
+      IsDone: false,
+      Reps: 1,
+      Series: 1,
+      MaxWeight: '',
+      Description: '',
+      Weekdays: [],
+      LastDone: yesterday.toISOString(),
+    }, pos);
+  }
+
   const onConfirmDelete = () => {
     Alert.alert('', 'Do you really want to delete?', [
       { text: 'NO', onPress: () => {}},
@@ -232,19 +259,16 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     await putObjective({...obj, Title: newText.trim(), LastModified: (new Date()).toISOString() });
   }
 
-  const onChangeIsItemsOpen = () => {
-    if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
+  const onArchive = async () => {
+    await putObjective({...obj, IsArchived: true, LastModified: (new Date()).toISOString() });
+  }
 
-    setIsPaletteOpen(false);
-    setIsEditingPos(false);
-    setIsItemsOpen(!isItemsOpen);
+  const onUnarchive = async () => {
+    await putObjective({...obj, IsArchived: false, LastModified: (new Date()).toISOString() });
   }
 
   const onChangeIsPaletteOpen = () => {
     if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
-
-    setIsItemsOpen(false);
-    setIsEditingPos(false);
     setIsPaletteOpen(!isPaletteOpen);
   }
 
@@ -269,24 +293,17 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
 
   const startEditingPos = () => {
     if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
-
-    setIsPaletteOpen(false);
-    setIsItemsOpen(false);
-
     setIsEditingPos(true);
   }
 
   const cancelEditingPos = () => {
     setItemsSelected([]);
-    itemsToChangePos = [];
     setIsEditingPos(false);
     setIsEndingPos(false);
   }
 
   const onEditingPosTo = () => {
     if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
-
-    itemsToChangePos = itemsSelected
     setIsEndingPos(true);
   }
 
@@ -320,6 +337,20 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     cancelEditingPos();
   }
 
+  const onChangeShowingItems = async () => {
+    if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
+    await putObjective(
+      {
+        ...obj, 
+        IsShowingCheckedGrocery: !obj.IsShowingCheckedGrocery, 
+        IsShowingCheckedExercise: !obj.IsShowingCheckedGrocery,
+        IsShowingCheckedStep: !obj.IsShowingCheckedGrocery,
+        IsShowingCheckedMedicine: !obj.IsShowingCheckedGrocery,
+        LastModified: (new Date()).toISOString() 
+      }
+    );
+  }
+
   const onChangeShowingGroceryChecked = async () => {
     if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
     await putObjective({...obj, IsShowingCheckedGrocery: !obj.IsShowingCheckedGrocery, LastModified: (new Date()).toISOString() });
@@ -331,7 +362,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
   }
 
   //Responsable for open, close and lock icon and menu.
-  const addingNewItem = async () => {
+  const addingNewItem = () => {
     if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
 
     if(isItemsOpen){
@@ -346,8 +377,6 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     else{//start adding item
       setIsItemsOpen(true);
     }
-
-    if(isPaletteOpen) setIsPaletteOpen(false);
   }
 
   const sortItemsAlphabetically = (items: Item[]): Item[] => {
@@ -432,6 +461,44 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     setItems(finalList);
   }
 
+  const onOpenTagList = () => {
+    setIsTagOpen(!isTagOpen);
+  }
+
+  const onChangeTags = async (tag: string) => {
+    const uniqueTags = Array.from(new Set([...obj.Tags, tag]));
+    await putObjective({...obj, Tags: [...uniqueTags], LastModified: (new Date()).toISOString() });
+    await putAvailableTags([tag]);
+    await putSelectedTags([tag]);
+  }
+
+  const removeTag = async (tag: string) => {
+    await putObjective({...obj, Tags: [...obj.Tags.filter((i)=>{return i !== tag})], LastModified: (new Date()).toISOString() });
+    await removeAvailableTags([tag]);
+    await removeSelectedTags([tag]);
+  }
+
+  const getTagList = () => {
+    let tagList = [];
+
+    for(let i = 0; i < obj.Tags.length; i++){
+      const cTag = obj.Tags[i];
+      tagList.push(
+        <PressText key={cTag} onPress={()=>removeTag(cTag)} style={s.tagContainer} textStyle={s.tagText} text={cTag}></PressText>
+      )
+    }
+    if(obj.Tags.length === 0){
+      return<></>;
+    }
+    else{
+      return (
+        <View style={s.tagListContainer}>
+          {tagList}
+        </View>
+      )
+    }
+  }
+
   const getList = () => {
     let filteredItems:Item[] = [];
 
@@ -445,6 +512,8 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       let current = items[i];
       let shouldAddStep = true;
       let shouldAddGrocery = true;
+      let shouldAddMedicine = true;
+      let shouldAddExercise = true;
 
       if(current.Type === ItemType.Divider) {
         filteredItems.push(current);
@@ -453,8 +522,10 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       else{
         if(current.Type === ItemType.Step && !obj.IsShowingCheckedStep) shouldAddStep = !(current as Step).Done;
         if(current.Type === ItemType.Grocery && !obj.IsShowingCheckedGrocery) shouldAddGrocery = !(current as Grocery).IsChecked;
+        if(current.Type === ItemType.Medicine && !obj.IsShowingCheckedMedicine) shouldAddMedicine = !(current as Medicine).IsChecked;
+        if(current.Type === ItemType.Exercise && !obj.IsShowingCheckedExercise) shouldAddExercise = !(current as Exercise).IsDone;
   
-        if(isDividerOpen && shouldAddStep && shouldAddGrocery){
+        if(isDividerOpen && shouldAddStep && shouldAddGrocery && shouldAddMedicine && shouldAddExercise){
           filteredItems.push(current);
         }
       }
@@ -465,7 +536,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     return <FlatList data={filteredItems} renderItem={getItemView}></FlatList>
   }
 
-  const getItemView = ({item}:any) => {
+  const getItemView = ({item}:any):JSX.Element => {
     let rtnItem;
     const itemSelected = itemsSelected.find((i: Item)=>i.ItemId === item.ItemId);
     if(item.Type === ItemType.Divider){
@@ -486,6 +557,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
         addNewQuestion={addNewQuestion}
         addNewStep={addNewStep}
         addNewWait={addNewWait}
+        addNewExercise={addNewExercise}
         ></DividerView>  
     }
     else if(item.Type === ItemType.Step){
@@ -496,6 +568,9 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     }
     else if(item.Type === ItemType.Medicine){
       rtnItem = <MedicineView key={item.ItemId} isEditingPos={isEditingPos} isEndingPos={isEndingPos} isSelected={itemSelected?true:false} loadMyItems={loadItems} objTheme={o} medicine={item as Medicine} onDeleteItem={onDeleteItem} ></MedicineView>
+    }
+    else if(item.Type === ItemType.Exercise){
+      rtnItem = <ExerciseView key={item.ItemId} isEditingPos={isEditingPos} isEndingPos={isEndingPos} isSelected={itemSelected?true:false} loadMyItems={loadItems} objTheme={o} exercise={item as Exercise} onDeleteItem={onDeleteItem} ></ExerciseView>
     }
     else if(item.Type === ItemType.Location){
       rtnItem = <LocationView key={item.ItemId} isEditingPos={isEditingPos} isEndingPos={isEndingPos} isSelected={itemSelected?true:false} loadMyItems={loadItems} objTheme={o} location={item as Location} onDeleteItem={onDeleteItem} ></LocationView>
@@ -517,11 +592,76 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     }
 
     return (
-      <View style={s.itemRow} onTouchEnd={() => {isEditingPos && (isEndingPos? endChangingPos(item) : addRemoveToSelected(item))}}>
+      <View 
+        style={s.itemRow}
+        onTouchEnd={() => {isEditingPos && (isEndingPos? endChangingPos(item) : addRemoveToSelected(item))}}>
         {rtnItem}
       </View>
     )
   }
+
+  const showBottomItem = (icon: BottomIcons) => {
+    setIsPaletteOpen(false);
+    setIsTagOpen(false);
+    if(icon !== BottomIcons.Pos) setIsEditingPos(false);
+    if(icon !== BottomIcons.Pos) setIsEndingPos(false);
+    if(icon !== BottomIcons.Add) setIsItemsOpen(false);
+    if(icon !== BottomIcons.Add) setIsItemOpenLocked(false);
+
+    switch (icon) {
+      case BottomIcons.Archive:
+        onArchive();
+        break;
+      case BottomIcons.Unarchive:
+        onUnarchive();
+        break;
+      case BottomIcons.Palette:
+        onChangeIsPaletteOpen();
+        break;
+      case BottomIcons.Checked:
+        onChangeShowingItems();
+        break;
+      case BottomIcons.Tags:
+        onOpenTagList();
+        break;
+      case BottomIcons.Sorted:
+        orderItems();
+        break;
+      case BottomIcons.Pos:
+        startEditingPos();
+        break;
+      case BottomIcons.Add:
+        addingNewItem();
+        break;
+      default:
+        break;
+    }
+  }
+
+  const shouldDisable = (icon: BottomIcons) => {
+    switch (icon) {
+      case BottomIcons.Archive:
+        return isPaletteOpen || isTagOpen || isEditingPos || isEndingPos || isItemsOpen || isItemOpenLocked;
+      case BottomIcons.Unarchive:
+        return isPaletteOpen || isTagOpen || isEditingPos || isEndingPos || isItemsOpen || isItemOpenLocked;
+      case BottomIcons.Palette:
+        return isTagOpen || isEditingPos || isEndingPos || isItemsOpen || isItemOpenLocked;
+      case BottomIcons.Checked:
+        return isPaletteOpen || isTagOpen || isEditingPos || isEndingPos || isItemsOpen || isItemOpenLocked;
+      case BottomIcons.Tags:
+        return isPaletteOpen || isEditingPos || isEndingPos || isItemsOpen || isItemOpenLocked;
+      case BottomIcons.Sorted:
+        return isPaletteOpen || isTagOpen || isEditingPos || isEndingPos || isItemsOpen || isItemOpenLocked;
+      case BottomIcons.Pos:
+        return isPaletteOpen || isTagOpen || isItemsOpen || isItemOpenLocked;
+      case BottomIcons.Add:
+        return isPaletteOpen || isTagOpen || isEditingPos || isEndingPos;
+      default:
+        return false;
+    }
+  }
+
+  enum BottomIcons {Archive, Unarchive, Palette, Checked, Tags, Sorted, Pos, Add};
 
   const s = StyleSheet.create(
   {
@@ -545,11 +685,6 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       minHeight: 50,
       alignItems: 'center',
       justifyContent: 'center',
-      marginBottom: 5,
-
-      borderColor: o.bordercolor,
-      borderWidth: 1,
-      borderStyle: 'solid',
     },
     titleContainerStyle: {
       justifyContent: 'center',
@@ -565,15 +700,64 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       flex: 1,
       width: '100%',
       flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'flex-end', 
+
+      borderColor: o.bordercolor,
+      borderBottomWidth: 1,
+      borderStyle: 'solid',
     },
     bottomContainer:{
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
+      margin: 5,
+    },
+    tagEditingContainer:{
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
 
       borderColor: o.bordercolor,
-      borderTopWidth: 1,
+      borderWidth: 1,
       borderStyle: 'solid',
+      borderRadius: 5,
+      marginTop: 5,
+      marginBottom: 0,
+      marginHorizontal: 5,
+    },
+    tagListContainer:{
+      flexWrap: "wrap",
+      flexDirection: "row",
+      padding: 5,
+    },
+    tagInputContainerStyle:{
+      justifyContent: 'center',
+      alignItems: 'center',
+      minHeight: 50,
+    },
+    tagInputContainer:{
+      color: o.objtitle,
+      fontWeight: 'bold',
+      borderColor: o.objtitle,
+    },
+    tagInputText:{
+      textAlign: 'center',
+      fontWeight: 'bold',
+      fontSize: 20,
+      color: o.objtitle,
+    },
+    tagContainer:{
+      margin: 5,
+      borderColor: o.bordercolor,
+      borderWidth: 1,
+      borderStyle: 'solid',
+      borderRadius: 5,
+    },
+    tagText:{
+      marginVertical: 10,
+      marginHorizontal: 15,
+      color: o.objtitle
     },
     bottomLeftContainer:{
       flexDirection: 'row',
@@ -589,29 +773,37 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     },
     itemsContainer:{
       justifyContent: 'flex-end',
+      borderColor: o.bordercolor,
+      borderWidth: 1,
+      borderRadius: 5,
+      borderStyle: 'solid',
+      margin: 5,
     },
     list:{
       flex: 1,
       width: "100%",
     },
-    imageContainerShadow:{
-      margin: 5,
-      
-      borderColor: 'lightgrey',
-      borderBottomWidth: 2,
-      borderRightWidth: 2,
-      borderStyle: 'solid'
-    },
     imageContainer: {
       height: 40,
       width: 40,
-      margin: 5,
+      marginVertical: 2,
+      marginHorizontal: 5,
       alignItems: 'center',
       justifyContent: 'center',
+    },
+    imageSmall:{
+      height: 15,
+      width: 15,
+      tintColor: o.objtitle,
     },
     image:{
       height: 20,
       width: 20,
+      tintColor: o.objtitle,
+    },
+    imageBig:{
+      height: 24,
+      width: 24,
       tintColor: o.objtitle,
     },
     itemRow:{
@@ -620,9 +812,11 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       alignItems: 'center',
       flexDirection: 'row',
     },
-    noTintImage:{
-      height: 20,
-      width: 20,
+    redImageColor:{
+      tintColor: o.trashicontint,
+    },
+    greenImageColor:{
+      tintColor: o.doneicontint,
     },
     imageFade:{
       tintColor: o.objtitlefade,
@@ -677,65 +871,117 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
           </View>
         }
         {getList()}
-        {isItemsOpen && !isPaletteOpen &&  
+        {isItemsOpen &&  
         <View style={s.itemsContainer}>
           <PressImage pressStyle={s.imageContainer} style={s.image} onPress={addNewDivider} source={require('../../../public/images/minus.png')}></PressImage>
+          <PressImage pressStyle={s.imageContainer} style={s.image} onPress={addNewExercise} source={require('../../../public/images/exercise-filled-black.png')}></PressImage>
           <PressImage pressStyle={s.imageContainer} style={s.image} onPress={addNewWait} source={require('../../../public/images/wait.png')}></PressImage>
-          <PressImage pressStyle={s.imageContainer} style={s.image} onPress={addNewGrocery} source={require('../../../public/images/grocery-filled.png')}></PressImage>
-          <PressImage pressStyle={s.imageContainer} style={s.image} onPress={addNewMedicine} source={require('../../../public/images/medicine.png')}></PressImage>
+          <PressImage pressStyle={s.imageContainer} style={s.image} onPress={addNewGrocery} source={require('../../../public/images/grocery-filled-black.png')}></PressImage>
+          <PressImage pressStyle={s.imageContainer} style={s.imageBig} onPress={addNewMedicine} source={require('../../../public/images/medicine-filled-black.png')}></PressImage>
           <PressImage pressStyle={s.imageContainer} style={s.image} onPress={addNewLocation} source={require('../../../public/images/location-filled.png')}></PressImage>
           <PressImage pressStyle={s.imageContainer} style={s.image} onPress={addNewQuestion} source={require('../../../public/images/questionfilled.png')}></PressImage>
           <PressImage pressStyle={s.imageContainer} style={s.image} onPress={addNewNote} source={require('../../../public/images/note.png')}></PressImage>
           <PressImage pressStyle={s.imageContainer} style={s.image} onPress={addNewStep} source={require('../../../public/images/step-filled.png')}></PressImage>
         </View>}
       </View>
+      {isTagOpen && 
+      <View style={s.tagEditingContainer}>
+        <View style={s.tagListContainer}>
+          <PressInput
+            text={''}
+            objTheme={o} 
+            onDone={onChangeTags}
+            onEditingState={onIsEditingTitle}
+            containerStyle={s.tagInputContainerStyle}
+            inputStyle={s.tagInputContainer}
+            textStyle={s.tagInputText}
+            defaultText={'click to insert tag'}
+            defaultStyle={{color: o.objtitle}}
+            trashImageStyle={{tintColor: o.trashicontint}}>
+          </PressInput>
+        </View>
+        {getTagList()}
+      </View>}
       <View style={s.bottomContainer}>
         <View style={s.bottomLeftContainer}>
-          {!isEditingTitle && 
-            <>
-              <PressImage 
-                pressStyle={s.imageContainer}
-                style={s.image}
-                disable={isEditingPos || isItemsOpen}
-                disableStyle={s.imageFade}
-                onPress={onChangeIsPaletteOpen}
-                source={require('../../../public/images/palette.png')}></PressImage>
-              <PressImage pressStyle={s.imageContainer} style={[s.image, !obj.IsShowingCheckedGrocery && s.imageFade]} onPress={onChangeShowingGroceryChecked} source={require('../../../public/images/checked.png')}></PressImage>
-              <PressImage pressStyle={s.imageContainer} style={[s.image, !obj.IsShowingCheckedStep && s.imageFade]} onPress={onChangeShowingStepChecked} source={require('../../../public/images/step-filled.png')}></PressImage>
-            </>
-          }
+          {obj.IsArchived?
+          <PressImage 
+            pressStyle={s.imageContainer}
+            style={s.image}
+            disable={shouldDisable(BottomIcons.Unarchive)}
+            disableStyle={s.imageFade}
+            onPress={()=>showBottomItem(BottomIcons.Unarchive)}
+            source={require('../../../public/images/unarchive.png')}></PressImage>
+          :
+          <PressImage 
+            pressStyle={s.imageContainer}
+            style={s.image}
+            disable={shouldDisable(BottomIcons.Archive)}
+            disableStyle={s.imageFade}
+            onPress={()=>showBottomItem(BottomIcons.Archive)}
+            source={require('../../../public/images/archive.png')}></PressImage>}
+          <PressImage 
+            pressStyle={s.imageContainer}
+            style={s.image}
+            disable={shouldDisable(BottomIcons.Palette)}
+            disableStyle={s.imageFade}
+            onPress={()=>showBottomItem(BottomIcons.Palette)}
+            source={require('../../../public/images/palette.png')}></PressImage>
+          <PressImage
+            style={[s.image]}
+            disable={shouldDisable(BottomIcons.Tags)}
+            disableStyle={s.imageFade}
+            pressStyle={s.imageContainer}
+            onPress={()=>showBottomItem(BottomIcons.Tags)}
+            source={require('../../../public/images/tag.png')}></PressImage>
         </View>
         <View style={s.bottomRightContainer}>
-          <PressImage pressStyle={s.imageContainer} style={[s.image, (isEditingPos || isItemsOpen || isPaletteOpen) && s.imageFade]} onPress={orderItems} confirm={true} source={require('../../../public/images/atoz.png')}></PressImage>
-          {!isEditingTitle && !isEditingPos && 
-            <PressImage 
-              pressStyle={s.imageContainer}
-              style={[s.image,{height: 15, width: 15}]}
-              disable={isEditingPos || isPaletteOpen || isItemsOpen}
+          <PressImage
+            style={s.image}
+            disable={shouldDisable(BottomIcons.Sorted)}
+            disableStyle={s.imageFade}
+            pressStyle={s.imageContainer}
+            onPress={()=>showBottomItem(BottomIcons.Sorted)}
+            confirm={true}
+            confirmStyle={[s.image, s.greenImageColor]}
+            source={require('../../../public/images/atoz.png')}></PressImage>
+          <PressImage
+            style={[s.image, !obj.IsShowingCheckedGrocery && s.imageFade]}
+            disable={shouldDisable(BottomIcons.Checked)}
+            disableStyle={s.imageFade}
+            pressStyle={s.imageContainer}
+            onPress={()=>showBottomItem(BottomIcons.Checked)}
+            source={require('../../../public/images/checked.png')}></PressImage>
+          {!isEditingPos && <PressImage 
+              style={s.imageSmall}
+              disable={shouldDisable(BottomIcons.Pos)}
               disableStyle={s.imageFade}
-              onPress={startEditingPos}
-              source={require('../../../public/images/updown.png')}></PressImage>
-          }
-          {!isEditingTitle && isEditingPos && <PressImage pressStyle={s.imageContainer} style={s.image} onPress={cancelEditingPos} source={require('../../../public/images/cancel.png')}></PressImage>}
-          {!isEditingTitle && isEditingPos && <PressImage pressStyle={s.imageContainer} hide={itemsSelected.length=== 0 || itemsSelected.length === items.length || isEndingPos} style={s.image} onPress={onEditingPosTo} source={require('../../../public/images/arrow-right-filled.png')}></PressImage>}
-          {!isEditingTitle && !isEditingPos &&
-            (isItemOpenLocked ?
+              pressStyle={[s.imageContainer]}
+              onPress={()=>showBottomItem(BottomIcons.Pos)}
+              source={require('../../../public/images/updown.png')}></PressImage>}
+          {isEditingPos && <PressImage pressStyle={s.imageContainer} style={[s.image, s.redImageColor]} onPress={cancelEditingPos} source={require('../../../public/images/cancel.png')}></PressImage>}
+          {isEditingPos && <PressImage 
+            style={[s.imageSmall, s.greenImageColor]}
+            pressStyle={s.imageContainer}
+            hide={itemsSelected.length=== 0 || itemsSelected.length === items.length || isEndingPos}
+            onPress={onEditingPosTo}
+            source={require('../../../public/images/arrow-right-filled.png')}></PressImage>}
+          {isItemOpenLocked ?
             <PressImage 
-              pressStyle={s.imageContainer}
-              style={s.noTintImage}
-              disable={isEditingPos || isPaletteOpen}
+              style={[s.image, s.redImageColor]}
+              disable={shouldDisable(BottomIcons.Add)}
               disableStyle={s.imageFade}
+              pressStyle={s.imageContainer}
               onPress={addingNewItem}
               source={require('../../../public/images/add-lock.png')}></PressImage>
             :
             <PressImage 
               pressStyle={s.imageContainer}
               style={s.image}
-              disable={isEditingPos || isPaletteOpen}
+              disable={shouldDisable(BottomIcons.Add)}
               disableStyle={s.imageFade}
-              onPress={addingNewItem}
+              onPress={()=>showBottomItem(BottomIcons.Add)}
               source={require('../../../public/images/add.png')}></PressImage>
-            )
           }
         </View>
       </View>

@@ -23,13 +23,33 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     storage.readUserPrefs().then((userPrefs: any) => {
       if(userPrefs) setUserPrefs(userPrefs);
     })
+    // loadSelectedTags();
     loadObjectives();
     loadLastSync();
   }, []);
 
   const loadObjectives = async () => {
     const storageList = await storage.readObjectives();
-    if(storageList) setObjectives(storageList);
+    if(storageList) {
+      setObjectives(storageList);
+
+      const tags = [];
+      for(let i = 0; i < storageList.length; i++){
+        tags.push(...storageList[i].Tags);
+      }
+      const uniqueTags = Array.from(new Set(tags));
+      setAvailableTags(uniqueTags);
+      await storage.writeAvailableTags(uniqueTags);
+
+      const v = await storage.readSelectedTags();
+      if (v) {
+        const filteredTags = v.filter((tag: string) => uniqueTags.includes(tag));
+        setSelectedTags(filteredTags);
+        await storage.writeSelectedTags(filteredTags);
+      } else {
+        log.err('no selected tags');
+      }
+    }
   }
 
   const loadLastSync = async () => {
@@ -37,6 +57,18 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     if(v) setLastSync(v);
     else log.err('no last sync');
   }
+
+  // const loadSelectedTags = async () => {
+  //   const v = await storage.readSelectedTags();
+  //   if (v) {
+  //     const filteredTags = v.filter((tag: string) => availableTags.includes(tag));
+  //     setSelectedTags(filteredTags);
+  //     log.b(filteredTags)
+  //     await storage.writeSelectedTags(filteredTags);
+  //   } else {
+  //     log.err('no selected tags');
+  //   }
+  // }
 
   //^-------------------- USER
   const [user, setUser] = useState<User|null>(null);
@@ -99,14 +131,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       log.err('writeJwtToken', '[catch] error: ' + err);
     }
   };
-  const deleteJwtToken = async () => {
-    try {
-      await storage.deleteJwtToken();
-      setJwtToken(null);
-    } catch (error) {
-      log.err('deleteJwtToken', '[catch] deleting jwt token.');
-    }
-  };
 
   //^-------------------- VIEW
   const [currentView, setCurrentView] = useState<Views>(Views.ListView);
@@ -116,6 +140,64 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       setCurrentView(view);
     } catch (err) {
       log.err('writeCurrentView', 'Problem writing current view', err);
+    }
+  };
+  //^-------------------- TAGS
+  const [availableTags, setAvailableTags] = useState<string[]>([]);
+  const writeAvailableTags = async (availableTags: string[]) => {
+    try {
+      const uniqueTags = Array.from(new Set(availableTags));
+      await storage.writeAvailableTags(uniqueTags);
+      setAvailableTags(uniqueTags);
+    } catch (err) {
+      log.err('AvailableTags', 'Problem writing available tags', err);
+    }
+  };
+  const putAvailableTags = async (tags: string[]) => {
+    try {
+      const newTags = Array.from(new Set([...availableTags, ...tags]));
+      await storage.writeAvailableTags(newTags);
+      setAvailableTags(newTags);
+    } catch (err) {
+      log.err('putAvailableTags', 'Problem putting available tags', err);
+    }
+  };
+  const removeAvailableTags = async (tags: string[]) => {
+    try {
+      const newTags = availableTags.filter(t => !tags.includes(t));
+      await storage.writeAvailableTags(newTags);
+      setAvailableTags(newTags);
+    } catch (err) {
+      log.err('removeAvailableTags', 'Problem removing available tags', err);
+    }
+  };
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const removeSelectedTags = async (tags: string[]) => {
+    try {
+      const newTags = selectedTags.filter(t => !tags.includes(t));
+      await storage.writeSelectedTags(newTags);
+      setSelectedTags(newTags);
+    } catch (err) {
+      log.err('removeSelectedTags', 'Problem removing selected tags', err);
+    }
+  };
+
+  const putSelectedTags = async (tags: string[]) => {
+    try {
+      const newTags = Array.from(new Set([...selectedTags, ...tags]));
+      await storage.writeSelectedTags(newTags);
+      setSelectedTags(newTags);
+    } catch (err) {
+      log.err('putSelectedTags', 'Problem putting selected tags', err);
+    }
+  };
+  const writeSelectedTags = async (selectedTags: string[]) => {
+    try {
+      const uniqueTags = Array.from(new Set(selectedTags));
+      await storage.writeSelectedTags(uniqueTags);
+      setSelectedTags(uniqueTags);
+    } catch (err) {
+      log.err('SelectedTags', 'Problem writing selected tags', err);
     }
   };
 
@@ -129,14 +211,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       log.err('writeCurrentView', 'Problem writing current objective id', err);
     }
   };
-  const deleteCurrentObjectiveId = async () => {
-    try {
-      await storage.deleteCurrentObjectiveId();
-      setCurrentObjectiveId('');
-    } catch (error) {
-      log.err('deleteCurrentObjective', '[catch] deleting current objective id.');
-    }
-  }
   //^-------------------- SYNC
   const [lastSync, setLastSync] = useState<Date|null>(new Date());
   const writeLastSync = async (value: Date) => {
@@ -209,13 +283,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       log.err('deleteObjective', 'Problem deleting objective', err);
     } 
   };
-  const clearObjectives = async () => {
-    try {
-      await storage.clear();
-    } catch (err) {
-      log.err('deleteObjectives', 'Problem deleting objectives', err);
-    }
-  };
   const putObjectives = async (objs: Objective[]) => {
     try {
       for(let i = 0; i < objs.length; i++){
@@ -234,8 +301,9 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
           newObjectives.push({...objs[i]});
         }
       }
-      await storage.writeObjectives(newObjectives);
-      setObjectives(newObjectives);
+      const sortedObjs = newObjectives.sort((a: Objective, b: Objective) => a.Pos - b.Pos);
+      await storage.writeObjectives(sortedObjs);
+      setObjectives(sortedObjs);
     } catch (err) {
       log.err('putItem', 'Problem putting objectives', err);
     }
@@ -380,25 +448,42 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     }
   };
   const clearAllData = async () =>{ 
-    await deleteJwtToken();
-    await deleteUser();
-    await clearObjectives();
+    await storage.clear();
+    setUser(null);
+    setJwtToken(null);
+    setAvailableTags([]);
+    setSelectedTags([]);
+    setCurrentObjectiveId('');
+    setLastSync(null);
+    setObjectives([]);
+    setDeletedObjectives([]);
+    setDeletedItems([]);
   };
 
   return (
     <UserContext.Provider 
       value={{
-        user, writeUser, deleteUser,
+        //^USER
+        user, writeUser,
         userPrefs, writeUserPrefs,
         theme, fontTheme,
-        currentView, writeCurrentView, 
-        currentObjectiveId, writeCurrentObjectiveId, deleteCurrentObjectiveId,
-        jwtToken, writeJwtToken, deleteJwtToken,
+        //^JWT TOKEN
+        jwtToken, writeJwtToken,
+        //^VIEW
+        currentView, writeCurrentView,
+        currentObjectiveId, writeCurrentObjectiveId,
+        //^TAGS
+        availableTags, putAvailableTags, removeAvailableTags, writeAvailableTags, 
+        selectedTags, putSelectedTags, removeSelectedTags, writeSelectedTags,
+        //^SYNC
         lastSync, writeLastSync,
-        objectives,writeObjectives, deleteObjectives: clearObjectives, putObjective, putObjectives, deleteObjective,
+        //^OBJECTIVE LIST
+        objectives,writeObjectives, putObjective, putObjectives, deleteObjective,
         readItems, writeItems, putItem, deleteItem, putItems,
+        //^DELETED
         deletedObjectives, pushDeletedObjective, deleteDeletedObjectives,
         deletedItems, pushDeletedItem, deleteDeletedItems,
+        //^HELPERS
         clearAllData,
       }}>
       {children}
@@ -408,45 +493,29 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
 interface UserContextType {
   //^USER
-  user: User|null,
-  writeUser: (user: User) => void,
-  deleteUser: () => void,
-  userPrefs: UserPrefs, 
-  writeUserPrefs: (userPrefs: UserPrefs) => void,
-  theme: ThemePalette,
-  fontTheme: FontPalette,
-  //^VIEW
-  currentView: Views,
-  writeCurrentView: (view: Views) => void,
-  currentObjectiveId: string,
-  writeCurrentObjectiveId: (view: string) => void,
-  deleteCurrentObjectiveId: () => void,
+  user: User|null, writeUser: (user: User) => void,
+  userPrefs: UserPrefs,  writeUserPrefs: (userPrefs: UserPrefs) => void,
+  theme: ThemePalette, fontTheme: FontPalette,
   //^JWT TOKEN
-  jwtToken: string|null,
-  writeJwtToken: (token: string) => void, 
-  deleteJwtToken: () => void,
+  jwtToken: string|null, writeJwtToken: (token: string) => void, 
+  //^VIEW
+  currentView: Views, writeCurrentView: (view: Views) => void,
+  currentObjectiveId: string, writeCurrentObjectiveId: (view: string) => void,
+  //^TAGS
+  availableTags: string[], writeAvailableTags: (availableTags: string[]) => void, putAvailableTags: (tag: string[]) => void, removeAvailableTags: (tag: string[]) => void,
+  selectedTags: string[], writeSelectedTags: (selectedTags: string[]) => void, putSelectedTags: (tags: string[]) => void, removeSelectedTags: (tags: string[]) => void,
   //^SYNC
-  lastSync: Date|null,
-  writeLastSync: (date: Date) => void,
+  lastSync: Date|null, writeLastSync: (date: Date) => void,
   //^OBJECTIVE LIST
   objectives: Objective[],
-  writeObjectives: (objective: Objective[]) => void,
-  putObjective: (objective: Objective) => void,
-  putObjectives: (objectives: Objective[]) => void,
+  writeObjectives: (objective: Objective[]) => void, putObjective: (objective: Objective) => void, putObjectives: (objectives: Objective[]) => void,
   deleteObjective: (objective: Objective) => void,
-  deleteObjectives: () => void,
-  readItems: (objectiveId: string) => Promise<Item[]>,
-  writeItems: (objectiveId: string, items: Item[]) => void,
-  putItem: (item: Item) => void,
-  deleteItem: (item: Item) => void,
-  putItems: (objectiveId: string, items: Item[]) => void,
-  //Deleted
-  deletedObjectives: Objective[],
-  pushDeletedObjective: (obj: Objective) => void, 
-  deleteDeletedObjectives: () => void,
-  deletedItems: Item[],
-  pushDeletedItem: (item: Item) => void, 
-  deleteDeletedItems: () => void,
+  readItems: (objectiveId: string) => Promise<Item[]>, writeItems: (objectiveId: string, items: Item[]) => void, putItem: (item: Item) => void,
+  deleteItem: (item: Item) => void, putItems: (objectiveId: string, items: Item[]) => void,
+  //^DELETED
+  deletedObjectives: Objective[], pushDeletedObjective: (obj: Objective) => void, deleteDeletedObjectives: () => void,
+  deletedItems: Item[], pushDeletedItem: (item: Item) => void,  deleteDeletedItems: () => void,
+  //^HELPERS
   clearAllData: () => void,
 }
 

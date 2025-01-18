@@ -45,10 +45,10 @@ const QuestionView = (props: QuestionViewProps) => {
       flexDirection: 'column',
       justifyContent: 'center',
       alignItems: 'center',
-      backgroundColor: o.questionbk,
+      backgroundColor: (question.Statement.trim() !== '' && question.Answer.trim() !== '')?o.objbk:o.itembk,
       
       borderRadius: 5,
-      borderColor: o.bordercolor,
+      borderColor: (question.Statement.trim() !== '' && question.Answer.trim() !== '')?o.objbk:o.bordercolor,
       borderWidth: 1,
       borderStyle: 'solid',
     },
@@ -65,11 +65,11 @@ const QuestionView = (props: QuestionViewProps) => {
       alignItems: 'center',
     },
     statement: {
-      color: o.questiontext,
+      color: o.itemtext,
       fontWeight: 'bold',
     },
     statementDefaultText:{
-      color: o.questionplaceholdertextcolor,
+      color: o.itemtextplaceholder,
     },
     answerLine: {
       flexDirection: 'row',
@@ -78,23 +78,23 @@ const QuestionView = (props: QuestionViewProps) => {
       minHeight: 30,
     },
     answerStyle: {
-      color: o.questiontext
+      color: o.itemtext
     },
     answerDefaultText:{
-      color: o.questionplaceholdertextcolor,
+      color: o.itemtextplaceholder,
     },
     inputStyle: {
-      color: o.questiontext,
-      borderColor: o.questiontext,
+      color: o.itemtext,
+      borderColor: o.itemtext,
     },
     arrowImage: {
       height: 10,
       width: 10,
       margin: 5,
-      tintColor: o.questionplaceholdertextcolor,
+      tintColor: o.itemtextplaceholder,
     },
     questionDoneImage:{
-      tintColor: o.doneicontintquestion,
+      tintColor: o.doneicontint,
     },
     imageContainer: {
       height: 40,
@@ -142,12 +142,12 @@ const QuestionView = (props: QuestionViewProps) => {
             inputStyle={s.inputStyle}
             defaultStyle={s.statementDefaultText}
             doneImageStyle={s.questionDoneImage}
-            trashImageStyle={{tintColor: o.trashicontintquestion}}
+            trashImageStyle={{tintColor: o.trashicontint}}
             >
           </PressInput>
         </View>
         <View style={s.answerLine}>
-          <Image style={[s.arrowImage, question.Answer === ''? {tintColor: o.questionplaceholdertextcolor}: {tintColor:o.questiontext}]} source={require('../../../../public/images/arow-down-right-thicker.png')}></Image>
+          <Image style={[s.arrowImage, question.Answer === ''? {tintColor: o.itemtextplaceholder}: {tintColor:o.itemtext}]} source={require('../../../../public/images/arow-down-right-thicker.png')}></Image>
           <PressInput 
             objTheme={o}
             text={question.Answer}

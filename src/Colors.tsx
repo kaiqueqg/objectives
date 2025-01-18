@@ -150,122 +150,41 @@ export type ObjectivePallete = {
   bordercolorselected: string,
   
   doneicontint: string,
-  doneicontintwait: string,
-  doneicontintquestion: string,
-  doneicontintstep: string,
-  doneicontintnote: string,
-  doneicontintlocation: string,
-  doneicontintdivider: string,
-  doneicontintgrocery: string,
-  doneicontintmedicine: string,
-  
   cancelicontint: string,
-  
   trashicontint: string,
-  trashicontintwait: string,
-  trashicontintquestion: string,
-  trashicontintstep: string,
-  trashicontintnote: string,
-  trashicontintlocation: string,
-  trashicontintdivider: string,
-  trashicontintgrocery: string,
-  trashicontintmedicine: string,
   
   objbk: string,
   objtitle: string,
   objtitlefade: string,
-  
-  stepbk: string,
-  steptitle: string,
-  steptitlefade: string,
-  
-  questionbk: string,
-  questiontext: string,
-  questionplaceholdertextcolor: string,
 
-  waitbk: string,
-  waittext: string,
-
-  notebk:string,
-  notetext:string,
-
-  locationbk:string,
-  locationtext:string,
-
-  dividerbk: string,
-  dividertext: string,
-
-  grocerybk: string,
-  grocerytext: string,
-  grocerytextfade: string,
-
-  medicinebk: string,
-  medicinetext: string,
-  medicinetextfade: string,
+  itembk: string,
+  itemtext: string,
+  itemtextfade: string,
+  itemtextplaceholder: string,
 }
 
 export const darkBlue: ObjectivePallete = {
   icontintcolor: colorPalette.beige,
-  icontintcolorfade: colorPalette.black,
+  icontintcolorfade: colorPalette.beigedark,
   
   inputbk: colorPalette.bluedarkerdarker,
-  bordercolor: colorPalette.bluedarkerdarker,
+  
+  bordercolor: '#346194',
   bordercolorlight: colorPalette.beige,
   bordercolorselected: colorPalette.red,
   
   doneicontint: colorPalette.green,
-  doneicontintwait: colorPalette.green,
-  doneicontintquestion: colorPalette.green,
-  doneicontintstep: colorPalette.green,
-  doneicontintnote: colorPalette.green,
-  doneicontintlocation: colorPalette.green,
-  doneicontintdivider: colorPalette.green,
-  doneicontintgrocery: colorPalette.green,
-  doneicontintmedicine: colorPalette.green,
-  
-  cancelicontint: colorPalette.beige,
-  
+  cancelicontint: colorPalette.yellow,
   trashicontint: colorPalette.red,
-  trashicontintwait: colorPalette.reddark,
-  trashicontintquestion: colorPalette.reddark,
-  trashicontintstep: colorPalette.red,
-  trashicontintnote: colorPalette.red,
-  trashicontintlocation: colorPalette.red,
-  trashicontintdivider: colorPalette.red,
-  trashicontintgrocery: colorPalette.red,
-  trashicontintmedicine: colorPalette.red,
   
   objbk: '#113a58',
   objtitle: colorPalette.beige,
   objtitlefade: colorPalette.grey,
   
-  stepbk: '#035a9c',
-  steptitle: colorPalette.beige,
-  steptitlefade: colorPalette.grey,
-  
-  questionbk: '#3f9be2',
-  questiontext: colorPalette.beige,
-  questionplaceholdertextcolor: colorPalette.beigelightdark,
-
-  waitbk: '#035a9c',
-  waittext: colorPalette.beige,
-
-  notebk: '#035a9c',
-  notetext: colorPalette.beige,
-
-  locationbk: '#035a9c',
-  locationtext: colorPalette.beige,
-
-  dividerbk: '#035a9c',
-  dividertext: colorPalette.beige,
-
-  grocerybk: '#035a9c',
-  grocerytext: colorPalette.beige,
-  grocerytextfade: colorPalette.grey,
-
-  medicinebk: '#035a9c',
-  medicinetext: colorPalette.beige,
-  medicinetextfade: colorPalette.grey,
+  itembk:  '#035a9c',
+  itemtext: colorPalette.beige,
+  itemtextfade: colorPalette.beigedarker,
+  itemtextplaceholder: colorPalette.beigedarker,
 }
 
 export const darkRed: ObjectivePallete = {
@@ -278,62 +197,20 @@ export const darkRed: ObjectivePallete = {
   bordercolorselected: colorPalette.beige,
   
   doneicontint: colorPalette.greendarker,
-  doneicontintwait: colorPalette.greendarker,
-  doneicontintquestion: colorPalette.greendarker,
-  doneicontintstep: colorPalette.greendarker,
-  doneicontintnote: colorPalette.greendarker,
-  doneicontintlocation: colorPalette.greendarker,
-  doneicontintdivider: colorPalette.greendarker,
-  doneicontintgrocery: colorPalette.greendarker,
-  doneicontintmedicine: colorPalette.greendarker,
-  
   cancelicontint: colorPalette.black,
-  
   trashicontint: colorPalette.redlightlight,
-  trashicontintwait: colorPalette.reddarker,
-  trashicontintquestion: colorPalette.reddarker,
-  trashicontintstep: colorPalette.reddarker,
-  trashicontintnote: colorPalette.reddarker,
-  trashicontintlocation: colorPalette.reddarker,
-  trashicontintdivider: colorPalette.reddarker,
-  trashicontintgrocery: colorPalette.reddarker,
-  trashicontintmedicine: colorPalette.reddarker,
   
   objbk: '#620000',
   objtitle: colorPalette.beige,
   objtitlefade: colorPalette.grey,
-  
-  stepbk: '#942020',
-  steptitle: colorPalette.beige,
-  steptitlefade: colorPalette.black,
-  
-  questionbk: '#C23030',
-  questiontext: colorPalette.beige,
-  questionplaceholdertextcolor: colorPalette.black,
 
-  waitbk: '#942020',
-  waittext: colorPalette.beige,
-
-  notebk: '#942020',
-  notetext: colorPalette.beige,
-
-  locationbk: '#942020',
-  locationtext: colorPalette.beige,
-
-  dividerbk: '#942020',
-  dividertext: colorPalette.beige,
-
-  grocerybk: '#942020',
-  grocerytext: colorPalette.beige,
-  grocerytextfade: colorPalette.black,
-
-  medicinebk: '#942020',
-  medicinetext: colorPalette.beige,
-  medicinetextfade: colorPalette.black,
+  itembk: '#942020',
+  itemtext: colorPalette.beige,
+  itemtextfade: colorPalette.black,
+  itemtextplaceholder: colorPalette.beigedarker,
 }
 
 export const darkGreen: ObjectivePallete = {
-  questionplaceholdertextcolor: colorPalette.greylighty,
   icontintcolor: colorPalette.black,
   icontintcolorfade: colorPalette.grey,
   
@@ -343,57 +220,17 @@ export const darkGreen: ObjectivePallete = {
   bordercolorselected: colorPalette.red,
 
   doneicontint: colorPalette.greendarker,
-  doneicontintwait: colorPalette.greendarker,
-  doneicontintquestion: colorPalette.greendarker,
-  doneicontintstep: colorPalette.greendarker,
-  doneicontintnote: colorPalette.greendarker,
-  doneicontintlocation: colorPalette.greendarker,
-  doneicontintdivider: colorPalette.greendarker,
-  doneicontintgrocery: colorPalette.greendarker,
-  doneicontintmedicine: colorPalette.greendarker,
-
   cancelicontint: colorPalette.black,
-
   trashicontint: colorPalette.reddarker,
-  trashicontintwait: colorPalette.reddarker,
-  trashicontintquestion: colorPalette.reddarker,
-  trashicontintstep: colorPalette.reddarker,
-  trashicontintnote: colorPalette.reddarker,
-  trashicontintlocation: colorPalette.reddarker,
-  trashicontintdivider: colorPalette.reddarker,
-  trashicontintgrocery: colorPalette.reddarker,
-  trashicontintmedicine: colorPalette.reddarker,
   
   objbk: '#538253',
   objtitle: colorPalette.black,
   objtitlefade: colorPalette.greendark,
-  
-  stepbk: '#a8e3a8',
-  steptitle: colorPalette.black,
-  steptitlefade: colorPalette.greylighty,
 
-  questionbk: '#D5FFDC',
-  questiontext: colorPalette.black,
-
-  waitbk: '#a8e3a8',
-  waittext: colorPalette.black,
-
-  notebk: '#a8e3a8',
-  notetext: colorPalette.black,
-
-  locationbk: '#a8e3a8',
-  locationtext: colorPalette.black,
-
-  dividerbk: '#a8e3a8',
-  dividertext: colorPalette.black,
-
-  grocerybk: '#a8e3a8',
-  grocerytext: colorPalette.black,
-  grocerytextfade: colorPalette.greylighty,
-
-  medicinebk: '#a8e3a8',
-  medicinetext: colorPalette.black,
-  medicinetextfade: colorPalette.greylighty,
+  itembk:  '#a8e3a8',
+  itemtext: colorPalette.black,
+  itemtextfade: colorPalette.greylighty,
+  itemtextplaceholder: colorPalette.beigedarker,
 }
 
 export const darkWhite: ObjectivePallete = {
@@ -406,58 +243,17 @@ export const darkWhite: ObjectivePallete = {
   bordercolorselected: colorPalette.red,
   
   doneicontint: colorPalette.greendarker,
-  doneicontintwait: colorPalette.greendarker,
-  doneicontintquestion: colorPalette.greendarker,
-  doneicontintstep: colorPalette.greendarker,
-  doneicontintnote: colorPalette.greendarker,
-  doneicontintlocation: colorPalette.greendarker,
-  doneicontintdivider: colorPalette.greendarker,
-  doneicontintgrocery: colorPalette.greendarker,
-  doneicontintmedicine: colorPalette.greendarker,
-  
   cancelicontint: colorPalette.black,
-  
   trashicontint: colorPalette.reddarker,
-  trashicontintwait: colorPalette.reddarker,
-  trashicontintquestion: colorPalette.reddarker,
-  trashicontintstep: colorPalette.reddarker,
-  trashicontintnote: colorPalette.reddarker,
-  trashicontintlocation: colorPalette.reddarker,
-  trashicontintdivider: colorPalette.reddarker,
-  trashicontintgrocery: colorPalette.reddarker,
-  trashicontintmedicine: colorPalette.reddarker,
   
   objbk: colorPalette.beige,
   objtitle: colorPalette.black,
   objtitlefade: colorPalette.greylighty,
-  
-  stepbk: '#D8AE7E',
-  steptitle: colorPalette.black,
-  steptitlefade: colorPalette.greylighty,
-  
-  questionbk: '#E0DCB6',
-  questiontext: colorPalette.black,
-  questionplaceholdertextcolor: colorPalette.grey,
 
-  waitbk: '#D8AE7E',
-  waittext: 'black',
-
-  notebk: colorPalette.beige,
-  notetext: colorPalette.black,
-
-  locationbk: '#D8AE7E',
-  locationtext: colorPalette.black,
-
-  dividerbk: '#D8AE7E',
-  dividertext: colorPalette.black,
-
-  grocerybk: '#D8AE7E',
-  grocerytext: colorPalette.black,
-  grocerytextfade: colorPalette.greylighty,
-
-  medicinebk: '#D8AE7E',
-  medicinetext: colorPalette.black,
-  medicinetextfade: colorPalette.greylighty,
+  itembk:  '#D8AE7E',
+  itemtext: colorPalette.black,
+  itemtextfade: colorPalette.greylighty,
+  itemtextplaceholder: colorPalette.beigedarker,
 }
 
 export const noTheme: ObjectivePallete = {
@@ -470,58 +266,17 @@ export const noTheme: ObjectivePallete = {
   bordercolorselected: colorPalette.red,
 
   doneicontint: colorPalette.greenlight,
-  doneicontintwait: colorPalette.greenlight,
-  doneicontintquestion: colorPalette.greenlight,
-  doneicontintstep: colorPalette.greenlight,
-  doneicontintnote: colorPalette.greenlight,
-  doneicontintlocation: colorPalette.greenlight,
-  doneicontintdivider: colorPalette.greenlight,
-  doneicontintgrocery: colorPalette.greenlight,
-  doneicontintmedicine: colorPalette.greenlight,
-
-  cancelicontint: colorPalette.beige,
-
+  cancelicontint: colorPalette.red,
   trashicontint: colorPalette.redlight,
-  trashicontintwait: colorPalette.redlight,
-  trashicontintquestion: colorPalette.redlight,
-  trashicontintstep: colorPalette.redlight,
-  trashicontintnote: colorPalette.redlight,
-  trashicontintlocation: colorPalette.redlight,
-  trashicontintdivider: colorPalette.redlight,
-  trashicontintgrocery: colorPalette.redlight,
-  trashicontintmedicine: colorPalette.redlight,
   
   objbk: colorPalette.bluedark,
   objtitle: colorPalette.beige,
   objtitlefade: colorPalette.beigedark,
-  
-  stepbk: colorPalette.bluedarkerdarker,
-  steptitle: colorPalette.beige,
-  steptitlefade: colorPalette.grey,
 
-  questionbk: colorPalette.bluedarker,
-  questiontext: colorPalette.beige,
-  questionplaceholdertextcolor: colorPalette.grey,
-
-  waitbk: colorPalette.bluedarkerdarker,
-  waittext: colorPalette.beige,
-
-  notebk: colorPalette.bluedarkerdarker,
-  notetext: colorPalette.beige,
-
-  locationbk: colorPalette.bluedarkerdarker,
-  locationtext: colorPalette.beige,
-
-  dividerbk: colorPalette.bluedarkerdarker,
-  dividertext: colorPalette.beige,
-
-  grocerybk: colorPalette.bluedarkerdarker,
-  grocerytext: colorPalette.beige,
-  grocerytextfade: colorPalette.grey,
-
-  medicinebk: colorPalette.bluedarkerdarker,
-  medicinetext: colorPalette.beige,
-  medicinetextfade: colorPalette.grey,
+  itembk:  colorPalette.bluedarkerdarker,
+  itemtext: colorPalette.beige,
+  itemtextfade: colorPalette.grey,
+  itemtextplaceholder: colorPalette.beigedarker,
 }
 
   export const getObjTheme = (t: string): ObjectivePallete => {

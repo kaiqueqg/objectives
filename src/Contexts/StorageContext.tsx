@@ -18,6 +18,8 @@ export const StorageProvider: React.FC<StorageProviderProps> = ({ children }) =>
     UserPrefs: string,
     JwtToken: string,
     CurrentView: string,
+    AvailableTags: string,
+    SelectedTags: string,
     CurrentObjectiveId: string,
     LastSync: string,
     Objectives: string,
@@ -31,6 +33,8 @@ export const StorageProvider: React.FC<StorageProviderProps> = ({ children }) =>
     UserPrefs: '@Objectives:userprefs',
     JwtToken: '@Objectives:jwt',
     CurrentView: '@Objectives:CurrentView',
+    AvailableTags: '@Objectives:AvailableTags',
+    SelectedTags: '@Objectives:SelectedTags',
     CurrentObjectiveId: '@Objectives:CurrentObjectiveId',
     LastSync: '@Objectives:LastSync',
     Objectives: '@Objectives:Objectives',
@@ -208,6 +212,55 @@ export const StorageProvider: React.FC<StorageProviderProps> = ({ children }) =>
         await AsyncStorage.removeItem(keys.CurrentObjectiveId);
       } catch (err) {
         log.err('deleteCurrentObjectiveId', '[catch] deleting current objective.');
+      }
+    },
+    //^-------------------- TAGS
+    async writeAvailableTags(tags: string[]): Promise<void> {
+      try {
+        await AsyncStorage.setItem(keys.AvailableTags, JSON.stringify(tags));
+      } catch (err) {
+        log.err('stg writeAvailableTags', '[catch] writing available tags.');
+      }
+    },
+    async readAvailableTags(): Promise<string[]|null> {
+      try {
+        const data = await AsyncStorage.getItem(keys.AvailableTags);
+        if(data !== null){
+          try {
+            const parsedData: string[] = JSON.parse(data);
+            return parsedData;
+          } catch (err) {
+            log.err('stg readAvailableTags', 'Error parsing json');
+          }
+        }
+        return null;
+      } catch (err) {
+        log.err('stg readAvailableTags', '[catch] reading available tags.');
+        return null;
+      }
+    },
+    async writeSelectedTags(tags: string[]): Promise<void> {
+      try {
+        await AsyncStorage.setItem(keys.SelectedTags, JSON.stringify(tags));
+      } catch (err) {
+        log.err('stg writeSelectedTags', '[catch] writing selected tags.');
+      }
+    },
+    async readSelectedTags(): Promise<string[]|null> {
+      try {
+        const data = await AsyncStorage.getItem(keys.SelectedTags);
+        if(data !== null){
+          try {
+            const parsedData: string[] = JSON.parse(data);
+            return parsedData;
+          } catch (err) {
+            log.err('stg readSelectedTags', 'Error parsing json');
+          }
+        }
+        return null;
+      } catch (err) {
+        log.err('stg readSelectedTags', '[catch] reading selected tags.');
+        return null;
       }
     },
     //^-------------------- SYNC

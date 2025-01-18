@@ -147,10 +147,10 @@ const LocationView = (props: LocationViewProps) => {
       flex: 1,
       justifyContent: 'center',
       alignItems: 'center',
-      backgroundColor: o.stepbk,
+      backgroundColor: (location.Title.trim() !== '' && location.Url.trim() !== '')?o.objbk:o.itembk,
       
       borderRadius: 5,
-      borderColor: o.bordercolor,
+      borderColor: (location.Title.trim() !== '' && location.Url.trim() !== '')?o.objbk:o.bordercolor,
       borderWidth: 1,
       borderStyle: 'solid',
     },
@@ -171,14 +171,14 @@ const LocationView = (props: LocationViewProps) => {
       alignItems: 'center',
     },
     title:{
-      color: o.locationtext,
+      color: o.itemtext,
     },
     titleFade:{
       color: 'grey',
     },
     inputStyle: {
-      color: o.locationtext,
-      borderColor: o.locationtext,
+      color: o.itemtext,
+      borderColor: o.itemtext,
     },
     imageContainer:{
       height: 40,
@@ -197,14 +197,14 @@ const LocationView = (props: LocationViewProps) => {
       tintColor: o.icontintcolorfade,
     },
     locationDoneImage:{
-      tintColor: o.doneicontintlocation,
+      tintColor: o.doneicontint,
     },
     urlText:{
-      color: o.locationtext,
+      color: o.itemtext,
       margin: 10,
     },
     distanceText:{
-      color: o.locationtext,
+      color: o.itemtext,
     },
     imageMoveContainer:{
       justifyContent: 'center',
@@ -237,7 +237,7 @@ const LocationView = (props: LocationViewProps) => {
           defaultStyle={s.title}
           inputStyle={s.inputStyle}
           doneImageStyle={s.locationDoneImage}
-          trashImageStyle={{tintColor: o.trashicontintlocation}}
+          trashImageStyle={{tintColor: o.trashicontint}}
           >
         </PressInput>
         {currentDistance && 
@@ -266,7 +266,7 @@ const LocationView = (props: LocationViewProps) => {
             textStyle={s.urlLine}
             inputStyle={s.inputStyle}
             doneImageStyle={s.locationDoneImage}
-            trashImageStyle={{tintColor: o.trashicontintlocation}}
+            trashImageStyle={{tintColor: o.trashicontint}}
             >
           </PressInput>
         </View>

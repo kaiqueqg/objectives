@@ -1,7 +1,6 @@
 import { View, StyleSheet, Text } from "react-native";
 import { ObjectivePallete, ThemePalette, colorPalette, getObjTheme } from "../../../Colors";
 import { FontPalette } from "../../../../fonts/Font";
-import log from "../../../Log/aLog";
 import { useUserContext } from "../../../Contexts/UserContext";
 import { ItemViewProps, Wait } from "../../../Types";
 import PressImage from "../../../PressImage/PressImage";
@@ -46,10 +45,10 @@ const WaitView = (props: WaitViewProps) => {
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      backgroundColor: o.waitbk,
+      backgroundColor: wait.Title.trim() !== ''?o.objbk:o.itembk,
       
       borderRadius: 5,
-      borderColor: o.bordercolor,
+      borderColor: wait.Title.trim() !== ''?o.objbk:o.bordercolor,
       borderWidth: 1,
       borderStyle: 'solid',
     },
@@ -62,11 +61,11 @@ const WaitView = (props: WaitViewProps) => {
       borderColor: o.bordercolorselected,
     },
     inputTextStyle:{
-      color: o.dividertext,
+      color: o.itemtext,
     },
     inputStyle: {
-      color: o.dividertext,
-      borderColor: o.dividertext,
+      color: o.itemtext,
+      borderColor: o.itemtext,
     },
     imageContainer:{
       height: 40,
@@ -111,7 +110,7 @@ const WaitView = (props: WaitViewProps) => {
 
           textStyle={s.inputTextStyle}
           inputStyle={s.inputStyle}
-          trashImageStyle={{tintColor: o.trashicontintwait}}
+          trashImageStyle={{tintColor: o.trashicontint}}
           >
         </PressInput>
         {!isEditingTitle && <PressImage 

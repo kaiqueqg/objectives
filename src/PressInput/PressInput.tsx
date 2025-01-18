@@ -1,10 +1,10 @@
-import { Pressable, Text, TextInput, View, StyleSheet, Alert } from "react-native";
+import { Text, TextInput, View, StyleSheet } from "react-native";
 import { useEffect, useState } from "react";
-import log from "../Log/aLog";
 import PressImage from "../PressImage/PressImage";
 import { useUserContext } from "../Contexts/UserContext";
 import { ObjectivePallete, ThemePalette } from "../Colors";
 import { FontPalette } from "../../fonts/Font";
+import React from "react";
 
 export interface PressInputProps {
   onDone: (newText: string) => void,
@@ -57,9 +57,11 @@ const PressInput = (props: PressInputProps) => {
     setIsDeleting(false);
     changeEditing(false);
     props.onDone(newText);
+    setNewText(props.text);
   }
 
   const onCancel = () => {
+    setNewText(props.text);
     setIsDeleting(false);
     changeEditing(false);
   }
@@ -92,7 +94,7 @@ const PressInput = (props: PressInputProps) => {
     imagePress:{
       maxHeight: 30,
       maxWidth: 30,
-      marginLeft: 5,
+      marginHorizontal: 5,
       alignItems: 'center',
       justifyContent: 'center',
     },
@@ -115,35 +117,31 @@ const PressInput = (props: PressInputProps) => {
       flex: 1,
       color: t.backgroundcolordarker,
       borderRadius: 2,
-      marginLeft: 5,
+      marginHorizontal: 5,
       padding: 5,
 
       borderColor: t.backgroundcolordarker,
-      borderWidth: 1,
-      borderStyle: 'dashed',
+      borderBottomWidth: 1,
+      borderStyle: 'solid',
     },
     text:{
       color: o.objtitle,
       marginLeft: 5,
     },
     defaultText:{
-      color: o.objtitlefade,
+      color: t.textcolorfade,
       marginLeft: 5,
     },
   });
 
   return (
     <View 
-      style={[s.container, props.containerStyle??undefined]}
-      onTouchEnd={() => {
-        if(!props.uneditable){
-          changeEditing(!isEditing);
-        }
-      }}>
+      style={[s.container, props.containerStyle??undefined]}>
       {isEditing?
         <View style={[s.inputContainer, props.inputContainerStyle]}>
           {isDeleting && props.onDelete && <PressImage pressStyle={[s.imagePress, props.imageContainerStyle]} style={[s.trashImage, props.trashImageStyle]} onPress={props.onDelete} source={require('../../public/images/done.png')}></PressImage>}
           {!isDeleting && props.onDelete && <PressImage pressStyle={[s.imagePress, props.imageContainerStyle]} style={[s.trashImage, props.trashImageStyle]} onPress={onDelete} source={require('../../public/images/trash.png')}></PressImage>}
+          {!props.onDelete && <PressImage pressStyle={[s.imagePress, props.imageContainerStyle]} style={[s.cancelImage, props.cancelImageStyle]} onPress={onCancel} source={require('../../public/images/cancel.png')}></PressImage>}
           <TextInput 
             style={[s.input, props.inputStyle, {height: inputHeight}]} 
             multiline={props.multiline?? false} 
@@ -152,17 +150,18 @@ const PressInput = (props: PressInputProps) => {
             onSubmitEditing={onDone} 
             onChangeText={handleChangeText}
             onContentSizeChange={onChange}
+            selectionColor={t.textcolor}
             >
           </TextInput>
-          <PressImage pressStyle={[s.imagePress, props.imageContainerStyle]} style={[s.cancelImage, props.cancelImageStyle]} onPress={onCancel} source={require('../../public/images/cancel.png')}></PressImage>
-          <PressImage pressStyle={[s.imagePress, props.imageContainerStyle, {marginRight: 5}]} style={[s.doneImage, props.doneImageStyle]} onPress={onDone} source={require('../../public/images/done.png')}></PressImage>
+          {props.onDelete && <PressImage pressStyle={[s.imagePress, props.imageContainerStyle]} style={[s.cancelImage, props.cancelImageStyle]} onPress={onCancel} source={require('../../public/images/cancel.png')}></PressImage>}
+          <PressImage pressStyle={[s.imagePress, props.imageContainerStyle]} style={[s.doneImage, props.doneImageStyle]} onPress={onDone} source={require('../../public/images/done.png')}></PressImage>
         </View>
         :
         <>
           {props.text === '' ?
-            <Text style={[s.defaultText, props.defaultStyle]}>{props.defaultText}</Text>
+            <Text style={[s.defaultText, props.defaultStyle]} onPress={()=>{if(!props.uneditable)changeEditing(true);}}>{props.defaultText}</Text>
             :
-            <Text style={[s.text, props.textStyle]}>{props.text}</Text>
+            <Text style={[s.text, props.textStyle]} onPress={()=>{if(!props.uneditable)changeEditing(true);}}>{props.text}</Text>
           }
         </>
       }

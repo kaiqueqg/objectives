@@ -13,6 +13,8 @@ import DevView from "./DevView/DevView";
 import { useLogContext } from "./Contexts/LogContext";
 import { useStorageContext } from "./Contexts/StorageContext";
 import { useRequestContext } from "./Contexts/RequestContext";
+import TagsView from "./TagsView/TagsView";
+import ArchivedView from "./ArchivedView/ArchivedView";
 
 export interface MainProps{
 }
@@ -30,6 +32,7 @@ const Main = (props: MainProps) => {
     lastSync, writeLastSync,
     objectives, deletedObjectives, deletedItems,
     currentObjectiveId,
+    availableTags, selectedTags, writeAvailableTags, writeSelectedTags,
   } = useUserContext();
 
   const [currentObjective, setCurrentObjective] = useState<Objective|null>(null);
@@ -96,6 +99,26 @@ const Main = (props: MainProps) => {
     return formatter.format(date);
   };
 
+  const syncTags = (objectives: Objective[]) => {
+    //^ Download tags, unique or not.
+    let download: string[] = [];
+    objectives.forEach((obj: any) => {
+        if (Array.isArray(obj.Tags)) {
+            download.push(...obj.Tags);
+        }
+    });
+    //^ All unique downloaded tags.
+    const uniqueDownloadTags = Array.from(new Set(download));
+    //^ New tags that'll be selected.
+    const downloadTagsNotInAvailable = uniqueDownloadTags.filter((tag) => !availableTags.includes(tag));
+    //^ Remove selected tags that don't exist anymore.
+    const selectedTagsStillOnAvailable = selectedTags.filter((tag) => uniqueDownloadTags.includes(tag));
+    //^ Write the downloaded unique tags.
+    writeAvailableTags(uniqueDownloadTags);
+    // ^ Write the selected tags that still exist and the downloaded ones.
+    writeSelectedTags([...selectedTagsStillOnAvailable, ...downloadTagsNotInAvailable]);
+  }
+
   const syncObjectivesList = async () => {
     try {
       if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
@@ -103,7 +126,7 @@ const Main = (props: MainProps) => {
   
       let syncObjectives: Objective[] = [];
       let syncItems: Item[] = [];
-      if(lastSync){
+      if(lastSync){ //^ If there is a last sync date, sync only the new objectives and items
         for(let i = 0; i < objectives.length; i++){
           const current = objectives[i];
           let objectiveLastModified = new Date(current.LastModified);
@@ -126,7 +149,7 @@ const Main = (props: MainProps) => {
           }
         }
       }
-      else{
+      else{//^ If there is no last sync date, sync all objectives and items
         syncObjectives = [...objectives];
         for(let i = 0; i < syncObjectives.length; i++){
           const objItems = await readItems(syncObjectives[i].ObjectiveId);
@@ -141,6 +164,8 @@ const Main = (props: MainProps) => {
         DeleteItems: deletedItems,
       }
   
+      log.arr(objectiveList)
+      //^ Sync all
       const data = await objectivesApi.syncObjectivesList(objectiveList, async () => {
         setIsSyncing(false);
         await objectivesApi.isUpObjective(() => {
@@ -150,10 +175,11 @@ const Main = (props: MainProps) => {
       });
   
       if(data !== null && data !==undefined && data.Objectives){
-        popMessage('Sync done.');
+        syncTags(data.Objectives);
+        
         const sorted = data.Objectives.sort((a: Objective, b: Objective)=>a.Pos-b.Pos);
         writeObjectives(sorted);
-  
+        
         if(data.Items) {
           data.Objectives.forEach((currentObj: any) => {
             const objItems = data.Items?.filter((item: any) => item.UserIdObjectiveId.slice(40) === currentObj.ObjectiveId);
@@ -162,7 +188,8 @@ const Main = (props: MainProps) => {
         }
         deleteDeletedObjectives();
         deleteDeletedItems();
-  
+        
+        popMessage('Sync done.');
         setIsSyncing(false);
         setDoneSync(true);
         setTimeout(() => {
@@ -194,11 +221,17 @@ const Main = (props: MainProps) => {
     if(currentView === Views.UserView){
       return <UserView syncObjectivesList={syncObjectivesList}></UserView>;
     }
+    else if(currentView === Views.ArchivedView){
+      return <ArchivedView></ArchivedView>
+    }
     else if(currentView === Views.ListView){
       return <ObjsListView></ObjsListView>
     }
-    else if(currentView === Views.DevView){
-      return <DevView syncObjectivesList={syncObjectivesList}></DevView>
+    // else if(currentView === Views.DevView){
+    //   return <DevView syncObjectivesList={syncObjectivesList}></DevView>
+    // }
+    else if(currentView === Views.TagsView){
+      return <TagsView></TagsView>
     }
     else if(currentObjective){
       return <ObjectiveView obj={currentObjective}></ObjectiveView>

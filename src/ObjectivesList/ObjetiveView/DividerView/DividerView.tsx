@@ -6,6 +6,7 @@ import { Divider, Item, ItemViewProps } from "../../../Types";
 import PressImage from "../../../PressImage/PressImage";
 import PressInput from "../../../PressInput/PressInput";
 import { useState } from "react";
+import React from "react";
 
 export interface DividerViewProps extends ItemViewProps{
   divider: Divider,
@@ -18,12 +19,13 @@ export interface DividerViewProps extends ItemViewProps{
   addNewQuestion: (pos?:number)=>{},
   addNewStep: (pos?:number)=>{},
   addNewWait: (pos?:number)=>{},
+  addNewExercise: (pos?:number)=>{},
 }
 
 const DividerView = (props: DividerViewProps) => {
   const { theme: t, fontTheme: f, putItem } = useUserContext();
   const { objTheme: o, isEditingPos, onDeleteItem, loadMyItems, divider, orderDividerItems,
-    addNewDivider, addNewGrocery, addNewLocation, addNewNote, addNewQuestion, addNewStep, addNewWait,
+    addNewDivider, addNewGrocery, addNewLocation, addNewNote, addNewQuestion, addNewStep, addNewWait, addNewExercise,
    } = props;
 
   const [isEditingTitle, setIsEditingTitle] = useState<boolean>(false);
@@ -103,14 +105,14 @@ const DividerView = (props: DividerViewProps) => {
     inputTextStyle:{
       textAlign: 'center',
       fontWeight: 'bold',
-      color: o.dividertext,
+      color: o.itemtext,
     },
     inputStyle: {
       justifyContent: 'center',
       alignItems: 'center',
 
       color: t.textcolor,
-      borderColor: o.dividertext,
+      borderColor: o.itemtext,
     },
     imageContainer:{
       height: 40,
@@ -150,12 +152,16 @@ const DividerView = (props: DividerViewProps) => {
   return (
     <View style={s.dividerContainer}>
       <View style={[s.titleContainer, props.isSelected && s.titleContainerSelected, props.isSelected && props.isEndingPos && s.titleContainerEnding]}>
-        {divider.IsOpen?
-          <PressImage pressStyle={s.imageContainer} style={s.image} onPress={() => {if(!isEditingPos)onChangeIsOpen();}} source={require('../../../../public/images/down-chevron.png')}></PressImage>
-          :
-          <PressImage pressStyle={s.imageContainer} style={s.image} onPress={() => {if(!isEditingPos)onChangeIsOpen();}} source={require('../../../../public/images/up-chevron.png')}></PressImage>
+        {!isEditingTitle &&
+          <>
+            {divider.IsOpen?
+              <PressImage pressStyle={s.imageContainer} style={s.image} onPress={() => {if(!isEditingPos)onChangeIsOpen();}} source={require('../../../../public/images/down-chevron.png')}></PressImage>
+              :
+              <PressImage pressStyle={s.imageContainer} style={s.image} onPress={() => {if(!isEditingPos)onChangeIsOpen();}} source={require('../../../../public/images/up-chevron.png')}></PressImage>
+            }
+            <View style={s.imageContainer}></View>
+          </>
         }
-        <View style={s.imageContainer}></View>
         <PressInput 
           objTheme={o}
           text={divider.Title}
@@ -166,20 +172,25 @@ const DividerView = (props: DividerViewProps) => {
 
           textStyle={s.inputTextStyle}
           inputStyle={s.inputStyle}
-          trashImageStyle={{tintColor: o.trashicontintdivider}}
+          trashImageStyle={{tintColor: o.trashicontint}}
           >
         </PressInput>
-        <PressImage pressStyle={s.imageContainer} style={s.image2} onPress={() => {orderDividerItems(divider)}} source={require('../../../../public/images/atoz.png')}></PressImage>
-        {isItemOpenLocked?
-          <PressImage pressStyle={s.imageContainer} style={[s.image, {tintColor: 'red'}]} onPress={addingNewItem} source={require('../../../../public/images/add-lock.png')}></PressImage>
-          :
-          <PressImage pressStyle={s.imageContainer} style={s.image} onPress={addingNewItem} source={require('../../../../public/images/add.png')}></PressImage>
+        {!isEditingTitle &&
+          <>
+            <PressImage pressStyle={s.imageContainer} style={s.image2} onPress={() => {orderDividerItems(divider)}} source={require('../../../../public/images/atoz.png')}></PressImage>
+            {isItemOpenLocked?
+              <PressImage pressStyle={s.imageContainer} style={[s.image, {tintColor: 'red'}]} onPress={addingNewItem} source={require('../../../../public/images/add-lock.png')}></PressImage>
+              :
+              <PressImage pressStyle={s.imageContainer} style={s.image} onPress={addingNewItem} source={require('../../../../public/images/add.png')}></PressImage>
+            }
+          </>
         }
       </View>
       {isItemsOpen && 
         <View style={s.dividerNewItemContainer}>
-          <PressImage pressStyle={s.imageContainer} style={s.image} onPress={()=>{if(!isItemOpenLocked)setIsItemsOpen(false); addNewDivider(divider.Pos);}} source={require('../../../../public/images/minus.png')}></PressImage>
           <PressImage pressStyle={s.imageContainer} style={s.image} onPress={()=>{if(!isItemOpenLocked)setIsItemsOpen(false); addNewWait(divider.Pos);}} source={require('../../../../public/images/wait.png')}></PressImage>
+          <PressImage pressStyle={s.imageContainer} style={s.image} onPress={()=>{if(!isItemOpenLocked)setIsItemsOpen(false); addNewExercise(divider.Pos);}} source={require('../../../../public/images/exercise-filled.png')}></PressImage>
+          <PressImage pressStyle={s.imageContainer} style={s.image} onPress={()=>{if(!isItemOpenLocked)setIsItemsOpen(false); addNewDivider(divider.Pos);}} source={require('../../../../public/images/minus.png')}></PressImage>
           <PressImage pressStyle={s.imageContainer} style={s.image} onPress={()=>{if(!isItemOpenLocked)setIsItemsOpen(false); addNewGrocery(divider.Pos);}} source={require('../../../../public/images/grocery-filled.png')}></PressImage>
           <PressImage pressStyle={s.imageContainer} style={s.image} onPress={()=>{if(!isItemOpenLocked)setIsItemsOpen(false); addNewLocation(divider.Pos);}} source={require('../../../../public/images/location-filled.png')}></PressImage>
           <PressImage pressStyle={s.imageContainer} style={s.image} onPress={()=>{if(!isItemOpenLocked)setIsItemsOpen(false); addNewQuestion(divider.Pos);}} source={require('../../../../public/images/questionfilled.png')}></PressImage>

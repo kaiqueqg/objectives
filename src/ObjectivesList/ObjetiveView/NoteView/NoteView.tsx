@@ -16,6 +16,7 @@ const NoteView = (props: NoteViewProps) => {
   const { objTheme: o, isEditingPos, onDeleteItem, loadMyItems, note } = props;
 
   const [isEditingTitle, setIsEditingTitle] = useState<boolean>(false);
+  const [shouldUpdate, setShouldUpdate] = useState<boolean>(false);
 
   const onDelete = async () => {
     await onDeleteItem(note);
@@ -45,10 +46,10 @@ const NoteView = (props: NoteViewProps) => {
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      backgroundColor: o.stepbk,
+      backgroundColor: note.Text.trim() === ''?o.itembk:o.objbk,
       
       borderRadius: 5,
-      borderColor: o.bordercolor,
+      borderColor: note.Text.trim() === ''?o.bordercolor:o.objbk,
       borderWidth: 1,
       borderStyle: 'solid',
     },
@@ -62,11 +63,11 @@ const NoteView = (props: NoteViewProps) => {
     },
     editingText:{
       verticalAlign: 'middle',
-      color: o.notetext,
+      color: o.itemtext,
     },
     editingInput: {
-      color: o.notetext,
-      borderColor: o.notetext,
+      color: o.itemtext,
+      borderColor: o.itemtext,
     },
     imageContainer:{
       height: 40,
@@ -112,10 +113,11 @@ const NoteView = (props: NoteViewProps) => {
           
           textStyle={s.editingText}
           inputStyle={s.editingInput}
-          trashImageStyle={{tintColor: o.trashicontintwait}}
+          trashImageStyle={{tintColor: o.trashicontint}}
           >
         </PressInput>
-        {note.Text === '' && !isEditingTitle && <PressImage 
+        {note.Text === '' && !isEditingTitle && 
+        <PressImage 
           style={s.image}
           pressStyle={s.imageContainer}
           onPress={()=>{}}

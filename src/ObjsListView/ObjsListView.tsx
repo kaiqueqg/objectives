@@ -21,23 +21,24 @@ const ObjsListView = (props: ObjsListViewProps) => {
     objectives,
     putObjective,
     putObjectives,
-    currentObjectiveId,
-    writeCurrentObjectiveId, deleteCurrentObjectiveId,
+    writeCurrentObjectiveId,
     writeCurrentView,
     user, userPrefs,
+    selectedTags,
   } = useUserContext();
 
-  const [myObjectives, setMyObjectives] = useState<Objective[]>([]);
   const [isEditingPos, setIsEditingPos] = useState<boolean>(false);
+  const [isEndingPos, setIsEndingPos] = useState<boolean>(false);
+  const [objectivesSelected, setObjectivesSelected] = useState<Objective[]>([]);
 
   useEffect(()=>{
-    const sortedObjs = objectives.sort((a: Objective, b: Objective) => a.Pos - b.Pos);
-    setMyObjectives(sortedObjs);
-  }, [objectives]);
+  }, [objectives, selectedTags]);
 
   const onSelectCurrentObj = async (id: string) => {
-    await writeCurrentObjectiveId(id);
-    await writeCurrentView(Views.IndividualView);
+    if(!isEditingPos) {
+      await writeCurrentObjectiveId(id);
+      await writeCurrentView(Views.IndividualView);
+    }
   }
 
   const onSelectAllObjs = async () => {
@@ -58,52 +59,140 @@ const ObjsListView = (props: ObjsListViewProps) => {
       Done: false, 
       Theme: 'noTheme', 
       Title: 'Title', 
-      IsOpen: true,
-      Pos: myObjectives.length,
+      IsShowing: true,
+      IsArchived: false,
+      Pos: objectives.length,
       LastModified: (new Date()).toISOString(),
       IsShowingCheckedGrocery: true,
       IsShowingCheckedStep: true,
+      IsShowingCheckedExercise: true,
+      IsShowingCheckedMedicine: true,
+      Tags: [],
     };
     await putObjective(newObj);
 
-    writeCurrentObjectiveId(newObj.ObjectiveId);
+    onSelectCurrentObj(newObj.ObjectiveId);
   }
 
   const keyExtractor = (obj: Objective) => {
     return obj.ObjectiveId;
   }
 
-  const onReordered = async (fromIndex: number, toIndex: number) => {
+  const startEditingPos = () => {
     if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
-    const copy = [...myObjectives];
-    const [removed] = copy.splice(fromIndex, 1);
-
-    copy.splice(toIndex, 0, removed);
-    const updateObjectives = copy.map((obj, index) => ({
-      ...obj,
-      Pos: index,
-      LastModified: (new Date()).toISOString(),
-    }));
-    updateObjectives.forEach((item: any)=>{
-    })
-    const sortedObjs = updateObjectives.sort((a: Objective, b: Objective) => a.Pos - b.Pos);
-    sortedObjs.forEach((item: any)=>{
-    })
-    await putObjectives(sortedObjs);
+    setIsEditingPos(true);
   }
 
-  const onChangePos = async () => {
+  const cancelEditingPos = () => {
+    setObjectivesSelected([]);
+    setIsEditingPos(false);
+    setIsEndingPos(false);
+  }
+
+  const onEditingPosTo = () => {
     if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
-    setIsEditingPos(!isEditingPos);
+    setIsEndingPos(true);
+  }
+
+  const addRemoveToSelected = (obj: Objective) => {
+    const filteredList = objectivesSelected.filter((o) => o.ObjectiveId !== obj.ObjectiveId);
+
+    if(filteredList.length !== objectivesSelected.length){
+      setObjectivesSelected(filteredList);
+    }
+    else{
+      setObjectivesSelected([...objectivesSelected, obj]);
+    }
+  }
+
+  const endChangingPos = (itemTo: Objective) => {
+    const newList = objectives.filter((o: Objective) => !objectivesSelected.includes(o));
+    const index = newList.indexOf(itemTo);
+    const before = newList.slice(0, index+1);
+    const after = newList.slice(index+1);
+
+    let ajustedList = [...before, ...objectivesSelected, ...after];
+
+    let finalList:Objective[] = [];
+    for(let i = 0; i < ajustedList.length; i++){
+      finalList.push({...ajustedList[i], Pos: i, LastModified: (new Date()).toISOString()});
+    }
+
+    //setMyObjectives(finalList); test
+    putObjectives(finalList);
+
+    cancelEditingPos();
+  }
+
+  const getFakeMinusOneObjective = () => {
+    const obj: Objective = {
+      UserId: '',
+      ObjectiveId: '' ,
+      Done: false, 
+      Theme: 'noTheme', 
+      Title: 'Title', 
+      IsShowing: true,
+      IsArchived: false,
+      Pos: -1,
+      LastModified: (new Date()).toISOString(),
+      IsShowingCheckedGrocery: true,
+      IsShowingCheckedStep: true,
+      Tags: [],
+    }
+    return obj;
+  }
+
+  const getListView = () => {
+    let rtn
+    // let filteredObjectives = objectives.filter((o=>o.Tags.includes()))
+    return(
+      <FlatList
+          //containerStyle={s.list}
+          data={objectives}
+          keyExtractor={keyExtractor}
+          renderItem={getObjectiveButton}
+        />
+    )
   }
   
-  const getObjectiveButton = (info: DragListRenderItemInfo<Objective>) => {
-    const {item, onDragStart, onDragEnd, isActive} = info;
+  const getObjectiveButton = ({item}:any):JSX.Element|null => {
+    const tagShow: boolean = item.Tags.length > 0 
+    ? selectedTags.some((tag) => item.Tags.includes(tag)) 
+    : true;
+
+  // Skip rendering if the tag doesn't match
+    if(!tagShow) return null;
+    if(item.IsArchived) return null;
+
+    const isSelected = objectivesSelected.some(obj => obj === item);
     return (
-      <View style={s.objectiveContainer}>
+      item.Pos === 0 && isEndingPos?
+      <>
+      <View style={[s.objectiveButtonContainerFake]} onTouchEnd={()=>endChangingPos(getFakeMinusOneObjective())}>
+        <Text style={s.objectiveButtonContainerFakeText}>click to be the first</Text>
+      </View>
+      <View 
+        style={[s.objectiveContainer]} 
+        onTouchEnd={() => {isEditingPos && (isEndingPos? endChangingPos(item) : addRemoveToSelected(item))}}>
         <PressText 
-          style={[s.objectiveButtonContainer, {backgroundColor: getObjTheme(item.Theme).objbk}, isActive? {borderColor: 'red'}:undefined]}
-          textStyle={{color: getObjTheme(item.Theme).objtitle}}
+          style={[s.objectiveButtonContainer, 
+            isEditingPos && isSelected? s.objectiveButtonContainerSelected:undefined,
+            isEndingPos && isSelected? s.objectiveButtonContainerEnding:undefined]}
+          textStyle={[s.text, {color: getObjTheme(item.Theme).objtitle}]}
+          onPress={() => onSelectCurrentObj(item.ObjectiveId)}
+          text={item.Title + item.Pos}></PressText>
+      </View>
+      </>
+      :
+      <View 
+        style={[s.objectiveContainer]} 
+        onTouchEnd={() => {isEditingPos && (isEndingPos? endChangingPos(item) : addRemoveToSelected(item))}}>
+        <PressText 
+          style={[s.objectiveButtonContainer, 
+            isEditingPos && isSelected? s.objectiveButtonContainerSelected:undefined,
+            isEndingPos && isSelected? s.objectiveButtonContainerEnding:undefined,
+            {backgroundColor: getObjTheme(item.Theme).objbk}]}
+          textStyle={[s.text, {color: getObjTheme(item.Theme).objtitle}]}
           onPress={() => onSelectCurrentObj(item.ObjectiveId)}
           text={item.Title}></PressText>
       </View>
@@ -125,7 +214,12 @@ const ObjsListView = (props: ObjsListViewProps) => {
       top: 0,
       bottom: 0,
       right: 0,
-      width: '90%',
+      width: '80%',
+      margin: 10,
+      borderRadius: 5,
+      borderColor: t.boxborderfade,
+      borderWidth: 1,
+      borderStyle: 'solid',
       backgroundColor: t.backgroundcolor,
       zIndex: 10,
     },
@@ -133,7 +227,7 @@ const ObjsListView = (props: ObjsListViewProps) => {
       flex: 1,
       width: '100%',
     },
-    topMenu: {
+    bottomMenu: {
       width: '100%',
       height: 50,
       flexDirection: 'row',
@@ -174,8 +268,9 @@ const ObjsListView = (props: ObjsListViewProps) => {
     },
     objectiveContainer:{
       flexDirection: 'row',
+      marginBottom: 5,
     },
-    objectiveButtonContainer:{
+    objectiveButtonContainerFake:{
       flex: 1,
       justifyContent: 'center',
       alignItems: 'center',
@@ -185,13 +280,30 @@ const ObjsListView = (props: ObjsListViewProps) => {
       marginVertical: 5,
 
       borderWidth: 1,
-      borderStyle: 'solid',
+      borderStyle: 'dashed',
+      borderColor: 'gray',
       borderRadius: 5,
-      borderColor: 'black',
+    },
+    objectiveButtonContainerFakeText:{
+      color: 'beige',
+    },
+    objectiveButtonContainer:{
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      minHeight: 50,
+    },
+    objectiveButtonContainerSelected:{
+      borderWidth: 1,
+      borderStyle: 'dashed',
+      borderColor: 'red',
+    },
+    objectiveButtonContainerEnding:{
+      borderStyle: 'solid',
+      borderColor: 'red',
     },
     text: {
-      color: 'red',
-      fontWeight: 'bold',
+      fontSize: 16,
     },
     textDark:{
       color: 'black',
@@ -212,25 +324,40 @@ const ObjsListView = (props: ObjsListViewProps) => {
   });
 
   return (
-    <View style={s.container} onTouchEnd={()=>{writeCurrentView(Views.IndividualView);}}>
-      <View style={s.containerSide}>
-        <View style={s.topMenu}>
-          <PressImage onPress={onChangePos} style={s.imageUpDown} pressStyle={s.imageContainer} source={require('../../public/images/updown.png')}></PressImage>
-          {isEditingPos?
-            <PressImage onPress={()=>{}} style={[s.image, {tintColor: t.icontintfade}]} pressStyle={s.imageContainer} source={require('../../public/images/add.png')}></PressImage>
-            :
-            <PressImage onPress={onAddNewObjective} style={s.image} pressStyle={s.imageContainer} source={require('../../public/images/add.png')}></PressImage>
-          }
-        </View>
-        <DragList
-          containerStyle={s.list}
-          data={myObjectives}
-          keyExtractor={keyExtractor}
-          onReordered={onReordered}
-          renderItem={getObjectiveButton}
-        />
+    <>
+      <View style={s.container} onTouchEnd={() => {writeCurrentView(Views.IndividualView);}}>
       </View>
-    </View>
+      <View
+        style={s.containerSide}
+        pointerEvents="box-none">
+        {getListView()}
+        <View style={s.bottomMenu}>
+          {!isEditingPos && <PressImage
+            onPress={startEditingPos}
+            style={s.imageUpDown}
+            pressStyle={s.imageContainer}
+            source={require('../../public/images/updown.png')}
+          ></PressImage>}
+          {isEditingPos && <PressImage pressStyle={s.imageContainer} style={s.image} onPress={cancelEditingPos} source={require('../../public/images/cancel.png')}></PressImage>}
+          {isEditingPos && <PressImage pressStyle={s.imageContainer} hide={objectivesSelected.length=== 0 || objectivesSelected.length === objectives.length || isEndingPos} style={s.image} onPress={onEditingPosTo} source={require('../../public/images/arrow-right-filled.png')}></PressImage>}
+          {isEditingPos ? (
+            <PressImage
+              onPress={() => {}}
+              style={[s.image, { tintColor: t.icontintfade }]}
+              pressStyle={s.imageContainer}
+              source={require('../../public/images/add.png')}
+            ></PressImage>
+          ) : (
+            <PressImage
+              onPress={onAddNewObjective}
+              style={s.image}
+              pressStyle={s.imageContainer}
+              source={require('../../public/images/add.png')}
+            ></PressImage>
+          )}
+        </View>
+      </View>
+    </>
   );
 };
 

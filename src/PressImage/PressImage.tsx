@@ -1,7 +1,9 @@
-import React, { useState } from "react";
-import { Image, ImageStyle, ImageSourcePropType, View, Vibration, Text } from "react-native";
+import React, { useEffect, useState } from "react";
+import { Image, ImageStyle, ImageSourcePropType, View, Vibration, StyleSheet, Text } from "react-native";
 import { useUserContext } from "../Contexts/UserContext";
 import { Pattern } from "../Types";
+import { useLogContext } from "../Contexts/LogContext";
+import { colorPalette } from "../Colors";
 
 export interface PressImageProps{
   style: any,
@@ -14,10 +16,14 @@ export interface PressImageProps{
   disable?: boolean,
   disableStyle?: any,
   confirm?: boolean,
+  confirmStyle?: any,
+  text?: string,
+  textStyle?: any,
 }
 
 const PressImage = (props: PressImageProps) => {
   const {userPrefs} = useUserContext();
+  const {log} = useLogContext();
   const [isConfirming, setIsConfirming] = useState<boolean>(false);
 
   const [text, setText] = useState<number>(2000);
@@ -25,7 +31,7 @@ const PressImage = (props: PressImageProps) => {
   const getHideImage = () => {
     return(
       <View style={props.pressStyle} onTouchEnd={()=>{}} onTouchStart={()=>{}}>
-        <View style={props.style as ImageStyle}></View>
+        <View style={(props.confirmStyle?props.confirmStyle:props.style) as ImageStyle}></View>
       </View>
     )
   }
@@ -50,10 +56,11 @@ const PressImage = (props: PressImageProps) => {
   const getNormalImage = () => {
     return(
       <View 
-        style={props.pressStyle}
+        style={[props.pressStyle]}
         onTouchEnd={normalTouchEnd}
         onTouchStart={props.onPressIn}>
         <Image style={[props.style as ImageStyle, props.disable? (props.disableStyle as ImageStyle):{}]} source={props.source}></Image>
+        {props.text && <Text style={props.textStyle?? s.text}>{props.text}</Text>}
       </View>
     )
   }
@@ -61,7 +68,7 @@ const PressImage = (props: PressImageProps) => {
   const getConfirmingImage = () => {
     return(
       <View style={props.pressStyle} onTouchEnd={props.onPress} onTouchStart={props.onPressIn}>
-        <Image style={[(props.style as ImageStyle)]} source={require('../../public/images/done.png')}></Image>
+        <Image style={[(props.confirmStyle??props.style as ImageStyle)]} source={require('../../public/images/done.png')}></Image>
       </View>
     )
   }
@@ -74,6 +81,16 @@ const PressImage = (props: PressImageProps) => {
       setIsConfirming(false);
     }, 2000);
   }
+
+  
+  const s = StyleSheet.create({
+    text: {
+      position: 'absolute',
+      color: colorPalette.blue,
+      fontSize: 12,
+      fontWeight: 'bold',
+    },
+  });
 
   return(
     props.hide ?

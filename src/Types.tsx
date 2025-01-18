@@ -13,14 +13,18 @@ export interface Objective {
   Title: string,
   Done: boolean,
   Theme: string,
-  IsOpen: boolean,
+  IsArchived: boolean,
+  IsShowing: boolean,
   LastModified: string,
   Pos: number,
   IsShowingCheckedGrocery?: boolean,
   IsShowingCheckedStep?: boolean,
+  IsShowingCheckedMedicine?: boolean,
+  IsShowingCheckedExercise?: boolean,
+  Tags: string[],
 }
 
-export enum ItemType{ Step, Wait, Question, Note, Location, Divider, Grocery, Medicine, ItemFake, Unknown }
+export enum ItemType{ Step, Wait, Question, Note, Location, Divider, Grocery, Medicine, Exercise, ItemFake, Unknown }
 
 export interface ItemViewProps {
   objTheme: ObjectivePallete,
@@ -39,9 +43,11 @@ export interface Item {
   LastModified: string,
 }
 
+export enum StepImportance { None, Low, Medium, High }
 export interface Step extends Item {
   Title: string,
   Done: boolean,
+  Importance: StepImportance,
 }
 
 export interface Wait extends Item {
@@ -82,6 +88,20 @@ export interface Medicine extends Item{
   Unit?: string,
   Purpose?: string,
   Components?: string[],
+}
+
+
+export enum Weekdays{ Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday }
+
+export interface Exercise extends Item{
+  Title: string,
+  IsDone: boolean,
+  Reps: number,
+  Series: number,
+  MaxWeight: string,
+  Description: string,
+  Weekdays: Weekdays[],
+  LastDone: string,
 }
 
 export interface User{
@@ -139,7 +159,7 @@ export const Pattern = {
   Short: [0, 100],
 };
 
-export enum Views { UserView, ListView, AllView, IndividualView, DevView }
+export enum Views { UserView, ListView, AllView, IndividualView, DevView, TagsView, ArchivedView }
 
 export const GetViewsText = (view: Views): string => {
   switch (view) {
@@ -153,6 +173,8 @@ export const GetViewsText = (view: Views): string => {
       return 'IndividualView'
     case Views.DevView:
       return 'DevView'
+    case Views.TagsView:
+      return 'TagsView'
     default:
       return ''
   }
