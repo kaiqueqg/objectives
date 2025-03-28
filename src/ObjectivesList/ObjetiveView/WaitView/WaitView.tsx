@@ -7,6 +7,14 @@ import PressImage from "../../../PressImage/PressImage";
 import PressInput from "../../../PressInput/PressInput";
 import { useState } from "react";
 
+export const New = () => {
+  return(
+    {
+      Title: '',
+    }
+  )
+}
+
 export interface WaitViewProps extends ItemViewProps{
   wait: Wait,
 }

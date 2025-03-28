@@ -32,14 +32,14 @@ const Main = (props: MainProps) => {
     lastSync, writeLastSync,
     objectives, deletedObjectives, deletedItems,
     currentObjectiveId,
-    availableTags, selectedTags, writeAvailableTags, writeSelectedTags,
+    availableTags, selectedTags, writeAvailableTags, writeSelectedTags, clearAllData
   } = useUserContext();
 
   const [currentObjective, setCurrentObjective] = useState<Objective|null>(null);
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
   const [doneSync, setDoneSync] = useState<boolean>(false);
   const [failedSync, setFailedSync] = useState<boolean>(false);
-  const [doneDownload, setDoneDownload] = useState<boolean>(false);
+  const [isLambdaCold, setIsLambdaCold] = useState<boolean>(false);
   const [isServerUp, setIsServerUp] = useState<boolean>(false);
 
   useEffect(() => {
@@ -119,10 +119,19 @@ const Main = (props: MainProps) => {
     writeSelectedTags([...selectedTagsStillOnAvailable, ...downloadTagsNotInAvailable]);
   }
 
+  const wakeupLambda = async () => {
+    setIsLambdaCold(true);
+    const wakeup = await objectivesApi.wakeupSync();
+    setIsLambdaCold(false);
+  }
+
   const syncObjectivesList = async () => {
     try {
       if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
-      setIsSyncing(true);
+      setFailedSync(false);
+      setDoneSync(false);
+      
+      await wakeupLambda();
   
       let syncObjectives: Objective[] = [];
       let syncItems: Item[] = [];
@@ -164,7 +173,7 @@ const Main = (props: MainProps) => {
         DeleteItems: deletedItems,
       }
   
-      log.arr(objectiveList)
+      setIsSyncing(true);
       //^ Sync all
       const data = await objectivesApi.syncObjectivesList(objectiveList, async () => {
         setIsSyncing(false);
@@ -259,6 +268,7 @@ const Main = (props: MainProps) => {
         failedSync={failedSync}
         doneSync={doneSync}
         syncObjectivesList={syncObjectivesList}
+        isLambdaCold={isLambdaCold}
         isServerUp={isServerUp}
       ></BottomBar>
       <StatusBar backgroundColor={t.backgroundcolor} barStyle={getContent()}/>

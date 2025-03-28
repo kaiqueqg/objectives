@@ -24,7 +24,7 @@ export interface Objective {
   Tags: string[],
 }
 
-export enum ItemType{ Step, Wait, Question, Note, Location, Divider, Grocery, Medicine, Exercise, ItemFake, Unknown }
+export enum ItemType{ Step, Wait, Question, Note, Location, Divider, Grocery, Medicine, Exercise, Links, ItemFake, Image, /*put new before here*/ Unknown,  }
 
 export interface ItemViewProps {
   objTheme: ObjectivePallete,
@@ -35,6 +35,16 @@ export interface ItemViewProps {
   loadMyItems: () => void,
 }
 
+export const ItemNew = (userId: string, objectiveId: string, itemId: string, type: ItemType, pos: number) => {
+  return({
+    UserIdObjectiveId: userId + objectiveId,
+    ItemId: itemId,
+    Pos: pos,
+    Type: type,
+    LastModified: (new Date()).toISOString(),
+  });
+}
+
 export interface Item {
   ItemId: string,
   UserIdObjectiveId: string,
@@ -43,7 +53,15 @@ export interface Item {
   LastModified: string,
 }
 
-export enum StepImportance { None, Low, Medium, High }
+export enum StepImportance {
+  None,
+  Low,
+  Medium,
+  High,
+  Question,
+  Waiting,
+  InProgress 
+}
 export interface Step extends Item {
   Title: string,
   Done: boolean,
@@ -102,6 +120,30 @@ export interface Exercise extends Item{
   Description: string,
   Weekdays: Weekdays[],
   LastDone: string,
+}
+
+export interface Links extends Item{
+  Title: string,
+  Links: Link[],
+}
+
+export interface Link{
+  Title: string,
+  Url: string,
+}
+
+export interface Image extends Item{
+  Title: string;
+  Name: string,
+  Size: number,
+  Width: number,
+  Height: number,
+  IsDisplaying: boolean;
+}
+
+export interface StoredImage{
+  ItemId: string,
+  ImageFile: string,
 }
 
 export interface User{
@@ -187,6 +229,6 @@ export interface PopMessage {
   text: string,
   timeout: number,
   type: MessageType,
- }
+}
 
 export enum LogLevel { Dev, Warn, Error, None }

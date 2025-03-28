@@ -1,6 +1,6 @@
 // UserContext.tsx
 import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
-import { Item, Objective, MessageType, User, UserPrefs, Views, PopMessage } from '../Types';
+import { Item, Objective, MessageType, User, UserPrefs, Views, PopMessage, ItemImage } from '../Types';
 import { ThemePalette, dark } from '../Colors';
 import { FontPalette, fontDark, fontPaper, fontWhite } from '../../fonts/Font';
 import { useStorageContext } from './StorageContext';
@@ -23,7 +23,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     storage.readUserPrefs().then((userPrefs: any) => {
       if(userPrefs) setUserPrefs(userPrefs);
     })
-    // loadSelectedTags();
     loadObjectives();
     loadLastSync();
   }, []);
@@ -383,7 +382,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       if(dbItems){
         newItems = [...dbItems];
         for (let i = 0; i < its.length; i++) {
-          let updated = false;
+          let updated = false; 
           for(let j = 0; j < newItems.length; j++){
             if(newItems[j].ItemId === its[i].ItemId){
               newItems[j] = {...newItems[j], ...its[i]};
@@ -460,6 +459,22 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     setDeletedItems([]);
   };
 
+  //^-------------------- IMAGES
+  const [storedImages, setStoredImages] = useState<ItemImage[]>([]);
+  const putStoredImages = async (images: ItemImage[]) => {
+    
+  };
+  const deleteStoredImages = async (images: ItemImage[]) => {
+    
+  };
+  const [storedNewImages, setStoredNewImages] = useState<ItemImage[]>([]);
+  const putStoredNewImages = async (images: ItemImage[]) => {
+    
+  };
+  const deleteStoredNewImages = async (images: ItemImage[]) => {
+    
+  };
+
   return (
     <UserContext.Provider 
       value={{
@@ -483,6 +498,8 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         //^DELETED
         deletedObjectives, pushDeletedObjective, deleteDeletedObjectives,
         deletedItems, pushDeletedItem, deleteDeletedItems,
+        //ÎMAGES
+
         //^HELPERS
         clearAllData,
       }}>

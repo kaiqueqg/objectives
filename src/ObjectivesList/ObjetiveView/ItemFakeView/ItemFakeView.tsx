@@ -7,6 +7,13 @@ import PressImage from "../../../PressImage/PressImage";
 import PressInput from "../../../PressInput/PressInput";
 import { useState } from "react";
 
+export const New = () => {
+  return(
+    {
+    }
+  )
+}
+
 export interface ItemFakeViewProps{
   objTheme: ObjectivePallete,
 }

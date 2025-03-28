@@ -6,12 +6,13 @@ import PressImage from "../PressImage/PressImage";
 import { useUserContext } from "../Contexts/UserContext";
 import Loading from "../Loading/Loading";
 import { useLogContext } from "../Contexts/LogContext";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 export interface BottomBarProps {
   isSyncing: boolean,
   doneSync: boolean,
   failedSync: boolean,
+  isLambdaCold: boolean,
   isServerUp: boolean,
   syncObjectivesList: () => void,
 }
@@ -19,8 +20,7 @@ export interface BottomBarProps {
 const BottomBar = (props: BottomBarProps) => {
   const { user, userPrefs, theme: t, fontTheme: f, currentView, writeCurrentView, availableTags, selectedTags } = useUserContext();
   const { log } = useLogContext();
-
-  const { isSyncing, doneSync, failedSync, syncObjectivesList } = props;
+  const { isSyncing, doneSync, failedSync, isLambdaCold, syncObjectivesList } = props;
 
   useEffect(() => {}, [availableTags, selectedTags]);
 
@@ -51,7 +51,7 @@ const BottomBar = (props: BottomBarProps) => {
       justifyContent: 'center',
       alignItems: 'center',
       height: 55,
-      backgroundColor: t.backgroundcolordark,
+      backgroundColor: t.backgroundcolordarker,
       borderStyle: 'solid',
       
       borderTopWidth: 1,
@@ -70,21 +70,23 @@ const BottomBar = (props: BottomBarProps) => {
       width: '50%',
     },
     imageContainer:{
-      borderColor: '#00000000',
-      borderTopWidth: 1,
-      borderStyle: 'solid',
     },
     imageContainerSelected:{
-      borderColor: 'beige',
-      borderTopWidth: 1,
-      borderStyle: 'solid',
+      backgroundColor: colorPalette.bluedarkerdarker,
     },
     bottomImage: {
       margin: 10,
       width: 30,
       height: 30,
+      tintColor: colorPalette.beigedark,
     },
-    offImage:{
+    bottomImageSelected:{
+      tintColor: colorPalette.bluelight,
+    },
+    doneImage:{
+      tintColor: t.doneicontint,
+    },
+    cancelImage:{
       tintColor: t.cancelicontint,
     },
     textImage:{
@@ -100,24 +102,22 @@ const BottomBar = (props: BottomBarProps) => {
   return (
     <View style={s.container}>
       <View style={s.leftContainer}>
-        <PressImage pressStyle={currentView === Views.UserView? s.imageContainerSelected:s.imageContainer} style={[s.bottomImage, {tintColor: user? t.doneicontint:t.cancelicontint}]} onPress={() => onChangeToList(Views.UserView)} source={require('../../public/images/user.png')}></PressImage>
+        <PressImage pressStyle={currentView === Views.UserView? s.imageContainerSelected:s.imageContainer} style={[s.bottomImage, s.cancelImage, user&&s.doneImage]} onPress={() => onChangeToList(Views.UserView)} source={require('../../public/images/user.png')}></PressImage>
         {/* <PressImage pressStyle={currentView === Views.DevView? s.imageContainerSelected:s.imageContainer} style={[s.bottomImage, {tintColor:'beige'}]} onPress={() => onChangeToList(Views.DevView)} source={require('../../public/images/dev.png')}></PressImage> */}
         {user?
           <>
-            {isSyncing?
-              <Loading style={s.loadingImage} theme={dark}></Loading>
-              :
-              <PressImage pressStyle={s.imageContainer} style={[s.bottomImage, doneSync?{tintColor: t.doneicontint}:(failedSync?{tintColor: t.cancelicontint}:{tintColor:'beige'})]} onPress={syncObjectivesList} source={require('../../public/images/sync.png')}></PressImage>
-            }
+            {!isSyncing && isLambdaCold && <PressImage pressStyle={s.imageContainer} style={[s.bottomImage, s.bottomImageSelected]} onPress={()=>{}} source={require('../../public/images/cold.png')}></PressImage>}
+            {isSyncing &&  !isLambdaCold && <Loading style={s.loadingImage} theme={dark}></Loading>}
+            {!isSyncing && !isLambdaCold && <PressImage pressStyle={s.imageContainer} style={[s.bottomImage, failedSync&&s.cancelImage, doneSync&&s.doneImage]} onPress={syncObjectivesList} source={require('../../public/images/sync.png')}></PressImage>}
           </>
           :
           <PressImage pressStyle={s.imageContainer} style={s.bottomImage} onPress={syncObjectivesList} source={require('../../public/images/cloud-offline.png')}></PressImage>
         }
       </View>
       <View style={s.rightContainer}>
-        <PressImage pressStyle={currentView === Views.ArchivedView? s.imageContainerSelected:s.imageContainer} style={[s.bottomImage]} textStyle={s.textImage} onPress={changeToArchivedView} source={require('../../public/images/archived.png')} ></PressImage>
-        <PressImage pressStyle={currentView === Views.TagsView? s.imageContainerSelected:s.imageContainer} style={[s.bottomImage]} textStyle={s.textImage} onPress={changeToTagView} source={require('../../public/images/tag.png')} text={getTagImageText()}></PressImage>
-        <PressImage pressStyle={currentView === Views.ListView? s.imageContainerSelected:s.imageContainer} style={s.bottomImage} onPress={changeToListView} source={require('../../public/images/list.png')}></PressImage>
+        <PressImage pressStyle={[s.imageContainer, currentView === Views.ArchivedView && s.imageContainerSelected]} style={[s.bottomImage, currentView === Views.ArchivedView && s.bottomImageSelected]} textStyle={s.textImage} onPress={changeToArchivedView} source={require('../../public/images/archived.png')} ></PressImage>
+        {/* <PressImage pressStyle={currentView === Views.TagsView? s.imageContainerSelected:s.imageContainer} style={[s.bottomImage]} textStyle={s.textImage} onPress={changeToTagView} source={require('../../public/images/tag.png')} text={getTagImageText()}></PressImage> */}
+        <PressImage pressStyle={[s.imageContainer, currentView === Views.ListView && s.imageContainerSelected]} style={[s.bottomImage, currentView === Views.ListView&&s.bottomImageSelected]} onPress={changeToListView} source={require('../../public/images/list.png')}></PressImage>
       </View>
     </View>
   );

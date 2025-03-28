@@ -70,6 +70,7 @@ const PressInput = (props: PressInputProps) => {
     if(props.onDelete){
       if(props.confirmDelete){
         setIsDeleting(true);
+        setTimeout(()=>{setIsDeleting(false)}, 2000);
       }else{
         props.onDelete();
       }

@@ -1,11 +1,22 @@
-import { View, StyleSheet,Text, Image, Vibration } from "react-native";
+import { View, StyleSheet,Text, Image, Vibration, TextInput } from "react-native";
 import { ItemViewProps, Question } from "../../../Types";
 import { FontPalette, fontWhite } from "../../../../fonts/Font";
-import { ObjectivePallete, ThemePalette } from "../../../Colors";
+import { colorPalette, ObjectivePallete, ThemePalette } from "../../../Colors";
 import { useUserContext } from "../../../Contexts/UserContext";
 import PressInput from "../../../PressInput/PressInput";
 import PressImage from "../../../PressImage/PressImage";
 import { useState } from "react";
+import PressText from "../../../PressText/PressText";
+import React from "react";
+
+export const New = () => {
+  return(
+    {
+      Statement: '',
+      Answer: '',
+    }
+  )
+}
 
 export interface QuestionViewProps extends ItemViewProps{
   question: Question,
@@ -15,152 +26,200 @@ const QuestionView = (props: QuestionViewProps) => {
   const { userPrefs, theme: t, fontTheme: f, putItem } = useUserContext();
   const { objTheme: o, isEditingPos, onDeleteItem, loadMyItems, question } = props;
 
-  const onDoneStatement = async (newText: string) => {
-    const newQuestion: Question = {...question, Statement: newText.trim() };
+  const [isEditingQuestion, setIsEditingQuestion] = useState<boolean>(false);
+  const [tempQuestion, setTempQuestion] = useState<Question>(props.question);
+
+  const onDoneQuestion = async () => {
+    let newQuestion = {...tempQuestion};
+    newQuestion.Statement = newQuestion.Statement.trim();
+    newQuestion.Answer = newQuestion.Answer.trim();
     await putItem(newQuestion);
+    setIsEditingQuestion(false);
     loadMyItems();
   }
 
-  const onDeleteStatement = async () => {
+  const onCancelQuestion = async () => {
+    setIsEditingQuestion(false);
+  }
+
+  const onDelete = async () => {
     await onDeleteItem(question);
-  }
-
-  const onDoneAnswer = async (newText: string) => {
-    const newQuestion: Question = {...question, Answer: newText };
-    await putItem(newQuestion);
-    loadMyItems();
   }
 
   const s = StyleSheet.create({
     container: {
-      justifyContent: 'center',
-      alignItems: 'center',
       flex: 1,
       flexDirection: 'row',
-      marginBottom: 4,
-      marginHorizontal: 6,
-    },
-    statementAnswerColumn:{
-      flex: 1,
-      flexDirection: 'column',
       justifyContent: 'center',
       alignItems: 'center',
-      backgroundColor: (question.Statement.trim() !== '' && question.Answer.trim() !== '')?o.objbk:o.itembk,
+      marginBottom: 4,
+      marginHorizontal: 6,
+      minHeight: 40,
+    },
+    questionContainer:{
+      flex: 1,
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: (question.Statement.trim() !== '' && question.Answer.trim() !== '')? o.objbk:o.itembk,
       
       borderRadius: 5,
-      borderColor: (question.Statement.trim() !== '' && question.Answer.trim() !== '')?o.objbk:o.bordercolor,
+      borderColor: (question.Statement.trim() !== '' && question.Answer.trim() !== '')?colorPalette.transparent:o.bordercolor,
       borderWidth: 1,
       borderStyle: 'solid',
     },
-    statementAnswerColumnSelected:{
+    questionContainerSelected:{
       borderStyle: 'dashed',
       borderColor: o.bordercolorselected,
     },
-    statementAnswerColumnEnding:{
+    questionContainerEnding:{
       borderStyle: 'solid',
       borderColor: o.bordercolorselected,
     },
-    statementLine: {
-      flexDirection: 'row',
+    textContainer:{
+      flex: 1,
+      justifyContent: 'center',
+
+      minHeight: 40,
+      margin: 2,
+      paddingLeft: 10,
+      color: 'beige',
+    },
+    questionDisplayContainer:{
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'flex-start',
+      flexDirection: 'column',
+    },
+    answerContainer:{
+      flex: 1,
+      justifyContent: 'center',
       alignItems: 'center',
-    },
-    statement: {
-      color: o.itemtext,
-      fontWeight: 'bold',
-    },
-    statementDefaultText:{
-      color: o.itemtextplaceholder,
-    },
-    answerLine: {
       flexDirection: 'row',
-      alignItems: 'center',
-      marginLeft: 20,
-      minHeight: 30,
     },
-    answerStyle: {
-      color: o.itemtext
-    },
-    answerDefaultText:{
-      color: o.itemtextplaceholder,
-    },
-    inputStyle: {
+    text:{
       color: o.itemtext,
-      borderColor: o.itemtext,
     },
-    arrowImage: {
-      height: 10,
-      width: 10,
-      margin: 5,
-      tintColor: o.itemtextplaceholder,
+    textFade:{
+      color: o.itemtextfade,
     },
-    questionDoneImage:{
-      tintColor: o.doneicontint,
-    },
-    imageContainer: {
+    imageContainer:{
       height: 40,
       width: 40,
       alignItems: 'center',
       justifyContent: 'center',
     },
     image:{
-      height: 20,
-      width: 20,
+      height: 24,
+      width: 24,
       tintColor: o.icontintcolor,
     },
-    imageFade:{
-      height: 20,
-      width: 20,
-      tintColor: o.icontintcolorfade,
+    imageSmall:{
+      height: 15,
+      width: 15,
+      tintColor: o.icontintcolor,
     },
-    imageMoveContainer:{
+    imageAnswerNormal:{
+      tintColor: o.itemtext,
+    },
+    imageAnswerFade:{
+      tintColor: o.itemtextfade,
+    },
+    imageDone:{
+      tintColor: o.doneicontint,
+    },
+    imageCancel:{
+      tintColor: o.cancelicontint,
+    },
+    imageDelete:{
+      tintColor: o.trashicontint,
+    },
+    questionDoneImage:{
+      tintColor: o.doneicontint,
+    },
+    inputsContainer:{
+      flex: 1,
+      flexDirection: 'row',
+    },
+    inputsLeft:{
+      width: '15%',
       justifyContent: 'center',
       alignItems: 'center',
-      marginLeft: 5,
-      width: 40,
-      height: 40,
     },
-    imageMove:{
-      height: 20,
-      width: 20,
-      tintColor: o.icontintcolor,
+    inputsCenter:{
+      width: '70%',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    inputsRight:{
+      width: '15%',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    inputStyle:{
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+
+      width: '100%',
+      minHeight: 40,
+      margin: 2,
+      paddingLeft: 10,
+      color: o.itemtext,
+
+      borderRadius: 5,
+      borderColor: o.bordercolor,
+      borderBottomWidth: 1,
+      borderStyle: 'solid',
     },
   });
 
   return (
     <View style={s.container}>
-    <View style={[s.statementAnswerColumn, props.isSelected && s.statementAnswerColumnSelected, props.isSelected && props.isEndingPos && s.statementAnswerColumnEnding]}>
-        <View style={s.statementLine}>
-          <PressInput 
-            objTheme={o}
-            text={question.Statement}
-            onDone={onDoneStatement}
-            onDelete={onDeleteStatement}
-            defaultText={'Question'}
-            uneditable={isEditingPos}
-
-            textStyle={s.statement}
-            inputStyle={s.inputStyle}
-            defaultStyle={s.statementDefaultText}
-            doneImageStyle={s.questionDoneImage}
-            trashImageStyle={{tintColor: o.trashicontint}}
-            >
-          </PressInput>
-        </View>
-        <View style={s.answerLine}>
-          <Image style={[s.arrowImage, question.Answer === ''? {tintColor: o.itemtextplaceholder}: {tintColor:o.itemtext}]} source={require('../../../../public/images/arow-down-right-thicker.png')}></Image>
-          <PressInput 
-            objTheme={o}
-            text={question.Answer}
-            defaultText={'Answer'}
-            onDone={onDoneAnswer}
-            uneditable={isEditingPos}
-
-            textStyle={s.answerStyle}
-            inputStyle={s.inputStyle}
-            defaultStyle={s.answerDefaultText}
-            doneImageStyle={s.questionDoneImage}>
-          </PressInput>
-        </View>
+      <View style={[s.questionContainer, props.isSelected && s.questionContainerSelected, props.isSelected && props.isEndingPos && s.questionContainerEnding]}>
+        {!isEditingPos && isEditingQuestion?
+          <View style={s.inputsContainer}>
+            <View style={s.inputsLeft}>
+              <PressImage pressStyle={s.imageContainer} style={[s.image, s.imageDelete]} confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete}></PressImage>
+            </View>
+            <View style={s.inputsCenter}>
+              <TextInput 
+                style={s.inputStyle}
+                placeholderTextColor={o.itemtextfade}
+                placeholder="Statement"
+                defaultValue={question.Statement}
+                onChangeText={(value: string)=>{setTempQuestion({...tempQuestion, Statement: value})}}></TextInput>
+              <TextInput 
+                style={s.inputStyle}
+                placeholderTextColor={o.itemtextfade}
+                placeholder="Answer"
+                defaultValue={question.Answer}
+                onChangeText={(value: string)=>{setTempQuestion({...tempQuestion, Answer: value})}}></TextInput>
+            </View>
+            <View style={s.inputsRight}>
+              <PressImage pressStyle={s.imageContainer} style={[s.image, s.imageDone]} source={require('../../../../public/images/done.png')} onPress={onDoneQuestion}></PressImage>
+              <PressImage pressStyle={s.imageContainer} style={[s.image, s.imageCancel]} source={require('../../../../public/images/cancel.png')} onPress={onCancelQuestion}></PressImage>
+            </View>
+          </View>
+          :
+          <View style={s.questionDisplayContainer}>
+            <PressText
+              style={s.textContainer}
+              textStyle={s.text}
+              text={question.Statement}
+              onPress={()=>{if(!isEditingPos)setIsEditingQuestion(!isEditingQuestion)}}
+              ></PressText>
+            <View style={s.answerContainer}>
+              <PressImage pressStyle={s.imageContainer} style={[s.imageSmall, question.Answer.trim() === ''? s.imageAnswerFade:s.imageAnswerNormal]} source={require('../../../../public/images/arow-down-right-thicker.png')} onPress={()=>{}}></PressImage>
+              <PressText
+                style={s.textContainer}
+                textStyle={s.text}
+                text={question.Answer}
+                onPress={()=>{if(!isEditingPos)setIsEditingQuestion(!isEditingQuestion)}}
+                ></PressText>
+            </View>
+          </View>
+        }
       </View>
     </View>
   );

@@ -7,6 +7,14 @@ import PressImage from "../../../PressImage/PressImage";
 import PressInput from "../../../PressInput/PressInput";
 import { useState } from "react";
 
+export const New = () => {
+  return(
+    {
+      Text: '',
+    }
+  )
+}
+
 export interface NoteViewProps extends ItemViewProps {
   note: Note,
 }
@@ -106,6 +114,7 @@ const NoteView = (props: NoteViewProps) => {
           objTheme={o}
           text={note.Text}
           onDelete={onDelete}
+          confirmDelete={true}
           onDone={onChangeText}
           onEditingState={onEditingTitle}
           multiline={true}

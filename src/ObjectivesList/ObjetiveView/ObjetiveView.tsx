@@ -1,25 +1,32 @@
+import React from "react";
 import { View, StyleSheet, Pressable, Vibration, Alert, FlatList, Text } from "react-native";
-import { useUserContext } from "../../Contexts/UserContext";
-import { colorPalette, getObjTheme } from "../../Colors";
-import { Item, ItemType, Note, Objective, Question, Step, Views, Wait, Location, Divider, Grocery, Pattern, MessageType, Medicine, Exercise, Weekdays, StepImportance } from "../../Types";
-import QuestionView from "./QuestionView/QuestionView";
-import PressImage from "../../PressImage/PressImage";
-import { useEffect, useState } from "react";
-import StepView from "./StepView/StepView";
-import PressInput from "../../PressInput/PressInput";
-import WaitView from "./WaitView/WaitView";
-import NoteView from "./NoteView/NoteView";
-import LocationView from "./LocationView/LocationView";
-import DividerView from "./DividerView/DividerView";
-import GroceryView from "./GroceryView/Grocery";
 import * as ExpoLocation from 'expo-location';
+
+import { colorPalette, getObjTheme } from "../../Colors";
+
+import { useUserContext } from "../../Contexts/UserContext";
 import { useLogContext } from "../../Contexts/LogContext";
 import { useStorageContext } from "../../Contexts/StorageContext";
-import MedicineView from "./MedicineView/MedicineView";
-import ItemFakeView from "./ItemFakeView/ItemFakeView";
+
 import PressText from "../../PressText/PressText";
-import React from "react";
-import ExerciseView from "./ExerciseView/ExerciseView";
+import PressImage from "../../PressImage/PressImage";
+import PressInput from "../../PressInput/PressInput";
+
+import { Item, ItemType, Note, Objective, Question, Step, Views, Wait, Location, Divider, Grocery, Pattern, MessageType, Medicine, Exercise, Weekdays, StepImportance, ItemNew, Links, Image } from "../../Types";
+import { useEffect, useState } from "react";
+
+import QuestionView, {New as QuestionNew} from "./QuestionView/QuestionView";
+import StepView, {New as StepNew} from "./StepView/StepView";
+import WaitView, {New as WaitNew} from "./WaitView/WaitView";
+import NoteView, {New as NoteNew} from "./NoteView/NoteView";
+import LocationView, {New as LocationNew} from "./LocationView/LocationView";
+import DividerView, {New as DividerNew} from "./DividerView/DividerView";
+import GroceryView, {New as GroceryNew} from "./GroceryView/Grocery";
+import MedicineView, {New as MedicineNew} from "./MedicineView/MedicineView";
+import ItemFakeView, {New as ItemFakeNew} from "./ItemFakeView/ItemFakeView";
+import ExerciseView, {New as ExerciseNew} from "./ExerciseView/ExerciseView";
+import LinksView, {New as LinksNew} from "./LinksView/LinksView";
+import ImageView, {New as ImageNew} from "./ImageView/ImageView";
 
 export interface ObjectiveViewProps {
   obj: Objective,
@@ -32,7 +39,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
   const { theme, fontTheme, 
     user, userPrefs, 
     objectives, putObjective, deleteObjective, 
-    currentObjectiveId, deleteCurrentObjectiveId, 
+    currentObjectiveId, 
     writeItems, readItems, putItems, deleteItem,
     putAvailableTags, removeAvailableTags,
     putSelectedTags, removeSelectedTags,
@@ -53,8 +60,9 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
 
   useEffect(() => {
     load();
+    
   }, [objectives, currentView]);
-  
+
   const load = async () => {
     const sorted = await loadItems();
     if(userPrefs.allowLocation) doesNeedToAskGPS(sorted);
@@ -84,6 +92,52 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     loadItems();
   }
 
+  const choseNewItemToAdd = async (type: ItemType, pos?:number) => {
+    if(!user) return log.err('No user.');
+    const baseItem = {...ItemNew(user.UserId, obj.ObjectiveId, await storage.randomId(), type, pos?pos:items.length)}
+
+    switch (type) {
+      case ItemType.Divider:
+        addNewItem({...baseItem, ...DividerNew()}, pos);
+        break;
+      case ItemType.Step:
+        addNewItem({...baseItem, ...StepNew()}, pos);
+        break;
+      case ItemType.Question:
+        addNewItem({...baseItem, ...QuestionNew()}, pos);
+        break;
+      case ItemType.Wait:
+        addNewItem({...baseItem, ...WaitNew()}, pos);
+        break;
+      case ItemType.Note:
+        addNewItem({...baseItem, ...NoteNew()}, pos);
+        break;
+      case ItemType.Location:
+        addNewItem({...baseItem, ...LocationNew()}, pos);
+        break;
+      case ItemType.Grocery:
+        addNewItem({...baseItem, ...GroceryNew()}, pos);
+        break;
+      case ItemType.Medicine:
+        addNewItem({...baseItem, ...MedicineNew()}, pos);
+        break;
+      case ItemType.Exercise:
+        addNewItem({...baseItem, ...ExerciseNew()}, pos);
+        break;
+      case ItemType.ItemFake:
+        addNewItem({...baseItem, ...ItemFakeNew()}, pos);
+        break;
+      case ItemType.Links:
+        addNewItem({...baseItem, ...LinksNew()}, pos);
+        break;
+      case ItemType.Image:
+        addNewItem({...baseItem, ...ImageNew()}, pos);
+        break;
+      default:
+        break;
+    }
+  }
+
   const addNewItem = async (item: any, pos?:number) => {
     if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
 
@@ -109,149 +163,8 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     if(!isItemOpenLocked) setIsItemsOpen(false);
   }
 
-  const addNewStep = async (pos?:number) => {
-    if(!user) return log.err('No user.');
-
-    addNewItem({
-      UserIdObjectiveId: user.UserId + obj.ObjectiveId,
-      ItemId: await storage.randomId(),
-      Type: ItemType.Step,
-      Done: false,
-      Title: '',
-      Pos: pos?pos:items.length,
-      LastModified: (new Date()).toISOString(),
-    }, pos);
-  }
-
-  const addNewQuestion = async (pos?:number) => {
-    if(!user) return log.err('No user.');
-
-    addNewItem({
-      UserIdObjectiveId: user.UserId + obj.ObjectiveId,
-      ItemId: await storage.randomId(),
-      Type: ItemType.Question,
-      Statement: '',
-      Answer: '',
-      Pos: pos?pos:items.length,
-      LastModified: (new Date()).toISOString(),
-    }, pos);
-  }
-
-  const addNewWait = async (pos?:number) => {
-    if(!user) return log.err('No user.');
-
-    addNewItem({
-      UserIdObjectiveId: user.UserId + obj.ObjectiveId,
-      ItemId: await storage.randomId(),
-      Type: ItemType.Wait,
-      Title: '',
-      Pos: pos?pos:items.length,
-      LastModified: (new Date()).toISOString(),
-    }, pos);
-  }
-
-  const addNewNote = async (pos?:number) => {
-    if(!user) return log.err('No user.');
-
-    addNewItem({
-      UserIdObjectiveId: user.UserId + obj.ObjectiveId,
-      ItemId: await storage.randomId(),
-      Type: ItemType.Note,
-      Text: '',
-      Pos: pos?pos:items.length,
-      LastModified: (new Date()).toISOString(),
-    }, pos);
-  }
-
-  const addNewLocation = async (pos?:number) => {
-    if(!user) return log.err('No user.');
-
-    addNewItem({
-      UserIdObjectiveId: user.UserId + obj.ObjectiveId,
-      ItemId: await storage.randomId(),
-      Type: ItemType.Location,
-      Pos: pos?pos:items.length,
-      LastModified: (new Date()).toISOString(),
-      Title: '',
-      Url: '',
-    }, pos);
-  }
-
-  const addNewDivider = async (pos?:number) => {
-    if(!user) return log.err('No user.');
-
-    addNewItem({
-      UserIdObjectiveId: user.UserId + obj.ObjectiveId,
-      ItemId: await storage.randomId(),
-      Type: ItemType.Divider,
-      Pos: pos?pos:items.length,
-      LastModified: (new Date()).toISOString(),
-      Title: '',
-      IsOpen: true,
-    }, pos);
-  }
-
-  const addNewGrocery = async (pos?:number) => {
-    if(!user) return log.err('No user.');
-
-    addNewItem({
-      UserIdObjectiveId: user.UserId + obj.ObjectiveId,
-      ItemId: await storage.randomId(),
-      Type: ItemType.Grocery,
-      Pos: pos?pos:items.length,
-      LastModified: (new Date()).toISOString(),
-      Title: '',
-      IsChecked: false,
-    }, pos);
-  }
-
-  const addNewMedicine = async (pos?:number) => {
-    if(!user) return log.err('No user.');
-
-    addNewItem({
-      UserIdObjectiveId: user.UserId + obj.ObjectiveId,
-      ItemId: await storage.randomId(),
-      Type: ItemType.Medicine,
-      Pos: pos?pos:items.length,
-      LastModified: (new Date()).toISOString(),
-      Title: '',
-      IsChecked: false,
-
-    }, pos);
-  }
-
-  const addNewExercise = async (pos?:number) => {
-    if(!user) return log.err('No user.');
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-
-    addNewItem({
-      UserIdObjectiveId: user.UserId + obj.ObjectiveId,
-      ItemId: await storage.randomId(),
-      Type: ItemType.Exercise,
-      Pos: pos?pos:items.length,
-      LastModified: (new Date()).toISOString(),
-      Title: '',
-      IsDone: false,
-      Reps: 1,
-      Series: 1,
-      MaxWeight: '',
-      Description: '',
-      Weekdays: [],
-      LastDone: yesterday.toISOString(),
-    }, pos);
-  }
-
-  const onConfirmDelete = () => {
-    Alert.alert('', 'Do you really want to delete?', [
-      { text: 'NO', onPress: () => {}},
-      { text: 'YES', onPress: async () => {onDeleteObjective()} }
-    ]);
-  }
-
   const onDeleteObjective = async () => {
     await deleteObjective(obj);
-    deleteCurrentObjectiveId();
     writeCurrentView(Views.ListView);
   }
 
@@ -466,7 +379,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
   }
 
   const onChangeTags = async (tag: string) => {
-    const uniqueTags = Array.from(new Set([...obj.Tags, tag]));
+    const uniqueTags = Array.from(new Set([...obj.Tags, tag.trim()]));
     await putObjective({...obj, Tags: [...uniqueTags], LastModified: (new Date()).toISOString() });
     await putAvailableTags([tag]);
     await putSelectedTags([tag]);
@@ -501,34 +414,54 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
 
   const getList = () => {
     let filteredItems:Item[] = [];
+    let partialItems:Item[] = [];
 
     if(isEditingPos && isEndingPos){
       const itemFake:Item = {ItemId: '-', LastModified: '', Pos: -1, Type: ItemType.ItemFake, UserIdObjectiveId: '-'}
       filteredItems.push(itemFake)
     }
+    
 
+    let isAfterDivider = false;
     let isDividerOpen = true;
     for(let i = 0; i < items.length; i++){
       let current = items[i];
       let shouldAddStep = true;
       let shouldAddGrocery = true;
-      let shouldAddMedicine = true;
       let shouldAddExercise = true;
+      let shouldAddMedicine = true;
 
       if(current.Type === ItemType.Divider) {
-        filteredItems.push(current);
-        isDividerOpen = (current as Divider).IsOpen;
+        isAfterDivider = true;
+        if(partialItems.length > 1 && !obj.IsShowingCheckedStep){
+          filteredItems.push(...partialItems);
+        }
+        partialItems = [];
+        const divider = current as Divider;
+        if(obj.IsShowingCheckedStep)
+          filteredItems.push(divider);
+        else
+          partialItems.push(divider);
+        isDividerOpen = divider.IsOpen;
       }
       else{
         if(current.Type === ItemType.Step && !obj.IsShowingCheckedStep) shouldAddStep = !(current as Step).Done;
         if(current.Type === ItemType.Grocery && !obj.IsShowingCheckedGrocery) shouldAddGrocery = !(current as Grocery).IsChecked;
-        if(current.Type === ItemType.Medicine && !obj.IsShowingCheckedMedicine) shouldAddMedicine = !(current as Medicine).IsChecked;
         if(current.Type === ItemType.Exercise && !obj.IsShowingCheckedExercise) shouldAddExercise = !(current as Exercise).IsDone;
-  
-        if(isDividerOpen && shouldAddStep && shouldAddGrocery && shouldAddMedicine && shouldAddExercise){
-          filteredItems.push(current);
+        if(current.Type === ItemType.Medicine && !obj.IsShowingCheckedMedicine) shouldAddMedicine = !(current as Medicine).IsChecked;
+        if(isDividerOpen && shouldAddStep && shouldAddGrocery && shouldAddExercise && shouldAddMedicine){
+          if(isAfterDivider && !obj.IsShowingCheckedStep)
+            partialItems.push(current);
+          else
+            filteredItems.push(current);
+        }
+        else{
         }
       }
+    }
+
+    if(partialItems.length > 1 && !obj.IsShowingCheckedStep){
+      filteredItems.push(...partialItems);
     }
 
     filteredItems.push({ItemId:'', LastModified: '', Pos:-1, UserIdObjectiveId: '',  Type: ItemType.Unknown})
@@ -550,14 +483,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
         divider={item as Divider}
         orderDividerItems={orderDividerItems}
         onDeleteItem={onDeleteItem} 
-        addNewDivider={addNewDivider}
-        addNewGrocery={addNewGrocery}
-        addNewLocation={addNewLocation}
-        addNewNote={addNewNote}
-        addNewQuestion={addNewQuestion}
-        addNewStep={addNewStep}
-        addNewWait={addNewWait}
-        addNewExercise={addNewExercise}
+        choseNewItemToAdd={(type: ItemType, pos?:number) => {choseNewItemToAdd(type, pos)}}
         ></DividerView>  
     }
     else if(item.Type === ItemType.Step){
@@ -583,6 +509,12 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     }
     else if(item.Type === ItemType.Wait){
       rtnItem = <WaitView key={item.ItemId} isEditingPos={isEditingPos} isEndingPos={isEndingPos} isSelected={itemSelected?true:false} loadMyItems={loadItems} objTheme={o} wait={item as Wait} onDeleteItem={onDeleteItem} ></WaitView>
+    }
+    else if(item.Type === ItemType.Links){
+      rtnItem = <LinksView key={item.ItemId} isEditingPos={isEditingPos} isEndingPos={isEndingPos} isSelected={itemSelected?true:false} loadMyItems={loadItems} objTheme={o} links={item as Links} onDeleteItem={onDeleteItem} ></LinksView>
+    }
+    else if(item.Type === ItemType.Image){
+      rtnItem = <ImageView key={item.ItemId} isEditingPos={isEditingPos} isEndingPos={isEndingPos} isSelected={itemSelected?true:false} loadMyItems={loadItems} objTheme={o} image={item as Image} onDeleteItem={onDeleteItem} ></ImageView>
     }
     else if(item.Type === ItemType.ItemFake){
       rtnItem = <ItemFakeView objTheme={o}></ItemFakeView>
@@ -653,7 +585,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       case BottomIcons.Sorted:
         return isPaletteOpen || isTagOpen || isEditingPos || isEndingPos || isItemsOpen || isItemOpenLocked;
       case BottomIcons.Pos:
-        return isPaletteOpen || isTagOpen || isItemsOpen || isItemOpenLocked;
+        return isPaletteOpen || isTagOpen || isItemsOpen || isItemOpenLocked || items.length < 2;
       case BottomIcons.Add:
         return isPaletteOpen || isTagOpen || isEditingPos || isEndingPos;
       default:
@@ -695,6 +627,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       fontWeight: 'bold',
       fontSize: 20,
       color: o.objtitle,
+      width: '100%',
     },
     bodyContainer:{
       flex: 1,
@@ -852,7 +785,8 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
           text={obj.Title}
           objTheme={o} 
           onDone={onChangeTitle}
-          onDelete={onConfirmDelete} 
+          confirmDelete={true}
+          onDelete={onDeleteObjective} 
           onEditingState={onIsEditingTitle}
           textStyle={s.titleTextStyle}
           inputStyle={s.inputStyle}
@@ -865,7 +799,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
           <View style={s.itemsContainer}>
             <Pressable style={[s.colorPalette, {backgroundColor: colorPalette.bluedark}]} onPress={() => onSelectColor('noTheme')}></Pressable>
             <Pressable style={[s.colorPalette, {backgroundColor: '#2D9BF0'}]} onPress={() => onSelectColor('darkBlue')}></Pressable>
-            <Pressable style={[s.colorPalette, {backgroundColor: '#FF5858',}]} onPress={() => onSelectColor('darkRed')}></Pressable>
+            <Pressable style={[s.colorPalette, {backgroundColor: '#FF5858'}]} onPress={() => onSelectColor('darkRed')}></Pressable>
             <Pressable style={[s.colorPalette, {backgroundColor: '#0CA789'}]} onPress={() => onSelectColor('darkGreen')}></Pressable>
             <Pressable style={[s.colorPalette, {backgroundColor: '#F5F5DC'}]} onPress={() => onSelectColor('darkWhite')}></Pressable>
           </View>
@@ -873,15 +807,17 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
         {getList()}
         {isItemsOpen &&  
         <View style={s.itemsContainer}>
-          <PressImage pressStyle={s.imageContainer} style={s.image} onPress={addNewDivider} source={require('../../../public/images/minus.png')}></PressImage>
-          <PressImage pressStyle={s.imageContainer} style={s.image} onPress={addNewExercise} source={require('../../../public/images/exercise-filled-black.png')}></PressImage>
-          <PressImage pressStyle={s.imageContainer} style={s.image} onPress={addNewWait} source={require('../../../public/images/wait.png')}></PressImage>
-          <PressImage pressStyle={s.imageContainer} style={s.image} onPress={addNewGrocery} source={require('../../../public/images/grocery-filled-black.png')}></PressImage>
-          <PressImage pressStyle={s.imageContainer} style={s.imageBig} onPress={addNewMedicine} source={require('../../../public/images/medicine-filled-black.png')}></PressImage>
-          <PressImage pressStyle={s.imageContainer} style={s.image} onPress={addNewLocation} source={require('../../../public/images/location-filled.png')}></PressImage>
-          <PressImage pressStyle={s.imageContainer} style={s.image} onPress={addNewQuestion} source={require('../../../public/images/questionfilled.png')}></PressImage>
-          <PressImage pressStyle={s.imageContainer} style={s.image} onPress={addNewNote} source={require('../../../public/images/note.png')}></PressImage>
-          <PressImage pressStyle={s.imageContainer} style={s.image} onPress={addNewStep} source={require('../../../public/images/step-filled.png')}></PressImage>
+          <PressImage pressStyle={s.imageContainer} style={s.image} onPress={() => {choseNewItemToAdd(ItemType.Wait)}} source={require('../../../public/images/wait.png')}></PressImage>
+          <PressImage pressStyle={s.imageContainer} style={s.image} onPress={() => {choseNewItemToAdd(ItemType.Links)}} source={require('../../../public/images/link.png')}></PressImage>
+          <PressImage pressStyle={s.imageContainer} style={s.image} onPress={() => {choseNewItemToAdd(ItemType.Exercise)}} source={require('../../../public/images/exercise-filled-black.png')}></PressImage>
+          <PressImage pressStyle={s.imageContainer} style={s.image} onPress={() => {choseNewItemToAdd(ItemType.Divider)}} source={require('../../../public/images/minus.png')}></PressImage>
+          <PressImage pressStyle={s.imageContainer} style={s.image} onPress={() => {choseNewItemToAdd(ItemType.Grocery)}} source={require('../../../public/images/grocery-filled-black.png')}></PressImage>
+          <PressImage pressStyle={s.imageContainer} style={s.imageBig} onPress={() => {choseNewItemToAdd(ItemType.Medicine)}} source={require('../../../public/images/medicine-filled-black.png')}></PressImage>
+          <PressImage pressStyle={s.imageContainer} style={s.image} onPress={() => {choseNewItemToAdd(ItemType.Location)}} source={require('../../../public/images/location-filled.png')}></PressImage>
+          <PressImage pressStyle={s.imageContainer} style={s.image} onPress={() => {choseNewItemToAdd(ItemType.Question)}} source={require('../../../public/images/questionfilled.png')}></PressImage>
+          <PressImage pressStyle={s.imageContainer} style={s.image} onPress={() => {choseNewItemToAdd(ItemType.Note)}} source={require('../../../public/images/note.png')}></PressImage>
+          <PressImage pressStyle={s.imageContainer} style={s.image} onPress={() => {choseNewItemToAdd(ItemType.Step)}} source={require('../../../public/images/step-filled.png')}></PressImage>
+          <PressImage pressStyle={s.imageContainer} style={s.image} onPress={() => {choseNewItemToAdd(ItemType.Image)}} source={require('../../../public/images/image-filled.png')}></PressImage>
         </View>}
       </View>
       {isTagOpen && 
@@ -953,12 +889,12 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
             onPress={()=>showBottomItem(BottomIcons.Checked)}
             source={require('../../../public/images/checked.png')}></PressImage>
           {!isEditingPos && <PressImage 
-              style={s.imageSmall}
+              style={s.image}
               disable={shouldDisable(BottomIcons.Pos)}
               disableStyle={s.imageFade}
               pressStyle={[s.imageContainer]}
               onPress={()=>showBottomItem(BottomIcons.Pos)}
-              source={require('../../../public/images/updown.png')}></PressImage>}
+              source={require('../../../public/images/change.png')}></PressImage>}
           {isEditingPos && <PressImage pressStyle={s.imageContainer} style={[s.image, s.redImageColor]} onPress={cancelEditingPos} source={require('../../../public/images/cancel.png')}></PressImage>}
           {isEditingPos && <PressImage 
             style={[s.imageSmall, s.greenImageColor]}
@@ -988,7 +924,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     </View>
     :
     <View style={s.objEmptyContainer}>
-      <PressImage pressStyle={s.imageContainer} style={[s.image, {width: 30, height: 30}]} onPress={addNewNote} source={require('../../../public/images/list.png')}></PressImage>
+      <PressImage pressStyle={s.imageContainer} style={[s.image, {width: 30, height: 30}]} onPress={()=>{}} source={require('../../../public/images/list.png')}></PressImage>
       <Text style={s.objEmptyText}>NO OBJECTIVE SELECTED</Text>
     </View>
     )

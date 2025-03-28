@@ -17,13 +17,17 @@ export const RequestProvider: React.FC<RequestProviderProps> = ({ children }) =>
   
   const errorsWithMessageInResponse = [400, 401, 404, 409, 500, 503];
 
-  const request = async (url: string, endpoint: string, method: string, body?: string, fError?: () => void): Promise<any> => {
+  const request = async (url: string, endpoint: string, method: string, body?: string, fError?: () => void, wakeup?: boolean): Promise<any> => {
     const headers: {[key: string]: string} = {};
 
     headers['Content-Type'] = 'application/json';
 
     const token = await storage.readJwtToken();
-    if(token !== null) headers['Authorization'] = "Bearer " + token;
+    if(token !== null) {
+      if(!wakeup){
+        headers['Authorization'] = "Bearer " + token;
+      }
+    }
     const controller = new AbortController();
     const { signal } = controller;
 
@@ -47,7 +51,6 @@ export const RequestProvider: React.FC<RequestProviderProps> = ({ children }) =>
         fError();
       }
       else {
-        log.dev("Untreated error..." + error);
         log.err("Error: " + error);
       }
 
@@ -87,37 +90,43 @@ export const RequestProvider: React.FC<RequestProviderProps> = ({ children }) =>
     async isUpObjective(fError?: () => void): Promise<any>{
       return this.requestObjectivesList('/IsUpObjective', 'GET', undefined, fError);
     },
+    async wakeupSync(fError?: () => void): Promise<any>{
+      return this.requestObjectivesList('/SyncObjectivesList', 'PUT', undefined, fError, true);
+    },
     async getObjectivesList(fError?: () => void): Promise<ObjectiveList>{
       return this.requestObjectivesList<ObjectiveList>('/GetObjectivesList', 'GET', undefined, fError);
     },
     async syncObjectivesList(objectivesList: ObjectiveList, fError?: () => void): Promise<ObjectiveList>{
       return this.requestObjectivesList<ObjectiveList>('/SyncObjectivesList', 'PUT', JSON.stringify(objectivesList), fError);
     },
-    async requestObjectivesList<T>(endpoint: string, method: string, body?: string, fError?: () => void): Promise<any>{
+    async backupData(fError?: () => void): Promise<boolean>{
+      return this.requestObjectivesList<boolean>('/BackupData', 'GET', undefined, fError);
+    },
+    async requestObjectivesList<T>(endpoint: string, method: string, body?: string, fError?: () => void, wakeup?: boolean): Promise<any>{
       try {
         const resp = await request('https://0z58mhwlhf.execute-api.sa-east-1.amazonaws.com/dev', endpoint, method, body, fError);
 
         if(resp){
           const respData: Response<T> = await resp.json();
+          // if(wakeup){
+          //   return {};
+          // }
           if(!respData.WasAnError && respData.Data){
             return respData.Data;
           }
           else{
-            log.dev('else respData')
-            log.dev(respData)
             switch(respData.Code){
               case 401:
                 popMessage(`The request wasn't authorized.`, MessageType.Error);
                 break;
               default:
-                popMessage('Default');
+                //popMessage('Default');
                 break;
             }
-            log.dev('respData.Message', respData.Message);
           }
         }
       } catch (err) {
-        log.err('Error: ', endpoint, err);
+        if(!wakeup) log.err('Error: ', endpoint, err);
       }
       return null;
     },

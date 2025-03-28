@@ -22,15 +22,20 @@ const ArchivedView = (props: ArchivedViewProps) => {
     writeCurrentView,
     writeCurrentObjectiveId,
     putObjective,
-    selectedTags,
+    selectedTags, writeSelectedTags, putSelectedTags, removeSelectedTags,
   } = useUserContext();
 
-  useEffect(()=>{
-  }, [objectives, selectedTags]);
+  const [archivedObjectives, setArchivedObjectives] = useState<Objective[]>([]);
+  const [archivedTags, setArchivedTags] = useState<string[]>([]);
 
-  const keyExtractor = (obj: Objective) => {
-    return obj.ObjectiveId;
-  }
+  useEffect(()=>{
+    const archivedObjectives = objectives.filter(obj => obj.IsArchived);
+    setArchivedObjectives(archivedObjectives);
+
+    let archivedTags = archivedObjectives.map(obj => obj.Tags).flat();
+    const uniqueArchivedTags = Array.from(new Set([...archivedTags]));
+    setArchivedTags(uniqueArchivedTags);
+  }, [objectives, selectedTags]);
 
   const onSelectCurrentObj = async (id: string) => {
     await writeCurrentObjectiveId(id);
@@ -41,9 +46,34 @@ const ArchivedView = (props: ArchivedViewProps) => {
     await putObjective({...obj, IsArchived: false, LastModified: (new Date()).toISOString() });
   }
 
-  const getArchivedList = ({item}:any):JSX.Element|null => {
-    if(item.IsArchived){
-      return (
+  const selectUnselectedTag = (tag: string) => {
+    const isSelected = selectedTags.some(obj => obj === tag);
+    if(isSelected){
+      removeSelectedTags([tag]);
+    }
+    else{
+      putSelectedTags([tag]);
+    }
+  }
+
+  const getTagButton = ({item}:any):JSX.Element|null=> {
+    return(
+      <PressText 
+        style={[s.tagButtonContainer, selectedTags.some(tag => tag === item)? s.tagButtonContainerSelected:undefined]}
+        textStyle={[s.text, selectedTags.some(tag => tag === item)? s.textSelected:undefined]}
+        onPress={() => selectUnselectedTag(item)}
+        text={item}></PressText>
+    )
+  }
+
+  const getArchivedButton = ({item}:any):JSX.Element|null => {
+    const tagShow: boolean = item.Tags.length > 0 ?
+      selectedTags.some((tag) => item.Tags.includes(tag)) 
+      : 
+      true;
+    if(!tagShow) return null;
+
+    return (
       <View style={[s.objectiveContainer]} onTouchEnd={() => {}}>
         <PressImage
           onPress={()=>unarchiveObjective(item)}
@@ -58,39 +88,67 @@ const ArchivedView = (props: ArchivedViewProps) => {
           onPress={() => onSelectCurrentObj(item.ObjectiveId)}
           text={item.Title}>
         </PressText>
-      </View>)
-    }
-
-    return null;
+      </View>
+    )
   }
 
   const s = StyleSheet.create({
     container: {
-      position: 'absolute',
-      top: 0,
-      bottom: 0,
-      right: 0,
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
       width: '100%',
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      zIndex: 10,
     },
-    containerSide: {
-      position: 'absolute',
-      top: 0,
-      bottom: 0,
-      right: 0,
-      width: '80%',
-      margin: 10,
-      borderRadius: 5,
-      borderColor: t.boxborderfade,
+    containerList: {
+      flex: 1,
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      width: '100%',
+    },
+    tagsList:{
+      width: '30%',
+      height: '100%',
+      paddingVertical: 15,
+      paddingHorizontal: 15,
+      borderColor: colorPalette.beigedark,
+      borderRightWidth: 1,
+      borderStyle: 'solid',
+    },
+    objectivesList:{
+      width: '70%',
+      height: '100%',
+      paddingVertical: 15,
+      paddingHorizontal: 15,
+    },
+    tagButtonContainer:{
+      display:'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      minHeight: 40,
+      marginBottom: 5,
+
+      borderTopLeftRadius: 5,
+      borderBottomLeftRadius: 5,
+      borderTopRightRadius: 50,
+      borderBottomRightRadius: 50,
+      borderColor: colorPalette.beigedark,
       borderWidth: 1,
       borderStyle: 'solid',
-      backgroundColor: t.backgroundcolor,
-      zIndex: 10,
+      
     },
-    list:{
-      flex: 1,
-      width: '100%',
+    tagButtonContainerSelected:{
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderColor: 'beige',
+      backgroundColor: colorPalette.beige,
+    },
+    text: {
+      fontSize: 16,
+      color: 'beige',
+    },
+    textSelected:{
+      color: colorPalette.beigedarker,
     },
     imageContainer:{
       width: 50,
@@ -109,56 +167,48 @@ const ArchivedView = (props: ArchivedViewProps) => {
       alignItems: 'center',
       marginBottom: 5,
     },
-    objectiveButtonContainerFake:{
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-
-      minHeight: 50,
-      marginHorizontal: 10,
-      marginVertical: 5,
-
-      borderWidth: 1,
-      borderStyle: 'dashed',
-      borderColor: 'gray',
-      borderRadius: 5,
-    },
-    objectiveButtonContainerFakeText:{
-      color: 'beige',
-    },
     objectiveButtonContainer:{
       flex: 1,
       justifyContent: 'center',
       alignItems: 'center',
       minHeight: 50,
-    },
-    objectiveButtonContainerSelected:{
-      borderStyle: 'dashed',
-      borderColor: 'red',
-    },
-    objectiveButtonContainerEnding:{
+
+      borderColor: colorPalette.beigedark,
+      borderWidth: 1,
       borderStyle: 'solid',
-      borderColor: 'red',
-    },
-    text: {
-      fontSize: 16,
     },
   });
 
   return (
-    <>
-      <View style={s.container} onTouchEnd={() => {writeCurrentView(Views.IndividualView);}}>
+    <View style={s.container}>
+      <View style={s.containerList}>
+        <FlatList 
+          style={s.tagsList}
+          data={archivedTags}
+          keyExtractor={(tag:string) => 'tag'+tag}
+          renderItem={getTagButton}
+          ListFooterComponent={<View style={{ height: 300 }} />}/>
+        <FlatList 
+          style={s.objectivesList}
+          data={archivedObjectives}
+          keyExtractor={(obj: Objective)=> obj.ObjectiveId}
+          renderItem={getArchivedButton}
+           ListFooterComponent={<View style={{ height: 300 }}/>}/>
       </View>
-      <View
-        style={s.containerSide}
-        pointerEvents="box-none">
-        <FlatList
-          data={objectives}
-          keyExtractor={keyExtractor}
-          renderItem={getArchivedList}
-        />
-      </View>
-    </>
+    </View>
+    // <>
+    //   <View style={s.container} onTouchEnd={() => {writeCurrentView(Views.IndividualView);}}>
+    //   </View>
+    //   <View
+    //     style={s.containerSide}
+    //     pointerEvents="box-none">
+    //     <FlatList
+    //       data={archivedObjectives}
+    //       keyExtractor={(obj: Objective) => obj.ObjectiveId}
+    //       renderItem={getArchivedList}
+    //     />
+    //   </View>
+    // </>
   );
 };
 

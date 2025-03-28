@@ -8,6 +8,19 @@ import { useEffect, useState } from "react";
 import PressText from "../../../PressText/PressText";
 import React from "react";
 
+export const New = () => {
+  return(
+    {
+      Title: '',
+      Purpose: '',
+      IsChecked: false,
+      Quantity: 0,
+      Unit: '',
+      Components: [],
+    }
+  )
+}
+
 export interface MedicineViewProps extends ItemViewProps {
   medicine: Medicine,
 }
@@ -191,7 +204,7 @@ const MedicineView = (props: MedicineViewProps) => {
         {!isEditingPos && isEditingMedicine?
           <View style={s.inputsContainer}>
             <View style={s.inputsLeft}>
-              <PressImage pressStyle={s.imageContainer} style={[s.image, s.imageDelete]} source={require('../../../../public/images/trash.png')} onPress={onDelete}></PressImage>
+              <PressImage pressStyle={s.imageContainer} style={[s.image, s.imageDelete]} confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete}></PressImage>
             </View>
             <View style={s.inputsCenter}>
               <TextInput 

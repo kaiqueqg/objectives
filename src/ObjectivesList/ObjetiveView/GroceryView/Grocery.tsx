@@ -7,6 +7,18 @@ import PressImage from "../../../PressImage/PressImage";
 import { useEffect, useState } from "react";
 import PressText from "../../../PressText/PressText";
 
+export const New = () => {
+  return(
+    {
+      Title: '',
+      IsChecked: false,
+      Quantity: 1,
+      Unit: '',
+      GoodPrice: '',
+    }
+  )
+}
+
 export interface GroceryViewProps extends ItemViewProps {
   grocery: Grocery,
 }
@@ -131,18 +143,6 @@ const GroceryView = (props: GroceryViewProps) => {
       width: 24,
       tintColor: o.itemtextfade,
     },
-    imageMoveContainer:{
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginLeft: 5,
-      width: 40,
-      height: 40,
-    },
-    imageMove:{
-      height: 20,
-      width: 20,
-      tintColor: o.icontintcolor,
-    },
     groceryDoneImage:{
       tintColor: o.doneicontint,
     },
@@ -189,7 +189,7 @@ const GroceryView = (props: GroceryViewProps) => {
         {!isEditingPos && isEditingGrocery?
           <View style={s.inputsContainer}>
             <View style={s.inputsLeft}>
-              <PressImage pressStyle={s.imageContainer} style={[s.image, s.imageDelete]} source={require('../../../../public/images/trash.png')} onPress={onDelete}></PressImage>
+              <PressImage pressStyle={s.imageContainer} style={[s.image, s.imageDelete]} confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete}></PressImage>
             </View>
             <View style={s.inputsCenter}>
               <TextInput 

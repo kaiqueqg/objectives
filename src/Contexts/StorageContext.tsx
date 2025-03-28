@@ -1,7 +1,7 @@
 // LogContext.tsx
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Item, LogLevel, LoginModel, Objective, Step, StorageInfo, User, UserPrefs, Views } from "../Types";
+import { Item, ItemImage, LogLevel, LoginModel, Objective, Step, StorageInfo, User, UserPrefs, Views } from "../Types";
 import { useLogContext } from './LogContext';
 
 interface StorageProviderProps {
@@ -26,6 +26,8 @@ export const StorageProvider: React.FC<StorageProviderProps> = ({ children }) =>
     Items: string,
     DeletedObjectives: string,
     DeletedItems: string,
+    Images: string,
+    NewImages: string,
   };
   
   const keys: StorageKeys = {
@@ -41,8 +43,10 @@ export const StorageProvider: React.FC<StorageProviderProps> = ({ children }) =>
     Items: '@Objectives:Items',
     DeletedObjectives: '@Objectives:DeletedObjectives',
     DeletedItems: '@Objectives:DeletedItems',
+    Images: '@Objectives:Images',
+    NewImages: '@Objectives:NewImages',
   };
-  
+
   const storage = {
   
     randomId(size?: number){
@@ -418,6 +422,69 @@ export const StorageProvider: React.FC<StorageProviderProps> = ({ children }) =>
         await AsyncStorage.removeItem(keys.DeletedItems);
       } catch (err) {
         log.err('deleteDeletedItems', '[catch] deleting deleted items.');
+      }
+    },
+    //^-------------------- IMAGES
+    async readImages(): Promise<ItemImage[]|null> {
+      try {
+        const data = await AsyncStorage.getItem(keys.Images);
+        if(data !== null){
+          try {
+            const parsedData: ItemImage[] = JSON.parse(data);
+            return parsedData;
+          } catch (err) {
+            log.err('readImages', 'Error parsing json');
+          }
+        }
+        return null;
+      } catch (err) {
+        log.err('readImages', '[catch] reading images.');
+        return null;
+      }
+    },
+    async writeImages(images: ItemImage[]): Promise<void> {
+      try {
+        await AsyncStorage.setItem(keys.Images, JSON.stringify(images));
+      } catch (err) {
+        log.err('writeImages', '[catch] writing images.');
+      }
+    },
+    async deleteImages(): Promise<void> {
+      try {
+        await AsyncStorage.removeItem(keys.Images);
+      } catch (err) {
+        log.err('deleteImages', '[catch] deleting images.');
+      }
+    },
+    async readNewImages(): Promise<ItemImage[]|null> {
+      try {
+        const data = await AsyncStorage.getItem(keys.NewImages);
+        if(data !== null){
+          try {
+            const parsedData: ItemImage[] = JSON.parse(data);
+            return parsedData;
+          } catch (err) {
+            log.err('readNewImages', 'Error parsing json');
+          }
+        }
+        return null;
+      } catch (err) {
+        log.err('readNewImages', '[catch] reading new images.');
+        return null;
+      }
+    },
+    async writeNewImages(images: ItemImage[]): Promise<void> {
+      try {
+        await AsyncStorage.setItem(keys.NewImages, JSON.stringify(images));
+      } catch (err) {
+        log.err('writeNewImages', '[catch] writing new images.');
+      }
+    },
+    async deleteNewImages(): Promise<void> {
+      try {
+        await AsyncStorage.removeItem(keys.NewImages);
+      } catch (err) {
+        log.err('deleteNewImages', '[catch] deleting new images.');
       }
     },
   }

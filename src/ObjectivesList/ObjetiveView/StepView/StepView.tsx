@@ -9,6 +9,16 @@ import { useEffect, useState } from "react";
 import { useLogContext } from "../../../Contexts/LogContext";
 import React from "react";
 
+export const New = () => {
+  return(
+    {
+      Title: '',
+      Done: false,
+      Importance: StepImportance.None,
+    }
+  )
+}
+
 export interface StepViewProps extends ItemViewProps {
   step: Step,
 }
@@ -50,13 +60,19 @@ const StepView = (props: StepViewProps) => {
         newImportance = StepImportance.High;
         break;
       case StepImportance.High:
-        newImportance = StepImportance.None;
+        newImportance = StepImportance.Question;
         break;
-      case StepImportance.None:
-        newImportance = StepImportance.Low;
+      case StepImportance.Question:
+        newImportance = StepImportance.Waiting;
+        break;
+      case StepImportance.Waiting:
+        newImportance = StepImportance.InProgress;
+        break;
+      case StepImportance.InProgress:
+        newImportance = StepImportance.None;
         break;
       default:
-        newImportance = StepImportance.None;
+        newImportance = StepImportance.Low;
         break;
     }
     const newStep = {...step, Importance: newImportance};
@@ -65,24 +81,36 @@ const StepView = (props: StepViewProps) => {
   }
 
   const getImportanceImage = () => {
-    if(step.Importance === StepImportance.Low){
-      return <PressImage pressStyle={s.imageContainer} style={s.imageNoTint} source={require('../../../../public/images/low.png')} onPress={() => {if(!isEditingPos)onChangeImportanceIcon();}}></PressImage>;
-    }
-    else if(step.Importance === StepImportance.Medium){
-      return <PressImage pressStyle={s.imageContainer} style={s.imageNoTint} source={require('../../../../public/images/med.png')} onPress={() => {if(!isEditingPos)onChangeImportanceIcon();}}></PressImage>;
-    }
-    else if(step.Importance === StepImportance.High){
-      return <PressImage pressStyle={s.imageContainer} style={s.imageNoTint} source={require('../../../../public/images/high.png')} onPress={() => {if(!isEditingPos)onChangeImportanceIcon();}}></PressImage>;
-    }
-    else{
-      if(isEditingTitle){
+    if(!step.Done) {
+      if(step.Importance === StepImportance.Low){
+        return <PressImage pressStyle={s.imageContainer} style={s.imageNoTint} source={require('../../../../public/images/low.png')} onPress={() => {if(!isEditingPos)onChangeImportanceIcon();}}></PressImage>;
+      }
+      else if(step.Importance === StepImportance.Medium){
+        return <PressImage pressStyle={s.imageContainer} style={s.imageNoTint} source={require('../../../../public/images/med.png')} onPress={() => {if(!isEditingPos)onChangeImportanceIcon();}}></PressImage>;
+      }
+      else if(step.Importance === StepImportance.High){
+        return <PressImage pressStyle={s.imageContainer} style={s.imageNoTint} source={require('../../../../public/images/high.png')} onPress={() => {if(!isEditingPos)onChangeImportanceIcon();}}></PressImage>;
+      }
+      else if(step.Importance === StepImportance.Question){
         return <PressImage pressStyle={s.imageContainer} style={s.imageNoTint} source={require('../../../../public/images/questionmark.png')} onPress={() => {if(!isEditingPos)onChangeImportanceIcon();}}></PressImage>;
-
+      }
+      else if(step.Importance === StepImportance.Waiting){
+        return <PressImage pressStyle={s.imageContainer} style={s.imageNoTint} source={require('../../../../public/images/wait.png')} onPress={() => {if(!isEditingPos)onChangeImportanceIcon();}}></PressImage>;
+      }
+      else if(step.Importance === StepImportance.InProgress){
+        return <PressImage pressStyle={s.imageContainer} style={s.imageNoTint} source={require('../../../../public/images/inprogress.png')} onPress={() => {if(!isEditingPos)onChangeImportanceIcon();}}></PressImage>;
       }
       else{
-        return <></>;
+        if(isEditingTitle){
+          return <PressImage pressStyle={s.imageContainer} style={s.imageNoTint} source={require('../../../../public/images/cancel.png')} onPress={() => {if(!isEditingPos)onChangeImportanceIcon();}}></PressImage>;
+  
+        }
+        else{
+          return <></>;
+        }
       }
     }
+    else{ return <></> }
   }
 
   const s = StyleSheet.create({
@@ -169,6 +197,7 @@ const StepView = (props: StepViewProps) => {
           objTheme={o}
           text={step.Title}
           onDelete={onDelete}
+          confirmDelete={true}
           onDone={onChangeTitle}
           uneditable={isEditingPos}
           onEditingState={onEditingTitle}

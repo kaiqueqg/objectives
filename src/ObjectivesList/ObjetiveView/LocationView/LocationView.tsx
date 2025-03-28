@@ -1,6 +1,6 @@
-import { View, StyleSheet, Text, Vibration, Alert, Linking } from "react-native";
-import { Item, Location, MessageType, ItemViewProps } from "../../../Types";
-import { ObjectivePallete, ThemePalette } from "../../../Colors";
+import { View, StyleSheet, Vibration, Alert, Linking, TextInput, Text,  } from "react-native";
+import { Item, Location, MessageType, ItemViewProps, ItemType } from "../../../Types";
+import { colorPalette, dark, ObjectivePallete, ThemePalette } from "../../../Colors";
 import { FontPalette } from "../../../../fonts/Font";
 import { useUserContext } from "../../../Contexts/UserContext";
 import PressImage from "../../../PressImage/PressImage";
@@ -9,52 +9,35 @@ import { useEffect, useState } from "react";
 import * as ExpoLocation from 'expo-location';
 import { getDistance } from "geolib";
 import { useLogContext } from "../../../Contexts/LogContext";
+import PressText from "../../../PressText/PressText";
+import Loading from "../../../Loading/Loading";
+
+export const New = () => {
+  return(
+    {
+      Title: '',
+      Url: '',
+    }
+  )
+}
 
 export interface LocationViewProps extends ItemViewProps {
   location: Location,
 }
 const LocationView = (props: LocationViewProps) => {
-  const { popMessage } = useLogContext();
+  const { popMessage, log } = useLogContext();
   const { theme: t, fontTheme: f, putItem, userPrefs } = useUserContext();
   const { objTheme: o, isEditingPos, onDeleteItem, loadMyItems, location } = props;
 
-  const [isEditingTitle, setIsEditingTitle] = useState<boolean>(false);
+  const [isEditingLocation, setIsEditingLocation] = useState<boolean>(false);
+  const [tempLocation, setTempLocation] = useState<Location>(props.location);
   const [currentLocation, setCurrentLocation] = useState<any>();
   const [currentDistance, setCurrentDistance] = useState<string>('');
+  const [isGettingCurrentLocation, setIsGettingCurrentLocation] = useState<boolean>(false);
 
   useEffect(() => {
     fillCurrentLocation();
-  }, [location]);
-
-  const fillCurrentLocation = async () => {
-    if(userPrefs.allowLocation){
-      const isEnabled = await ExpoLocation.hasServicesEnabledAsync();
-      if(!isEnabled){
-        setCurrentLocation(undefined);
-        return;
-      }
-
-      (async () => {
-        try {
-          let { status } = await ExpoLocation.requestForegroundPermissionsAsync();
-          if (status !== 'granted') return;
-    
-          let currentLocation = await ExpoLocation.getCurrentPositionAsync({});
-          setCurrentLocation(currentLocation);
-          
-          if(location.Url !== ''){
-            const pointA = {latitude: currentLocation.coords.latitude, longitude: currentLocation.coords.longitude};
-            const pointB = extractCoordinates(location.Url);
-    
-            if(pointA && pointB) {
-              const distanceInMeters = getDistance(pointA, pointB);
-              setCurrentDistance(distanceInMeters > 1000? ((distanceInMeters/1000).toFixed(2) + 'km'):distanceInMeters.toString()+'m');
-            }
-          }
-        } catch (err) {}
-      })();
-    }
-  }
+  }, [location, tempLocation]);
 
   const extractCoordinates = (url: string) => {
     // Regex for the query pattern (e.g., ?query=-23.6068458,-46.6110111)
@@ -82,21 +65,18 @@ const LocationView = (props: LocationViewProps) => {
     await onDeleteItem(location);
   };
 
-  const onChangeTitle = async (newText: string) => {
-    const newLocation = {...location, Title: newText.trim()};
+  const onDoneLocation = async () => {
+    let newLocation = {...tempLocation};
+    newLocation.Title = newLocation.Title.trim();
+    newLocation.Url = newLocation.Url?.trim();
     await putItem(newLocation);
+    setIsEditingLocation(false);
     loadMyItems();
-  };
+  }
 
-  const onEditingTitle = (editingState: boolean) => {
-    setIsEditingTitle(editingState);
-  };
-
-  const onChangeUrl = async (newUrl: string) => {
-    const newLocation = {...location, Url: newUrl.trim()};
-    await putItem(newLocation);
-    loadMyItems();
-  };
+  const onCancelLocation = async () => {
+    setIsEditingLocation(false);
+  }
 
   const openUrl = async () => {
     if(location.Url && location.Url.trim()) {
@@ -107,6 +87,7 @@ const LocationView = (props: LocationViewProps) => {
   };
 
   const addCurrentLocation = async () => {
+    setIsGettingCurrentLocation(true);
     if(!userPrefs.allowLocation){
       popMessage('Allow location on preferences...', MessageType.Error, 5);
       return;
@@ -115,23 +96,54 @@ const LocationView = (props: LocationViewProps) => {
     const isEnabled = await ExpoLocation.hasServicesEnabledAsync();
     if(!isEnabled){
       popMessage('Turn on phone GPS to get current location!', MessageType.Alert, 3);
-        setCurrentLocation(undefined);
-        return;
-    }
-
-    fillCurrentLocation();
-    
-    if(!currentLocation){
-      popMessage('Current location wasn\'t available.', MessageType.Error, 5);
+      setCurrentLocation(undefined);
       return;
     }
 
-    let newUrl = 'https://www.google.com/maps/search/?api=1&query=' + currentLocation.coords.latitude+','+currentLocation.coords.longitude;
-    const newLocation = {...location, Url: newUrl.trim()};
-    await putItem(newLocation);
-    loadMyItems();
+    const location = await fillCurrentLocation();
 
-    onEditingTitle(true);
+    if(!currentLocation){
+      popMessage('Current location wasn\'t available.', MessageType.Error, 5);
+    }
+    else{
+      let newUrl = 'https://www.google.com/maps/search/?api=1&query=' + currentLocation.coords.latitude+','+currentLocation.coords.longitude;
+      setTempLocation({...tempLocation, Url: newUrl});
+    }
+
+    setIsGettingCurrentLocation(false);
+  }
+
+  
+  const fillCurrentLocation = async (): Promise<ExpoLocation.LocationObject|null> => {
+    if(userPrefs.allowLocation){
+      const isEnabled = await ExpoLocation.hasServicesEnabledAsync();
+      if(!isEnabled){
+        setCurrentLocation(undefined);
+        return null;
+      }
+
+      try {
+        let { status } = await ExpoLocation.requestForegroundPermissionsAsync();
+        if (status !== 'granted') return null;
+  
+        let currentLocation = await ExpoLocation.getCurrentPositionAsync({});
+        setCurrentLocation(currentLocation);
+        
+        if(location.Url !== ''){
+          const pointA = {latitude: currentLocation.coords.latitude, longitude: currentLocation.coords.longitude};
+          const pointB = extractCoordinates(location.Url);
+  
+          if(pointA && pointB) {
+            const distanceInMeters = getDistance(pointA, pointB);
+            setCurrentDistance(distanceInMeters > 1000? ((distanceInMeters/1000).toFixed(2) + 'km'):distanceInMeters.toString()+'m');
+          }
+        }
+
+        return currentLocation;
+      } catch (err) {}
+    }
+
+    return null;
   }
 
   const s = StyleSheet.create({
@@ -142,43 +154,58 @@ const LocationView = (props: LocationViewProps) => {
       alignItems: 'center',
       marginBottom: 4,
       marginHorizontal: 6,
+      minHeight: 40,
     },
-    titleUrlContainer:{
+    locationContainer:{
       flex: 1,
+      flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      backgroundColor: (location.Title.trim() !== '' && location.Url.trim() !== '')?o.objbk:o.itembk,
+      backgroundColor: location.Url.trim() !== ''? o.objbk:o.itembk,
       
       borderRadius: 5,
-      borderColor: (location.Title.trim() !== '' && location.Url.trim() !== '')?o.objbk:o.bordercolor,
+      borderColor: location.Url.trim() !== ''?colorPalette.transparent:o.bordercolor,
       borderWidth: 1,
       borderStyle: 'solid',
     },
-    titleUrlContainerSelected:{
+    locationContainerSelected:{
       borderStyle: 'dashed',
       borderColor: o.bordercolorselected,
     },
-    titleUrlContainerEnding:{
+    locationContainerEnding:{
       borderStyle: 'solid',
       borderColor: o.bordercolorselected,
     },
-    titleLine:{
-      flexDirection: 'row',
-      alignItems: 'center',
-    },
-    urlLine:{
-      flexDirection: 'row',
-      alignItems: 'center',
+    titleContainer:{
+      flex: 1,
+      justifyContent: 'center',
+
+      minHeight: 40,
+      margin: 2,
+      paddingLeft: 10,
+      color: 'beige',
     },
     title:{
       color: o.itemtext,
     },
     titleFade:{
-      color: 'grey',
+      color: o.itemtextfade,
     },
-    inputStyle: {
+    displayContainer:{
+      flex: 1,
+      flexDirection: 'row',
+    },
+    displayLeft:{
+      flex: 1,
+    },
+    displayRight:{
+      flexDirection: 'row',
+    },
+    displayDistance:{
+      verticalAlign: 'middle',
+      height: '100%',
       color: o.itemtext,
-      borderColor: o.itemtext,
+      paddingHorizontal: 5,
     },
     imageContainer:{
       height: 40,
@@ -187,93 +214,119 @@ const LocationView = (props: LocationViewProps) => {
       justifyContent: 'center',
     },
     image:{
-      height: 20,
-      width: 20,
+      height: 24,
+      width: 24,
       tintColor: o.icontintcolor,
     },
-    imageFade:{
-      height: 20,
-      width: 20,
-      tintColor: o.icontintcolorfade,
-    },
-    locationDoneImage:{
+    imageDone:{
       tintColor: o.doneicontint,
     },
-    urlText:{
-      color: o.itemtext,
-      margin: 10,
+    imageCancel:{
+      tintColor: o.cancelicontint,
     },
-    distanceText:{
-      color: o.itemtext,
+    imageDelete:{
+      tintColor: o.trashicontint,
     },
-    imageMoveContainer:{
+    imageFade:{
+      height: 24,
+      width: 24,
+      tintColor: o.itemtextfade,
+    },
+    groceryDoneImage:{
+      tintColor: o.doneicontint,
+    },
+    inputsContainer:{
+      flex: 1,
+      flexDirection: 'row',
+    },
+    inputsLeft:{
+      width: '15%',
       justifyContent: 'center',
       alignItems: 'center',
-      marginLeft: 5,
-      width: 40,
-      height: 40,
     },
-    imageMove:{
-      height: 20,
-      width: 20,
-      tintColor: o.icontintcolor,
+    inputsCenter:{
+      width: '70%',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    inputsRight:{
+      width: '15%',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    inputStyle:{
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+
+      width: '100%',
+      minHeight: 40,
+      margin: 2,
+      paddingLeft: 10,
+      color: o.itemtext,
+
+      borderRadius: 5,
+      borderColor: o.bordercolor,
+      borderBottomWidth: 1,
+      borderStyle: 'solid',
     },
   });
 
-  return (
+  return(
     <View style={s.container}>
-    <View style={[s.titleUrlContainer, props.isSelected && s.titleUrlContainerSelected, props.isSelected && props.isEndingPos && s.titleUrlContainerEnding]}>
-      {/*Title View*/}
-      <View style={s.titleLine}>
-        <PressInput 
-          objTheme={o}
-          text={location.Title}
-          onDelete={onDelete}
-          onDone={onChangeTitle}
-          onEditingState={onEditingTitle}
-          uneditable={isEditingPos}
-          
-          textStyle={s.title}
-          defaultStyle={s.title}
-          inputStyle={s.inputStyle}
-          doneImageStyle={s.locationDoneImage}
-          trashImageStyle={{tintColor: o.trashicontint}}
-          >
-        </PressInput>
-        {currentDistance && 
-          <Text style={s.distanceText}>
-            {currentDistance}
-          </Text>
+      <View style={[s.locationContainer, props.isSelected && s.locationContainerSelected, props.isSelected && props.isEndingPos && s.locationContainerEnding]}>
+        {!isEditingPos && isEditingLocation?
+          <View style={s.inputsContainer}>
+            <View style={s.inputsLeft}>
+              <PressImage pressStyle={s.imageContainer} style={[s.image, s.imageDelete]} confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete}></PressImage>
+            </View>
+            <View style={s.inputsCenter}>
+              <TextInput 
+                style={s.inputStyle}
+                placeholderTextColor={o.itemtextfade}
+                placeholder="Title"
+                defaultValue={location.Title}
+                onChangeText={(value: string)=>{setTempLocation({...tempLocation, Title: value})}}></TextInput>
+              <TextInput 
+                style={s.inputStyle}
+                placeholderTextColor={o.itemtextfade}
+                placeholder="Url"
+                defaultValue={location.Url}
+                onChangeText={(value: string)=>{setTempLocation({...tempLocation, Url: value})}}></TextInput>
+            </View>
+            <View style={s.inputsRight}>
+              {isGettingCurrentLocation?
+                <Loading theme={dark}></Loading>
+                :
+                <PressImage pressStyle={s.imageContainer} style={[s.image]} source={require('../../../../public/images/location-filled.png')} onPress={addCurrentLocation}></PressImage>
+              }
+              <PressImage pressStyle={s.imageContainer} style={[s.image, s.imageDone]} source={require('../../../../public/images/done.png')} onPress={onDoneLocation}></PressImage>
+              <PressImage pressStyle={s.imageContainer} style={[s.image, s.imageCancel]} source={require('../../../../public/images/cancel.png')} onPress={onCancelLocation}></PressImage>
+            </View>
+          </View>
+          :
+          <View style={s.displayContainer}>
+            <View style={s.displayLeft}>
+              <PressText
+              style={s.titleContainer}
+              textStyle={s.title}
+              text={location.Title}
+              onPress={()=>{if(!isEditingPos)setIsEditingLocation(!isEditingLocation)}}
+              ></PressText>
+            </View>
+            <View style={s.displayRight}>
+              <Text style={s.displayDistance}>{currentDistance}</Text>
+              {location.Url.trim() === ''?
+                <PressImage pressStyle={s.imageContainer} style={s.image} source={require('../../../../public/images/location.png')}></PressImage>
+                :
+                <PressImage pressStyle={s.imageContainer} style={s.image} source={require('../../../../public/images/location-filled.png')} onPress={() => {if(!isEditingPos)openUrl();}}></PressImage>
+              }
+            </View>
+          </View>
         }
-        {!isEditingTitle && 
-          (location.Url.trim() === ''?
-            <PressImage pressStyle={s.imageContainer} style={s.image} source={require('../../../../public/images/location.png')} onPress={() => {if(!isEditingPos)addCurrentLocation();}}></PressImage>
-            :
-            <PressImage pressStyle={s.imageContainer} style={s.image} source={require('../../../../public/images/location-filled.png')} onPress={() => {if(!isEditingPos)openUrl();}}></PressImage>
-          )
-        }
-      </View>
-      {/*URL View*/}
-      {isEditingTitle && 
-        <View style={s.urlLine}>
-          <Text style={s.urlText}>URL: </Text>
-          <PressInput 
-            objTheme={o}
-            text={location.Url}
-            onDone={onChangeUrl}
-            uneditable={isEditingPos}
-            
-            textStyle={s.urlLine}
-            inputStyle={s.inputStyle}
-            doneImageStyle={s.locationDoneImage}
-            trashImageStyle={{tintColor: o.trashicontint}}
-            >
-          </PressInput>
-        </View>
-      }
       </View>
     </View>
-  );
+  )
 };
 
 export default LocationView;

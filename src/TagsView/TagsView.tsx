@@ -16,7 +16,7 @@ const TagsView = (props: TagsViewProps) => {
     fontTheme: f,
     objectives,
     user, userPrefs,
-    selectedTags, writeSelectedTags, putSelectedTags, removeSelectedTags,
+    selectedTags, putSelectedTags, removeSelectedTags,
   } = useUserContext();
 
   const [tags, setTags] = useState<string[]>([]);

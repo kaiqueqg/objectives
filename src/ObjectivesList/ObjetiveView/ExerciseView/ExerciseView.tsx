@@ -8,6 +8,21 @@ import { useEffect, useState } from "react";
 import PressText from "../../../PressText/PressText";
 import React from "react";
 
+export const New = () => {
+  return(
+    {
+      Title: '',
+      IsDone: false,
+      Reps: 1,
+      Series: 1,
+      MaxWeight: '',
+      Description: '',
+      Weekdays: [],
+      LastDone: '',
+    }
+  )
+}
+
 export interface ExerciseViewProps extends ItemViewProps {
   exercise: Exercise,
 }
@@ -285,7 +300,7 @@ const ExerciseView = (props: ExerciseViewProps) => {
         {!isEditingPos && isEditingExercise?
           <View style={s.inputsContainer}>
             <View style={s.inputsLeft}>
-              <PressImage pressStyle={s.imageContainer} style={[s.image, s.imageDelete]} source={require('../../../../public/images/trash.png')} onPress={onDelete}></PressImage>
+              <PressImage pressStyle={s.imageContainer} style={[s.image, s.imageDelete]} confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete}></PressImage>
             </View>
             <View style={s.inputsCenter}>
               <TextInput 

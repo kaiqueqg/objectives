@@ -23,27 +23,31 @@ const ObjsListView = (props: ObjsListViewProps) => {
     putObjectives,
     writeCurrentObjectiveId,
     writeCurrentView,
+    availableTags, selectedTags, putSelectedTags, removeSelectedTags, writeSelectedTags,
     user, userPrefs,
-    selectedTags,
   } = useUserContext();
 
   const [isEditingPos, setIsEditingPos] = useState<boolean>(false);
   const [isEndingPos, setIsEndingPos] = useState<boolean>(false);
   const [objectivesSelected, setObjectivesSelected] = useState<Objective[]>([]);
+  const [onlySelectOneTag, setOnlySelectOneTag] = useState<boolean>(true);
+  const [unarchivedObjectives, setUnarchivedObjectives] = useState<Objective[]>([]);
+  const [unarchivedTags, setUnarchivedTags] = useState<string[]>([]);
 
   useEffect(()=>{
-  }, [objectives, selectedTags]);
+    const unarchivedObjectives = objectives.filter(obj => !obj.IsArchived);
+    setUnarchivedObjectives(unarchivedObjectives);
+
+    let unarchivedTags = unarchivedObjectives.map(obj => obj.Tags).flat();
+    const uniqueUnarchivedTags = Array.from(new Set([...unarchivedTags]));
+    setUnarchivedTags(uniqueUnarchivedTags);
+  }, [objectives, availableTags, selectedTags]);
 
   const onSelectCurrentObj = async (id: string) => {
     if(!isEditingPos) {
       await writeCurrentObjectiveId(id);
       await writeCurrentView(Views.IndividualView);
     }
-  }
-
-  const onSelectAllObjs = async () => {
-    await deleteCurrentObjectiveId();
-    await writeCurrentView(Views.AllView);
   }
 
   const onAddNewObjective = async () => {
@@ -74,8 +78,12 @@ const ObjsListView = (props: ObjsListViewProps) => {
     onSelectCurrentObj(newObj.ObjectiveId);
   }
 
-  const keyExtractor = (obj: Objective) => {
+  const objKeyExtractor = (obj: Objective) => {
     return obj.ObjectiveId;
+  }
+
+  const tagKeyExtractor = (tag: string) => {
+    return tag;
   }
 
   const startEditingPos = () => {
@@ -142,25 +150,49 @@ const ObjsListView = (props: ObjsListViewProps) => {
     return obj;
   }
 
-  const getListView = () => {
-    let rtn
-    // let filteredObjectives = objectives.filter((o=>o.Tags.includes()))
+  const selectUnselectedTag = (tag: string) => {
+    if(onlySelectOneTag) {
+      writeSelectedTags([tag]);
+    }
+    else{
+      const isSelected = selectedTags.some(obj => obj === tag);
+      if(isSelected){
+        removeSelectedTags([tag]);
+      }
+      else{
+        putSelectedTags([tag]);
+      }
+    }
+  }
+
+  const selectAllTags = () => {
+    writeSelectedTags(availableTags);
+  }
+
+  const unselectAllTags = () => {
+    writeSelectedTags([]);
+  }
+
+  const onlySelectedThisTag = (tag: string) => {
+    writeSelectedTags([tag]);
+  }
+
+  const getTagButton = ({item}:any):JSX.Element|null=> {
     return(
-      <FlatList
-          //containerStyle={s.list}
-          data={objectives}
-          keyExtractor={keyExtractor}
-          renderItem={getObjectiveButton}
-        />
+      <PressText 
+        style={[s.tagButtonContainer, selectedTags.some(tag => tag === item)? s.tagButtonContainerSelected:undefined]}
+        textStyle={[s.text, selectedTags.some(tag => tag === item)? s.textSelected:undefined]}
+        onPress={() => selectUnselectedTag(item)}
+        text={item}></PressText>
     )
   }
-  
+
   const getObjectiveButton = ({item}:any):JSX.Element|null => {
     const tagShow: boolean = item.Tags.length > 0 
     ? selectedTags.some((tag) => item.Tags.includes(tag)) 
     : true;
 
-  // Skip rendering if the tag doesn't match
+    // Skip rendering if the tag doesn't match
     if(!tagShow) return null;
     if(item.IsArchived) return null;
 
@@ -168,20 +200,20 @@ const ObjsListView = (props: ObjsListViewProps) => {
     return (
       item.Pos === 0 && isEndingPos?
       <>
-      <View style={[s.objectiveButtonContainerFake]} onTouchEnd={()=>endChangingPos(getFakeMinusOneObjective())}>
-        <Text style={s.objectiveButtonContainerFakeText}>click to be the first</Text>
-      </View>
-      <View 
-        style={[s.objectiveContainer]} 
-        onTouchEnd={() => {isEditingPos && (isEndingPos? endChangingPos(item) : addRemoveToSelected(item))}}>
-        <PressText 
-          style={[s.objectiveButtonContainer, 
-            isEditingPos && isSelected? s.objectiveButtonContainerSelected:undefined,
-            isEndingPos && isSelected? s.objectiveButtonContainerEnding:undefined]}
-          textStyle={[s.text, {color: getObjTheme(item.Theme).objtitle}]}
-          onPress={() => onSelectCurrentObj(item.ObjectiveId)}
-          text={item.Title + item.Pos}></PressText>
-      </View>
+        <View style={[s.objectiveButtonContainerFake]} onTouchEnd={()=>endChangingPos(getFakeMinusOneObjective())}>
+          <Text style={s.objectiveButtonContainerFakeText}>click to be the first</Text>
+        </View>
+        <View 
+          style={[s.objectiveContainer]} 
+          onTouchEnd={() => {isEditingPos && (isEndingPos? endChangingPos(item) : addRemoveToSelected(item))}}>
+          <PressText 
+            style={[s.objectiveButtonContainer, 
+              isEditingPos && isSelected? s.objectiveButtonContainerSelected:undefined,
+              isEndingPos && isSelected? s.objectiveButtonContainerEnding:undefined]}
+            textStyle={[s.text, {color: getObjTheme(item.Theme).objtitle}]}
+            onPress={() => onSelectCurrentObj(item.ObjectiveId)}
+            text={item.Title + item.Pos}></PressText>
+        </View>
       </>
       :
       <View 
@@ -201,35 +233,67 @@ const ObjsListView = (props: ObjsListViewProps) => {
 
   const s = StyleSheet.create({
     container: {
-      position: 'absolute',
-      top: 0,
-      bottom: 0,
-      right: 0,
-      width: '100%',
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      zIndex: 10,
-    },
-    containerSide: {
-      position: 'absolute',
-      top: 0,
-      bottom: 0,
-      right: 0,
-      width: '80%',
-      margin: 10,
-      borderRadius: 5,
-      borderColor: t.boxborderfade,
-      borderWidth: 1,
-      borderStyle: 'solid',
-      backgroundColor: t.backgroundcolor,
-      zIndex: 10,
-    },
-    list:{
       flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
       width: '100%',
+    },
+    containerList: {
+      flex: 1,
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      width: '100%',
+    },
+    containerListTag:{
+      flexDirection: "column",
+      width: '40%',
+    },
+    containerListObjs:{
+      flexDirection: "column",
+      width: '60%',
+
+      borderColor: colorPalette.beigedark,
+      borderLeftWidth: 1,
+      borderStyle: 'solid',
+    },
+    containerListTitle:{
+      fontWeight: 'bold',
+      color: colorPalette.bluedarker,
+      backgroundColor: colorPalette.beige,
+      justifyContent: 'center',
+      alignItems: 'center',
+      textAlign: 'center',
+      padding: 10,
+    },
+    tagsList:{
+      paddingVertical: 15,
+      paddingHorizontal: 15,
+    },
+    objectivesList:{
+      paddingVertical: 15,
+      paddingHorizontal: 15,
     },
     bottomMenu: {
       width: '100%',
       height: 50,
+      flexDirection: 'row',
+      justifyContent: 'flex-end',
+      alignItems: 'center',
+      paddingHorizontal: 5,
+
+      borderColor: colorPalette.beigedark,
+      borderWidth: 1,
+      borderStyle: 'solid',
+    },
+    leftBottomMenu:{
+      flex: 1,
+      flexDirection: 'row',
+      justifyContent: 'flex-start',
+      alignItems: 'center',
+    },
+    rightBottomMenu:{
+      flex: 1,
       flexDirection: 'row',
       justifyContent: 'flex-end',
       alignItems: 'center',
@@ -256,6 +320,10 @@ const ObjsListView = (props: ObjsListViewProps) => {
       justifyContent: 'center',
       alignItems: 'center',
     },
+    imageNoTint:{
+      width: 20,
+      height: 20,
+    },
     image:{
       width: 20,
       height: 20,
@@ -266,9 +334,13 @@ const ObjsListView = (props: ObjsListViewProps) => {
       height: 20,
       tintColor: colorPalette.beige,
     },
+    imageFade:{
+      tintColor: colorPalette.beigedark,
+    },
     objectiveContainer:{
       flexDirection: 'row',
       marginBottom: 5,
+      width: '100%',
     },
     objectiveButtonContainerFake:{
       flex: 1,
@@ -292,6 +364,11 @@ const ObjsListView = (props: ObjsListViewProps) => {
       justifyContent: 'center',
       alignItems: 'center',
       minHeight: 50,
+
+      borderColor: colorPalette.beigedark,
+      borderWidth: 1,
+      borderRadius: 5,
+      borderStyle: 'solid',
     },
     objectiveButtonContainerSelected:{
       borderWidth: 1,
@@ -302,8 +379,31 @@ const ObjsListView = (props: ObjsListViewProps) => {
       borderStyle: 'solid',
       borderColor: 'red',
     },
+    tagButtonContainer:{
+      display:'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      minHeight: 40,
+      marginBottom: 5,
+
+      borderRadius: 30,
+      borderColor: colorPalette.beigedark,
+      borderWidth: 1,
+      borderStyle: 'solid',
+      
+    },
+    tagButtonContainerSelected:{
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderColor: colorPalette.beige,
+      backgroundColor: colorPalette.bluedarkerdarker
+    },
     text: {
       fontSize: 16,
+      color: colorPalette.beigelightdark,
+    },
+    textSelected:{
+      color: colorPalette.beige,
     },
     textDark:{
       color: 'black',
@@ -324,40 +424,39 @@ const ObjsListView = (props: ObjsListViewProps) => {
   });
 
   return (
-    <>
-      <View style={s.container} onTouchEnd={() => {writeCurrentView(Views.IndividualView);}}>
+    <View style={s.container}>
+      <View style={s.containerList}>
+        <View style={s.containerListTag}>
+          <Text style={s.containerListTitle}>TAGS</Text>
+          <FlatList style={s.tagsList} data={unarchivedTags} keyExtractor={tagKeyExtractor} renderItem={getTagButton} ListFooterComponent={<View style={{ height: 300 }} />}/>
+        </View>
+        <View style={s.containerListObjs}>
+          <Text style={s.containerListTitle}>OBJECTIVES</Text>
+          <FlatList style={s.objectivesList} data={unarchivedObjectives} keyExtractor={objKeyExtractor} renderItem={getObjectiveButton}  ListFooterComponent={<View style={{ height: 300 }}/>}/>
+        </View>
       </View>
-      <View
-        style={s.containerSide}
-        pointerEvents="box-none">
-        {getListView()}
-        <View style={s.bottomMenu}>
-          {!isEditingPos && <PressImage
+      <View style={s.bottomMenu}>
+        <View style={s.leftBottomMenu}>
+          <PressImage style={[s.imageNoTint, isEditingPos&&s.imageFade]} pressStyle={s.imageContainer} onPress={selectAllTags} disable={isEditingPos} source={require('../../public/images/tag.png')}></PressImage>
+          <PressImage style={[s.imageNoTint, isEditingPos&&s.imageFade]} pressStyle={s.imageContainer} onPress={unselectAllTags} disable={isEditingPos} source={require('../../public/images/tagnone.png')}></PressImage>
+          <PressImage style={[s.imageNoTint, isEditingPos&&s.imageFade, !onlySelectOneTag&&s.imageFade]} pressStyle={s.imageContainer} onPress={()=>{setOnlySelectOneTag(!onlySelectOneTag)}} disable={isEditingPos} source={require('../../public/images/tagsingle.png')}></PressImage>
+        </View>
+        <View style={s.rightBottomMenu}>
+          {!isEditingPos && 
+          <PressImage
             onPress={startEditingPos}
             style={s.imageUpDown}
+            disableStyle={s.imageFade}
             pressStyle={s.imageContainer}
-            source={require('../../public/images/updown.png')}
+            disable={objectives.length < 2}
+            source={require('../../public/images/change.png')}
           ></PressImage>}
           {isEditingPos && <PressImage pressStyle={s.imageContainer} style={s.image} onPress={cancelEditingPos} source={require('../../public/images/cancel.png')}></PressImage>}
           {isEditingPos && <PressImage pressStyle={s.imageContainer} hide={objectivesSelected.length=== 0 || objectivesSelected.length === objectives.length || isEndingPos} style={s.image} onPress={onEditingPosTo} source={require('../../public/images/arrow-right-filled.png')}></PressImage>}
-          {isEditingPos ? (
-            <PressImage
-              onPress={() => {}}
-              style={[s.image, { tintColor: t.icontintfade }]}
-              pressStyle={s.imageContainer}
-              source={require('../../public/images/add.png')}
-            ></PressImage>
-          ) : (
-            <PressImage
-              onPress={onAddNewObjective}
-              style={s.image}
-              pressStyle={s.imageContainer}
-              source={require('../../public/images/add.png')}
-            ></PressImage>
-          )}
+          <PressImage style={[s.image, isEditingPos&&s.imageFade]} pressStyle={s.imageContainer} onPress={onAddNewObjective} disable={isEditingPos} source={require('../../public/images/plus-one.png')}></PressImage>
         </View>
       </View>
-    </>
+    </View>
   );
 };
 

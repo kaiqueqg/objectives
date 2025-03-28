@@ -8,12 +8,13 @@ import { colorPalette, dark } from "../Colors";
 import { Pattern, UserPrefs } from "../Types";
 import { useLogContext } from "../Contexts/LogContext";
 import { useRequestContext } from "../Contexts/RequestContext";
+import PressImage from "../PressImage/PressImage";
 
 export interface UserViewProps {
   syncObjectivesList: () => void,
 }
 const UserView = (props: UserViewProps) => {
-  const { identityApi } = useRequestContext();
+  const { identityApi, objectivesApi } = useRequestContext();
   const { log, popMessage } = useLogContext();
   const { theme: t, fontTheme: f, user, writeUser, writeJwtToken, userPrefs, writeUserPrefs, clearAllData } = useUserContext();
 
@@ -21,6 +22,8 @@ const UserView = (props: UserViewProps) => {
   const [password, setPassword] = useState<string>('');
   const [isLogging, setIsLogging] = useState<boolean>(false);
   const [isLogged, setIsLogged] = useState<boolean>(false);
+  const [isShowingPassword, setIsShowingPassword] = useState<boolean>(false);
+  const [isBackingUpData, setIsBackingUpData] = useState<boolean>(false);
 
   const parseJwt = (token :string) => {
     var base64Url = token.split('.')[1];
@@ -85,10 +88,23 @@ const UserView = (props: UserViewProps) => {
     writeUserPrefs(newPrefs);
   }
 
+  const backupData = async () => {
+    setIsBackingUpData(true);
+    const data = await objectivesApi.backupData(() => {});
+
+    if(data){
+      log.popMessage("Backup Ok");
+    }
+    else{
+      log.popMessage("Backup Fail");
+    }
+
+    setIsBackingUpData(false);
+  }
+
   const s = StyleSheet.create({
     container: {
       flex: 1,
-      width: '100%',
       backgroundColor: t.backgroundcolor,
       justifyContent: 'center',
       alignItems: 'center',
@@ -176,10 +192,10 @@ const UserView = (props: UserViewProps) => {
       fontSize: f.userViewLogoutButton.fontSize,
     },
     loginContainer:{
-      flex: 1, 
+      flex: 1,
+      width: '100%',
       justifyContent: 'center',
       alignItems: 'center',
-      width: '100%',
     },
     objectivesText: {
       fontSize: 25,
@@ -188,15 +204,49 @@ const UserView = (props: UserViewProps) => {
       color: 'beige',
       textAlign: 'center',
     },
-    emailpassword: {
+    emailInput:{
+      height: 50,
       width: '90%',
-      margin: 10,
       color: colorPalette.beige,
       borderStyle: 'solid',
       borderWidth: 1,
       borderColor: 'grey',
       borderRadius: 2,
-      padding: 10
+      padding: 10,
+      marginVertical: 10,
+    },
+    passwordContainer:{
+      height: 50,
+      width: '90%',
+      justifyContent: 'center',
+      alignItems: 'center',
+      flexDirection: 'row',
+    },
+    passwordInput: {
+      height: 50,
+      flex: 1,
+      color: colorPalette.beige,
+      borderStyle: 'solid',
+      borderWidth: 1,
+      borderColor: 'grey',
+      borderRadius: 2,
+      padding: 10,
+    },
+    imageContainer:{
+      width: 50,
+      height: 50,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    image:{
+      width: 20,
+      height: 20,
+      tintColor: colorPalette.beige,
+    },
+    backupImage:{
+      width: 30,
+      height: 30,
+      tintColor: colorPalette.beige,
     },
     loginButton: {
       borderRadius: 2,
@@ -223,6 +273,11 @@ const UserView = (props: UserViewProps) => {
         (user?
           <>
             <View style={s.contentContainer}>
+              {isBackingUpData?
+                <Loading style={s.backupImage} theme={dark}></Loading>
+                :
+                <PressImage onPress={backupData} style={s.backupImage} pressStyle={s.imageContainer} source={require('../../public/images/backup.png')}></PressImage>
+              }
               <Text style={s.header}>USER:</Text>
               <View style={s.userContainer}>
                 <View style={s.userView}>
@@ -273,8 +328,13 @@ const UserView = (props: UserViewProps) => {
             <Text style={s.objectivesText}>
               Objectives
             </Text>
-            <TextInput autoCapitalize="none" placeholder="Email" placeholderTextColor={'grey'} style={s.emailpassword} onChangeText={onChangeEmail}></TextInput>
-            <TextInput autoCapitalize="none" placeholder="Password" placeholderTextColor={'grey'} style={s.emailpassword} secureTextEntry={true} onChangeText={onChangePassword}></TextInput>
+
+            <TextInput autoCapitalize="none" placeholder="Email" placeholderTextColor={'grey'} style={s.emailInput} onChangeText={onChangeEmail}></TextInput>
+            <View style={s.passwordContainer}>
+              <TextInput autoCapitalize="none" placeholder="Password" placeholderTextColor={'grey'} style={s.passwordInput} secureTextEntry={!isShowingPassword} onChangeText={onChangePassword}></TextInput>
+              {!isShowingPassword && <PressImage onPress={()=>{setIsShowingPassword(!isShowingPassword)}} style={s.image} pressStyle={s.imageContainer} source={require('../../public/images/show.png')}></PressImage>}
+              {isShowingPassword && <PressImage onPress={()=>{setIsShowingPassword(!isShowingPassword)}} style={s.image} pressStyle={s.imageContainer} source={require('../../public/images/hide.png')}></PressImage>}
+            </View>
             {isLogging?
             <Loading theme={dark} style={{width: 30, height: 30, margin: 10}}></Loading>
             :
