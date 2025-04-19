@@ -1,6 +1,5 @@
-import { View, StyleSheet, Text, Vibration, Alert } from "react-native";
-import { ThemePalette, colorPalette, dark } from "../Colors";
-import { FontPalette } from "../../fonts/Font";
+import { View, StyleSheet, Vibration } from "react-native";
+import { ThemePalette, colorPalette, dark, globalStyle as gs } from "../Colors";
 import { Pattern, Views } from "../Types";
 import PressImage from "../PressImage/PressImage";
 import { useUserContext } from "../Contexts/UserContext";
@@ -18,31 +17,26 @@ export interface BottomBarProps {
 }
 
 const BottomBar = (props: BottomBarProps) => {
-  const { user, userPrefs, theme: t, fontTheme: f, currentView, writeCurrentView, availableTags, selectedTags } = useUserContext();
+  const { user, userPrefs, theme: t, fontTheme: f, currentView, writeCurrentView, availableTags, selectedTags, currentObjectiveId } = useUserContext();
   const { log } = useLogContext();
   const { isSyncing, doneSync, failedSync, isLambdaCold, syncObjectivesList } = props;
 
   useEffect(() => {}, [availableTags, selectedTags]);
 
-  const onChangeToList = (view: Views) => {
-    if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
-    writeCurrentView(view);
-  }
-
-  const changeToArchivedView = () => {
-    onChangeToList(currentView === Views.IndividualView || currentView === Views.ListView || currentView === Views.TagsView? Views.ArchivedView:Views.IndividualView);
-  }
-
-  const changeToTagView = () => {
-    onChangeToList(currentView === Views.IndividualView || currentView === Views.ListView || currentView === Views.ArchivedView? Views.TagsView:Views.IndividualView);
-  }
-
-  const changeToListView = () => {
-    onChangeToList(currentView === Views.IndividualView || currentView === Views.TagsView || currentView === Views.ArchivedView? Views.ListView:Views.IndividualView);
-  }
-
-  const getTagImageText = () => {
-    return selectedTags.length+'/'+availableTags.length;
+  const changeToView = (newView: Views) => {
+    if(currentView === newView){
+      if(currentObjectiveId === ''){
+        if(userPrefs.vibrate) Vibration.vibrate(Pattern.Wrong);
+      }
+      else{
+        if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
+        writeCurrentView(Views.IndividualView);
+      }
+    }
+    else{
+      if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
+      writeCurrentView(newView);
+    }
   }
 
   const s = StyleSheet.create({
@@ -50,12 +44,10 @@ const BottomBar = (props: BottomBarProps) => {
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      height: 55,
       backgroundColor: t.backgroundcolordarker,
       borderStyle: 'solid',
       
-      borderTopWidth: 1,
-      borderBottomWidth: 1,
+      borderWidth: 1,
       borderColor: t.boxborderfade,
     },
     leftContainer: {
@@ -69,25 +61,22 @@ const BottomBar = (props: BottomBarProps) => {
       justifyContent: 'flex-end',
       width: '50%',
     },
-    imageContainer:{
-    },
     imageContainerSelected:{
       backgroundColor: colorPalette.bluedarkerdarker,
     },
     bottomImage: {
-      margin: 10,
-      width: 30,
-      height: 30,
+      ...gs.baseBiggerImage,
       tintColor: colorPalette.beigedark,
-    },
-    bottomImageSelected:{
-      tintColor: colorPalette.bluelight,
     },
     doneImage:{
       tintColor: t.doneicontint,
     },
     cancelImage:{
       tintColor: t.cancelicontint,
+    },
+    bottomImageSelected:{
+      ...gs.baseBiggerImage,
+      tintColor: colorPalette.bluelight,
     },
     textImage:{
       position: 'absolute',
@@ -102,22 +91,26 @@ const BottomBar = (props: BottomBarProps) => {
   return (
     <View style={s.container}>
       <View style={s.leftContainer}>
-        <PressImage pressStyle={currentView === Views.UserView? s.imageContainerSelected:s.imageContainer} style={[s.bottomImage, s.cancelImage, user&&s.doneImage]} onPress={() => onChangeToList(Views.UserView)} source={require('../../public/images/user.png')}></PressImage>
-        {/* <PressImage pressStyle={currentView === Views.DevView? s.imageContainerSelected:s.imageContainer} style={[s.bottomImage, {tintColor:'beige'}]} onPress={() => onChangeToList(Views.DevView)} source={require('../../public/images/dev.png')}></PressImage> */}
+        {/* <PressImage pressStyle={gs.baseImageContainer} style={[s.bottomImage, (currentView === Views.UserView)?s.bottomImageSelected:(s.cancelImage, user&&s.doneImage) ]} onPress={() => changeToView(Views.UserView)} source={require('../../public/images/user.png')}></PressImage> */}
+        {user?
+          <PressImage pressStyle={gs.baseImageContainer} style={[s.bottomImage, currentView === Views.UserView&&s.bottomImageSelected]} onPress={() => changeToView(Views.UserView)} source={require('../../public/images/user.png')}></PressImage>
+          :
+          <PressImage pressStyle={gs.baseImageContainer} style={[s.bottomImage, currentView === Views.UserView&&s.bottomImageSelected]} onPress={() => changeToView(Views.UserView)} source={require('../../public/images/stop.png')}></PressImage>
+        }
+        {/* {user && user.Role !== 'Guest' && <PressImage pressStyle={currentView === Views.DevView? s.bottomImageSelected:gs.baseImageContainer} style={[s.bottomImage, {tintColor:'beige'}]} onPress={() => onChangeToList(Views.DevView)} source={require('../../public/images/dev.png')}></PressImage>} */}
         {user?
           <>
-            {!isSyncing && isLambdaCold && <PressImage pressStyle={s.imageContainer} style={[s.bottomImage, s.bottomImageSelected]} onPress={()=>{}} source={require('../../public/images/cold.png')}></PressImage>}
-            {isSyncing &&  !isLambdaCold && <Loading style={s.loadingImage} theme={dark}></Loading>}
-            {!isSyncing && !isLambdaCold && <PressImage pressStyle={s.imageContainer} style={[s.bottomImage, failedSync&&s.cancelImage, doneSync&&s.doneImage]} onPress={syncObjectivesList} source={require('../../public/images/sync.png')}></PressImage>}
+            {!isSyncing && isLambdaCold && <PressImage pressStyle={gs.baseImageContainer} style={[s.bottomImage, s.bottomImageSelected]} onPress={()=>{}} source={require('../../public/images/cold.png')}></PressImage>}
+            {isSyncing &&  !isLambdaCold && <Loading theme={dark}></Loading>}
+            {!isSyncing && !isLambdaCold && <PressImage pressStyle={gs.baseImageContainer} style={[s.bottomImage, failedSync&&s.cancelImage, doneSync&&s.doneImage]} onPress={syncObjectivesList} source={require('../../public/images/sync.png')}></PressImage>}
           </>
           :
-          <PressImage pressStyle={s.imageContainer} style={s.bottomImage} onPress={syncObjectivesList} source={require('../../public/images/cloud-offline.png')}></PressImage>
+          <PressImage pressStyle={gs.baseImageContainer} style={s.bottomImage} onPress={syncObjectivesList} source={require('../../public/images/cloud-offline.png')}></PressImage>
         }
       </View>
       <View style={s.rightContainer}>
-        <PressImage pressStyle={[s.imageContainer, currentView === Views.ArchivedView && s.imageContainerSelected]} style={[s.bottomImage, currentView === Views.ArchivedView && s.bottomImageSelected]} textStyle={s.textImage} onPress={changeToArchivedView} source={require('../../public/images/archived.png')} ></PressImage>
-        {/* <PressImage pressStyle={currentView === Views.TagsView? s.imageContainerSelected:s.imageContainer} style={[s.bottomImage]} textStyle={s.textImage} onPress={changeToTagView} source={require('../../public/images/tag.png')} text={getTagImageText()}></PressImage> */}
-        <PressImage pressStyle={[s.imageContainer, currentView === Views.ListView && s.imageContainerSelected]} style={[s.bottomImage, currentView === Views.ListView&&s.bottomImageSelected]} onPress={changeToListView} source={require('../../public/images/list.png')}></PressImage>
+        <PressImage pressStyle={gs.baseImageContainer} style={[s.bottomImage, currentView === Views.ArchivedView && s.bottomImageSelected]} textStyle={s.textImage} onPress={()=>{changeToView(Views.ArchivedView)}} source={require('../../public/images/archived.png')} ></PressImage>
+        <PressImage pressStyle={gs.baseImageContainer} style={[s.bottomImage, currentView === Views.ListView&&s.bottomImageSelected]} onPress={()=>{changeToView(Views.ListView)}} source={require('../../public/images/list.png')}></PressImage>
       </View>
     </View>
   );

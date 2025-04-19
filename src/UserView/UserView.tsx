@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import PressInput from "../PressInput/PressInput";
 import PressText from "../PressText/PressText";
 import Loading from "../Loading/Loading";
-import { colorPalette, dark } from "../Colors";
+import { colorPalette, dark, globalStyle as gs } from "../Colors";
 import { Pattern, UserPrefs } from "../Types";
 import { useLogContext } from "../Contexts/LogContext";
 import { useRequestContext } from "../Contexts/RequestContext";
@@ -232,20 +232,12 @@ const UserView = (props: UserViewProps) => {
       borderRadius: 2,
       padding: 10,
     },
-    imageContainer:{
-      width: 50,
-      height: 50,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
     image:{
-      width: 20,
-      height: 20,
+      ...gs.baseImage,
       tintColor: colorPalette.beige,
     },
     backupImage:{
-      width: 30,
-      height: 30,
+      ...gs.baseImage,
       tintColor: colorPalette.beige,
     },
     loginButton: {
@@ -268,15 +260,15 @@ const UserView = (props: UserViewProps) => {
   return (
     <View style={s.container}>
       {isLogging?
-        <Loading theme={dark} style={{width: 30, height: 30, margin: 10}}></Loading>
+        <Loading theme={dark}></Loading>
         :
         (user?
           <>
             <View style={s.contentContainer}>
               {isBackingUpData?
-                <Loading style={s.backupImage} theme={dark}></Loading>
+                <Loading theme={dark}></Loading>
                 :
-                <PressImage onPress={backupData} style={s.backupImage} pressStyle={s.imageContainer} source={require('../../public/images/backup.png')}></PressImage>
+                <PressImage onPress={backupData} style={s.backupImage} pressStyle={gs.baseImageContainer} source={require('../../public/images/backup.png')}></PressImage>
               }
               <Text style={s.header}>USER:</Text>
               <View style={s.userContainer}>
@@ -332,11 +324,11 @@ const UserView = (props: UserViewProps) => {
             <TextInput autoCapitalize="none" placeholder="Email" placeholderTextColor={'grey'} style={s.emailInput} onChangeText={onChangeEmail}></TextInput>
             <View style={s.passwordContainer}>
               <TextInput autoCapitalize="none" placeholder="Password" placeholderTextColor={'grey'} style={s.passwordInput} secureTextEntry={!isShowingPassword} onChangeText={onChangePassword}></TextInput>
-              {!isShowingPassword && <PressImage onPress={()=>{setIsShowingPassword(!isShowingPassword)}} style={s.image} pressStyle={s.imageContainer} source={require('../../public/images/show.png')}></PressImage>}
-              {isShowingPassword && <PressImage onPress={()=>{setIsShowingPassword(!isShowingPassword)}} style={s.image} pressStyle={s.imageContainer} source={require('../../public/images/hide.png')}></PressImage>}
+              {!isShowingPassword && <PressImage onPress={()=>{setIsShowingPassword(!isShowingPassword)}} style={s.image} pressStyle={gs.baseImageContainer} source={require('../../public/images/show.png')}></PressImage>}
+              {isShowingPassword && <PressImage onPress={()=>{setIsShowingPassword(!isShowingPassword)}} style={s.image} pressStyle={gs.baseImageContainer} source={require('../../public/images/hide.png')}></PressImage>}
             </View>
             {isLogging?
-            <Loading theme={dark} style={{width: 30, height: 30, margin: 10}}></Loading>
+            <Loading theme={dark}></Loading>
             :
             <Pressable style={s.loginButton} onPress={login}>
               <Text style={s.loginButtonText}>Login</Text>

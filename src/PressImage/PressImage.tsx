@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Image, ImageStyle, ImageSourcePropType, View, Vibration, StyleSheet, Text } from "react-native";
+import { Image, ImageStyle, ImageSourcePropType, View, Vibration, StyleSheet, Text, Pressable } from "react-native";
 import { useUserContext } from "../Contexts/UserContext";
 import { Pattern } from "../Types";
 import { useLogContext } from "../Contexts/LogContext";
@@ -12,6 +12,9 @@ export interface PressImageProps{
   onPress?: () => void,
   onPressIn?: () => void,
   onPressOut?: () => void,
+  onLongPress?: () => void,
+  delayLongPress?: number,
+
   hide?: boolean,
   disable?: boolean,
   disableStyle?: any,
@@ -25,18 +28,29 @@ const PressImage = (props: PressImageProps) => {
   const {userPrefs} = useUserContext();
   const {log} = useLogContext();
   const [isConfirming, setIsConfirming] = useState<boolean>(false);
+  const [wasLongPressed, setWasLongPressed] = useState(false);
 
   const [text, setText] = useState<number>(2000);
 
+  const handleLongPress = () => {
+    setWasLongPressed(true);
+    props.onLongPress?.();
+  };
+
   const getHideImage = () => {
     return(
-      <View style={props.pressStyle} onTouchEnd={()=>{}} onTouchStart={()=>{}}>
+      <Pressable style={props.pressStyle} onPressOut={()=>{}} onPressIn={()=>{}} onLongPress={()=>{}}>
         <View style={(props.confirmStyle?props.confirmStyle:props.style) as ImageStyle}></View>
-      </View>
+      </Pressable>
     )
   }
 
   const normalTouchEnd = () => {
+    if (wasLongPressed) {
+      setWasLongPressed(false);
+      return;
+    }
+
     if(!props.disable) {
       if(props.confirm){
         if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
@@ -55,21 +69,23 @@ const PressImage = (props: PressImageProps) => {
 
   const getNormalImage = () => {
     return(
-      <View 
+      <Pressable 
         style={[props.pressStyle]}
-        onTouchEnd={normalTouchEnd}
-        onTouchStart={props.onPressIn}>
+        onPressOut={normalTouchEnd}
+        onPressIn={props.onPressIn}
+        onLongPress={handleLongPress}
+        delayLongPress={props.delayLongPress??800}>
         <Image style={[props.style as ImageStyle, props.disable? (props.disableStyle as ImageStyle):{}]} source={props.source}></Image>
         {props.text && <Text style={props.textStyle?? s.text}>{props.text}</Text>}
-      </View>
+      </Pressable>
     )
   }
 
   const getConfirmingImage = () => {
     return(
-      <View style={props.pressStyle} onTouchEnd={props.onPress} onTouchStart={props.onPressIn}>
+      <Pressable style={props.pressStyle} onPressOut={props.onPress} onPressIn={props.onPressIn} onLongPress={handleLongPress} delayLongPress={props.delayLongPress??800}>
         <Image style={[(props.confirmStyle??props.style as ImageStyle)]} source={require('../../public/images/done.png')}></Image>
-      </View>
+      </Pressable>
     )
   }
 

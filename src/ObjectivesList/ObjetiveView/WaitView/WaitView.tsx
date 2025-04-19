@@ -1,5 +1,5 @@
 import { View, StyleSheet, Text } from "react-native";
-import { ObjectivePallete, ThemePalette, colorPalette, getObjTheme } from "../../../Colors";
+import { globalStyle as gs } from "../../../Colors";
 import { FontPalette } from "../../../../fonts/Font";
 import { useUserContext } from "../../../Contexts/UserContext";
 import { ItemViewProps, Wait } from "../../../Types";
@@ -75,32 +75,12 @@ const WaitView = (props: WaitViewProps) => {
       color: o.itemtext,
       borderColor: o.itemtext,
     },
-    imageContainer:{
-      height: 40,
-      width: 40,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
     image:{
-      height: 20,
-      width: 20,
+      ...gs.baseSmallImage,
       tintColor: o.icontintcolor,
     },
-    imageFade: {
-      height: 20,
-      width: 20,
-      tintColor: o.icontintcolorfade
-    },
-    imageMoveContainer:{
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginLeft: 5,
-      width: 40,
-      height: 40,
-    },
     imageMove:{
-      height: 20,
-      width: 20,
+      ...gs.baseImage,
       tintColor: o.icontintcolor,
     },
   });
@@ -123,7 +103,7 @@ const WaitView = (props: WaitViewProps) => {
         </PressInput>
         {!isEditingTitle && <PressImage 
           style={s.image}
-          pressStyle={s.imageContainer}
+          pressStyle={gs.baseImageContainer}
           onPress={()=>{}}
           source={require('../../../../public/images/wait.png')}
         ></PressImage>}

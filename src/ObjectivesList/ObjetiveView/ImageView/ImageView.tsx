@@ -1,6 +1,6 @@
 import { View, StyleSheet, Text, Vibration, TextInput, Platform, Image as ReactImage, TouchableOpacity, Button } from "react-native";
 import { Item, Image, Pattern, ItemViewProps, ItemNew, StoredImage } from "../../../Types";
-import { colorPalette, ObjectivePallete, ThemePalette } from "../../../Colors";
+import { dark, globalStyle as gs } from "../../../Colors";
 import { FontPalette } from "../../../../fonts/Font";
 import { useUserContext } from "../../../Contexts/UserContext";
 import PressImage from "../../../PressImage/PressImage";
@@ -12,6 +12,8 @@ import * as ImagePicker from 'expo-image-picker';
 
 import * as FileSystem from 'expo-file-system';
 import { useStorageContext } from "../../../Contexts/StorageContext";
+import { useRequestContext } from "../../../Contexts/RequestContext";
+import Loading from "../../../Loading/Loading";
 
 export const New = () => {
   return(
@@ -39,6 +41,7 @@ const ImageView = (props: ImageViewProps) => {
   const { userPrefs, theme: t, fontTheme: f, putItem } = useUserContext();
   const { log }= useLogContext();
   const { storage } = useStorageContext();
+  const { objectivesApi } = useRequestContext();
   const { objTheme: o, isEditingPos, onDeleteItem, loadMyItems, image } = props;
 
   const [isEditingImage, setIsEditingImage] = useState<boolean>(false);
@@ -56,7 +59,7 @@ const ImageView = (props: ImageViewProps) => {
   useEffect(()=>{
     // a();
     if(image.Name) loadImage();
-  },[]);
+  },[storedImage]);
 
   const a = async () => {
     const fileDir:string|null = FileSystem.documentDirectory;
@@ -68,21 +71,32 @@ const ImageView = (props: ImageViewProps) => {
   }
 
   const loadImage = async () => {
-    const fileDir:string|null = FileSystem.documentDirectory;
-
-    if(fileDir){
-      const list:string[] = await FileSystem.readDirectoryAsync(fileDir);
-      const storedFile:string|undefined = list.find(file=>file.endsWith(image.Name));
-
-      if(storedFile){
-        setStoredImage({ItemId: image.ItemId, ImageFile: storedFile});
+    const fileDir: string | null = FileSystem.documentDirectory;
+  
+    if (fileDir) {
+      const list: string[] = await FileSystem.readDirectoryAsync(fileDir);
+      const storedFile: string | undefined = list.find(file => file === image.Name);
+  
+      if (storedFile) {
+        const fullPath = fileDir + storedFile;
+        setStoredImage({ ItemId: image.ItemId, ImageFile: fullPath });
+      } else {
+        setIsDownloadingImage(true);
+        const data = await objectivesApi.getImage({ itemId: image.ItemId, fileName: image.Name });
+        if (data) setStoredImage({ ItemId: image.ItemId, ImageFile: data });
+        setIsDownloadingImage(false);
       }
     }
-  }
+  };
 
   useEffect(()=>{
-    const v = viewWidth/(image.Width/image.Height);
-    setViewHeight(v);
+    if(storedImage?.ImageFile){ReactImage.getSize(storedImage.ImageFile, (width, height) => {
+      setViewHeight(viewWidth/(width/height));
+    }, (error:any) => {
+      console.error('Failed to get image size:', error);
+    });}
+
+    
   },[viewWidth, image])  
   
   useEffect(()=>{
@@ -253,15 +267,8 @@ const ImageView = (props: ImageViewProps) => {
       alignItems: 'center',
       width: '100%',
     },
-    imageContainer:{
-      height: 40,
-      width: 40,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
     image:{
-      height: 24,
-      width: 24,
+      ...gs.baseImage,
       tintColor: o.icontintcolor,
     },
     imageDone:{
@@ -274,8 +281,7 @@ const ImageView = (props: ImageViewProps) => {
       tintColor: o.trashicontint,
     },
     imageFade:{
-      height: 24,
-      width: 24,
+      ...gs.baseImage,
       tintColor: o.itemtextfade,
     },
     imageMoveContainer:{
@@ -286,8 +292,7 @@ const ImageView = (props: ImageViewProps) => {
       height: 40,
     },
     imageMove:{
-      height: 20,
-      width: 20,
+      ...gs.baseImage,
       tintColor: o.icontintcolor,
     },
     imageDoneImage:{
@@ -342,7 +347,7 @@ const ImageView = (props: ImageViewProps) => {
         {!isEditingPos && isEditingImage?
           <View style={s.inputsContainer}>
             <View style={s.inputsLeft}>
-              <PressImage pressStyle={s.imageContainer} style={[s.image, s.imageDelete]} confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete}></PressImage>
+              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageDelete]} confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete}></PressImage>
             </View>
             <View style={s.inputsCenter}>
               <TextInput 
@@ -352,16 +357,16 @@ const ImageView = (props: ImageViewProps) => {
                 defaultValue={getTitle()}
                 onChangeText={(value: string)=>{setTempImage({...tempImage, Title: value})}}></TextInput>
               <View style={s.buttonsRowContainer}>
-                <PressImage pressStyle={s.imageContainer} style={[s.image]} source={require('../../../../public/images/camera.png')} onPress={openCamera}></PressImage>
-                <PressImage pressStyle={s.imageContainer} style={[s.image]} source={require('../../../../public/images/image.png')} onPress={pickImage}></PressImage>
-                <PressImage pressStyle={s.imageContainer} style={[s.image]} confirm={true} source={require('../../../../public/images/trash.png')} onPress={deleteImage}></PressImage>
+                <PressImage pressStyle={gs.baseImageContainer} style={[s.image]} source={require('../../../../public/images/camera.png')} onPress={openCamera}></PressImage>
+                <PressImage pressStyle={gs.baseImageContainer} style={[s.image]} source={require('../../../../public/images/image.png')} onPress={pickImage}></PressImage>
+                <PressImage pressStyle={gs.baseImageContainer} style={[s.image]} confirm={true} source={require('../../../../public/images/trash.png')} onPress={deleteImage}></PressImage>
               </View>
               {storedImage && <ReactImage style={s.imagePreview} source={{ uri: storedImage.ImageFile }}></ReactImage>}
-              {!storedImage && image.Name && <PressImage pressStyle={s.imageContainer} style={[s.image]} source={require('../../../../public/images/download.png')} onPress={downloadImage}></PressImage>}
+              {!storedImage && image.Name && <PressImage pressStyle={gs.baseImageContainer} style={[s.image]} source={require('../../../../public/images/download.png')} onPress={downloadImage}></PressImage>}
             </View>
             <View style={s.inputsRight}>
-              <PressImage pressStyle={s.imageContainer} style={[s.image, s.imageDone]} source={require('../../../../public/images/done.png')} onPress={onDoneImage}></PressImage>
-              <PressImage pressStyle={s.imageContainer} style={[s.image, s.imageCancel]} source={require('../../../../public/images/cancel.png')} onPress={onCancelImage}></PressImage>
+              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageDone]} source={require('../../../../public/images/done.png')} onPress={onDoneImage}></PressImage>
+              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageCancel]} source={require('../../../../public/images/cancel.png')} onPress={onCancelImage}></PressImage>
             </View>
           </View>
           :
@@ -369,17 +374,23 @@ const ImageView = (props: ImageViewProps) => {
             <View style={s.displayContainerRow}>
               <PressText
                 style={s.titleContainer}
-                textStyle={image.IsDisplaying? s.titleFade:s.title}
+                textStyle={s.title}
                 text={getTitle()}
                 onPress={()=>{if(!isEditingPos)setIsEditingImage(!isEditingImage)}}
-                ></PressText>
+              ></PressText>
               {storedImage?
-                <PressImage pressStyle={[s.imageContainer]} style={[s.image, image.IsDisplaying? null:s.imageFade]} source={require('../../../../public/images/image-filled.png')} onPress={() => {if(!isEditingPos)onChangeIsDisplaying();}}></PressImage>
+                <PressImage pressStyle={[gs.baseImageContainer]} style={[s.image, image.IsDisplaying? null:s.imageFade]} source={require('../../../../public/images/image-filled.png')} onPress={() => {if(!isEditingPos)onChangeIsDisplaying();}}></PressImage>
                 :
-                <PressImage pressStyle={[s.imageContainer]} style={[s.image, image.IsDisplaying? null:s.imageFade]} source={require('../../../../public/images/image.png')} onPress={() => {if(!isEditingPos)onChangeIsDisplaying();}}></PressImage>
+                <PressImage pressStyle={[gs.baseImageContainer]} style={[s.image, image.IsDisplaying? null:s.imageFade]} source={require('../../../../public/images/image.png')} onPress={() => {if(!isEditingPos)onChangeIsDisplaying();}}></PressImage>
               }
             </View>
-          {storedImage && <ReactImage style={s.imagePreview} source={{ uri: storedImage.ImageFile }}></ReactImage>}
+          {image.IsDisplaying && storedImage?.ImageFile && 
+          (isDownloadingImage?
+            <Loading theme={dark}></Loading>
+            :
+            <ReactImage source={{ uri: storedImage.ImageFile }} style={s.imagePreview} />
+          )
+          }
         <View/>
       </View>
       }

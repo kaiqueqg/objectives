@@ -1,6 +1,6 @@
 import { View, StyleSheet, Text, Vibration, TextInput } from "react-native";
 import { Grocery, Item, Pattern, ItemViewProps } from "../../../Types";
-import { colorPalette, ObjectivePallete, ThemePalette } from "../../../Colors";
+import { colorPalette, globalStyle as gs } from "../../../Colors";
 import { FontPalette } from "../../../../fonts/Font";
 import { useUserContext } from "../../../Contexts/UserContext";
 import PressImage from "../../../PressImage/PressImage";
@@ -118,15 +118,8 @@ const GroceryView = (props: GroceryViewProps) => {
     titleFade:{
       color: o.itemtextfade,
     },
-    imageContainer:{
-      height: 40,
-      width: 40,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
     image:{
-      height: 24,
-      width: 24,
+      ...gs.baseImage,
       tintColor: o.icontintcolor,
     },
     imageDone:{
@@ -139,8 +132,7 @@ const GroceryView = (props: GroceryViewProps) => {
       tintColor: o.trashicontint,
     },
     imageFade:{
-      height: 24,
-      width: 24,
+      ...gs.baseImage,
       tintColor: o.itemtextfade,
     },
     groceryDoneImage:{
@@ -189,7 +181,7 @@ const GroceryView = (props: GroceryViewProps) => {
         {!isEditingPos && isEditingGrocery?
           <View style={s.inputsContainer}>
             <View style={s.inputsLeft}>
-              <PressImage pressStyle={s.imageContainer} style={[s.image, s.imageDelete]} confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete}></PressImage>
+              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageDelete]} confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete}></PressImage>
             </View>
             <View style={s.inputsCenter}>
               <TextInput 
@@ -222,8 +214,8 @@ const GroceryView = (props: GroceryViewProps) => {
                 onChangeText={(value: string)=>{setTempGrocery({...tempGrocery, Unit: value})}}></TextInput>
             </View>
             <View style={s.inputsRight}>
-              <PressImage pressStyle={s.imageContainer} style={[s.image, s.imageDone]} source={require('../../../../public/images/done.png')} onPress={onDoneGrocery}></PressImage>
-              <PressImage pressStyle={s.imageContainer} style={[s.image, s.imageCancel]} source={require('../../../../public/images/cancel.png')} onPress={onCancelGrocery}></PressImage>
+              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageDone]} source={require('../../../../public/images/done.png')} onPress={onDoneGrocery}></PressImage>
+              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageCancel]} source={require('../../../../public/images/cancel.png')} onPress={onCancelGrocery}></PressImage>
             </View>
           </View>
           :
@@ -234,8 +226,8 @@ const GroceryView = (props: GroceryViewProps) => {
             onPress={()=>{if(!isEditingPos)setIsEditingGrocery(!isEditingGrocery)}}
             ></PressText>
         }
-        {!isEditingGrocery && !grocery.IsChecked && <PressImage pressStyle={s.imageContainer} style={s.image} source={require('../../../../public/images/grocery.png')} onPress={() => {if(!isEditingPos)onChangeIsChecked();}}></PressImage>}
-        {!isEditingGrocery && grocery.IsChecked && <PressImage pressStyle={s.imageContainer} style={s.imageFade} source={require('../../../../public/images/grocery-filled.png')} onPress={() => {if(!isEditingPos)onChangeIsChecked();}}></PressImage>}
+        {!isEditingGrocery && !grocery.IsChecked && <PressImage pressStyle={gs.baseImageContainer} style={s.image} source={require('../../../../public/images/grocery.png')} onPress={() => {if(!isEditingPos)onChangeIsChecked();}}></PressImage>}
+        {!isEditingGrocery && grocery.IsChecked && <PressImage pressStyle={gs.baseImageContainer} style={s.imageFade} source={require('../../../../public/images/grocery-filled.png')} onPress={() => {if(!isEditingPos)onChangeIsChecked();}}></PressImage>}
       </View>
     </View>
   );

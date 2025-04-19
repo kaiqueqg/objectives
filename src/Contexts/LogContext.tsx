@@ -113,6 +113,21 @@ export const LogProvider: React.FC<LogProviderProps> = ({ children }) => {
         // putLog(...formattedTexts);
       }
     },
+    w(...texts: any[]){
+      if (currentLogLevel <= LogLevel.Dev) {
+        const formattedTexts = texts.map(text => {
+          if(text === null) return 'null';
+          if(text === undefined) return 'undefined';
+          if(text !== null && typeof text === 'object' && !Array.isArray(text)) {
+            return JSON.stringify(text, null, 2); //if object, prettyfy
+          } else {
+            return text;
+          }
+        });
+        console.log(`\x1b[38;2;255;255;255m[DEV]`, ...formattedTexts);
+        // putLog(...formattedTexts);
+      }
+    },
     y(...texts: any[]){
       if (currentLogLevel <= LogLevel.Dev) {
         const formattedTexts = texts.map(text => {

@@ -1,7 +1,7 @@
 import { View, StyleSheet,Text, Image, Vibration, TextInput } from "react-native";
 import { ItemViewProps, Question } from "../../../Types";
 import { FontPalette, fontWhite } from "../../../../fonts/Font";
-import { colorPalette, ObjectivePallete, ThemePalette } from "../../../Colors";
+import { colorPalette, globalStyle as gs } from "../../../Colors";
 import { useUserContext } from "../../../Contexts/UserContext";
 import PressInput from "../../../PressInput/PressInput";
 import PressImage from "../../../PressImage/PressImage";
@@ -103,20 +103,12 @@ const QuestionView = (props: QuestionViewProps) => {
     textFade:{
       color: o.itemtextfade,
     },
-    imageContainer:{
-      height: 40,
-      width: 40,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
     image:{
-      height: 24,
-      width: 24,
+      ...gs.baseImage,
       tintColor: o.icontintcolor,
     },
     imageSmall:{
-      height: 15,
-      width: 15,
+      ...gs.baseImage,
       tintColor: o.icontintcolor,
     },
     imageAnswerNormal:{
@@ -180,7 +172,7 @@ const QuestionView = (props: QuestionViewProps) => {
         {!isEditingPos && isEditingQuestion?
           <View style={s.inputsContainer}>
             <View style={s.inputsLeft}>
-              <PressImage pressStyle={s.imageContainer} style={[s.image, s.imageDelete]} confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete}></PressImage>
+              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageDelete]} confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete}></PressImage>
             </View>
             <View style={s.inputsCenter}>
               <TextInput 
@@ -197,8 +189,8 @@ const QuestionView = (props: QuestionViewProps) => {
                 onChangeText={(value: string)=>{setTempQuestion({...tempQuestion, Answer: value})}}></TextInput>
             </View>
             <View style={s.inputsRight}>
-              <PressImage pressStyle={s.imageContainer} style={[s.image, s.imageDone]} source={require('../../../../public/images/done.png')} onPress={onDoneQuestion}></PressImage>
-              <PressImage pressStyle={s.imageContainer} style={[s.image, s.imageCancel]} source={require('../../../../public/images/cancel.png')} onPress={onCancelQuestion}></PressImage>
+              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageDone]} source={require('../../../../public/images/done.png')} onPress={onDoneQuestion}></PressImage>
+              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageCancel]} source={require('../../../../public/images/cancel.png')} onPress={onCancelQuestion}></PressImage>
             </View>
           </View>
           :
@@ -210,7 +202,7 @@ const QuestionView = (props: QuestionViewProps) => {
               onPress={()=>{if(!isEditingPos)setIsEditingQuestion(!isEditingQuestion)}}
               ></PressText>
             <View style={s.answerContainer}>
-              <PressImage pressStyle={s.imageContainer} style={[s.imageSmall, question.Answer.trim() === ''? s.imageAnswerFade:s.imageAnswerNormal]} source={require('../../../../public/images/arow-down-right-thicker.png')} onPress={()=>{}}></PressImage>
+              <PressImage pressStyle={gs.baseImageContainer} style={[s.imageSmall, question.Answer.trim() === ''? s.imageAnswerFade:s.imageAnswerNormal]} source={require('../../../../public/images/arow-down-right-thicker.png')} onPress={()=>{}}></PressImage>
               <PressText
                 style={s.textContainer}
                 textStyle={s.text}

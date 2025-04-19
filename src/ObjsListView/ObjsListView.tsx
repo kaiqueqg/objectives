@@ -1,5 +1,5 @@
 import { View, StyleSheet, FlatList, Text, Vibration, BackHandler, Pressable } from "react-native";
-import { ThemePalette, colorPalette, getObjTheme } from "../Colors";
+import { ThemePalette, colorPalette, getObjTheme, globalStyle as gs } from "../Colors";
 import { FontPalette } from "../../fonts/Font";
 import { useUserContext } from "../Contexts/UserContext";
 import PressText from "../PressText/PressText";
@@ -276,11 +276,9 @@ const ObjsListView = (props: ObjsListViewProps) => {
     },
     bottomMenu: {
       width: '100%',
-      height: 50,
       flexDirection: 'row',
       justifyContent: 'flex-end',
       alignItems: 'center',
-      paddingHorizontal: 5,
 
       borderColor: colorPalette.beigedark,
       borderWidth: 1,
@@ -314,24 +312,15 @@ const ObjsListView = (props: ObjsListViewProps) => {
     allText:{
       color: 'white',
     },
-    imageContainer:{
-      width: 40,
-      height: 40,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
     imageNoTint:{
-      width: 20,
-      height: 20,
+      ...gs.baseImage,
     },
     image:{
-      width: 20,
-      height: 20,
+      ...gs.baseImage,
       tintColor: colorPalette.beige,
     },
     imageUpDown:{
-      width: 20,
-      height: 20,
+      ...gs.baseImage,
       tintColor: colorPalette.beige,
     },
     imageFade:{
@@ -363,9 +352,8 @@ const ObjsListView = (props: ObjsListViewProps) => {
       flex: 1,
       justifyContent: 'center',
       alignItems: 'center',
-      minHeight: 50,
 
-      borderColor: colorPalette.beigedark,
+      borderColor: colorPalette.black,
       borderWidth: 1,
       borderRadius: 5,
       borderStyle: 'solid',
@@ -399,6 +387,7 @@ const ObjsListView = (props: ObjsListViewProps) => {
       backgroundColor: colorPalette.bluedarkerdarker
     },
     text: {
+      padding: 10,
       fontSize: 16,
       color: colorPalette.beigelightdark,
     },
@@ -437,9 +426,9 @@ const ObjsListView = (props: ObjsListViewProps) => {
       </View>
       <View style={s.bottomMenu}>
         <View style={s.leftBottomMenu}>
-          <PressImage style={[s.imageNoTint, isEditingPos&&s.imageFade]} pressStyle={s.imageContainer} onPress={selectAllTags} disable={isEditingPos} source={require('../../public/images/tag.png')}></PressImage>
-          <PressImage style={[s.imageNoTint, isEditingPos&&s.imageFade]} pressStyle={s.imageContainer} onPress={unselectAllTags} disable={isEditingPos} source={require('../../public/images/tagnone.png')}></PressImage>
-          <PressImage style={[s.imageNoTint, isEditingPos&&s.imageFade, !onlySelectOneTag&&s.imageFade]} pressStyle={s.imageContainer} onPress={()=>{setOnlySelectOneTag(!onlySelectOneTag)}} disable={isEditingPos} source={require('../../public/images/tagsingle.png')}></PressImage>
+          <PressImage style={[s.imageNoTint, isEditingPos&&s.imageFade]} pressStyle={gs.baseImageContainer} onPress={selectAllTags} disable={isEditingPos} source={require('../../public/images/tag.png')}></PressImage>
+          <PressImage style={[s.imageNoTint, isEditingPos&&s.imageFade]} pressStyle={gs.baseImageContainer} onPress={unselectAllTags} disable={isEditingPos} source={require('../../public/images/tagnone.png')}></PressImage>
+          <PressImage style={[s.imageNoTint, isEditingPos&&s.imageFade, !onlySelectOneTag&&s.imageFade]} pressStyle={gs.baseImageContainer} onPress={()=>{setOnlySelectOneTag(!onlySelectOneTag)}} disable={isEditingPos} source={require('../../public/images/tagsingle.png')}></PressImage>
         </View>
         <View style={s.rightBottomMenu}>
           {!isEditingPos && 
@@ -447,13 +436,13 @@ const ObjsListView = (props: ObjsListViewProps) => {
             onPress={startEditingPos}
             style={s.imageUpDown}
             disableStyle={s.imageFade}
-            pressStyle={s.imageContainer}
+            pressStyle={gs.baseImageContainer}
             disable={objectives.length < 2}
             source={require('../../public/images/change.png')}
           ></PressImage>}
-          {isEditingPos && <PressImage pressStyle={s.imageContainer} style={s.image} onPress={cancelEditingPos} source={require('../../public/images/cancel.png')}></PressImage>}
-          {isEditingPos && <PressImage pressStyle={s.imageContainer} hide={objectivesSelected.length=== 0 || objectivesSelected.length === objectives.length || isEndingPos} style={s.image} onPress={onEditingPosTo} source={require('../../public/images/arrow-right-filled.png')}></PressImage>}
-          <PressImage style={[s.image, isEditingPos&&s.imageFade]} pressStyle={s.imageContainer} onPress={onAddNewObjective} disable={isEditingPos} source={require('../../public/images/plus-one.png')}></PressImage>
+          {isEditingPos && <PressImage pressStyle={gs.baseImageContainer} style={s.image} onPress={cancelEditingPos} source={require('../../public/images/cancel.png')}></PressImage>}
+          {isEditingPos && <PressImage pressStyle={gs.baseImageContainer} hide={objectivesSelected.length=== 0 || isEndingPos} style={s.image} onPress={onEditingPosTo} source={require('../../public/images/arrow-right-filled.png')}></PressImage>}
+          <PressImage style={[s.image, isEditingPos&&s.imageFade]} pressStyle={gs.baseImageContainer} onPress={onAddNewObjective} disable={isEditingPos} source={require('../../public/images/plus-one.png')}></PressImage>
         </View>
       </View>
     </View>

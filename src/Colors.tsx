@@ -1,3 +1,5 @@
+import { ViewStyle } from "react-native";
+
 export type ColorPalette = {
   transparent: string,
   bluedarkerdarker: string,
@@ -11,6 +13,7 @@ export type ColorPalette = {
 
   beige: string,
   beigelightdark: string,
+  beigedarky: string,
   beigedark: string,
   beigedarker: string,
 
@@ -41,6 +44,22 @@ export type ColorPalette = {
 
   yellowdark: string,
   yellow: string,
+
+  objBlue: string,
+  objRed: string,
+  objWhite: string,
+  objGreen: string,
+  objNoTheme: string,
+  objCyan: string,
+  objPink: string,
+
+  itemBlue: string,
+  itemRed: string,
+  itemWhite: string,
+  itemGreen: string,
+  itemNoTheme: string,
+  itemCyan: string,
+  itemPink: string,
 };
 
 export const colorPalette: ColorPalette = {
@@ -57,6 +76,7 @@ export const colorPalette: ColorPalette = {
 
   beige: '#F5F5DC',
   beigelightdark: '#B9B9A0',
+  beigedarky: '#81815F',
   beigedark: '#4B4B46',
   beigedarker: '#32322D',
 
@@ -86,7 +106,76 @@ export const colorPalette: ColorPalette = {
   
   yellowdark: '#CCC300',
   yellow: '#FFFFAA',
+  
+  objBlue: '#23315c',
+  objRed: '#861932',
+  objGreen: '#123525',
+  objWhite: '#F5F5DC',
+  objNoTheme: '#282C34',
+  objCyan: '#256377',
+  objPink: '#F9C5D5',
+
+  itemBlue: '#314581',
+  itemRed: '#A41E3D',
+  itemGreen: '#1F5B40',
+  itemWhite: '#D8AE7E',
+  itemNoTheme: '#3E4451',
+  itemCyan: '#3287A4',
+  itemPink: '#F499B5',
 };
+
+export type GlobalStyle = {
+  baseImageContainer: ViewStyle,
+  baseImage: ViewStyle,
+  baseBiggerImage: ViewStyle,
+  baseSmallImage: ViewStyle,
+  baseVerySmallImage: ViewStyle,
+}
+
+export const globalStyle:GlobalStyle = {
+  baseImageContainer: {
+    height: 50,
+    width: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+
+    // borderColor: 'red',
+    // borderWidth: 1,
+    // borderStyle: 'solid',
+  },
+  baseImage: {
+    height: 25,
+    width: 25,
+
+    // borderColor: 'green',
+    // borderWidth: 1,
+    // borderStyle: 'solid',
+  },
+  baseBiggerImage:{
+    height: 30,
+    width: 30,
+
+    // borderColor: 'purple',
+    // borderWidth: 1,
+    // borderStyle: 'solid',
+  },
+  baseSmallImage: {
+    height: 20,
+    width: 20,
+
+    // borderColor: 'yellow',
+    // borderWidth: 1,
+    // borderStyle: 'solid',
+  },
+  baseVerySmallImage: {
+    height: 15,
+    width: 15,
+
+    // borderColor: 'blue',
+    // borderWidth: 1,
+    // borderStyle: 'solid',
+  }
+}
 
 export type ThemePalette = {
   backgroundcolordarker: string,
@@ -141,151 +230,127 @@ export const dark: ThemePalette = {
 };
 
 export type ObjectivePallete = {
-  icontintcolor: string,
-  icontintcolorfade: string,
+  icontintcolor?: string,
+  icontintcolorfade?: string,
   
-  inputbk: string,
-  bordercolor: string,
-  bordercolorlight: string,
-  bordercolorselected: string,
+  inputbk?: string,
+  bordercolor?: string,
+  bordercolorlight?: string,
+  bordercolorselected?: string,
   
-  doneicontint: string,
-  cancelicontint: string,
-  trashicontint: string,
+  doneicontint?: string,
+  cancelicontint?: string,
+  trashicontint?: string,
   
-  objbk: string,
-  objtitle: string,
-  objtitlefade: string,
+  objbk?: string,
+  objtitle?: string,
 
-  itembk: string,
-  itemtext: string,
-  itemtextfade: string,
-  itemtextplaceholder: string,
-}
-
-export const darkBlue: ObjectivePallete = {
-  icontintcolor: colorPalette.beige,
-  icontintcolorfade: colorPalette.beigedark,
-  
-  inputbk: colorPalette.bluedarkerdarker,
-  
-  bordercolor: '#346194',
-  bordercolorlight: colorPalette.beige,
-  bordercolorselected: colorPalette.red,
-  
-  doneicontint: colorPalette.green,
-  cancelicontint: colorPalette.yellow,
-  trashicontint: colorPalette.red,
-  
-  objbk: '#113a58',
-  objtitle: colorPalette.beige,
-  objtitlefade: colorPalette.grey,
-  
-  itembk:  '#035a9c',
-  itemtext: colorPalette.beige,
-  itemtextfade: colorPalette.beigedarker,
-  itemtextplaceholder: colorPalette.beigedarker,
-}
-
-export const darkRed: ObjectivePallete = {
-  icontintcolor: colorPalette.beige,
-  icontintcolorfade: colorPalette.black,
-  
-  inputbk: colorPalette.bluedarkerdarker,
-  bordercolor: colorPalette.bluedarkerdarker,
-  bordercolorlight: colorPalette.red,
-  bordercolorselected: colorPalette.beige,
-  
-  doneicontint: colorPalette.greendarker,
-  cancelicontint: colorPalette.black,
-  trashicontint: colorPalette.redlightlight,
-  
-  objbk: '#620000',
-  objtitle: colorPalette.beige,
-  objtitlefade: colorPalette.grey,
-
-  itembk: '#942020',
-  itemtext: colorPalette.beige,
-  itemtextfade: colorPalette.black,
-  itemtextplaceholder: colorPalette.beigedarker,
-}
-
-export const darkGreen: ObjectivePallete = {
-  icontintcolor: colorPalette.black,
-  icontintcolorfade: colorPalette.grey,
-  
-  inputbk: colorPalette.bluedarkerdarker,
-  bordercolor: colorPalette.bluedarkerdarker,
-  bordercolorlight: colorPalette.red,
-  bordercolorselected: colorPalette.red,
-
-  doneicontint: colorPalette.greendarker,
-  cancelicontint: colorPalette.black,
-  trashicontint: colorPalette.reddarker,
-  
-  objbk: '#538253',
-  objtitle: colorPalette.black,
-  objtitlefade: colorPalette.greendark,
-
-  itembk:  '#a8e3a8',
-  itemtext: colorPalette.black,
-  itemtextfade: colorPalette.greylighty,
-  itemtextplaceholder: colorPalette.beigedarker,
-}
-
-export const darkWhite: ObjectivePallete = {
-  icontintcolor: colorPalette.black,
-  icontintcolorfade: colorPalette.grey,
-  
-  inputbk: colorPalette.bluedarkerdarker,
-  bordercolor: colorPalette.bluedarkerdarker,
-  bordercolorlight: colorPalette.red,
-  bordercolorselected: colorPalette.red,
-  
-  doneicontint: colorPalette.greendarker,
-  cancelicontint: colorPalette.black,
-  trashicontint: colorPalette.reddarker,
-  
-  objbk: colorPalette.beige,
-  objtitle: colorPalette.black,
-  objtitlefade: colorPalette.greylighty,
-
-  itembk:  '#D8AE7E',
-  itemtext: colorPalette.black,
-  itemtextfade: colorPalette.greylighty,
-  itemtextplaceholder: colorPalette.beigedarker,
+  itembk?: string,
+  itemtext?: string,
+  itemtextfade?: string,
+  itemtextplaceholder?: string,
 }
 
 export const noTheme: ObjectivePallete = {
   icontintcolor: colorPalette.beige,
   icontintcolorfade: colorPalette.grey,
   
-  inputbk: colorPalette.red,
-  bordercolor: colorPalette.beigedark,
+  bordercolor: colorPalette.black,
   bordercolorlight: colorPalette.beige,
   bordercolorselected: colorPalette.red,
 
   doneicontint: colorPalette.greenlight,
-  cancelicontint: colorPalette.red,
+  cancelicontint: colorPalette.yellow,
   trashicontint: colorPalette.redlight,
   
-  objbk: colorPalette.bluedark,
+  objbk: colorPalette.objNoTheme,
   objtitle: colorPalette.beige,
-  objtitlefade: colorPalette.beigedark,
 
-  itembk:  colorPalette.bluedarkerdarker,
+  itembk:  colorPalette.itemNoTheme,
   itemtext: colorPalette.beige,
   itemtextfade: colorPalette.grey,
   itemtextplaceholder: colorPalette.beigedarker,
 }
 
-  export const getObjTheme = (t: string): ObjectivePallete => {
-    let rtn = noTheme;
-    if(t === 'darkBlue') rtn = darkBlue;
-    else if(t === 'darkRed') rtn = darkRed;
-    else if(t === 'darkGreen') rtn = darkGreen;
-    else if(t === 'darkWhite') rtn = darkWhite;
-    else if(t === 'noTheme') rtn = noTheme;
-    
-    return rtn;
-  }
+export const darkBlue: ObjectivePallete = {
+  ...noTheme,
+  
+  objbk: colorPalette.objBlue,
+  itembk:  colorPalette.itemBlue,
+}
+
+export const darkRed: ObjectivePallete = {
+  ...noTheme,
+  bordercolorselected: colorPalette.beige,
+
+  objbk: colorPalette.objRed,
+  itembk: colorPalette.itemRed,
+
+  doneicontint: colorPalette.greenlight,
+  trashicontint: colorPalette.redlightlight,
+  
+  itemtextfade: colorPalette.black,
+}
+
+export const darkGreen: ObjectivePallete = {
+  ...noTheme,
+  bordercolorlight: colorPalette.red,
+  bordercolorselected: colorPalette.red,
+
+  objbk: colorPalette.objGreen,
+  itembk:  colorPalette.itemGreen,
+}
+
+export const darkWhite: ObjectivePallete = {
+  ...noTheme,
+  icontintcolor: colorPalette.black,
+  
+  bordercolorlight: colorPalette.red,
+  
+  doneicontint: colorPalette.greendarker,
+  trashicontint: colorPalette.reddarker,
+  
+  objbk: colorPalette.objWhite,
+  objtitle: colorPalette.black,
+
+  itembk:  colorPalette.itemWhite,
+  itemtext: colorPalette.black,
+  itemtextfade: colorPalette.greylighty,
+}
+
+export const darkCyan: ObjectivePallete = {
+  ...noTheme,
+  icontintcolorfade: colorPalette.beigelightdark,
+  
+  objbk: colorPalette.objCyan,
+  
+  itembk:  colorPalette.itemCyan,
+  itemtextfade: colorPalette.beigelightdark,
+}
+
+export const darkPink: ObjectivePallete = {
+  ...noTheme,
+  icontintcolor: colorPalette.black,
+  
+  bordercolorlight: colorPalette.red,
+  
+  doneicontint: colorPalette.greendarker,
+  trashicontint: colorPalette.reddarker,
+  
+  objbk: colorPalette.objPink,
+  objtitle: colorPalette.black,
+
+  itembk:  colorPalette.itemPink,
+  itemtext: colorPalette.black,
+}
+
+export const getObjTheme = (t: string): ObjectivePallete => {
+  let rtn = noTheme;
+  if(t === 'darkBlue') rtn = darkBlue;
+  else if(t === 'darkRed') rtn = darkRed;
+  else if(t === 'darkGreen') rtn = darkGreen;
+  else if(t === 'darkWhite') rtn = darkWhite;
+  else if(t === 'darkCyan') rtn = darkCyan;
+  else if(t === 'darkPink') rtn = darkPink;
+  return rtn;
+}

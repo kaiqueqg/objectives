@@ -1,6 +1,6 @@
 import { View, StyleSheet, Text, Vibration, TextInput } from "react-native";
 import { Exercise, Pattern, ItemViewProps, Weekdays } from "../../../Types";
-import { colorPalette, ObjectivePallete, ThemePalette } from "../../../Colors";
+import { colorPalette, globalStyle as gs } from "../../../Colors";
 import { FontPalette } from "../../../../fonts/Font";
 import { useUserContext } from "../../../Contexts/UserContext";
 import PressImage from "../../../PressImage/PressImage";
@@ -198,15 +198,8 @@ const ExerciseView = (props: ExerciseViewProps) => {
     titleFade:{
       color: o.itemtextfade,
     },
-    imageContainer:{
-      height: 40,
-      width: 40,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
     image:{
-      height: 24,
-      width: 24,
+      ...gs.baseImage,
       tintColor: o.icontintcolor,
     },
     imageDone:{
@@ -219,21 +212,8 @@ const ExerciseView = (props: ExerciseViewProps) => {
       tintColor: o.trashicontint,
     },
     imageFade:{
-      height: 24,
-      width: 24,
+      ...gs.baseImage,
       tintColor: o.icontintcolorfade,
-    },
-    imageMoveContainer:{
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginLeft: 5,
-      width: 40,
-      height: 40,
-    },
-    imageMove:{
-      height: 20,
-      width: 20,
-      tintColor: o.icontintcolor,
     },
     exerciseDoneImage:{
       tintColor: o.doneicontint,
@@ -300,7 +280,7 @@ const ExerciseView = (props: ExerciseViewProps) => {
         {!isEditingPos && isEditingExercise?
           <View style={s.inputsContainer}>
             <View style={s.inputsLeft}>
-              <PressImage pressStyle={s.imageContainer} style={[s.image, s.imageDelete]} confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete}></PressImage>
+              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageDelete]} confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete}></PressImage>
             </View>
             <View style={s.inputsCenter}>
               <TextInput 
@@ -352,8 +332,8 @@ const ExerciseView = (props: ExerciseViewProps) => {
               </View>
             </View>  
             <View style={s.inputsRight}>
-              <PressImage pressStyle={s.imageContainer} style={[s.image, s.imageDone]} source={require('../../../../public/images/done.png')} onPress={doneEdit}></PressImage>
-              <PressImage pressStyle={s.imageContainer} style={[s.image, s.imageCancel]} source={require('../../../../public/images/cancel.png')} onPress={onCancelExercise}></PressImage>
+              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageDone]} source={require('../../../../public/images/done.png')} onPress={doneEdit}></PressImage>
+              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageCancel]} source={require('../../../../public/images/cancel.png')} onPress={onCancelExercise}></PressImage>
             </View>
           </View>
           :
@@ -366,8 +346,8 @@ const ExerciseView = (props: ExerciseViewProps) => {
               ></PressText>
           </>
         }
-        {!isEditingExercise && !exercise.IsDone && <PressImage pressStyle={s.imageContainer} style={s.image} source={require('../../../../public/images/exercise.png')} onPress={() => {if(!isEditingPos)onChangeIsDone();}}></PressImage>}
-        {!isEditingExercise && exercise.IsDone && <PressImage pressStyle={s.imageContainer} style={s.imageFade} source={require('../../../../public/images/exercise-filled.png')} onPress={() => {if(!isEditingPos)onChangeIsDone();}}></PressImage>}
+        {!isEditingExercise && !exercise.IsDone && <PressImage pressStyle={gs.baseImageContainer} style={s.image} source={require('../../../../public/images/exercise.png')} onPress={() => {if(!isEditingPos)onChangeIsDone();}}></PressImage>}
+        {!isEditingExercise && exercise.IsDone && <PressImage pressStyle={gs.baseImageContainer} style={s.imageFade} source={require('../../../../public/images/exercise-filled.png')} onPress={() => {if(!isEditingPos)onChangeIsDone();}}></PressImage>}
       </View>
     </View>
   );

@@ -1,11 +1,11 @@
 import { View, StyleSheet, Vibration, Alert, Linking, TextInput, Text,  } from "react-native";
 import { Item, Location, MessageType, ItemViewProps, ItemType } from "../../../Types";
-import { colorPalette, dark, ObjectivePallete, ThemePalette } from "../../../Colors";
+import { colorPalette, dark, globalStyle as gs } from "../../../Colors";
 import { FontPalette } from "../../../../fonts/Font";
 import { useUserContext } from "../../../Contexts/UserContext";
 import PressImage from "../../../PressImage/PressImage";
 import PressInput from "../../../PressInput/PressInput";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as ExpoLocation from 'expo-location';
 import { getDistance } from "geolib";
 import { useLogContext } from "../../../Contexts/LogContext";
@@ -34,6 +34,8 @@ const LocationView = (props: LocationViewProps) => {
   const [currentLocation, setCurrentLocation] = useState<any>();
   const [currentDistance, setCurrentDistance] = useState<string>('');
   const [isGettingCurrentLocation, setIsGettingCurrentLocation] = useState<boolean>(false);
+
+  const inputRef = useRef<TextInput>(null);
 
   useEffect(() => {
     fillCurrentLocation();
@@ -90,6 +92,7 @@ const LocationView = (props: LocationViewProps) => {
     setIsGettingCurrentLocation(true);
     if(!userPrefs.allowLocation){
       popMessage('Allow location on preferences...', MessageType.Error, 5);
+      setIsGettingCurrentLocation(false);
       return;
     }
 
@@ -97,6 +100,7 @@ const LocationView = (props: LocationViewProps) => {
     if(!isEnabled){
       popMessage('Turn on phone GPS to get current location!', MessageType.Alert, 3);
       setCurrentLocation(undefined);
+      setIsGettingCurrentLocation(false);
       return;
     }
 
@@ -108,6 +112,7 @@ const LocationView = (props: LocationViewProps) => {
     else{
       let newUrl = 'https://www.google.com/maps/search/?api=1&query=' + currentLocation.coords.latitude+','+currentLocation.coords.longitude;
       setTempLocation({...tempLocation, Url: newUrl});
+      inputRef.current?.setNativeProps({ text: newUrl });
     }
 
     setIsGettingCurrentLocation(false);
@@ -201,21 +206,20 @@ const LocationView = (props: LocationViewProps) => {
     displayRight:{
       flexDirection: 'row',
     },
+    urlInputContainer:{
+      flex: 1,
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
     displayDistance:{
       verticalAlign: 'middle',
       height: '100%',
       color: o.itemtext,
       paddingHorizontal: 5,
     },
-    imageContainer:{
-      height: 40,
-      width: 40,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
     image:{
-      height: 24,
-      width: 24,
+      ...gs.baseImage,
       tintColor: o.icontintcolor,
     },
     imageDone:{
@@ -228,8 +232,7 @@ const LocationView = (props: LocationViewProps) => {
       tintColor: o.trashicontint,
     },
     imageFade:{
-      height: 24,
-      width: 24,
+      ...gs.baseImage,
       tintColor: o.itemtextfade,
     },
     groceryDoneImage:{
@@ -278,7 +281,7 @@ const LocationView = (props: LocationViewProps) => {
         {!isEditingPos && isEditingLocation?
           <View style={s.inputsContainer}>
             <View style={s.inputsLeft}>
-              <PressImage pressStyle={s.imageContainer} style={[s.image, s.imageDelete]} confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete}></PressImage>
+              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageDelete]} confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete}></PressImage>
             </View>
             <View style={s.inputsCenter}>
               <TextInput 
@@ -287,21 +290,25 @@ const LocationView = (props: LocationViewProps) => {
                 placeholder="Title"
                 defaultValue={location.Title}
                 onChangeText={(value: string)=>{setTempLocation({...tempLocation, Title: value})}}></TextInput>
-              <TextInput 
-                style={s.inputStyle}
-                placeholderTextColor={o.itemtextfade}
-                placeholder="Url"
-                defaultValue={location.Url}
-                onChangeText={(value: string)=>{setTempLocation({...tempLocation, Url: value})}}></TextInput>
+
+              <View style={s.urlInputContainer}>
+                <TextInput
+                  ref={inputRef}
+                  style={s.inputStyle}
+                  placeholderTextColor={o.itemtextfade}
+                  placeholder="Url"
+                  defaultValue={location.Url}
+                  onChangeText={(value: string)=>{setTempLocation({...tempLocation, Url: value})}}></TextInput>
+                {isGettingCurrentLocation?
+                  <Loading theme={dark}></Loading>
+                  :
+                  <PressImage pressStyle={gs.baseImageContainer} style={[s.image]} source={require('../../../../public/images/location-filled.png')} onPress={addCurrentLocation}></PressImage>
+                }
+              </View>
             </View>
             <View style={s.inputsRight}>
-              {isGettingCurrentLocation?
-                <Loading theme={dark}></Loading>
-                :
-                <PressImage pressStyle={s.imageContainer} style={[s.image]} source={require('../../../../public/images/location-filled.png')} onPress={addCurrentLocation}></PressImage>
-              }
-              <PressImage pressStyle={s.imageContainer} style={[s.image, s.imageDone]} source={require('../../../../public/images/done.png')} onPress={onDoneLocation}></PressImage>
-              <PressImage pressStyle={s.imageContainer} style={[s.image, s.imageCancel]} source={require('../../../../public/images/cancel.png')} onPress={onCancelLocation}></PressImage>
+              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageDone]} source={require('../../../../public/images/done.png')} onPress={onDoneLocation}></PressImage>
+              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageCancel]} source={require('../../../../public/images/cancel.png')} onPress={onCancelLocation}></PressImage>
             </View>
           </View>
           :
@@ -317,9 +324,9 @@ const LocationView = (props: LocationViewProps) => {
             <View style={s.displayRight}>
               <Text style={s.displayDistance}>{currentDistance}</Text>
               {location.Url.trim() === ''?
-                <PressImage pressStyle={s.imageContainer} style={s.image} source={require('../../../../public/images/location.png')}></PressImage>
+                <PressImage pressStyle={gs.baseImageContainer} style={s.image} source={require('../../../../public/images/location.png')}></PressImage>
                 :
-                <PressImage pressStyle={s.imageContainer} style={s.image} source={require('../../../../public/images/location-filled.png')} onPress={() => {if(!isEditingPos)openUrl();}}></PressImage>
+                <PressImage pressStyle={gs.baseImageContainer} style={s.image} source={require('../../../../public/images/location-filled.png')} onPress={() => {if(!isEditingPos)openUrl();}}></PressImage>
               }
             </View>
           </View>

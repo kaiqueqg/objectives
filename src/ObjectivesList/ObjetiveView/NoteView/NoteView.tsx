@@ -1,6 +1,5 @@
 import { View, StyleSheet, Vibration } from "react-native";
-import { ObjectivePallete, ThemePalette, getObjTheme } from "../../../Colors";
-import { FontPalette } from "../../../../fonts/Font";
+import { globalStyle as gs } from "../../../Colors";
 import { useUserContext } from "../../../Contexts/UserContext";
 import { Note, ItemViewProps } from "../../../Types";
 import PressImage from "../../../PressImage/PressImage";
@@ -77,32 +76,17 @@ const NoteView = (props: NoteViewProps) => {
       color: o.itemtext,
       borderColor: o.itemtext,
     },
-    imageContainer:{
-      height: 40,
-      width: 40,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
     image:{
       height: 20,
       width: 20,
       tintColor: o.icontintcolor,
     },
     imageFade: {
-      height: 20,
-      width: 20,
+      ...gs.baseImage,
       tintColor: o.icontintcolorfade
     },
-    imageMoveContainer:{
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginLeft: 5,
-      width: 40,
-      height: 40,
-    },
     imageMove:{
-      height: 20,
-      width: 20,
+      ...gs.baseImage,
       tintColor: o.icontintcolor,
     },
   });
@@ -128,7 +112,7 @@ const NoteView = (props: NoteViewProps) => {
         {note.Text === '' && !isEditingTitle && 
         <PressImage 
           style={s.image}
-          pressStyle={s.imageContainer}
+          pressStyle={gs.baseImageContainer}
           onPress={()=>{}}
           source={require('../../../../public/images/note.png')}
         ></PressImage>}    

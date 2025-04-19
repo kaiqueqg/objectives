@@ -1,10 +1,9 @@
 import { View, StyleSheet, Text, StatusBar, Vibration, BackHandler, Platform, AppState, AppStateStatus, FlatList, ScrollView  } from "react-native";
 import { Item, MessageType, Objective, ObjectiveList, Pattern, PopMessage, Step, UserPrefs, Views } from "./../Types";
 import { FontPalette } from "../../fonts/Font";
-import { ThemePalette, colorPalette, dark } from "./../Colors";
+import { ThemePalette, colorPalette, globalStyle as gs } from "./../Colors";
 import { useUserContext } from "./../Contexts/UserContext";
 import React, { useEffect, useState } from "react";
-import { objectivesApi } from "./../Requests/RequestFactory";
 import PopMessageView from "./../Log/PopMessageView";
 import PopMessageContainer from "./../Log/PopMessageContainer";
 import Loading from "../Loading/Loading";
@@ -55,16 +54,8 @@ const DevView = (props: MainProps) => {
       paddingVertical: 20,
       paddingHorizontal: 10,
     },
-    imageContainer: {
-      height: 40,
-      width: 40,
-      margin: 5,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
     image:{
-      height: 20,
-      width: 20,
+      ...gs.baseImage,
       tintColor: colorPalette.beige,
     },
     devButtonRow:{
@@ -114,7 +105,7 @@ const DevView = (props: MainProps) => {
         <Text style={s.devMessages}>{consoleLogs}</Text>
       </ScrollView>
       <View style={s.devButtonRow}>
-        <PressImage style={s.image} pressStyle={s.imageContainer} source={require('../../public/images/trash.png')} onPress={clear}></PressImage>
+        <PressImage style={s.image} pressStyle={gs.baseImageContainer} source={require('../../public/images/trash.png')} onPress={clear}></PressImage>
         {/* {isSyncing?
           <Loading theme={dark}></Loading>
           :

@@ -1,6 +1,6 @@
 import { View, StyleSheet, Text, Vibration, TextInput } from "react-native";
 import { Medicine, Pattern, ItemViewProps } from "../../../Types";
-import { colorPalette, ObjectivePallete, ThemePalette } from "../../../Colors";
+import { colorPalette, globalStyle as gs } from "../../../Colors";
 import { FontPalette } from "../../../../fonts/Font";
 import { useUserContext } from "../../../Contexts/UserContext";
 import PressImage from "../../../PressImage/PressImage";
@@ -121,15 +121,8 @@ const MedicineView = (props: MedicineViewProps) => {
     titleFade:{
       color: o.itemtextfade,
     },
-    imageContainer:{
-      height: 40,
-      width: 40,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
     image:{
-      height: 24,
-      width: 24,
+      ...gs.baseImage,
       tintColor: o.icontintcolor,
     },
     imageDone:{
@@ -142,20 +135,11 @@ const MedicineView = (props: MedicineViewProps) => {
       tintColor: o.trashicontint,
     },
     imageFade:{
-      height: 24,
-      width: 24,
+      ...gs.baseImage,
       tintColor: o.itemtextfade,
     },
-    imageMoveContainer:{
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginLeft: 5,
-      width: 40,
-      height: 40,
-    },
     imageMove:{
-      height: 20,
-      width: 20,
+      ...gs.baseImage,
       tintColor: o.icontintcolor,
     },
     medicineDoneImage:{
@@ -204,7 +188,7 @@ const MedicineView = (props: MedicineViewProps) => {
         {!isEditingPos && isEditingMedicine?
           <View style={s.inputsContainer}>
             <View style={s.inputsLeft}>
-              <PressImage pressStyle={s.imageContainer} style={[s.image, s.imageDelete]} confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete}></PressImage>
+              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageDelete]} confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete}></PressImage>
             </View>
             <View style={s.inputsCenter}>
               <TextInput 
@@ -237,8 +221,8 @@ const MedicineView = (props: MedicineViewProps) => {
                 onChangeText={(value: string)=>{setTempMedicine({...tempMedicine, Purpose: value})}}></TextInput>
             </View>
             <View style={s.inputsRight}>
-              <PressImage pressStyle={s.imageContainer} style={[s.image, s.imageDone]} source={require('../../../../public/images/done.png')} onPress={onDoneMedicine}></PressImage>
-              <PressImage pressStyle={s.imageContainer} style={[s.image, s.imageCancel]} source={require('../../../../public/images/cancel.png')} onPress={onCancelMedicine}></PressImage>
+              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageDone]} source={require('../../../../public/images/done.png')} onPress={onDoneMedicine}></PressImage>
+              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageCancel]} source={require('../../../../public/images/cancel.png')} onPress={onCancelMedicine}></PressImage>
             </View>
           </View>
           :
@@ -251,8 +235,8 @@ const MedicineView = (props: MedicineViewProps) => {
               ></PressText>
           </>
         }
-        {!isEditingMedicine && !medicine.IsChecked && <PressImage pressStyle={s.imageContainer} style={s.image} source={require('../../../../public/images/medicine.png')} onPress={() => {if(!isEditingPos)onChangeIsChecked();}}></PressImage>}
-        {!isEditingMedicine && medicine.IsChecked && <PressImage pressStyle={s.imageContainer} style={s.imageFade} source={require('../../../../public/images/medicine-filled.png')} onPress={() => {if(!isEditingPos)onChangeIsChecked();}}></PressImage>}
+        {!isEditingMedicine && !medicine.IsChecked && <PressImage pressStyle={gs.baseImageContainer} style={s.image} source={require('../../../../public/images/medicine.png')} onPress={() => {if(!isEditingPos)onChangeIsChecked();}}></PressImage>}
+        {!isEditingMedicine && medicine.IsChecked && <PressImage pressStyle={gs.baseImageContainer} style={s.imageFade} source={require('../../../../public/images/medicine-filled.png')} onPress={() => {if(!isEditingPos)onChangeIsChecked();}}></PressImage>}
       </View>
     </View>
   );

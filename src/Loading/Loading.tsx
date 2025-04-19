@@ -3,11 +3,9 @@ import { StyleSheet, ImageStyle, Animated, Easing, View } from 'react-native';
 import { ThemePalette } from '../Colors';
 import { useUserContext } from '../Contexts/UserContext';
 
-
-
 interface Props {
   theme: ThemePalette;
-  style?: ImageStyle;
+  // style?: ImageStyle;
 }
 
 const Loading: React.FC<Props> = () => {

@@ -1,5 +1,5 @@
 import { View, StyleSheet, FlatList, Text, Vibration, BackHandler, Pressable } from "react-native";
-import { ThemePalette, colorPalette, getObjTheme } from "../Colors";
+import { ThemePalette, colorPalette, getObjTheme, globalStyle as gs } from "../Colors";
 import { FontPalette } from "../../fonts/Font";
 import { useUserContext } from "../Contexts/UserContext";
 import PressText from "../PressText/PressText";
@@ -78,7 +78,7 @@ const ArchivedView = (props: ArchivedViewProps) => {
         <PressImage
           onPress={()=>unarchiveObjective(item)}
           style={s.image}
-          pressStyle={s.imageContainer}
+          pressStyle={gs.baseImageContainer}
           source={require('../../public/images/unarchive.png')}
           confirm={true}
         ></PressImage>

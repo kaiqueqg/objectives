@@ -1,7 +1,7 @@
 // UserContext.tsx
 import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
-import { Item, Objective, MessageType, User, UserPrefs, Views, PopMessage, ItemImage } from '../Types';
-import { ThemePalette, dark } from '../Colors';
+import { Item, Objective, MessageType, User, UserPrefs, Views, PopMessage, StoredImage } from '../Types';
+import { ThemePalette, dark, globalStyle as gs } from '../Colors';
 import { FontPalette, fontDark, fontPaper, fontWhite } from '../../fonts/Font';
 import { useStorageContext } from './StorageContext';
 import { useLogContext } from './LogContext';
@@ -460,18 +460,18 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   };
 
   //^-------------------- IMAGES
-  const [storedImages, setStoredImages] = useState<ItemImage[]>([]);
-  const putStoredImages = async (images: ItemImage[]) => {
+  const [storedImages, setStoredImages] = useState<StoredImage[]>([]);
+  const putStoredImages = async (images: StoredImage[]) => {
     
   };
-  const deleteStoredImages = async (images: ItemImage[]) => {
+  const deleteStoredImages = async (images: StoredImage[]) => {
     
   };
-  const [storedNewImages, setStoredNewImages] = useState<ItemImage[]>([]);
-  const putStoredNewImages = async (images: ItemImage[]) => {
+  const [storedNewImages, setStoredNewImages] = useState<StoredImage[]>([]);
+  const putStoredNewImages = async (images: StoredImage[]) => {
     
   };
-  const deleteStoredNewImages = async (images: ItemImage[]) => {
+  const deleteStoredNewImages = async (images: StoredImage[]) => {
     
   };
 

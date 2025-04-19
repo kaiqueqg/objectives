@@ -24,7 +24,7 @@ export interface Objective {
   Tags: string[],
 }
 
-export enum ItemType{ Step, Wait, Question, Note, Location, Divider, Grocery, Medicine, Exercise, Links, ItemFake, Image, /*put new before here*/ Unknown,  }
+export enum ItemType{ Step, Wait, Question, Note, Location, Divider, Grocery, Medicine, Exercise, Link, ItemFake, Image, /*put new before here*/ Unknown,  }
 
 export interface ItemViewProps {
   objTheme: ObjectivePallete,
@@ -122,14 +122,9 @@ export interface Exercise extends Item{
   LastDone: string,
 }
 
-export interface Links extends Item{
+export interface Link extends Item{
   Title: string,
-  Links: Link[],
-}
-
-export interface Link{
-  Title: string,
-  Url: string,
+  Link: string,
 }
 
 export interface Image extends Item{
@@ -141,9 +136,18 @@ export interface Image extends Item{
   IsDisplaying: boolean;
 }
 
+export interface PresignedUrl { url: string }
+
+//^local
 export interface StoredImage{
   ItemId: string,
   ImageFile: string,
+}
+
+//^aws
+export interface ImageInfo {
+  itemId: string;
+  fileName: string;
 }
 
 export interface User{

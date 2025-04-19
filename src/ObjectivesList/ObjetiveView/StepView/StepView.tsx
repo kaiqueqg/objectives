@@ -1,6 +1,6 @@
 import { View, StyleSheet, Text, Vibration } from "react-native";
 import { Pattern,  Step, ItemViewProps, StepImportance } from "../../../Types";
-import { colorPalette, ObjectivePallete, ThemePalette } from "../../../Colors";
+import { colorPalette, globalStyle as gs, ObjectivePallete, ThemePalette } from "../../../Colors";
 import { FontPalette } from "../../../../fonts/Font";
 import { useUserContext } from "../../../Contexts/UserContext";
 import PressImage from "../../../PressImage/PressImage";
@@ -83,26 +83,26 @@ const StepView = (props: StepViewProps) => {
   const getImportanceImage = () => {
     if(!step.Done) {
       if(step.Importance === StepImportance.Low){
-        return <PressImage pressStyle={s.imageContainer} style={s.imageNoTint} source={require('../../../../public/images/low.png')} onPress={() => {if(!isEditingPos)onChangeImportanceIcon();}}></PressImage>;
+        return <PressImage pressStyle={gs.baseImageContainer} style={gs.baseImage} source={require('../../../../public/images/low.png')} onPress={() => {if(!isEditingPos)onChangeImportanceIcon();}}></PressImage>;
       }
       else if(step.Importance === StepImportance.Medium){
-        return <PressImage pressStyle={s.imageContainer} style={s.imageNoTint} source={require('../../../../public/images/med.png')} onPress={() => {if(!isEditingPos)onChangeImportanceIcon();}}></PressImage>;
+        return <PressImage pressStyle={gs.baseImageContainer} style={gs.baseImage} source={require('../../../../public/images/med.png')} onPress={() => {if(!isEditingPos)onChangeImportanceIcon();}}></PressImage>;
       }
       else if(step.Importance === StepImportance.High){
-        return <PressImage pressStyle={s.imageContainer} style={s.imageNoTint} source={require('../../../../public/images/high.png')} onPress={() => {if(!isEditingPos)onChangeImportanceIcon();}}></PressImage>;
+        return <PressImage pressStyle={gs.baseImageContainer} style={gs.baseImage} source={require('../../../../public/images/high.png')} onPress={() => {if(!isEditingPos)onChangeImportanceIcon();}}></PressImage>;
       }
       else if(step.Importance === StepImportance.Question){
-        return <PressImage pressStyle={s.imageContainer} style={s.imageNoTint} source={require('../../../../public/images/questionmark.png')} onPress={() => {if(!isEditingPos)onChangeImportanceIcon();}}></PressImage>;
+        return <PressImage pressStyle={gs.baseImageContainer} style={gs.baseImage} source={require('../../../../public/images/questionmark.png')} onPress={() => {if(!isEditingPos)onChangeImportanceIcon();}}></PressImage>;
       }
       else if(step.Importance === StepImportance.Waiting){
-        return <PressImage pressStyle={s.imageContainer} style={s.imageNoTint} source={require('../../../../public/images/wait.png')} onPress={() => {if(!isEditingPos)onChangeImportanceIcon();}}></PressImage>;
+        return <PressImage pressStyle={gs.baseImageContainer} style={gs.baseImage} source={require('../../../../public/images/wait.png')} onPress={() => {if(!isEditingPos)onChangeImportanceIcon();}}></PressImage>;
       }
       else if(step.Importance === StepImportance.InProgress){
-        return <PressImage pressStyle={s.imageContainer} style={s.imageNoTint} source={require('../../../../public/images/inprogress.png')} onPress={() => {if(!isEditingPos)onChangeImportanceIcon();}}></PressImage>;
+        return <PressImage pressStyle={gs.baseImageContainer} style={gs.baseImage} source={require('../../../../public/images/inprogress.png')} onPress={() => {if(!isEditingPos)onChangeImportanceIcon();}}></PressImage>;
       }
       else{
         if(isEditingTitle){
-          return <PressImage pressStyle={s.imageContainer} style={s.imageNoTint} source={require('../../../../public/images/cancel.png')} onPress={() => {if(!isEditingPos)onChangeImportanceIcon();}}></PressImage>;
+          return <PressImage pressStyle={gs.baseImageContainer} style={gs.baseImage} source={require('../../../../public/images/cancel.png')} onPress={() => {if(!isEditingPos)onChangeImportanceIcon();}}></PressImage>;
   
         }
         else{
@@ -152,39 +152,16 @@ const StepView = (props: StepViewProps) => {
       color: o.itemtext,
       borderColor: o.itemtext,
     },
-    imageContainer:{
-      height: 40,
-      width: 40,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
     image:{
-      height: 20,
-      width: 20,
+      ...gs.baseImage,
       tintColor: o.icontintcolor,
-    },
-    imageNoTint:{
-      height: 20,
-      width: 20,
     },
     imageFade:{
-      height: 20,
-      width: 20,
-      tintColor: o.itemtextfade,
-    },
-    imageMoveContainer:{
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginLeft: 5,
-      width: 40,
-      height: 40,
-    },
-    imageMove:{
-      height: 20,
-      width: 20,
-      tintColor: o.icontintcolor,
+      ...gs.baseImage,
+      tintColor: o.icontintcolorfade,
     },
     stepDoneImage:{
+      ...gs.baseImage,
       tintColor: o.doneicontint,
     },
   });
@@ -209,8 +186,8 @@ const StepView = (props: StepViewProps) => {
           >
         </PressInput>
 
-        {!isEditingTitle && !step.Done && <PressImage pressStyle={s.imageContainer} style={s.image} source={require('../../../../public/images/step-black.png')} onPress={() => {if(!isEditingPos)onChangeIsDone();}}></PressImage>}
-        {!isEditingTitle && step.Done && <PressImage pressStyle={s.imageContainer} style={s.imageFade} source={require('../../../../public/images/step-filled-black.png')} onPress={() => {if(!isEditingPos)onChangeIsDone();}}></PressImage>}
+        {!isEditingTitle && !step.Done && <PressImage pressStyle={gs.baseImageContainer} style={s.image} source={require('../../../../public/images/step-black.png')} onPress={() => {if(!isEditingPos)onChangeIsDone();}}></PressImage>}
+        {!isEditingTitle && step.Done && <PressImage pressStyle={gs.baseImageContainer} style={s.imageFade} source={require('../../../../public/images/step-filled-black.png')} onPress={() => {if(!isEditingPos)onChangeIsDone();}}></PressImage>}
       </View>
     </View>
   );

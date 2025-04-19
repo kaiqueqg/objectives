@@ -2,7 +2,7 @@ import React from "react";
 import { View, StyleSheet, Pressable, Vibration, Alert, FlatList, Text } from "react-native";
 import * as ExpoLocation from 'expo-location';
 
-import { colorPalette, getObjTheme } from "../../Colors";
+import { colorPalette, getObjTheme, globalStyle as gs } from "../../Colors";
 
 import { useUserContext } from "../../Contexts/UserContext";
 import { useLogContext } from "../../Contexts/LogContext";
@@ -12,7 +12,7 @@ import PressText from "../../PressText/PressText";
 import PressImage from "../../PressImage/PressImage";
 import PressInput from "../../PressInput/PressInput";
 
-import { Item, ItemType, Note, Objective, Question, Step, Views, Wait, Location, Divider, Grocery, Pattern, MessageType, Medicine, Exercise, Weekdays, StepImportance, ItemNew, Links, Image } from "../../Types";
+import { Item, ItemType, Note, Objective, Question, Step, Views, Wait, Location, Divider, Grocery, Pattern, MessageType, Medicine, Exercise, Weekdays, StepImportance, ItemNew, Link, Image } from "../../Types";
 import { useEffect, useState } from "react";
 
 import QuestionView, {New as QuestionNew} from "./QuestionView/QuestionView";
@@ -25,7 +25,7 @@ import GroceryView, {New as GroceryNew} from "./GroceryView/Grocery";
 import MedicineView, {New as MedicineNew} from "./MedicineView/MedicineView";
 import ItemFakeView, {New as ItemFakeNew} from "./ItemFakeView/ItemFakeView";
 import ExerciseView, {New as ExerciseNew} from "./ExerciseView/ExerciseView";
-import LinksView, {New as LinksNew} from "./LinksView/LinksView";
+import LinkView, {New as LinkNew} from "./LinkView/LinkView";
 import ImageView, {New as ImageNew} from "./ImageView/ImageView";
 
 export interface ObjectiveViewProps {
@@ -35,7 +35,7 @@ export interface ObjectiveViewProps {
 }
 const ObjectiveView = (props: ObjectiveViewProps) => {
   const { log } = useLogContext();
-  const { storage } = useStorageContext();
+  const { storage, } = useStorageContext();
   const { theme, fontTheme, 
     user, userPrefs, 
     objectives, putObjective, deleteObjective, 
@@ -53,6 +53,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
   const [isItemOpenLocked, setIsItemOpenLocked] = useState<boolean>(false);
   const [isTagOpen, setIsTagOpen] = useState<boolean>(false);
   const [isPaletteOpen, setIsPaletteOpen] = useState<boolean>(false);
+  const [isCheckedOpen, setIsCheckedOpen] = useState<boolean>(false);
   const [isEditingTitle, setIsEditingTitle] = useState<boolean>(false);
   const [isEditingPos, setIsEditingPos] = useState<boolean>(false);
   const [isEndingPos, setIsEndingPos] = useState<boolean>(false);
@@ -127,8 +128,8 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       case ItemType.ItemFake:
         addNewItem({...baseItem, ...ItemFakeNew()}, pos);
         break;
-      case ItemType.Links:
-        addNewItem({...baseItem, ...LinksNew()}, pos);
+      case ItemType.Link:
+        addNewItem({...baseItem, ...LinkNew()}, pos);
         break;
       case ItemType.Image:
         addNewItem({...baseItem, ...ImageNew()}, pos);
@@ -251,7 +252,6 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
   }
 
   const onChangeShowingItems = async () => {
-    if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
     await putObjective(
       {
         ...obj, 
@@ -264,14 +264,38 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     );
   }
 
-  const onChangeShowingGroceryChecked = async () => {
-    if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
-    await putObjective({...obj, IsShowingCheckedGrocery: !obj.IsShowingCheckedGrocery, LastModified: (new Date()).toISOString() });
+  const selectUnselectAllItems = async (v: boolean) => {
+    let rtnItems: Item[] = [];
+    items.forEach((item: Item)=>{
+      if(item.Type === ItemType.Exercise){
+        const newItem = (item as Exercise);
+        newItem.IsDone = v;
+        rtnItems = [...rtnItems, newItem];
+      }
+      else if(item.Type === ItemType.Grocery){
+        const newItem = (item as Grocery);
+        newItem.IsChecked = v;
+        rtnItems = [...rtnItems, newItem];
+      }
+      else if(item.Type === ItemType.Step){
+        const newItem = (item as Step);
+        newItem.Done = v;
+        rtnItems = [...rtnItems, newItem];
+      }
+      else if(item.Type === ItemType.Medicine){
+        const newItem = (item as Medicine);
+        newItem.IsChecked = v;
+        rtnItems = [...rtnItems, newItem];
+      }
+    });
+
+    await putItems(obj.ObjectiveId, rtnItems);
+    await loadItems();
   }
 
-  const onChangeShowingStepChecked = async () => {
+  const onChangeShowingItemsMenuOpen = async () => {
     if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
-    await putObjective({...obj, IsShowingCheckedStep: !obj.IsShowingCheckedStep, LastModified: (new Date()).toISOString() });
+    setIsCheckedOpen(!isCheckedOpen);
   }
 
   //Responsable for open, close and lock icon and menu.
@@ -510,8 +534,8 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     else if(item.Type === ItemType.Wait){
       rtnItem = <WaitView key={item.ItemId} isEditingPos={isEditingPos} isEndingPos={isEndingPos} isSelected={itemSelected?true:false} loadMyItems={loadItems} objTheme={o} wait={item as Wait} onDeleteItem={onDeleteItem} ></WaitView>
     }
-    else if(item.Type === ItemType.Links){
-      rtnItem = <LinksView key={item.ItemId} isEditingPos={isEditingPos} isEndingPos={isEndingPos} isSelected={itemSelected?true:false} loadMyItems={loadItems} objTheme={o} links={item as Links} onDeleteItem={onDeleteItem} ></LinksView>
+    else if(item.Type === ItemType.Link){
+      rtnItem = <LinkView key={item.ItemId} isEditingPos={isEditingPos} isEndingPos={isEndingPos} isSelected={itemSelected?true:false} loadMyItems={loadItems} objTheme={o} link={item as Link} onDeleteItem={onDeleteItem} ></LinkView>
     }
     else if(item.Type === ItemType.Image){
       rtnItem = <ImageView key={item.ItemId} isEditingPos={isEditingPos} isEndingPos={isEndingPos} isSelected={itemSelected?true:false} loadMyItems={loadItems} objTheme={o} image={item as Image} onDeleteItem={onDeleteItem} ></ImageView>
@@ -551,7 +575,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
         onChangeIsPaletteOpen();
         break;
       case BottomIcons.Checked:
-        onChangeShowingItems();
+        onChangeShowingItemsMenuOpen();
         break;
       case BottomIcons.Tags:
         onOpenTagList();
@@ -573,21 +597,21 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
   const shouldDisable = (icon: BottomIcons) => {
     switch (icon) {
       case BottomIcons.Archive:
-        return isPaletteOpen || isTagOpen || isEditingPos || isEndingPos || isItemsOpen || isItemOpenLocked;
+        return isPaletteOpen || isTagOpen || isEditingPos || isEndingPos || isItemsOpen || isItemOpenLocked || isCheckedOpen;
       case BottomIcons.Unarchive:
-        return isPaletteOpen || isTagOpen || isEditingPos || isEndingPos || isItemsOpen || isItemOpenLocked;
+        return isPaletteOpen || isTagOpen || isEditingPos || isEndingPos || isItemsOpen || isItemOpenLocked || isCheckedOpen;
       case BottomIcons.Palette:
-        return isTagOpen || isEditingPos || isEndingPos || isItemsOpen || isItemOpenLocked;
+        return isTagOpen || isEditingPos || isEndingPos || isItemsOpen || isItemOpenLocked || isCheckedOpen;
       case BottomIcons.Checked:
         return isPaletteOpen || isTagOpen || isEditingPos || isEndingPos || isItemsOpen || isItemOpenLocked;
       case BottomIcons.Tags:
-        return isPaletteOpen || isEditingPos || isEndingPos || isItemsOpen || isItemOpenLocked;
+        return isPaletteOpen || isEditingPos || isEndingPos || isItemsOpen || isItemOpenLocked || isCheckedOpen;
       case BottomIcons.Sorted:
-        return isPaletteOpen || isTagOpen || isEditingPos || isEndingPos || isItemsOpen || isItemOpenLocked;
+        return isPaletteOpen || isTagOpen || isEditingPos || isEndingPos || isItemsOpen || isItemOpenLocked || isCheckedOpen;
       case BottomIcons.Pos:
-        return isPaletteOpen || isTagOpen || isItemsOpen || isItemOpenLocked || items.length < 2;
+        return isPaletteOpen || isTagOpen || isItemsOpen || isItemOpenLocked || items.length < 2 || isCheckedOpen;
       case BottomIcons.Add:
-        return isPaletteOpen || isTagOpen || isEditingPos || isEndingPos;
+        return isPaletteOpen || isTagOpen || isEditingPos || isEndingPos || isCheckedOpen;
       default:
         return false;
     }
@@ -644,7 +668,18 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
-      margin: 5,
+    },
+    bottomLeftContainer:{
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'flex-start',
+      width: '50%',
+    },
+    bottomRightContainer:{
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'flex-end',
+      width: '50%',
     },
     tagEditingContainer:{
       flexDirection: 'column',
@@ -692,18 +727,6 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       marginHorizontal: 15,
       color: o.objtitle
     },
-    bottomLeftContainer:{
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'flex-start',
-      width: '50%',
-    },
-    bottomRightContainer:{
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'flex-end',
-      width: '50%',
-    },
     itemsContainer:{
       justifyContent: 'flex-end',
       borderColor: o.bordercolor,
@@ -716,28 +739,17 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       flex: 1,
       width: "100%",
     },
-    imageContainer: {
-      height: 40,
-      width: 40,
-      marginVertical: 2,
-      marginHorizontal: 5,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
     imageSmall:{
-      height: 15,
-      width: 15,
-      tintColor: o.objtitle,
+      ...gs.baseVerySmallImage,
+      tintColor: o.icontintcolor,
     },
     image:{
-      height: 20,
-      width: 20,
-      tintColor: o.objtitle,
+      ...gs.baseSmallImage,
+      tintColor: o.icontintcolor,
     },
     imageBig:{
-      height: 24,
-      width: 24,
-      tintColor: o.objtitle,
+      ...gs.baseImage,
+      tintColor: o.icontintcolor,
     },
     itemRow:{
       flex: 1,
@@ -752,7 +764,8 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       tintColor: o.doneicontint,
     },
     imageFade:{
-      tintColor: o.objtitlefade,
+      ...gs.baseSmallImage,
+      tintColor: o.icontintcolorfade,
     },
     inputStyle: {
       textAlign: 'center',
@@ -798,26 +811,34 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
         {isPaletteOpen && 
           <View style={s.itemsContainer}>
             <Pressable style={[s.colorPalette, {backgroundColor: colorPalette.bluedark}]} onPress={() => onSelectColor('noTheme')}></Pressable>
-            <Pressable style={[s.colorPalette, {backgroundColor: '#2D9BF0'}]} onPress={() => onSelectColor('darkBlue')}></Pressable>
-            <Pressable style={[s.colorPalette, {backgroundColor: '#FF5858'}]} onPress={() => onSelectColor('darkRed')}></Pressable>
-            <Pressable style={[s.colorPalette, {backgroundColor: '#0CA789'}]} onPress={() => onSelectColor('darkGreen')}></Pressable>
-            <Pressable style={[s.colorPalette, {backgroundColor: '#F5F5DC'}]} onPress={() => onSelectColor('darkWhite')}></Pressable>
+            <Pressable style={[s.colorPalette, {backgroundColor: colorPalette.objBlue}]} onPress={() => onSelectColor('darkBlue')}></Pressable>
+            <Pressable style={[s.colorPalette, {backgroundColor: colorPalette.objRed}]} onPress={() => onSelectColor('darkRed')}></Pressable>
+            <Pressable style={[s.colorPalette, {backgroundColor: colorPalette.objGreen}]} onPress={() => onSelectColor('darkGreen')}></Pressable>
+            <Pressable style={[s.colorPalette, {backgroundColor: colorPalette.objWhite}]} onPress={() => onSelectColor('darkWhite')}></Pressable>
+            <Pressable style={[s.colorPalette, {backgroundColor: colorPalette.objCyan}]} onPress={() => onSelectColor('darkCyan')}></Pressable>
+            <Pressable style={[s.colorPalette, {backgroundColor: colorPalette.objPink}]} onPress={() => onSelectColor('darkPink')}></Pressable>
           </View>
         }
         {getList()}
+        {isCheckedOpen &&
+          <View style={s.itemsContainer}>
+            <PressImage pressStyle={gs.baseImageContainer} style={s.image} onPress={() => {selectUnselectAllItems(true)}} source={require('../../../public/images/checkedunchecked.png')}></PressImage>
+            <PressImage pressStyle={gs.baseImageContainer} style={s.imageFade} onPress={() => {selectUnselectAllItems(false)}} source={require('../../../public/images/checkedunchecked.png')}></PressImage>
+          </View>
+        }
         {isItemsOpen &&  
         <View style={s.itemsContainer}>
-          <PressImage pressStyle={s.imageContainer} style={s.image} onPress={() => {choseNewItemToAdd(ItemType.Wait)}} source={require('../../../public/images/wait.png')}></PressImage>
-          <PressImage pressStyle={s.imageContainer} style={s.image} onPress={() => {choseNewItemToAdd(ItemType.Links)}} source={require('../../../public/images/link.png')}></PressImage>
-          <PressImage pressStyle={s.imageContainer} style={s.image} onPress={() => {choseNewItemToAdd(ItemType.Exercise)}} source={require('../../../public/images/exercise-filled-black.png')}></PressImage>
-          <PressImage pressStyle={s.imageContainer} style={s.image} onPress={() => {choseNewItemToAdd(ItemType.Divider)}} source={require('../../../public/images/minus.png')}></PressImage>
-          <PressImage pressStyle={s.imageContainer} style={s.image} onPress={() => {choseNewItemToAdd(ItemType.Grocery)}} source={require('../../../public/images/grocery-filled-black.png')}></PressImage>
-          <PressImage pressStyle={s.imageContainer} style={s.imageBig} onPress={() => {choseNewItemToAdd(ItemType.Medicine)}} source={require('../../../public/images/medicine-filled-black.png')}></PressImage>
-          <PressImage pressStyle={s.imageContainer} style={s.image} onPress={() => {choseNewItemToAdd(ItemType.Location)}} source={require('../../../public/images/location-filled.png')}></PressImage>
-          <PressImage pressStyle={s.imageContainer} style={s.image} onPress={() => {choseNewItemToAdd(ItemType.Question)}} source={require('../../../public/images/questionfilled.png')}></PressImage>
-          <PressImage pressStyle={s.imageContainer} style={s.image} onPress={() => {choseNewItemToAdd(ItemType.Note)}} source={require('../../../public/images/note.png')}></PressImage>
-          <PressImage pressStyle={s.imageContainer} style={s.image} onPress={() => {choseNewItemToAdd(ItemType.Step)}} source={require('../../../public/images/step-filled.png')}></PressImage>
-          <PressImage pressStyle={s.imageContainer} style={s.image} onPress={() => {choseNewItemToAdd(ItemType.Image)}} source={require('../../../public/images/image-filled.png')}></PressImage>
+          <PressImage pressStyle={gs.baseImageContainer} style={s.image} onPress={() => {choseNewItemToAdd(ItemType.Wait)}} source={require('../../../public/images/wait.png')}></PressImage>
+          <PressImage pressStyle={gs.baseImageContainer} style={s.image} onPress={() => {choseNewItemToAdd(ItemType.Link)}} source={require('../../../public/images/link.png')}></PressImage>
+          <PressImage pressStyle={gs.baseImageContainer} style={s.image} onPress={() => {choseNewItemToAdd(ItemType.Exercise)}} source={require('../../../public/images/exercise-filled-black.png')}></PressImage>
+          <PressImage pressStyle={gs.baseImageContainer} style={s.image} onPress={() => {choseNewItemToAdd(ItemType.Divider)}} source={require('../../../public/images/minus.png')}></PressImage>
+          <PressImage pressStyle={gs.baseImageContainer} style={s.image} onPress={() => {choseNewItemToAdd(ItemType.Grocery)}} source={require('../../../public/images/grocery-filled-black.png')}></PressImage>
+          <PressImage pressStyle={gs.baseImageContainer} style={s.imageBig} onPress={() => {choseNewItemToAdd(ItemType.Medicine)}} source={require('../../../public/images/medicine-filled-black.png')}></PressImage>
+          <PressImage pressStyle={gs.baseImageContainer} style={s.image} onPress={() => {choseNewItemToAdd(ItemType.Location)}} source={require('../../../public/images/location-filled.png')}></PressImage>
+          <PressImage pressStyle={gs.baseImageContainer} style={s.image} onPress={() => {choseNewItemToAdd(ItemType.Question)}} source={require('../../../public/images/questionfilled.png')}></PressImage>
+          <PressImage pressStyle={gs.baseImageContainer} style={s.image} onPress={() => {choseNewItemToAdd(ItemType.Note)}} source={require('../../../public/images/note.png')}></PressImage>
+          <PressImage pressStyle={gs.baseImageContainer} style={s.image} onPress={() => {choseNewItemToAdd(ItemType.Step)}} source={require('../../../public/images/step-filled.png')}></PressImage>
+          <PressImage pressStyle={gs.baseImageContainer} style={s.image} onPress={() => {choseNewItemToAdd(ItemType.Image)}} source={require('../../../public/images/image-filled.png')}></PressImage>
         </View>}
       </View>
       {isTagOpen && 
@@ -842,7 +863,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
         <View style={s.bottomLeftContainer}>
           {obj.IsArchived?
           <PressImage 
-            pressStyle={s.imageContainer}
+            pressStyle={gs.baseImageContainer}
             style={s.image}
             disable={shouldDisable(BottomIcons.Unarchive)}
             disableStyle={s.imageFade}
@@ -850,14 +871,14 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
             source={require('../../../public/images/unarchive.png')}></PressImage>
           :
           <PressImage 
-            pressStyle={s.imageContainer}
+            pressStyle={gs.baseImageContainer}
             style={s.image}
             disable={shouldDisable(BottomIcons.Archive)}
             disableStyle={s.imageFade}
             onPress={()=>showBottomItem(BottomIcons.Archive)}
             source={require('../../../public/images/archive.png')}></PressImage>}
           <PressImage 
-            pressStyle={s.imageContainer}
+            pressStyle={gs.baseImageContainer}
             style={s.image}
             disable={shouldDisable(BottomIcons.Palette)}
             disableStyle={s.imageFade}
@@ -867,7 +888,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
             style={[s.image]}
             disable={shouldDisable(BottomIcons.Tags)}
             disableStyle={s.imageFade}
-            pressStyle={s.imageContainer}
+            pressStyle={gs.baseImageContainer}
             onPress={()=>showBottomItem(BottomIcons.Tags)}
             source={require('../../../public/images/tag.png')}></PressImage>
         </View>
@@ -876,7 +897,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
             style={s.image}
             disable={shouldDisable(BottomIcons.Sorted)}
             disableStyle={s.imageFade}
-            pressStyle={s.imageContainer}
+            pressStyle={gs.baseImageContainer}
             onPress={()=>showBottomItem(BottomIcons.Sorted)}
             confirm={true}
             confirmStyle={[s.image, s.greenImageColor]}
@@ -885,20 +906,21 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
             style={[s.image, !obj.IsShowingCheckedGrocery && s.imageFade]}
             disable={shouldDisable(BottomIcons.Checked)}
             disableStyle={s.imageFade}
-            pressStyle={s.imageContainer}
-            onPress={()=>showBottomItem(BottomIcons.Checked)}
+            pressStyle={gs.baseImageContainer}
+            onPress={onChangeShowingItems}
+            onLongPress={()=>showBottomItem(BottomIcons.Checked)}
             source={require('../../../public/images/checked.png')}></PressImage>
           {!isEditingPos && <PressImage 
               style={s.image}
               disable={shouldDisable(BottomIcons.Pos)}
               disableStyle={s.imageFade}
-              pressStyle={[s.imageContainer]}
+              pressStyle={[gs.baseImageContainer]}
               onPress={()=>showBottomItem(BottomIcons.Pos)}
               source={require('../../../public/images/change.png')}></PressImage>}
-          {isEditingPos && <PressImage pressStyle={s.imageContainer} style={[s.image, s.redImageColor]} onPress={cancelEditingPos} source={require('../../../public/images/cancel.png')}></PressImage>}
+          {isEditingPos && <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.redImageColor]} onPress={cancelEditingPos} source={require('../../../public/images/cancel.png')}></PressImage>}
           {isEditingPos && <PressImage 
             style={[s.imageSmall, s.greenImageColor]}
-            pressStyle={s.imageContainer}
+            pressStyle={gs.baseImageContainer}
             hide={itemsSelected.length=== 0 || itemsSelected.length === items.length || isEndingPos}
             onPress={onEditingPosTo}
             source={require('../../../public/images/arrow-right-filled.png')}></PressImage>}
@@ -907,12 +929,12 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
               style={[s.image, s.redImageColor]}
               disable={shouldDisable(BottomIcons.Add)}
               disableStyle={s.imageFade}
-              pressStyle={s.imageContainer}
+              pressStyle={gs.baseImageContainer}
               onPress={addingNewItem}
               source={require('../../../public/images/add-lock.png')}></PressImage>
             :
             <PressImage 
-              pressStyle={s.imageContainer}
+              pressStyle={gs.baseImageContainer}
               style={s.image}
               disable={shouldDisable(BottomIcons.Add)}
               disableStyle={s.imageFade}
@@ -924,7 +946,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     </View>
     :
     <View style={s.objEmptyContainer}>
-      <PressImage pressStyle={s.imageContainer} style={[s.image, {width: 30, height: 30}]} onPress={()=>{}} source={require('../../../public/images/list.png')}></PressImage>
+      <PressImage pressStyle={gs.baseImageContainer} style={[s.image, {width: 30, height: 30}]} onPress={()=>{}} source={require('../../../public/images/list.png')}></PressImage>
       <Text style={s.objEmptyText}>NO OBJECTIVE SELECTED</Text>
     </View>
     )
