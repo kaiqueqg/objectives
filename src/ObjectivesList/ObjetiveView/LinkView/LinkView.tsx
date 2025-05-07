@@ -78,9 +78,8 @@ const LinkView = (props: LinkViewProps) => {
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      marginBottom: 4,
-      marginHorizontal: 6,
-      minHeight: 40,
+      marginHorizontal: o.marginHorizontal,
+      marginVertical: o.marginVertical,
     },
     linksContainer:{
       flex: 1,
@@ -89,10 +88,10 @@ const LinkView = (props: LinkViewProps) => {
       alignItems: 'center',
       backgroundColor: (link.Title.trim() !=='')?colorPalette.transparent:o.itembk,
       
-      borderRadius: 5,
       borderColor: (link.Title.trim() !=='')?colorPalette.transparent:o.bordercolor,
       borderWidth: 1,
       borderStyle: 'solid',
+      borderRadius: o.borderRadius,
     },
     linksContainerSelected:{
       borderStyle: 'dashed',
@@ -222,7 +221,7 @@ const LinkView = (props: LinkViewProps) => {
                 placeholder="Title"
                 defaultValue={link.Title}
                 onSubmitEditing={onDoneLink}
-                onChangeText={(value: string)=>{setNewTitle(value)}}></TextInput>
+                onChangeText={(value: string)=>{setNewTitle(value)}} autoFocus></TextInput>
               <TextInput 
                 style={s.inputStyle}
                 placeholderTextColor={o.itemtextfade}

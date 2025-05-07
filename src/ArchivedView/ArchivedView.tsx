@@ -6,7 +6,7 @@ import PressText from "../PressText/PressText";
 import { Objective, Pattern, Views } from "../Types";
 import PressImage from "../PressImage/PressImage";
 import DragList, { DragListRenderItemInfo } from "react-native-draglist";
-import React, { DO_NOT_USE_OR_YOU_WILL_BE_FIRED_CALLBACK_REF_RETURN_VALUES, useEffect, useState } from "react";
+import React, { DO_NOT_USE_OR_YOU_WILL_BE_FIRED_CALLBACK_REF_RETURN_VALUES, JSX, useEffect, useState } from "react";
 import { useLogContext } from "../Contexts/LogContext";
 import { useStorageContext } from "../Contexts/StorageContext";
 
@@ -18,15 +18,33 @@ const ArchivedView = (props: ArchivedViewProps) => {
   const { 
     theme: t,
     fontTheme: f,
+    currentObjectiveId,
     objectives,
     writeCurrentView,
     writeCurrentObjectiveId,
     putObjective,
     selectedTags, writeSelectedTags, putSelectedTags, removeSelectedTags,
+    userPrefs,
   } = useUserContext();
 
   const [archivedObjectives, setArchivedObjectives] = useState<Objective[]>([]);
   const [archivedTags, setArchivedTags] = useState<string[]>([]);
+
+  useEffect(()=>{
+    const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+      if(currentObjectiveId) {
+        writeCurrentView(Views.IndividualView);
+      }
+      else{
+        if(userPrefs.vibrate) Vibration.vibrate(Pattern.Wrong);
+      }
+      return true;
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
 
   useEffect(()=>{
     const archivedObjectives = objectives.filter(obj => obj.IsArchived);

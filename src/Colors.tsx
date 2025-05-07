@@ -126,6 +126,7 @@ export const colorPalette: ColorPalette = {
 
 export type GlobalStyle = {
   baseImageContainer: ViewStyle,
+  baseBiggerImageContainer: ViewStyle,
   baseImage: ViewStyle,
   baseBiggerImage: ViewStyle,
   baseSmallImage: ViewStyle,
@@ -134,14 +135,20 @@ export type GlobalStyle = {
 
 export const globalStyle:GlobalStyle = {
   baseImageContainer: {
-    height: 50,
-    width: 50,
+    height: 40,
+    width: 40,
     alignItems: 'center',
     justifyContent: 'center',
 
     // borderColor: 'red',
     // borderWidth: 1,
     // borderStyle: 'solid',
+  },
+  baseBiggerImageContainer:{
+    height: 45,
+    width: 45,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   baseImage: {
     height: 25,
@@ -249,6 +256,10 @@ export type ObjectivePallete = {
   itemtext?: string,
   itemtextfade?: string,
   itemtextplaceholder?: string,
+
+  borderRadius: number,
+  marginHorizontal: number,
+  marginVertical: number,
 }
 
 export const noTheme: ObjectivePallete = {
@@ -270,6 +281,10 @@ export const noTheme: ObjectivePallete = {
   itemtext: colorPalette.beige,
   itemtextfade: colorPalette.grey,
   itemtextplaceholder: colorPalette.beigedarker,
+  
+  borderRadius: 5,
+  marginHorizontal: 6,
+  marginVertical: 1,
 }
 
 export const darkBlue: ObjectivePallete = {
@@ -309,6 +324,7 @@ export const darkWhite: ObjectivePallete = {
   
   doneicontint: colorPalette.greendarker,
   trashicontint: colorPalette.reddarker,
+  cancelicontint: colorPalette.black,
   
   objbk: colorPalette.objWhite,
   objtitle: colorPalette.black,

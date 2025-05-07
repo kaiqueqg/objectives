@@ -1,11 +1,11 @@
-import { View, StyleSheet, Text, TextInput, Vibration , Pressable} from "react-native";
+import { View, StyleSheet, Text, TextInput, Vibration , Pressable, BackHandler} from "react-native";
 import { useUserContext } from "../Contexts/UserContext";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import PressInput from "../PressInput/PressInput";
 import PressText from "../PressText/PressText";
 import Loading from "../Loading/Loading";
 import { colorPalette, dark, globalStyle as gs } from "../Colors";
-import { Pattern, UserPrefs } from "../Types";
+import { Pattern, UserPrefs, Views } from "../Types";
 import { useLogContext } from "../Contexts/LogContext";
 import { useRequestContext } from "../Contexts/RequestContext";
 import PressImage from "../PressImage/PressImage";
@@ -16,6 +16,7 @@ export interface UserViewProps {
 const UserView = (props: UserViewProps) => {
   const { identityApi, objectivesApi } = useRequestContext();
   const { log, popMessage } = useLogContext();
+  const { writeCurrentView } = useUserContext();
   const { theme: t, fontTheme: f, user, writeUser, writeJwtToken, userPrefs, writeUserPrefs, clearAllData } = useUserContext();
 
   const [email, setEmail] = useState<string>('');
@@ -24,6 +25,17 @@ const UserView = (props: UserViewProps) => {
   const [isLogged, setIsLogged] = useState<boolean>(false);
   const [isShowingPassword, setIsShowingPassword] = useState<boolean>(false);
   const [isBackingUpData, setIsBackingUpData] = useState<boolean>(false);
+
+  useEffect(()=>{
+    const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+      writeCurrentView(Views.ListView);
+      return true;
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
 
   const parseJwt = (token :string) => {
     var base64Url = token.split('.')[1];
@@ -93,10 +105,10 @@ const UserView = (props: UserViewProps) => {
     const data = await objectivesApi.backupData(() => {});
 
     if(data){
-      log.popMessage("Backup Ok");
+      popMessage("Backup Ok");
     }
     else{
-      log.popMessage("Backup Fail");
+      popMessage("Backup Fail");
     }
 
     setIsBackingUpData(false);

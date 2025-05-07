@@ -45,8 +45,8 @@ const WaitView = (props: WaitViewProps) => {
       alignItems: 'center',
       flex: 1,
       flexDirection: 'row',
-      marginBottom: 4,
-      marginHorizontal: 6,
+      marginHorizontal: o.marginHorizontal,
+      marginVertical: o.marginVertical,
     },
     titleContainer:{
       flex: 1,
@@ -55,10 +55,10 @@ const WaitView = (props: WaitViewProps) => {
       alignItems: 'center',
       backgroundColor: wait.Title.trim() !== ''?o.objbk:o.itembk,
       
-      borderRadius: 5,
       borderColor: wait.Title.trim() !== ''?o.objbk:o.bordercolor,
       borderWidth: 1,
       borderStyle: 'solid',
+      borderRadius: o.borderRadius,
     },
     titleContainerSelected:{
       borderStyle: 'dashed',

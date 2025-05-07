@@ -16,11 +16,20 @@ export interface MainProps{
 
 const DevView = (props: MainProps) => {
   const { log, consoleLogs, deleteLog } = useLogContext();
+  const { writeCurrentView } = useUserContext();
   const { syncObjectivesList } = props;
 
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
 
   useEffect(()=>{
+    const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+      writeCurrentView(Views.ListView);
+      return true;
+    });
+
+    return () => {
+      subscription.remove();
+    };
   }, []);
 
   const clear = () => {

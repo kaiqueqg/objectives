@@ -199,8 +199,7 @@ const ImageView = (props: ImageViewProps) => {
   }
 
   const getTitle = (): string => {
-    image.Name? 'has name': log.b('not image name');
-
+    //image.Name? 'has name': log.b('not image name');
     return image.Title;
   }
 
@@ -210,9 +209,8 @@ const ImageView = (props: ImageViewProps) => {
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      marginBottom: 4,
-      marginHorizontal: 6,
-      minHeight: 40,
+      marginHorizontal: o.marginHorizontal,
+      marginVertical: o.marginVertical,
     },
     imageViewContainer:{
       flex: 1,
@@ -221,10 +219,10 @@ const ImageView = (props: ImageViewProps) => {
       alignItems: 'center',
       backgroundColor: o.itembk,
       
-      borderRadius: 5,
       borderColor: o.bordercolor,
       borderWidth: 1,
       borderStyle: 'solid',
+      borderRadius: o.borderRadius,
     },
     imageViewContainerSelected:{
       borderStyle: 'dashed',

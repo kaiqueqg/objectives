@@ -3,21 +3,22 @@ import { ThemePalette, colorPalette, getObjTheme, globalStyle as gs } from "../C
 import { FontPalette } from "../../fonts/Font";
 import { useUserContext } from "../Contexts/UserContext";
 import PressText from "../PressText/PressText";
-import { Objective, Pattern, Views } from "../Types";
+import { MessageType, Objective, Pattern, Views } from "../Types";
 import PressImage from "../PressImage/PressImage";
 import DragList, { DragListRenderItemInfo } from "react-native-draglist";
-import React, { useEffect, useState } from "react";
+import React, { JSX, useEffect, useState } from "react";
 import { useLogContext } from "../Contexts/LogContext";
 import { useStorageContext } from "../Contexts/StorageContext";
 
 export interface ObjsListViewProps {
 }
 const ObjsListView = (props: ObjsListViewProps) => {
-  const { log } = useLogContext();
+  const { log, popMessage } = useLogContext();
   const { storage } = useStorageContext();
   const { 
     theme: t,
     fontTheme: f,
+    currentObjectiveId,
     objectives,
     putObjective,
     putObjectives,
@@ -35,11 +36,27 @@ const ObjsListView = (props: ObjsListViewProps) => {
   const [unarchivedTags, setUnarchivedTags] = useState<string[]>([]);
 
   useEffect(()=>{
+      const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+        if(currentObjectiveId) {
+          writeCurrentView(Views.IndividualView);
+        }
+        else{
+          if(userPrefs.vibrate) Vibration.vibrate(Pattern.Wrong);
+        }
+        return true;
+      });
+  
+      return () => {
+        subscription.remove();
+      };
+    }, []);
+
+  useEffect(()=>{
     const unarchivedObjectives = objectives.filter(obj => !obj.IsArchived);
     setUnarchivedObjectives(unarchivedObjectives);
 
     let unarchivedTags = unarchivedObjectives.map(obj => obj.Tags).flat();
-    const uniqueUnarchivedTags = Array.from(new Set([...unarchivedTags]));
+    const uniqueUnarchivedTags = Array.from(new Set(['Pin', ...unarchivedTags]));
     setUnarchivedTags(uniqueUnarchivedTags);
   }, [objectives, availableTags, selectedTags]);
 
@@ -151,17 +168,23 @@ const ObjsListView = (props: ObjsListViewProps) => {
   }
 
   const selectUnselectedTag = (tag: string) => {
-    if(onlySelectOneTag) {
-      writeSelectedTags([tag]);
-    }
-    else{
-      const isSelected = selectedTags.some(obj => obj === tag);
-      if(isSelected){
-        removeSelectedTags([tag]);
+    if(tag.trim() !== 'Pin') {
+      if(onlySelectOneTag) {
+        writeSelectedTags([tag]);
       }
       else{
-        putSelectedTags([tag]);
+        const isSelected = selectedTags.some(obj => obj === tag);
+        if(isSelected){
+          removeSelectedTags([tag]);
+        }
+        else{
+          putSelectedTags([tag]);
+        }
       }
+    }
+    else{
+      if(userPrefs.vibrate) Vibration.vibrate(Pattern.Wrong);
+      popMessage(`You can't unselect "Pin" tag.`, MessageType.Error, 3);
     }
   }
 
@@ -171,10 +194,6 @@ const ObjsListView = (props: ObjsListViewProps) => {
 
   const unselectAllTags = () => {
     writeSelectedTags([]);
-  }
-
-  const onlySelectedThisTag = (tag: string) => {
-    writeSelectedTags([tag]);
   }
 
   const getTagButton = ({item}:any):JSX.Element|null=> {
@@ -267,7 +286,8 @@ const ObjsListView = (props: ObjsListViewProps) => {
       padding: 10,
     },
     tagsList:{
-      paddingVertical: 15,
+      paddingTop: 10,
+      paddingBottom: 15,
       paddingHorizontal: 15,
     },
     objectivesList:{
@@ -279,6 +299,7 @@ const ObjsListView = (props: ObjsListViewProps) => {
       flexDirection: 'row',
       justifyContent: 'flex-end',
       alignItems: 'center',
+      backgroundColor: colorPalette.bluedarkerdarker,
 
       borderColor: colorPalette.beigedark,
       borderWidth: 1,
@@ -313,14 +334,14 @@ const ObjsListView = (props: ObjsListViewProps) => {
       color: 'white',
     },
     imageNoTint:{
-      ...gs.baseImage,
+      ...gs.baseSmallImage,
     },
     image:{
-      ...gs.baseImage,
+      ...gs.baseSmallImage,
       tintColor: colorPalette.beige,
     },
     imageUpDown:{
-      ...gs.baseImage,
+      ...gs.baseSmallImage,
       tintColor: colorPalette.beige,
     },
     imageFade:{
@@ -353,7 +374,7 @@ const ObjsListView = (props: ObjsListViewProps) => {
       justifyContent: 'center',
       alignItems: 'center',
 
-      borderColor: colorPalette.black,
+      borderColor: colorPalette.greydarky,
       borderWidth: 1,
       borderRadius: 5,
       borderStyle: 'solid',
@@ -378,13 +399,31 @@ const ObjsListView = (props: ObjsListViewProps) => {
       borderColor: colorPalette.beigedark,
       borderWidth: 1,
       borderStyle: 'solid',
-      
     },
     tagButtonContainerSelected:{
       justifyContent: 'center',
       alignItems: 'center',
       borderColor: colorPalette.beige,
       backgroundColor: colorPalette.bluedarkerdarker
+    },
+    allNoneTagContainer:{
+      display:'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      minHeight: 40,
+      marginTop: 10,
+      marginHorizontal: 15,
+
+      borderRadius: 30,
+      borderWidth: 1,
+      borderStyle: 'solid',
+      borderColor: colorPalette.beige,
+      backgroundColor: colorPalette.beige
+    },
+    allNoneTagText:{
+      fontSize: 16,
+      padding: 10,
+      color: colorPalette.black,
     },
     text: {
       padding: 10,
@@ -417,6 +456,16 @@ const ObjsListView = (props: ObjsListViewProps) => {
       <View style={s.containerList}>
         <View style={s.containerListTag}>
           <Text style={s.containerListTitle}>TAGS</Text>
+          <PressText 
+            style={[s.allNoneTagContainer]}
+            textStyle={[s.allNoneTagText]}
+            onPress={selectAllTags}
+            text={'ALL'}></PressText>
+          <PressText 
+            style={[s.allNoneTagContainer]}
+            textStyle={[s.allNoneTagText]}
+            onPress={unselectAllTags}
+            text={'NONE'}></PressText>
           <FlatList style={s.tagsList} data={unarchivedTags} keyExtractor={tagKeyExtractor} renderItem={getTagButton} ListFooterComponent={<View style={{ height: 300 }} />}/>
         </View>
         <View style={s.containerListObjs}>
@@ -426,9 +475,9 @@ const ObjsListView = (props: ObjsListViewProps) => {
       </View>
       <View style={s.bottomMenu}>
         <View style={s.leftBottomMenu}>
-          <PressImage style={[s.imageNoTint, isEditingPos&&s.imageFade]} pressStyle={gs.baseImageContainer} onPress={selectAllTags} disable={isEditingPos} source={require('../../public/images/tag.png')}></PressImage>
-          <PressImage style={[s.imageNoTint, isEditingPos&&s.imageFade]} pressStyle={gs.baseImageContainer} onPress={unselectAllTags} disable={isEditingPos} source={require('../../public/images/tagnone.png')}></PressImage>
-          <PressImage style={[s.imageNoTint, isEditingPos&&s.imageFade, !onlySelectOneTag&&s.imageFade]} pressStyle={gs.baseImageContainer} onPress={()=>{setOnlySelectOneTag(!onlySelectOneTag)}} disable={isEditingPos} source={require('../../public/images/tagsingle.png')}></PressImage>
+          {/* <PressImage style={[s.imageNoTint, isEditingPos&&s.imageFade]} pressStyle={gs.baseBiggerImageContainer} onPress={selectAllTags} disable={isEditingPos} source={require('../../public/images/tag.png')}></PressImage>
+          <PressImage style={[s.imageNoTint, isEditingPos&&s.imageFade]} pressStyle={gs.baseBiggerImageContainer} onPress={unselectAllTags} disable={isEditingPos} source={require('../../public/images/tagnone.png')}></PressImage> */}
+          <PressImage style={[s.imageNoTint, isEditingPos&&s.imageFade, !onlySelectOneTag&&s.imageFade]} pressStyle={gs.baseBiggerImageContainer} onPress={()=>{setOnlySelectOneTag(!onlySelectOneTag)}} disable={isEditingPos} source={require('../../public/images/tagsingle.png')}></PressImage>
         </View>
         <View style={s.rightBottomMenu}>
           {!isEditingPos && 
@@ -436,13 +485,13 @@ const ObjsListView = (props: ObjsListViewProps) => {
             onPress={startEditingPos}
             style={s.imageUpDown}
             disableStyle={s.imageFade}
-            pressStyle={gs.baseImageContainer}
+            pressStyle={gs.baseBiggerImageContainer}
             disable={objectives.length < 2}
             source={require('../../public/images/change.png')}
           ></PressImage>}
-          {isEditingPos && <PressImage pressStyle={gs.baseImageContainer} style={s.image} onPress={cancelEditingPos} source={require('../../public/images/cancel.png')}></PressImage>}
-          {isEditingPos && <PressImage pressStyle={gs.baseImageContainer} hide={objectivesSelected.length=== 0 || isEndingPos} style={s.image} onPress={onEditingPosTo} source={require('../../public/images/arrow-right-filled.png')}></PressImage>}
-          <PressImage style={[s.image, isEditingPos&&s.imageFade]} pressStyle={gs.baseImageContainer} onPress={onAddNewObjective} disable={isEditingPos} source={require('../../public/images/plus-one.png')}></PressImage>
+          {isEditingPos && <PressImage pressStyle={gs.baseBiggerImageContainer} style={s.image} onPress={cancelEditingPos} source={require('../../public/images/cancel.png')}></PressImage>}
+          {isEditingPos && <PressImage pressStyle={gs.baseBiggerImageContainer} hide={objectivesSelected.length=== 0 || isEndingPos} style={s.image} onPress={onEditingPosTo} source={require('../../public/images/arrow-right-filled.png')}></PressImage>}
+          <PressImage style={[s.image, isEditingPos&&s.imageFade]} pressStyle={gs.baseBiggerImageContainer} onPress={onAddNewObjective} disable={isEditingPos} source={require('../../public/images/plus-one.png')}></PressImage>
         </View>
       </View>
     </View>

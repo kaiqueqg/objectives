@@ -159,9 +159,8 @@ const ExerciseView = (props: ExerciseViewProps) => {
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      marginBottom: 4,
-      marginHorizontal: 6,
-      minHeight: 40,
+      marginHorizontal: o.marginHorizontal,
+      marginVertical: o.marginVertical,
     },
     exerciseContainer:{
       flex: 1,
@@ -170,10 +169,10 @@ const ExerciseView = (props: ExerciseViewProps) => {
       alignItems: 'center',
       backgroundColor: exercise.IsDone? o.objbk:o.itembk,
       
-      borderRadius: 5,
       borderColor: exercise.IsDone?colorPalette.transparent:o.bordercolor,
       borderWidth: 1,
       borderStyle: 'solid',
+      borderRadius: o.borderRadius,
     },
     exerciseContainerSelected:{
       borderStyle: 'dashed',
@@ -288,7 +287,7 @@ const ExerciseView = (props: ExerciseViewProps) => {
                 placeholderTextColor={o.itemtextfade}
                 placeholder="Title"
                 defaultValue={exercise.Title}
-                onChangeText={(value: string)=>{setNewExercise({...newExercise, Title: value})}}></TextInput>
+                onChangeText={(value: string)=>{setNewExercise({...newExercise, Title: value})}} autoFocus></TextInput>
               <TextInput 
                 style={s.inputStyle}
                 placeholderTextColor={o.itemtextfade}
@@ -333,6 +332,7 @@ const ExerciseView = (props: ExerciseViewProps) => {
             </View>  
             <View style={s.inputsRight}>
               <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageDone]} source={require('../../../../public/images/done.png')} onPress={doneEdit}></PressImage>
+              <View style={gs.baseImageContainer}></View>
               <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageCancel]} source={require('../../../../public/images/cancel.png')} onPress={onCancelExercise}></PressImage>
             </View>
           </View>

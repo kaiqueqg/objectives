@@ -2,7 +2,7 @@ import { View, StyleSheet, FlatList, Text, Vibration, BackHandler, Pressable } f
 import { ThemePalette, colorPalette, getObjTheme } from "../Colors";
 import { FontPalette } from "../../fonts/Font";
 import { useUserContext } from "../Contexts/UserContext";
-import React, { useEffect, useState } from "react";
+import React, { JSX, useEffect, useState } from "react";
 import { useLogContext } from "../Contexts/LogContext";
 import { useStorageContext } from "../Contexts/StorageContext";
 

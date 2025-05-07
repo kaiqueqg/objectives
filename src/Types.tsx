@@ -24,7 +24,7 @@ export interface Objective {
   Tags: string[],
 }
 
-export enum ItemType{ Step, Wait, Question, Note, Location, Divider, Grocery, Medicine, Exercise, Link, ItemFake, Image, /*put new before here*/ Unknown,  }
+export enum ItemType{ Step, Wait, Question, Note, Location, Divider, Grocery, Medicine, Exercise, Link, ItemFake, Image, House, /*put new before here*/ Unknown,  }
 
 export interface ItemViewProps {
   objTheme: ObjectivePallete,
@@ -60,7 +60,8 @@ export enum StepImportance {
   High,
   Question,
   Waiting,
-  InProgress 
+  InProgress,
+  Ladybug,
 }
 export interface Step extends Item {
   Title: string,
@@ -134,6 +135,19 @@ export interface Image extends Item{
   Width: number,
   Height: number,
   IsDisplaying: boolean;
+}
+
+export interface House extends Item{
+  Title: string,
+  Listing: string,
+  MapLink: string,
+  MeterSquare: string,
+  Rating: number,
+  Address: string,
+  TotalPrice: number,
+  WasContacted: boolean,
+  Details: string,
+  Attention: string,
 }
 
 export interface PresignedUrl { url: string }

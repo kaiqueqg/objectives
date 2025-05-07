@@ -45,8 +45,8 @@ const NoteView = (props: NoteViewProps) => {
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      marginBottom: 4,
-      marginHorizontal: 6,
+      marginHorizontal: o.marginHorizontal,
+      marginVertical: o.marginVertical,
     },
     titleContainer:{
       flex: 1,
@@ -55,10 +55,10 @@ const NoteView = (props: NoteViewProps) => {
       alignItems: 'center',
       backgroundColor: note.Text.trim() === ''?o.itembk:o.objbk,
       
-      borderRadius: 5,
       borderColor: note.Text.trim() === ''?o.bordercolor:o.objbk,
       borderWidth: 1,
       borderStyle: 'solid',
+      borderRadius: o.borderRadius,
     },
     titleContainerSelected:{
       borderStyle: 'dashed',

@@ -49,19 +49,17 @@ const Main = (props: MainProps) => {
       }
     });
 
-    const handleBack = () => {
-      if(currentView === Views.IndividualView || currentView === Views.UserView || currentView === Views.AllView)
-        writeCurrentView(Views.ListView);
-      else
-        BackHandler.exitApp();
+    // const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+    //   if(currentView === Views.IndividualView || currentView === Views.UserView || currentView === Views.AllView)
+    //     writeCurrentView(Views.ListView);
+    //   else
+    //     BackHandler.exitApp();
       
-      return true;
-    };
-
-    BackHandler.addEventListener('hardwareBackPress', handleBack);
-    return () => {
-      BackHandler.removeEventListener('hardwareBackPress', handleBack);
-    };
+    //   return true;
+    // });
+    // return () => {
+    //   subscription.remove();
+    // };
   }, []);
   
   useEffect(()=>{
@@ -236,9 +234,9 @@ const Main = (props: MainProps) => {
     else if(currentView === Views.ListView){
       return <ObjsListView></ObjsListView>
     }
-    // else if(currentView === Views.DevView){
-    //   return <DevView syncObjectivesList={syncObjectivesList}></DevView>
-    // }
+    else if(currentView === Views.DevView){
+      return <DevView syncObjectivesList={syncObjectivesList}></DevView>
+    }
     else if(currentView === Views.TagsView){
       return <TagsView></TagsView>
     }

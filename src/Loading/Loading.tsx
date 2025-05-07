@@ -39,14 +39,14 @@ const Loading: React.FC<Props> = () => {
 
   const s = (theme: ThemePalette) => StyleSheet.create({
     container: {
-      width: 30,
-      height: 30,
-      margin: 10,
+      alignItems: 'center',
+      justifyContent: 'center',
+      width: 40,
+      height: 40,
     },
     image: {
-      flex: 1,
-      width: 30,
-      height: 30,
+      width: 25,
+      height: 25,
       tintColor: theme.inprogressicontint,
     },
   });

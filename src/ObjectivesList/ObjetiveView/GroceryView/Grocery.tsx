@@ -79,9 +79,8 @@ const GroceryView = (props: GroceryViewProps) => {
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      marginBottom: 4,
-      marginHorizontal: 6,
-      minHeight: 40,
+      marginHorizontal: o.marginHorizontal,
+      marginVertical: o.marginVertical,
     },
     groceryContainer:{
       flex: 1,
@@ -90,10 +89,10 @@ const GroceryView = (props: GroceryViewProps) => {
       alignItems: 'center',
       backgroundColor: grocery.IsChecked? o.objbk:o.itembk,
       
-      borderRadius: 5,
       borderColor: grocery.IsChecked?colorPalette.transparent:o.bordercolor,
       borderWidth: 1,
       borderStyle: 'solid',
+      borderRadius: o.borderRadius,
     },
     groceryContainerSelected:{
       borderStyle: 'dashed',
@@ -189,7 +188,7 @@ const GroceryView = (props: GroceryViewProps) => {
                 placeholderTextColor={o.itemtextfade}
                 placeholder="Title"
                 defaultValue={grocery.Title}
-                onChangeText={(value: string)=>{setTempGrocery({...tempGrocery, Title: value})}}></TextInput>
+                onChangeText={(value: string)=>{setTempGrocery({...tempGrocery, Title: value})}} autoFocus></TextInput>
               <TextInput 
                 style={s.inputStyle}
                 placeholder="Quatity"

@@ -82,9 +82,8 @@ const MedicineView = (props: MedicineViewProps) => {
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      marginBottom: 4,
-      marginHorizontal: 6,
-      minHeight: 40,
+      marginHorizontal: o.marginHorizontal,
+      marginVertical: o.marginVertical,
     },
     medicineContainer:{
       flex: 1,
@@ -93,10 +92,10 @@ const MedicineView = (props: MedicineViewProps) => {
       alignItems: 'center',
       backgroundColor: medicine.IsChecked? o.objbk:o.itembk,
       
-      borderRadius: 5,
       borderColor: medicine.IsChecked?colorPalette.transparent:o.bordercolor,
       borderWidth: 1,
       borderStyle: 'solid',
+      borderRadius: o.borderRadius,
     },
     medicineContainerSelected:{
       borderStyle: 'dashed',
@@ -184,7 +183,11 @@ const MedicineView = (props: MedicineViewProps) => {
 
   return (
     <View style={s.container}>
-      <View style={[s.medicineContainer, props.isSelected && s.medicineContainerSelected, props.isSelected && props.isEndingPos && s.medicineContainerEnding]}>
+      <View style={
+        [s.medicineContainer, 
+          props.isSelected && s.medicineContainerSelected, 
+          props.isSelected && props.isEndingPos &&
+          s.medicineContainerEnding]}>
         {!isEditingPos && isEditingMedicine?
           <View style={s.inputsContainer}>
             <View style={s.inputsLeft}>
@@ -196,7 +199,7 @@ const MedicineView = (props: MedicineViewProps) => {
                 placeholderTextColor={o.itemtextfade}
                 placeholder="Title"
                 defaultValue={medicine.Title}
-                onChangeText={(value: string)=>{setTempMedicine({...tempMedicine, Title: value})}}></TextInput>
+                onChangeText={(value: string)=>{setTempMedicine({...tempMedicine, Title: value})}} autoFocus></TextInput>
               <TextInput 
                 style={s.inputStyle}
                 placeholderTextColor={o.itemtextfade}
@@ -226,14 +229,12 @@ const MedicineView = (props: MedicineViewProps) => {
             </View>
           </View>
           :
-          <>
-            <PressText
-              style={s.titleContainer}
-              textStyle={medicine.IsChecked? s.titleFade:s.title}
-              text={getText()}
-              onPress={()=>{if(!isEditingPos)setIsEditingMedicine(!isEditingMedicine)}}
-              ></PressText>
-          </>
+          <PressText
+            style={s.titleContainer}
+            textStyle={medicine.IsChecked? s.titleFade:s.title}
+            text={getText()}
+            onPress={()=>{if(!isEditingPos)setIsEditingMedicine(!isEditingMedicine)}}
+            ></PressText>
         }
         {!isEditingMedicine && !medicine.IsChecked && <PressImage pressStyle={gs.baseImageContainer} style={s.image} source={require('../../../../public/images/medicine.png')} onPress={() => {if(!isEditingPos)onChangeIsChecked();}}></PressImage>}
         {!isEditingMedicine && medicine.IsChecked && <PressImage pressStyle={gs.baseImageContainer} style={s.imageFade} source={require('../../../../public/images/medicine-filled.png')} onPress={() => {if(!isEditingPos)onChangeIsChecked();}}></PressImage>}

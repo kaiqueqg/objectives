@@ -145,7 +145,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const [availableTags, setAvailableTags] = useState<string[]>([]);
   const writeAvailableTags = async (availableTags: string[]) => {
     try {
-      const uniqueTags = Array.from(new Set(availableTags));
+      const uniqueTags: string[] = Array.from(new Set(['Pin', ...availableTags]));
       await storage.writeAvailableTags(uniqueTags);
       setAvailableTags(uniqueTags);
     } catch (err) {
@@ -155,8 +155,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const putAvailableTags = async (tags: string[]) => {
     try {
       const newTags = Array.from(new Set([...availableTags, ...tags]));
-      await storage.writeAvailableTags(newTags);
-      setAvailableTags(newTags);
+      await writeAvailableTags(newTags);
     } catch (err) {
       log.err('putAvailableTags', 'Problem putting available tags', err);
     }
@@ -164,39 +163,35 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const removeAvailableTags = async (tags: string[]) => {
     try {
       const newTags = availableTags.filter(t => !tags.includes(t));
-      await storage.writeAvailableTags(newTags);
-      setAvailableTags(newTags);
+      await writeAvailableTags(newTags);
     } catch (err) {
       log.err('removeAvailableTags', 'Problem removing available tags', err);
     }
   };
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const removeSelectedTags = async (tags: string[]) => {
-    try {
-      const newTags = selectedTags.filter(t => !tags.includes(t));
-      await storage.writeSelectedTags(newTags);
-      setSelectedTags(newTags);
-    } catch (err) {
-      log.err('removeSelectedTags', 'Problem removing selected tags', err);
-    }
-  };
-
-  const putSelectedTags = async (tags: string[]) => {
-    try {
-      const newTags = Array.from(new Set([...selectedTags, ...tags]));
-      await storage.writeSelectedTags(newTags);
-      setSelectedTags(newTags);
-    } catch (err) {
-      log.err('putSelectedTags', 'Problem putting selected tags', err);
-    }
-  };
   const writeSelectedTags = async (selectedTags: string[]) => {
     try {
-      const uniqueTags = Array.from(new Set(selectedTags));
+      const uniqueTags: string[] = Array.from(new Set(['Pin', ...selectedTags]));
       await storage.writeSelectedTags(uniqueTags);
       setSelectedTags(uniqueTags);
     } catch (err) {
       log.err('SelectedTags', 'Problem writing selected tags', err);
+    }
+  };
+  const putSelectedTags = async (tags: string[]) => {
+    try {
+      const newTags = Array.from(new Set([...selectedTags, ...tags]));
+      await writeSelectedTags(newTags);
+    } catch (err) {
+      log.err('putSelectedTags', 'Problem putting selected tags', err);
+    }
+  };
+  const removeSelectedTags = async (tags: string[]) => {
+    try {
+      const newTags = selectedTags.filter(t => !tags.includes(t));
+      await writeSelectedTags(newTags);
+    } catch (err) {
+      log.err('removeSelectedTags', 'Problem removing selected tags', err);
     }
   };
 

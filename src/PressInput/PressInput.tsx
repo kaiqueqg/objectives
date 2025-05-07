@@ -5,9 +5,11 @@ import { useUserContext } from "../Contexts/UserContext";
 import { ObjectivePallete, globalStyle as gs } from "../Colors";
 import { FontPalette } from "../../fonts/Font";
 import React from "react";
+import { useLogContext } from "../Contexts/LogContext";
 
 export interface PressInputProps {
   onDone: (newText: string) => void,
+  onChangeText?: (newText: string) => void,
 
   onDelete?: () => void,
   confirmDelete?: boolean,
@@ -29,10 +31,12 @@ export interface PressInputProps {
   defaultStyle?: any,
 
   multiline?: boolean,
+  shouldntEndEditOnDone?: boolean,
 }
 
 const PressInput = (props: PressInputProps) => {
   const { theme: t, fontTheme: f } = useUserContext();
+  const { log } = useLogContext();
   const { objTheme: o } = props;
 
   const [newText, setNewText] = useState<string>(props.text);
@@ -51,11 +55,13 @@ const PressInput = (props: PressInputProps) => {
 
   const handleChangeText = (value: string) => {
     setNewText(value);
+    if(props.onChangeText) props.onChangeText(value);
   };
   
   const onDone = () => {
     setIsDeleting(false);
-    changeEditing(false);
+    log.r(props.shouldntEndEditOnDone);
+    // if(!props.shouldntEndEditOnDone) changeEditing(false);
     props.onDone(newText);
     setNewText(props.text);
   }
@@ -145,7 +151,7 @@ const PressInput = (props: PressInputProps) => {
             multiline={props.multiline?? false} 
             autoFocus={true}
             value={newText}
-            onSubmitEditing={onDone} 
+            onSubmitEditing={onDone}
             onChangeText={handleChangeText}
             onContentSizeChange={onChange}
             selectionColor={t.textcolor}

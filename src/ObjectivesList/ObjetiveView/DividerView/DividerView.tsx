@@ -75,13 +75,11 @@ const DividerView = (props: DividerViewProps) => {
       flex: 1,
       justifyContent: 'center',
       alignItems: 'center',
-      marginBottom: 4,
-      marginHorizontal: 6,
-      minHeight: 40,
-
+      marginHorizontal: o.marginHorizontal,
+      marginVertical: o.marginVertical,
+      borderRadius: o.borderRadius,
     },
     dividerContainerOpen:{
-      borderRadius: 5,
       borderColor: colorPalette.beigedark,
       borderWidth: 1,
       borderStyle: 'solid',

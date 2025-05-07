@@ -157,9 +157,8 @@ const LocationView = (props: LocationViewProps) => {
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      marginBottom: 4,
-      marginHorizontal: 6,
-      minHeight: 40,
+      marginHorizontal: o.marginHorizontal,
+      marginVertical: o.marginVertical,
     },
     locationContainer:{
       flex: 1,
@@ -168,10 +167,10 @@ const LocationView = (props: LocationViewProps) => {
       alignItems: 'center',
       backgroundColor: location.Url.trim() !== ''? o.objbk:o.itembk,
       
-      borderRadius: 5,
       borderColor: location.Url.trim() !== ''?colorPalette.transparent:o.bordercolor,
       borderWidth: 1,
       borderStyle: 'solid',
+      borderRadius: o.borderRadius,
     },
     locationContainerSelected:{
       borderStyle: 'dashed',
@@ -289,7 +288,7 @@ const LocationView = (props: LocationViewProps) => {
                 placeholderTextColor={o.itemtextfade}
                 placeholder="Title"
                 defaultValue={location.Title}
-                onChangeText={(value: string)=>{setTempLocation({...tempLocation, Title: value})}}></TextInput>
+                onChangeText={(value: string)=>{setTempLocation({...tempLocation, Title: value})}} autoFocus></TextInput>
 
               <View style={s.urlInputContainer}>
                 <TextInput

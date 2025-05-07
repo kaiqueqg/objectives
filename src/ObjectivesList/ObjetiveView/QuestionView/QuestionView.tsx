@@ -52,9 +52,8 @@ const QuestionView = (props: QuestionViewProps) => {
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      marginBottom: 4,
-      marginHorizontal: 6,
-      minHeight: 40,
+      marginHorizontal: o.marginHorizontal,
+      marginVertical: o.marginVertical,
     },
     questionContainer:{
       flex: 1,
@@ -63,10 +62,10 @@ const QuestionView = (props: QuestionViewProps) => {
       alignItems: 'center',
       backgroundColor: (question.Statement.trim() !== '' && question.Answer.trim() !== '')? o.objbk:o.itembk,
       
-      borderRadius: 5,
       borderColor: (question.Statement.trim() !== '' && question.Answer.trim() !== '')?colorPalette.transparent:o.bordercolor,
       borderWidth: 1,
       borderStyle: 'solid',
+      borderRadius: o.borderRadius,
     },
     questionContainerSelected:{
       borderStyle: 'dashed',
@@ -115,7 +114,7 @@ const QuestionView = (props: QuestionViewProps) => {
       tintColor: o.itemtext,
     },
     imageAnswerFade:{
-      tintColor: o.itemtextfade,
+      tintColor: o.itemtext,
     },
     imageDone:{
       tintColor: o.doneicontint,
@@ -180,7 +179,7 @@ const QuestionView = (props: QuestionViewProps) => {
                 placeholderTextColor={o.itemtextfade}
                 placeholder="Statement"
                 defaultValue={question.Statement}
-                onChangeText={(value: string)=>{setTempQuestion({...tempQuestion, Statement: value})}}></TextInput>
+                onChangeText={(value: string)=>{setTempQuestion({...tempQuestion, Statement: value})}} autoFocus></TextInput>
               <TextInput 
                 style={s.inputStyle}
                 placeholderTextColor={o.itemtextfade}
@@ -195,12 +194,14 @@ const QuestionView = (props: QuestionViewProps) => {
           </View>
           :
           <View style={s.questionDisplayContainer}>
-            <PressText
-              style={s.textContainer}
-              textStyle={s.text}
-              text={question.Statement}
-              onPress={()=>{if(!isEditingPos)setIsEditingQuestion(!isEditingQuestion)}}
-              ></PressText>
+            <View style={s.answerContainer}>
+              <PressText
+                style={s.textContainer}
+                textStyle={s.text}
+                text={question.Statement}
+                onPress={()=>{if(!isEditingPos)setIsEditingQuestion(!isEditingQuestion)}}
+                ></PressText>
+            </View>
             <View style={s.answerContainer}>
               <PressImage pressStyle={gs.baseImageContainer} style={[s.imageSmall, question.Answer.trim() === ''? s.imageAnswerFade:s.imageAnswerNormal]} source={require('../../../../public/images/arow-down-right-thicker.png')} onPress={()=>{}}></PressImage>
               <PressText
