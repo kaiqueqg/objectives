@@ -132,7 +132,7 @@ const GroceryView = (props: GroceryViewProps) => {
     },
     imageFade:{
       ...gs.baseImage,
-      tintColor: o.itemtextfade,
+      tintColor: o.icontintcolorfade,
     },
     groceryDoneImage:{
       tintColor: o.doneicontint,

@@ -1,7 +1,7 @@
 import { View, StyleSheet, Text, StatusBar, Vibration, BackHandler, Platform, AppState, AppStateStatus, FlatList, ScrollView  } from "react-native";
 import { Item, MessageType, Objective, ObjectiveList, Pattern, PopMessage, Step, UserPrefs, Views } from "./../Types";
 import { FontPalette } from "../../fonts/Font";
-import { ThemePalette, colorPalette, globalStyle as gs } from "./../Colors";
+import { AppPalette, colorPalette, globalStyle as gs } from "./../Colors";
 import { useUserContext } from "./../Contexts/UserContext";
 import React, { useEffect, useState } from "react";
 import PopMessageView from "./../Log/PopMessageView";
@@ -16,7 +16,7 @@ export interface MainProps{
 
 const DevView = (props: MainProps) => {
   const { log, consoleLogs, deleteLog } = useLogContext();
-  const { writeCurrentView } = useUserContext();
+  const { writeCurrentView, theme: t } = useUserContext();
   const { syncObjectivesList } = props;
 
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
@@ -65,7 +65,7 @@ const DevView = (props: MainProps) => {
     },
     image:{
       ...gs.baseImage,
-      tintColor: colorPalette.beige,
+      tintColor: t.icontint,
     },
     devButtonRow:{
       flexDirection: 'row',
@@ -81,15 +81,15 @@ const DevView = (props: MainProps) => {
       justifyContent: 'center',
       alignItems: 'center',
 
-      backgroundColor: colorPalette.bluedarker,
+      backgroundColor: t.backgroundcolor,
 
-      borderColor: colorPalette.beige,
+      borderColor: t.bordercolor,
       borderWidth: 1,
       borderStyle: 'solid',
       borderRadius: 5,
     },
     devButtonText:{
-      color: colorPalette.beige,
+      color: t.textcolor,
       flexWrap: 'wrap',
     },
     devScrollMessages:{
@@ -98,13 +98,13 @@ const DevView = (props: MainProps) => {
       marginVertical: 5,
       marginHorizontal: 2,
 
-      borderColor: 'black',
+      borderColor: t.bordercolor,
       borderWidth: 1,
       borderStyle: 'solid',
       borderRadius: 5,
     },
     devMessages:{
-      color: colorPalette.beige,
+      color: t.textcolor,
     },
   }); 
 

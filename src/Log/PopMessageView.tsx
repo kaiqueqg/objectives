@@ -1,6 +1,6 @@
 
 import { View, StyleSheet, Text } from "react-native";
-import { ThemePalette, colorPalette, getObjTheme } from "../Colors";
+import { AppPalette, colorPalette, getObjTheme } from "../Colors";
 import { FontPalette } from "../../fonts/Font";
 import { useUserContext } from "../Contexts/UserContext";
 import { MessageType, PopMessage } from "../Types";
@@ -11,7 +11,7 @@ export interface PopMessageViewProps {
   message: PopMessage,
 }
 const PopMessageView = (props: PopMessageViewProps) => {
-  const { removeMessage } = useLogContext();
+  const { removeMessage, log } = useLogContext();
   const { theme: t, fontTheme: f } = useUserContext();
   const { message } = props;
 
@@ -42,10 +42,11 @@ const PopMessageView = (props: PopMessageViewProps) => {
 
   const s = StyleSheet.create({
     messageContainer:{
-      flex: 1,
+      display: 'flex',
       color: 'beige',
       height: 30, 
       maxHeight: 30,
+      minHeight: 30,
       
       backgroundColor: colorPalette.greenlight,
       justifyContent: 'center',

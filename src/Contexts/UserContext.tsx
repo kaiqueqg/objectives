@@ -1,7 +1,7 @@
 // UserContext.tsx
 import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
 import { Item, Objective, MessageType, User, UserPrefs, Views, PopMessage, StoredImage } from '../Types';
-import { ThemePalette, dark, globalStyle as gs } from '../Colors';
+import { AppPalette, dark, globalStyle as gs, light } from '../Colors';
 import { FontPalette, fontDark, fontPaper, fontWhite } from '../../fonts/Font';
 import { useStorageContext } from './StorageContext';
 import { useLogContext } from './LogContext';
@@ -22,6 +22,14 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     });
     storage.readUserPrefs().then((userPrefs: any) => {
       if(userPrefs) setUserPrefs(userPrefs);
+      if(userPrefs.theme === 'dark'){
+        setTheme(dark);
+        setFontTheme(fontDark);
+      }
+      else if(userPrefs.theme === 'light'){
+        setTheme(light);
+        setFontTheme(fontDark);
+      }
     })
     loadObjectives();
     loadLastSync();
@@ -56,18 +64,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     if(v) setLastSync(v);
     else log.err('no last sync');
   }
-
-  // const loadSelectedTags = async () => {
-  //   const v = await storage.readSelectedTags();
-  //   if (v) {
-  //     const filteredTags = v.filter((tag: string) => availableTags.includes(tag));
-  //     setSelectedTags(filteredTags);
-  //     log.b(filteredTags)
-  //     await storage.writeSelectedTags(filteredTags);
-  //   } else {
-  //     log.err('no selected tags');
-  //   }
-  // }
 
   //^-------------------- USER
   const [user, setUser] = useState<User|null>(null);
@@ -107,8 +103,8 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         setTheme(dark);
         setFontTheme(fontDark);
       }
-      else{
-        setTheme(dark);
+      else if(userPrefs.theme === 'light'){
+        setTheme(light);
         setFontTheme(fontDark);
       }
     } catch (err) {
@@ -117,7 +113,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     }
   };
 
-  const [theme, setTheme] = useState<ThemePalette>(dark);
+  const [theme, setTheme] = useState<AppPalette>(dark);
   const [fontTheme, setFontTheme] = useState<FontPalette>(fontDark);
 
   //^-------------------- JWT TOKEN
@@ -507,7 +503,7 @@ interface UserContextType {
   //^USER
   user: User|null, writeUser: (user: User) => void,
   userPrefs: UserPrefs,  writeUserPrefs: (userPrefs: UserPrefs) => void,
-  theme: ThemePalette, fontTheme: FontPalette,
+  theme: AppPalette, fontTheme: FontPalette,
   //^JWT TOKEN
   jwtToken: string|null, writeJwtToken: (token: string) => void, 
   //^VIEW

@@ -1,5 +1,4 @@
 import { View, StyleSheet } from "react-native";
-import { ThemePalette, getObjTheme } from "../Colors";
 import { FontPalette } from "../../fonts/Font";
 import { useUserContext } from "../Contexts/UserContext";
 import { useEffect } from "react";

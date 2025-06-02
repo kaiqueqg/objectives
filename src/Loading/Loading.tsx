@@ -1,10 +1,10 @@
 import React, { useEffect, useRef } from 'react';
 import { StyleSheet, ImageStyle, Animated, Easing, View } from 'react-native';
-import { ThemePalette } from '../Colors';
+import { AppPalette } from '../Colors';
 import { useUserContext } from '../Contexts/UserContext';
 
 interface Props {
-  theme: ThemePalette;
+  theme: AppPalette;
   // style?: ImageStyle;
 }
 
@@ -37,7 +37,7 @@ const Loading: React.FC<Props> = () => {
     outputRange: ['0deg', '360deg'],
   });
 
-  const s = (theme: ThemePalette) => StyleSheet.create({
+  const s = (theme: AppPalette) => StyleSheet.create({
     container: {
       alignItems: 'center',
       justifyContent: 'center',

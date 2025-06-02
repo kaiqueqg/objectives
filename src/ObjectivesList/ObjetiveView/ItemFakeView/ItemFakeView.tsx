@@ -1,11 +1,7 @@
 import { View, StyleSheet, Text } from "react-native";
-import { ObjectivePallete, ThemePalette, getObjTheme } from "../../../Colors";
+import { ObjectivePallete } from "../../../Colors";
 import { FontPalette } from "../../../../fonts/Font";
 import { useUserContext } from "../../../Contexts/UserContext";
-import { ItemViewProps } from "../../../Types";
-import PressImage from "../../../PressImage/PressImage";
-import PressInput from "../../../PressInput/PressInput";
-import { useState } from "react";
 
 export const New = () => {
   return(

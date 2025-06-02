@@ -47,6 +47,7 @@ const NoteView = (props: NoteViewProps) => {
       alignItems: 'center',
       marginHorizontal: o.marginHorizontal,
       marginVertical: o.marginVertical,
+      minHeight: 45,
     },
     titleContainer:{
       flex: 1,

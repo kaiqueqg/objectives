@@ -80,9 +80,10 @@ const DividerView = (props: DividerViewProps) => {
       borderRadius: o.borderRadius,
     },
     dividerContainerOpen:{
-      borderColor: colorPalette.beigedark,
+      borderColor: colorPalette.black,
       borderWidth: 1,
       borderStyle: 'solid',
+      borderRadius: 5,
     },
     dividerNewItemContainer:{
       width: '100%',

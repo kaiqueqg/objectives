@@ -1,7 +1,7 @@
 import { View, StyleSheet, Text, StatusBar, Vibration, BackHandler, Platform, AppState, AppStateStatus, FlatList  } from "react-native";
 import { Item, MessageType, Objective, ObjectiveList, Pattern, PopMessage, Step, UserPrefs, Views } from "./Types";
 import { FontPalette } from "../fonts/Font";
-import { ThemePalette, colorPalette } from "./Colors";
+import { AppPalette, colorPalette } from "./Colors";
 import BottomBar from "./BottomBar/BottomBar";
 import { useUserContext } from "./Contexts/UserContext";
 import React, { useEffect, useState } from "react";
@@ -15,6 +15,7 @@ import { useStorageContext } from "./Contexts/StorageContext";
 import { useRequestContext } from "./Contexts/RequestContext";
 import TagsView from "./TagsView/TagsView";
 import ArchivedView from "./ArchivedView/ArchivedView";
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export interface MainProps{
 }
@@ -129,7 +130,7 @@ const Main = (props: MainProps) => {
       setFailedSync(false);
       setDoneSync(false);
       
-      await wakeupLambda();
+      // await wakeupLambda();
   
       let syncObjectives: Objective[] = [];
       let syncItems: Item[] = [];
@@ -173,13 +174,7 @@ const Main = (props: MainProps) => {
   
       setIsSyncing(true);
       //^ Sync all
-      const data = await objectivesApi.syncObjectivesList(objectiveList, async () => {
-        setIsSyncing(false);
-        await objectivesApi.isUpObjective(() => {
-          popMessage('Server or internet is down!', MessageType.Error, 5);
-          setIsServerUp(false);
-        });
-      });
+      const data = await objectivesApi.syncObjectivesList(objectiveList);
   
       if(data !== null && data !==undefined && data.Objectives){
         syncTags(data.Objectives);
@@ -256,21 +251,23 @@ const Main = (props: MainProps) => {
   });
 
   return (
-    <View style={s.container}>
-      <PopMessageContainer></PopMessageContainer>
-      <View style={s.mainContent}>
-        {getCurrentView()}
+    <SafeAreaView style={{ flex: 1, backgroundColor: t.backgroundcolor }}>
+      <View style={s.container}>
+        <PopMessageContainer></PopMessageContainer>
+        <View style={s.mainContent}>
+          {getCurrentView()}
+        </View>
+        <BottomBar
+          isSyncing={isSyncing}
+          failedSync={failedSync}
+          doneSync={doneSync}
+          syncObjectivesList={syncObjectivesList}
+          isLambdaCold={isLambdaCold}
+          isServerUp={isServerUp}
+        ></BottomBar>
+        <StatusBar backgroundColor={t.backgroundcolor} barStyle={getContent()}/>
       </View>
-      <BottomBar
-        isSyncing={isSyncing}
-        failedSync={failedSync}
-        doneSync={doneSync}
-        syncObjectivesList={syncObjectivesList}
-        isLambdaCold={isLambdaCold}
-        isServerUp={isServerUp}
-      ></BottomBar>
-      <StatusBar backgroundColor={t.backgroundcolor} barStyle={getContent()}/>
-    </View>
+    </SafeAreaView>
   );
 };
 

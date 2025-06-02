@@ -1,11 +1,10 @@
 import { View, StyleSheet, FlatList, Text, Vibration, BackHandler, Pressable } from "react-native";
-import { ThemePalette, colorPalette, getObjTheme, globalStyle as gs } from "../Colors";
+import { AppPalette, colorPalette, getObjTheme, globalStyle as gs } from "../Colors";
 import { FontPalette } from "../../fonts/Font";
 import { useUserContext } from "../Contexts/UserContext";
 import PressText from "../PressText/PressText";
 import { MessageType, Objective, Pattern, Views } from "../Types";
 import PressImage from "../PressImage/PressImage";
-import DragList, { DragListRenderItemInfo } from "react-native-draglist";
 import React, { JSX, useEffect, useState } from "react";
 import { useLogContext } from "../Contexts/LogContext";
 import { useStorageContext } from "../Contexts/StorageContext";
@@ -36,20 +35,20 @@ const ObjsListView = (props: ObjsListViewProps) => {
   const [unarchivedTags, setUnarchivedTags] = useState<string[]>([]);
 
   useEffect(()=>{
-      const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
-        if(currentObjectiveId) {
-          writeCurrentView(Views.IndividualView);
-        }
-        else{
-          if(userPrefs.vibrate) Vibration.vibrate(Pattern.Wrong);
-        }
-        return true;
-      });
-  
-      return () => {
-        subscription.remove();
-      };
-    }, []);
+    const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+      if(currentObjectiveId) {
+        writeCurrentView(Views.IndividualView);
+      }
+      else{
+        if(userPrefs.vibrate) Vibration.vibrate(Pattern.Wrong);
+      }
+      return true;
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
 
   useEffect(()=>{
     const unarchivedObjectives = objectives.filter(obj => !obj.IsArchived);
@@ -68,18 +67,14 @@ const ObjsListView = (props: ObjsListViewProps) => {
   }
 
   const onAddNewObjective = async () => {
-    if(!user){ 
-      Vibration.vibrate(Pattern.Wrong);
-      return log.err('No user.');
-    }
-    
     if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
+
     const newObj: Objective = {
-      UserId: user.UserId,
-      ObjectiveId: storage.randomId(), 
-      Done: false, 
-      Theme: 'noTheme', 
-      Title: 'Title', 
+      UserId: user? user.UserId:'fakeuseridfakeuseridfakeuseridfakeuserid',
+      ObjectiveId: storage.randomId(),
+      Done: false,
+      Theme: 'noTheme',
+      Title: 'Title',
       IsShowing: true,
       IsArchived: false,
       Pos: objectives.length,
@@ -211,6 +206,9 @@ const ObjsListView = (props: ObjsListViewProps) => {
     ? selectedTags.some((tag) => item.Tags.includes(tag)) 
     : true;
 
+    const matchingTags = selectedTags.filter(tag => item.Tags.includes(tag));
+    const shouldShowTag =  matchingTags.length === 1 && matchingTags[0] === 'Pin';
+
     // Skip rendering if the tag doesn't match
     if(!tagShow) return null;
     if(item.IsArchived) return null;
@@ -229,21 +227,20 @@ const ObjsListView = (props: ObjsListViewProps) => {
             style={[s.objectiveButtonContainer, 
               isEditingPos && isSelected? s.objectiveButtonContainerSelected:undefined,
               isEndingPos && isSelected? s.objectiveButtonContainerEnding:undefined]}
-            textStyle={[s.text, {color: getObjTheme(item.Theme).objtitle}]}
+            textStyle={[s.text, {color: getObjTheme(userPrefs.theme ,item.Theme).objtitle}]}
             onPress={() => onSelectCurrentObj(item.ObjectiveId)}
             text={item.Title + item.Pos}></PressText>
         </View>
       </>
       :
-      <View 
-        style={[s.objectiveContainer]} 
-        onTouchEnd={() => {isEditingPos && (isEndingPos? endChangingPos(item) : addRemoveToSelected(item))}}>
+      <View style={[s.objectiveContainer]} onTouchEnd={() => {isEditingPos && (isEndingPos? endChangingPos(item) : addRemoveToSelected(item))}}>
+        {shouldShowTag && <PressImage style={s.objectivePinImage} pressStyle={s.objectivePin} source={require('../../public/images/pin.png')}/>}
         <PressText 
           style={[s.objectiveButtonContainer, 
             isEditingPos && isSelected? s.objectiveButtonContainerSelected:undefined,
             isEndingPos && isSelected? s.objectiveButtonContainerEnding:undefined,
-            {backgroundColor: getObjTheme(item.Theme).objbk}]}
-          textStyle={[s.text, {color: getObjTheme(item.Theme).objtitle}]}
+            {backgroundColor: getObjTheme(userPrefs.theme, item.Theme).objbk}]}
+          textStyle={[s.text, {color: getObjTheme(userPrefs.theme, item.Theme).objtitle}]}
           onPress={() => onSelectCurrentObj(item.ObjectiveId)}
           text={item.Title}></PressText>
       </View>
@@ -272,14 +269,14 @@ const ObjsListView = (props: ObjsListViewProps) => {
       flexDirection: "column",
       width: '60%',
 
-      borderColor: colorPalette.beigedark,
+      borderColor: t.bordercolorfade,
       borderLeftWidth: 1,
       borderStyle: 'solid',
     },
     containerListTitle:{
       fontWeight: 'bold',
-      color: colorPalette.bluedarker,
-      backgroundColor: colorPalette.beige,
+      color: t.textcolor,
+      backgroundColor: t.backgroundcolordarker,
       justifyContent: 'center',
       alignItems: 'center',
       textAlign: 'center',
@@ -299,10 +296,10 @@ const ObjsListView = (props: ObjsListViewProps) => {
       flexDirection: 'row',
       justifyContent: 'flex-end',
       alignItems: 'center',
-      backgroundColor: colorPalette.bluedarkerdarker,
+      backgroundColor: t.backgroundcolordark,
 
-      borderColor: colorPalette.beigedark,
-      borderWidth: 1,
+      borderColor: t.bordercolorfade,
+      borderTopWidth: 1,
       borderStyle: 'solid',
     },
     leftBottomMenu:{
@@ -325,32 +322,45 @@ const ObjsListView = (props: ObjsListViewProps) => {
       marginRight: 10,
       justifyContent: 'center',
       alignItems: 'center',
-      borderColor: 'grey',
+      borderColor: t.bordercolor,
       borderWidth: 1,
       borderStyle: 'solid',
       borderRadius: 5,
     },
     allText:{
-      color: 'white',
+      color: t.textcolor,
     },
     imageNoTint:{
       ...gs.baseSmallImage,
     },
     image:{
       ...gs.baseSmallImage,
-      tintColor: colorPalette.beige,
+      tintColor: t.icontint,
     },
     imageUpDown:{
       ...gs.baseSmallImage,
-      tintColor: colorPalette.beige,
+      tintColor: t.icontint,
     },
     imageFade:{
-      tintColor: colorPalette.beigedark,
+      tintColor: t.icontintfade,
     },
     objectiveContainer:{
       flexDirection: 'row',
       marginBottom: 5,
       width: '100%',
+    },
+    objectivePin:{
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      width: 25,
+      height: 25,
+      zIndex: 9999,
+      transform: [{ translateX: -5 }, { translateY: -5 }],
+    },
+    objectivePinImage:{
+      height: 17,
+      width: 17,
     },
     objectiveButtonContainerFake:{
       flex: 1,
@@ -374,7 +384,7 @@ const ObjsListView = (props: ObjsListViewProps) => {
       justifyContent: 'center',
       alignItems: 'center',
 
-      borderColor: colorPalette.greydarky,
+      borderColor: t.bordercolorfade,
       borderWidth: 1,
       borderRadius: 5,
       borderStyle: 'solid',
@@ -396,15 +406,15 @@ const ObjsListView = (props: ObjsListViewProps) => {
       marginBottom: 5,
 
       borderRadius: 30,
-      borderColor: colorPalette.beigedark,
+      borderColor: t.bordercolorfade,
       borderWidth: 1,
       borderStyle: 'solid',
     },
     tagButtonContainerSelected:{
       justifyContent: 'center',
       alignItems: 'center',
-      borderColor: colorPalette.beige,
-      backgroundColor: colorPalette.bluedarkerdarker
+      borderColor: t.bordercolor,
+      backgroundColor: t.backgroundcolordarker,
     },
     allNoneTagContainer:{
       display:'flex',
@@ -417,21 +427,21 @@ const ObjsListView = (props: ObjsListViewProps) => {
       borderRadius: 30,
       borderWidth: 1,
       borderStyle: 'solid',
-      borderColor: colorPalette.beige,
-      backgroundColor: colorPalette.beige
+      borderColor: t.bordercolor,
+      backgroundColor: t.backgroundcolorcontrast,
     },
     allNoneTagText:{
       fontSize: 16,
       padding: 10,
-      color: colorPalette.black,
+      color: t.textcolorcontrast,
     },
     text: {
       padding: 10,
       fontSize: 16,
-      color: colorPalette.beigelightdark,
+      color: t.textcolor,
     },
     textSelected:{
-      color: colorPalette.beige,
+      color: t.textcolor,
     },
     textDark:{
       color: 'black',
@@ -475,15 +485,13 @@ const ObjsListView = (props: ObjsListViewProps) => {
       </View>
       <View style={s.bottomMenu}>
         <View style={s.leftBottomMenu}>
-          {/* <PressImage style={[s.imageNoTint, isEditingPos&&s.imageFade]} pressStyle={gs.baseBiggerImageContainer} onPress={selectAllTags} disable={isEditingPos} source={require('../../public/images/tag.png')}></PressImage>
-          <PressImage style={[s.imageNoTint, isEditingPos&&s.imageFade]} pressStyle={gs.baseBiggerImageContainer} onPress={unselectAllTags} disable={isEditingPos} source={require('../../public/images/tagnone.png')}></PressImage> */}
-          <PressImage style={[s.imageNoTint, isEditingPos&&s.imageFade, !onlySelectOneTag&&s.imageFade]} pressStyle={gs.baseBiggerImageContainer} onPress={()=>{setOnlySelectOneTag(!onlySelectOneTag)}} disable={isEditingPos} source={require('../../public/images/tagsingle.png')}></PressImage>
+          <PressImage style={[s.image, isEditingPos&&s.imageFade, !onlySelectOneTag&&s.imageFade]} pressStyle={gs.baseBiggerImageContainer} onPress={()=>{setOnlySelectOneTag(!onlySelectOneTag)}} disable={isEditingPos} source={require('../../public/images/tagsingle.png')}></PressImage>
         </View>
         <View style={s.rightBottomMenu}>
           {!isEditingPos && 
           <PressImage
-            onPress={startEditingPos}
             style={s.imageUpDown}
+            onPress={startEditingPos}
             disableStyle={s.imageFade}
             pressStyle={gs.baseBiggerImageContainer}
             disable={objectives.length < 2}

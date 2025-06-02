@@ -25,7 +25,7 @@ export interface PressImageProps{
 }
 
 const PressImage = (props: PressImageProps) => {
-  const {userPrefs} = useUserContext();
+  const {userPrefs, theme: t} = useUserContext();
   const {log} = useLogContext();
   const [isConfirming, setIsConfirming] = useState<boolean>(false);
   const [wasLongPressed, setWasLongPressed] = useState(false);
@@ -76,7 +76,7 @@ const PressImage = (props: PressImageProps) => {
         onLongPress={handleLongPress}
         delayLongPress={props.delayLongPress??800}>
         <Image style={[props.style as ImageStyle, props.disable? (props.disableStyle as ImageStyle):{}]} source={props.source}></Image>
-        {props.text && <Text style={props.textStyle?? s.text}>{props.text}</Text>}
+        {props.text && <Text style={[s.text, props.textStyle]}>{props.text}</Text>}
       </Pressable>
     )
   }
@@ -102,8 +102,8 @@ const PressImage = (props: PressImageProps) => {
   const s = StyleSheet.create({
     text: {
       position: 'absolute',
-      color: colorPalette.blue,
-      fontSize: 12,
+      color: t.textcolor,
+      fontSize: 16,
       fontWeight: 'bold',
     },
   });

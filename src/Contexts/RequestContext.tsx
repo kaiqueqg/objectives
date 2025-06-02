@@ -41,33 +41,37 @@ export const RequestProvider: React.FC<RequestProviderProps> = ({ children }) =>
   const errorsWithMessageInResponse = [400, 401, 404, 409, 500, 503];
 
   const request = async (url: string, endpoint: string, method: string, body?: string, fError?: () => void, wakeup?: boolean): Promise<any> => {
+    
+    //^Headers
     const headers: {[key: string]: string} = {};
-
     headers['Content-Type'] = 'application/json';
 
+    //^Authorization
     const token = await storage.readJwtToken();
     if(token !== null) {
       if(!wakeup){
         headers['Authorization'] = "Bearer " + token;
       }
     }
+
+    //^To cancel
     const controller = new AbortController();
     const { signal } = controller;
 
     const timeoutId = setTimeout(() => {
       controller.abort();
       if(fError != undefined) fError();
-    }, 10000);
+    }, 60000);
 
+    //^Fetch
     try {
       const response = await fetch(url + endpoint, { headers, method, mode: 'cors', body: body, signal });
       clearTimeout(timeoutId);
-
-      if(response !== undefined && errorsWithMessageInResponse.includes(response.status)){
-        const message = await response.text();
+      if(response){
+        return response;
       }
 
-      return response;
+      return null;
     } 
     catch (error){
       if(fError !== undefined){
@@ -120,7 +124,8 @@ export const RequestProvider: React.FC<RequestProviderProps> = ({ children }) =>
       return this.requestObjectivesList<ObjectiveList>('/GetObjectivesList', 'GET', undefined, fError);
     },
     async syncObjectivesList(objectivesList: ObjectiveList, fError?: () => void): Promise<ObjectiveList>{
-      return this.requestObjectivesList<ObjectiveList>('/SyncObjectivesList', 'PUT', JSON.stringify(objectivesList), fError);
+      const rtn = await this.requestObjectivesList<ObjectiveList>('/SyncObjectivesList', 'PUT', JSON.stringify(objectivesList), fError);
+      return rtn;
     },
     async backupData(fError?: () => void): Promise<boolean>{
       return this.requestObjectivesList<boolean>('/BackupData', 'GET', undefined, fError);
@@ -212,7 +217,6 @@ export const RequestProvider: React.FC<RequestProviderProps> = ({ children }) =>
       log.b('presignedUrlReturn', presignedUrlReturn);
   
       if(presignedUrlReturn.url === null){
-        log.r('Delete presigned url.');
         return false;
       }
   
@@ -235,6 +239,7 @@ export const RequestProvider: React.FC<RequestProviderProps> = ({ children }) =>
         return false;
       }
     },
+    //! Responsable to parse and react to equal among all, know, request errors.
     async requestObjectivesList<T>(endpoint: string, method: string, body?: string, fError?: () => void, wakeup?: boolean): Promise<any>{
       try {
         const resp = await request('https://0z58mhwlhf.execute-api.sa-east-1.amazonaws.com/dev', endpoint, method, body, fError);
@@ -250,7 +255,7 @@ export const RequestProvider: React.FC<RequestProviderProps> = ({ children }) =>
           else{
             switch(respData.Code){
               case 401:
-                popMessage(`The request wasn't authorized.`, MessageType.Error);
+                popMessage(respData.Message??"Unauthorized", MessageType.Error);
                 break;
               default:
                 //popMessage('Default');

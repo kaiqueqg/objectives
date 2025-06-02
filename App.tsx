@@ -1,6 +1,6 @@
 import { KeyboardAvoidingView, StyleSheet, Text, View } from 'react-native';
 import * as Font from 'expo-font';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { UserProvider } from './src/Contexts/UserContext';
 import Main from './src/Main';
 import { colorPalette, dark } from './src/Colors';

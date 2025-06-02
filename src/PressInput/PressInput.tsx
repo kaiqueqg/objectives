@@ -60,10 +60,9 @@ const PressInput = (props: PressInputProps) => {
   
   const onDone = () => {
     setIsDeleting(false);
-    log.r(props.shouldntEndEditOnDone);
-    // if(!props.shouldntEndEditOnDone) changeEditing(false);
     props.onDone(newText);
     setNewText(props.text);
+    if(!props.shouldntEndEditOnDone) changeEditing(false);
   }
 
   const onCancel = () => {

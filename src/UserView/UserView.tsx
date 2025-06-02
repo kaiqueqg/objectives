@@ -9,6 +9,7 @@ import { Pattern, UserPrefs, Views } from "../Types";
 import { useLogContext } from "../Contexts/LogContext";
 import { useRequestContext } from "../Contexts/RequestContext";
 import PressImage from "../PressImage/PressImage";
+import Constants from 'expo-constants';
 
 export interface UserViewProps {
   syncObjectivesList: () => void,
@@ -159,10 +160,10 @@ const UserView = (props: UserViewProps) => {
     userPrefsContainerOn:{
       padding: 5,
       marginTop: 10,
-      backgroundColor: colorPalette.bluedarkerdarker,
+      backgroundColor: t.backgroundcolordarker,
 
       borderRadius: 2,
-      borderColor: colorPalette.beigedark,
+      borderColor: t.bordercolorfade,
       borderWidth: 1,
       borderStyle: 'solid',
     },
@@ -171,19 +172,19 @@ const UserView = (props: UserViewProps) => {
       marginTop: 10,
 
       borderRadius: 2,
-      borderColor: 'grey',
+      borderColor: t.bordercolorfade,
       borderWidth: 1,
       borderStyle: 'solid',
     },
     userPrefsTextOn:{
       marginVertical: 5,
       marginHorizontal: 5,
-      color: 'beige',
+      color: t.textcolor,
     },
     userPrefsTextOff:{
       marginVertical: 5,
       marginHorizontal: 5,
-      color: 'grey',
+      color: t.textcolorfade,
     },
     logoutView:{
       width: '100%',
@@ -213,16 +214,16 @@ const UserView = (props: UserViewProps) => {
       fontSize: 25,
       marginBottom: 30,
       width: '90%',
-      color: 'beige',
+      color: t.textcolor,
       textAlign: 'center',
     },
     emailInput:{
       height: 50,
       width: '90%',
-      color: colorPalette.beige,
+      color: t.textcolor,
       borderStyle: 'solid',
       borderWidth: 1,
-      borderColor: 'grey',
+      borderColor: t.bordercolorfade,
       borderRadius: 2,
       padding: 10,
       marginVertical: 10,
@@ -237,23 +238,22 @@ const UserView = (props: UserViewProps) => {
     passwordInput: {
       height: 50,
       flex: 1,
-      color: colorPalette.beige,
+      color: t.textcolor,
       borderStyle: 'solid',
       borderWidth: 1,
-      borderColor: 'grey',
+      borderColor: t.bordercolorfade,
       borderRadius: 2,
       padding: 10,
     },
     image:{
       ...gs.baseImage,
-      tintColor: colorPalette.beige,
+      tintColor: t.icontint,
     },
     backupImage:{
       ...gs.baseImage,
-      tintColor: colorPalette.beige,
+      tintColor: t.icontint,
     },
     loginButton: {
-      borderRadius: 2,
       justifyContent: 'center',
       alignItems: 'center',
       width: '90%',
@@ -261,11 +261,14 @@ const UserView = (props: UserViewProps) => {
       color: t.textcolor,
       backgroundColor: t.loginbuttonbk,
       padding: 10,
+
+      borderStyle: 'solid',
+      borderWidth: 1,
+      borderColor: t.bordercolorfade,
+      borderRadius: 2,
     },
     loginButtonText: {
       fontSize: 18,
-    },
-    loading:{
     },
   });
 
@@ -285,6 +288,10 @@ const UserView = (props: UserViewProps) => {
               <Text style={s.header}>USER:</Text>
               <View style={s.userContainer}>
                 <View style={s.userView}>
+                  <Text style={s.userTextDef}>Build:</Text>
+                  <Text style={s.userText}>{Constants.easBuildNumber}</Text>
+                </View>
+                <View style={s.userView}>
                   <Text style={s.userTextDef}>Email:</Text>
                   <Text style={s.userText}>{user === null? "no user": user.Email}</Text>
                 </View>
@@ -303,6 +310,11 @@ const UserView = (props: UserViewProps) => {
               </View>
               <Text style={s.header}>SETTINGS:</Text>
               <Text style={s.subHeader}>General</Text>
+              <PressText 
+                style={s.userPrefsContainerOn}
+                textStyle={s.userPrefsTextOn}
+                onPress={() => onChangePrefs({...userPrefs, theme: userPrefs.theme === 'dark'?'light':'dark'})}
+                text={"Which theme? - " + (userPrefs.theme==='dark'? 'Dark.':'White.')}></PressText>
               <PressText 
                 style={userPrefs.vibrate? s.userPrefsContainerOn:s.userPrefsContainerOff}
                 textStyle={userPrefs.vibrate? s.userPrefsTextOn:s.userPrefsTextOff}
@@ -342,9 +354,16 @@ const UserView = (props: UserViewProps) => {
             {isLogging?
             <Loading theme={dark}></Loading>
             :
-            <Pressable style={s.loginButton} onPress={login}>
-              <Text style={s.loginButtonText}>Login</Text>
-            </Pressable>}
+            <>
+              <Pressable style={s.loginButton} onPress={login}>
+                <Text style={s.loginButtonText}>Login</Text>
+              </Pressable>
+              <PressText 
+                style={s.userPrefsContainerOn}
+                textStyle={s.userPrefsTextOn}
+                onPress={() => onChangePrefs({...userPrefs, theme: userPrefs.theme === 'dark'?'light':'dark'})}
+                text={"Which theme? - " + (userPrefs.theme==='dark'? 'Dark.':'White.')}></PressText>
+            </>}
           </View>
         )
       }

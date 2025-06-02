@@ -224,19 +224,36 @@ export const LogProvider: React.FC<LogProviderProps> = ({ children }) => {
 
   const [messageList, setMessageList] = useState<PopMessage[]>([]);
   const popMessage = (text: string, type?: MessageType, timeoutInSeconds?: number) => {
+    //remove existing equal messages
+    // let newList = messageList.filter((item)=>{
+    //   return item.text.trim() !== text;
+    // });
+
     let timeout = 3000;
     if(timeoutInSeconds && timeoutInSeconds > 30) timeout = 30000;
     if(timeoutInSeconds && timeoutInSeconds < 1) timeout = 1000;
 
-    setMessageList((prevList) => [
-      ...prevList,
-      {
-        id: randomId(),
-        text: text,
-        type: type ?? MessageType.Normal,
-        timeout: timeout,
-      },
-    ]);
+    messageList.push({
+      id: randomId(),
+      text: text,
+      type: type ?? MessageType.Normal,
+      timeout: timeout,
+    });
+
+    setMessageList(messageList);
+
+    // let timeout = 3000;
+    // if(timeoutInSeconds && timeoutInSeconds > 30) timeout = 30000;
+    // if(timeoutInSeconds && timeoutInSeconds < 1) timeout = 1000;
+    // setMessageList((prevList) => [
+    //   ...prevList,
+    //   {
+    //     id: randomId(),
+    //     text: text,
+    //     type: type ?? MessageType.Normal,
+    //     timeout: timeout,
+    //   },
+    // ]);
   }
   const removeMessage = (removeId: string) => {
     setMessageList(prevMessages => prevMessages.filter(msg => msg.id !== removeId));

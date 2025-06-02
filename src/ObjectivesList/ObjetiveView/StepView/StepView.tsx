@@ -35,9 +35,8 @@ const StepView = (props: StepViewProps) => {
     await onDeleteItem(step);
   }
 
-  const onDoneStep = async () => {
-    const newStep = {...tempStep};
-    newStep.Title = newStep.Title.trim();
+  const onDoneStep = async (newImp?: StepImportance) => {
+    const newStep:Step = {...tempStep, Title: tempStep.Title.trim(), Importance: newImp??tempStep.Importance};
     await putItem(newStep);
     setIsEditingStep(false);
     loadMyItems();
@@ -60,30 +59,30 @@ const StepView = (props: StepViewProps) => {
   }
 
   const getImportanceImage = () => {
-    if(tempStep.Importance === StepImportance.Low){
-      return <PressImage pressStyle={gs.baseImageContainer} style={gs.baseImage} source={require('../../../../public/images/low.png')} onPress={() => {if(!isEditingPos)onChangeImportanceIcon(StepImportance.Low);}}></PressImage>;
+    if(step.Importance === StepImportance.Low){
+      return <PressImage pressStyle={gs.baseImageContainer} style={gs.baseImage} source={require('../../../../public/images/low.png')}></PressImage>;
     }
-    else if(tempStep.Importance === StepImportance.Medium){
-      return <PressImage pressStyle={gs.baseImageContainer} style={gs.baseImage} source={require('../../../../public/images/med.png')} onPress={() => {if(!isEditingPos)onChangeImportanceIcon(StepImportance.Medium);}}></PressImage>;
+    else if(step.Importance === StepImportance.Medium){
+      return <PressImage pressStyle={gs.baseImageContainer} style={gs.baseImage} source={require('../../../../public/images/med.png')}></PressImage>;
     }
-    else if(tempStep.Importance === StepImportance.High){
-      return <PressImage pressStyle={gs.baseImageContainer} style={gs.baseImage} source={require('../../../../public/images/high.png')} onPress={() => {if(!isEditingPos)onChangeImportanceIcon(StepImportance.High);}}></PressImage>;
+    else if(step.Importance === StepImportance.High){
+      return <PressImage pressStyle={gs.baseImageContainer} style={gs.baseImage} source={require('../../../../public/images/high.png')}></PressImage>;
     }
-    else if(tempStep.Importance === StepImportance.Ladybug){
-      return <PressImage pressStyle={gs.baseImageContainer} style={gs.baseImage} source={require('../../../../public/images/ladybug.png')} onPress={() => {if(!isEditingPos)onChangeImportanceIcon(StepImportance.Ladybug);}}></PressImage>;
+    else if(step.Importance === StepImportance.Ladybug){
+      return <PressImage pressStyle={gs.baseImageContainer} style={gs.baseImage} source={require('../../../../public/images/ladybug.png')}></PressImage>;
     }
-    else if(tempStep.Importance === StepImportance.Question){
-      return <PressImage pressStyle={gs.baseImageContainer} style={gs.baseImage} source={require('../../../../public/images/questionmark.png')} onPress={() => {if(!isEditingPos)onChangeImportanceIcon(StepImportance.Question);}}></PressImage>;
+    else if(step.Importance === StepImportance.Question){
+      return <PressImage pressStyle={gs.baseImageContainer} style={gs.baseImage} source={require('../../../../public/images/questionmark.png')}></PressImage>;
     }
-    else if(tempStep.Importance === StepImportance.Waiting){
-      return <PressImage pressStyle={gs.baseImageContainer} style={gs.baseImage} source={require('../../../../public/images/wait.png')} onPress={() => {if(!isEditingPos)onChangeImportanceIcon(StepImportance.Waiting);}}></PressImage>;
+    else if(step.Importance === StepImportance.Waiting){
+      return <PressImage pressStyle={gs.baseImageContainer} style={gs.baseImage} source={require('../../../../public/images/wait.png')}></PressImage>;
     }
-    else if(tempStep.Importance === StepImportance.InProgress){
-      return <PressImage pressStyle={gs.baseImageContainer} style={gs.baseImage} source={require('../../../../public/images/inprogress.png')} onPress={() => {if(!isEditingPos)onChangeImportanceIcon(StepImportance.InProgress);}}></PressImage>;
+    else if(step.Importance === StepImportance.InProgress){
+      return <PressImage pressStyle={gs.baseImageContainer} style={gs.baseImage} source={require('../../../../public/images/inprogress.png')}></PressImage>;
     }
     else{
       if(isEditingStep){
-        return <PressImage pressStyle={gs.baseImageContainer} style={gs.baseImage} source={require('../../../../public/images/cancel.png')} onPress={() => {if(!isEditingPos)onChangeImportanceIcon(StepImportance.None);}}></PressImage>;
+        return <PressImage pressStyle={gs.baseImageContainer} style={gs.baseImage} source={require('../../../../public/images/cancel.png')}></PressImage>;
 
       }
       else{
@@ -234,17 +233,18 @@ const StepView = (props: StepViewProps) => {
                   placeholderTextColor={o.itemtextfade}
                   placeholder="Title"
                   defaultValue={tempStep.Title}
+                  onSubmitEditing={()=>{onDoneStep()}}
                   onChangeText={(value: string)=>{setTempStep({...tempStep, Title: value})}} autoFocus></TextInput>
               </View>
               <View style={[s.importanceIconContainer]}>
-                <PressImage pressStyle={gs.baseImageContainer} style={gs.baseImage} source={require('../../../../public/images/cancel.png')} onPress={() => {if(!isEditingPos)onChangeImportanceIcon(StepImportance.None);}}></PressImage>
-                <PressImage pressStyle={gs.baseImageContainer} style={gs.baseImage} source={require('../../../../public/images/low.png')} onPress={() => {if(!isEditingPos)onChangeImportanceIcon(StepImportance.Low);}}></PressImage>
-                <PressImage pressStyle={gs.baseImageContainer} style={gs.baseImage} source={require('../../../../public/images/med.png')} onPress={() => {if(!isEditingPos)onChangeImportanceIcon(StepImportance.Medium);}}></PressImage>
-                <PressImage pressStyle={gs.baseImageContainer} style={gs.baseImage} source={require('../../../../public/images/high.png')} onPress={() => {if(!isEditingPos)onChangeImportanceIcon(StepImportance.High);}}></PressImage>
-                <PressImage pressStyle={gs.baseImageContainer} style={gs.baseImage} source={require('../../../../public/images/ladybug.png')} onPress={() => {if(!isEditingPos)onChangeImportanceIcon(StepImportance.Ladybug);}}></PressImage>
-                <PressImage pressStyle={gs.baseImageContainer} style={gs.baseImage} source={require('../../../../public/images/questionmark.png')} onPress={() => {if(!isEditingPos)onChangeImportanceIcon(StepImportance.Question);}}></PressImage>
-                <PressImage pressStyle={gs.baseImageContainer} style={gs.baseImage} source={require('../../../../public/images/wait.png')} onPress={() => {if(!isEditingPos)onChangeImportanceIcon(StepImportance.Waiting);}}></PressImage>
-                <PressImage pressStyle={gs.baseImageContainer} style={gs.baseImage} source={require('../../../../public/images/inprogress.png')} onPress={() => {if(!isEditingPos)onChangeImportanceIcon(StepImportance.InProgress);}}></PressImage>
+                <PressImage pressStyle={gs.baseImageContainer} style={gs.baseImage} source={require('../../../../public/images/cancel.png')} onPress={() => {if(!isEditingPos)onDoneStep(StepImportance.None);}}></PressImage>
+                <PressImage pressStyle={gs.baseImageContainer} style={gs.baseImage} source={require('../../../../public/images/low.png')} onPress={() => {if(!isEditingPos)onDoneStep(StepImportance.Low);}}></PressImage>
+                <PressImage pressStyle={gs.baseImageContainer} style={gs.baseImage} source={require('../../../../public/images/med.png')} onPress={() => {if(!isEditingPos)onDoneStep(StepImportance.Medium);}}></PressImage>
+                <PressImage pressStyle={gs.baseImageContainer} style={gs.baseImage} source={require('../../../../public/images/high.png')} onPress={() => {if(!isEditingPos)onDoneStep(StepImportance.High);}}></PressImage>
+                <PressImage pressStyle={gs.baseImageContainer} style={gs.baseImage} source={require('../../../../public/images/ladybug.png')} onPress={() => {if(!isEditingPos)onDoneStep(StepImportance.Ladybug);}}></PressImage>
+                <PressImage pressStyle={gs.baseImageContainer} style={gs.baseImage} source={require('../../../../public/images/questionmark.png')} onPress={() => {if(!isEditingPos)onDoneStep(StepImportance.Question);}}></PressImage>
+                <PressImage pressStyle={gs.baseImageContainer} style={gs.baseImage} source={require('../../../../public/images/wait.png')} onPress={() => {if(!isEditingPos)onDoneStep(StepImportance.Waiting);}}></PressImage>
+                <PressImage pressStyle={gs.baseImageContainer} style={gs.baseImage} source={require('../../../../public/images/inprogress.png')} onPress={() => {if(!isEditingPos)onDoneStep(StepImportance.InProgress);}}></PressImage>
               </View>
             </View>
             <View style={s.inputsRight}>

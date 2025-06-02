@@ -1,5 +1,5 @@
 import { View, StyleSheet, FlatList, Text, Vibration, BackHandler, Pressable } from "react-native";
-import { ThemePalette, colorPalette, getObjTheme, globalStyle as gs } from "../Colors";
+import { AppPalette, colorPalette, getObjTheme, globalStyle as gs } from "../Colors";
 import { FontPalette } from "../../fonts/Font";
 import { useUserContext } from "../Contexts/UserContext";
 import PressText from "../PressText/PressText";
@@ -51,7 +51,7 @@ const ArchivedView = (props: ArchivedViewProps) => {
     setArchivedObjectives(archivedObjectives);
 
     let archivedTags = archivedObjectives.map(obj => obj.Tags).flat();
-    const uniqueArchivedTags = Array.from(new Set([...archivedTags]));
+    const uniqueArchivedTags = Array.from(new Set(['Pin', ...archivedTags]));
     setArchivedTags(uniqueArchivedTags);
   }, [objectives, selectedTags]);
 
@@ -101,8 +101,8 @@ const ArchivedView = (props: ArchivedViewProps) => {
           confirm={true}
         ></PressImage>
         <PressText 
-          style={[s.objectiveButtonContainer, {backgroundColor: getObjTheme(item.Theme).objbk}]}
-          textStyle={[s.text, {color: getObjTheme(item.Theme).objtitle}]}
+          style={[s.objectiveButtonContainer, {backgroundColor: getObjTheme(userPrefs.theme ,item.Theme).objbk}]}
+          textStyle={[s.text, {color: getObjTheme(userPrefs.theme ,item.Theme).objtitle}]}
           onPress={() => onSelectCurrentObj(item.ObjectiveId)}
           text={item.Title}>
         </PressText>
@@ -112,29 +112,39 @@ const ArchivedView = (props: ArchivedViewProps) => {
 
   const s = StyleSheet.create({
     container: {
-      flex: 1,
+      display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
+      flexDirection: 'row',
       width: '100%',
     },
-    containerList: {
-      flex: 1,
-      flexDirection: 'row',
+    containerListTag:{
+      flexDirection: "column",
+      width: '40%',
+    },
+    containerListObjs:{
+      flexDirection: "column",
+      width: '60%',
+
+      borderColor: colorPalette.beigedark,
+      borderLeftWidth: 1,
+      borderStyle: 'solid',
+    },
+    containerListTitle:{
+      fontWeight: 'bold',
+      color: t.textcolor,
+      backgroundColor: t.backgroundcolordarker,
       justifyContent: 'center',
       alignItems: 'center',
-      width: '100%',
+      textAlign: 'center',
+      padding: 10,
     },
     tagsList:{
-      width: '30%',
       height: '100%',
       paddingVertical: 15,
       paddingHorizontal: 15,
-      borderColor: colorPalette.beigedark,
-      borderRightWidth: 1,
-      borderStyle: 'solid',
     },
     objectivesList:{
-      width: '70%',
       height: '100%',
       paddingVertical: 15,
       paddingHorizontal: 15,
@@ -150,7 +160,7 @@ const ArchivedView = (props: ArchivedViewProps) => {
       borderBottomLeftRadius: 5,
       borderTopRightRadius: 50,
       borderBottomRightRadius: 50,
-      borderColor: colorPalette.beigedark,
+      borderColor: t.bordercolorfade,
       borderWidth: 1,
       borderStyle: 'solid',
       
@@ -158,15 +168,18 @@ const ArchivedView = (props: ArchivedViewProps) => {
     tagButtonContainerSelected:{
       justifyContent: 'center',
       alignItems: 'center',
-      borderColor: 'beige',
-      backgroundColor: colorPalette.beige,
+      backgroundColor: t.backgroundcolordarker,
+      borderColor: t.bordercolorfade,
+      borderWidth: 1,
+      borderStyle: 'solid',
+      borderRadius: 5,
     },
     text: {
       fontSize: 16,
-      color: 'beige',
+      color: t.textcolor,
     },
     textSelected:{
-      color: colorPalette.beigedarker,
+      color: t.textcolor,
     },
     imageContainer:{
       width: 50,
@@ -177,7 +190,7 @@ const ArchivedView = (props: ArchivedViewProps) => {
     image:{
       width: 20,
       height: 20,
-      tintColor: colorPalette.beige,
+      tintColor: t.icontint,
     },
     objectiveContainer:{
       flexDirection: 'row',
@@ -191,7 +204,7 @@ const ArchivedView = (props: ArchivedViewProps) => {
       alignItems: 'center',
       minHeight: 50,
 
-      borderColor: colorPalette.beigedark,
+      borderColor: t.bordercolorfade,
       borderWidth: 1,
       borderStyle: 'solid',
     },
@@ -199,34 +212,15 @@ const ArchivedView = (props: ArchivedViewProps) => {
 
   return (
     <View style={s.container}>
-      <View style={s.containerList}>
-        <FlatList 
-          style={s.tagsList}
-          data={archivedTags}
-          keyExtractor={(tag:string) => 'tag'+tag}
-          renderItem={getTagButton}
-          ListFooterComponent={<View style={{ height: 300 }} />}/>
-        <FlatList 
-          style={s.objectivesList}
-          data={archivedObjectives}
-          keyExtractor={(obj: Objective)=> obj.ObjectiveId}
-          renderItem={getArchivedButton}
-           ListFooterComponent={<View style={{ height: 300 }}/>}/>
+      <View style={s.containerListTag}>
+        <Text style={s.containerListTitle}>TAGS</Text>
+        <FlatList style={s.tagsList} data={archivedTags} keyExtractor={(tag:string) => 'tag'+tag} renderItem={getTagButton} ListFooterComponent={<View style={{ height: 300 }} />}/>
+      </View>
+      <View style={s.containerListObjs}>
+        <Text style={s.containerListTitle}>ARCHIVED OBJS</Text>
+        <FlatList style={s.objectivesList} data={archivedObjectives} keyExtractor={(obj: Objective)=> obj.ObjectiveId} renderItem={getArchivedButton} ListFooterComponent={<View style={{ height: 300 }}/>}/>
       </View>
     </View>
-    // <>
-    //   <View style={s.container} onTouchEnd={() => {writeCurrentView(Views.IndividualView);}}>
-    //   </View>
-    //   <View
-    //     style={s.containerSide}
-    //     pointerEvents="box-none">
-    //     <FlatList
-    //       data={archivedObjectives}
-    //       keyExtractor={(obj: Objective) => obj.ObjectiveId}
-    //       renderItem={getArchivedList}
-    //     />
-    //   </View>
-    // </>
   );
 };
 

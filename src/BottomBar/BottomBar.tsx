@@ -1,11 +1,12 @@
 import { View, StyleSheet, Vibration } from "react-native";
-import { ThemePalette, colorPalette, dark, globalStyle as gs } from "../Colors";
+import { AppPalette, colorPalette, dark, globalStyle as gs } from "../Colors";
 import { Pattern, Views } from "../Types";
 import PressImage from "../PressImage/PressImage";
 import { useUserContext } from "../Contexts/UserContext";
 import Loading from "../Loading/Loading";
 import { useLogContext } from "../Contexts/LogContext";
 import React, { useEffect, useState } from "react";
+import Constants, { ExecutionEnvironment } from 'expo-constants';
 
 export interface BottomBarProps {
   isSyncing: boolean,
@@ -17,7 +18,7 @@ export interface BottomBarProps {
 }
 
 const BottomBar = (props: BottomBarProps) => {
-  const { user, userPrefs, theme: t, fontTheme: f, currentView, writeCurrentView, availableTags, selectedTags, currentObjectiveId } = useUserContext();
+  const { user, userPrefs, theme: t, fontTheme: f, currentView, writeCurrentView, availableTags, selectedTags, currentObjectiveId, writeUserPrefs } = useUserContext();
   const { log } = useLogContext();
   const { isSyncing, doneSync, failedSync, isLambdaCold, syncObjectivesList } = props;
 
@@ -38,6 +39,11 @@ const BottomBar = (props: BottomBarProps) => {
       writeCurrentView(newView);
     }
   }
+  
+  const changeTheme = () => {
+    if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
+    writeUserPrefs({...userPrefs, theme: userPrefs.theme === 'dark'?'light':'dark'});
+  }
 
   const s = StyleSheet.create({
     container: {
@@ -45,10 +51,11 @@ const BottomBar = (props: BottomBarProps) => {
       justifyContent: 'center',
       alignItems: 'center',
       backgroundColor: t.backgroundcolordarker,
+
       borderStyle: 'solid',
-      
-      borderWidth: 1,
-      borderColor: t.boxborderfade,
+      borderTopWidth: 1,
+      borderBottomWidth: 1,
+      borderColor: t.bordercolorfade,
     },
     leftContainer: {
       flexDirection: 'row',
@@ -62,11 +69,10 @@ const BottomBar = (props: BottomBarProps) => {
       width: '50%',
     },
     imageContainerSelected:{
-      backgroundColor: colorPalette.bluedarkerdarker,
     },
     bottomImage: {
       ...gs.baseImage,
-      tintColor: colorPalette.beigedark,
+      tintColor: t.icontint,
     },
     doneImage:{
       tintColor: t.doneicontint,
@@ -76,7 +82,7 @@ const BottomBar = (props: BottomBarProps) => {
     },
     bottomImageSelected:{
       ...gs.baseBiggerImage,
-      tintColor: colorPalette.bluelight,
+      tintColor: t.bottombariconselected,
     },
     textImage:{
       position: 'absolute',
@@ -93,10 +99,15 @@ const BottomBar = (props: BottomBarProps) => {
       <View style={s.leftContainer}>
         {/* <PressImage pressStyle={gs.baseImageContainer} style={[s.bottomImage, (currentView === Views.UserView)?s.bottomImageSelected:(s.cancelImage, user&&s.doneImage) ]} onPress={() => changeToView(Views.UserView)} source={require('../../public/images/user.png')}></PressImage> */}
         {user?
-          <PressImage pressStyle={gs.baseBiggerImageContainer} style={[s.bottomImage, currentView === Views.UserView&&s.bottomImageSelected]} onPress={() => changeToView(Views.UserView)} source={require('../../public/images/user.png')}></PressImage>
+          (Constants.executionEnvironment === ExecutionEnvironment.StoreClient?
+            <PressImage text="dev" textStyle={{color: colorPalette.red}} pressStyle={gs.baseBiggerImageContainer} style={[s.bottomImage, currentView === Views.UserView&&s.bottomImageSelected]} onPress={() => changeToView(Views.UserView)} source={require('../../public/images/user.png')}></PressImage>
+            :
+            <PressImage pressStyle={gs.baseBiggerImageContainer} style={[s.bottomImage, currentView === Views.UserView&&s.bottomImageSelected]} onPress={() => changeToView(Views.UserView)} source={require('../../public/images/user.png')}></PressImage>
+          )
           :
-          <PressImage pressStyle={gs.baseBiggerImageContainer} style={[s.bottomImage, {tintColor: colorPalette.red}]} onPress={() => changeToView(Views.UserView)} source={require('../../public/images/user.png')}></PressImage>
+          <PressImage pressStyle={gs.baseBiggerImageContainer} style={[s.bottomImage, s.cancelImage]} onPress={() => changeToView(Views.UserView)} source={require('../../public/images/user.png')}></PressImage>
         }
+        <PressImage pressStyle={gs.baseBiggerImageContainer} style={[s.bottomImage]} onPress={changeTheme} source={require('../../public/images/theme.png')}></PressImage>
         {user && user.Role !== 'Guest' && <PressImage pressStyle={currentView === Views.DevView? s.bottomImageSelected:gs.baseImageContainer} style={[s.bottomImage, currentView === Views.DevView&&s.bottomImageSelected]} onPress={() => changeToView(Views.DevView)} source={require('../../public/images/dev.png')}></PressImage>}
         {user?
           <>

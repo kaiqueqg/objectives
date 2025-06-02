@@ -1,5 +1,5 @@
 import { View, StyleSheet, FlatList, Text, Vibration, BackHandler, Pressable } from "react-native";
-import { ThemePalette, colorPalette, getObjTheme } from "../Colors";
+import { colorPalette } from "../Colors";
 import { FontPalette } from "../../fonts/Font";
 import { useUserContext } from "../Contexts/UserContext";
 import React, { JSX, useEffect, useState } from "react";
@@ -89,7 +89,7 @@ const TagsView = (props: TagsViewProps) => {
       margin: 10,
 
       borderRadius: 5,
-      borderColor: t.boxborderfade,
+      borderColor: t.bordercolorfade,
       borderWidth: 1,
       borderStyle: 'solid',
     },
@@ -115,14 +115,14 @@ const TagsView = (props: TagsViewProps) => {
       margin: 5,
       padding: 5,
 
-      borderColor: t.boxborderfade,
+      borderColor: t.bordercolorfade,
       borderWidth: 1,
       borderStyle: 'solid',
       borderRadius: 5,
     },
     tagSelected:{
       color: 'beige',
-      borderColor: t.boxborder,
+      borderColor: t.bordercolor,
       borderWidth: 1,
       borderStyle: 'solid',
     },
