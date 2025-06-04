@@ -85,6 +85,7 @@ export interface Question extends Item {
 export interface Location extends Item {
   Title: string,
   Url: string,
+  IsShowingMap: boolean,
 }
 
 export interface Divider extends Item {

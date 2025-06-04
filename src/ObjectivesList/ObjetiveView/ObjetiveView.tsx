@@ -893,7 +893,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       textAlign: 'center',
       color: o.objtitle,
       fontWeight: 'bold',
-      borderColor: o.objtitle,
+      borderColor: o.icontintcolor,
     },
     colorPalette: {
       width: 40,

@@ -128,11 +128,6 @@ const StepView = (props: StepViewProps) => {
       flexWrap: 'wrap',
       justifyContent: 'center',
       alignItems: 'center',
-
-      borderRadius: 5,
-      borderColor: o.bordercolor,
-      borderWidth: 1,
-      borderStyle: 'solid',
       marginBottom: 5,
     },
     titleContainerSelected:{
@@ -165,7 +160,7 @@ const StepView = (props: StepViewProps) => {
       color: o.itemtext,
 
       borderRadius: 5,
-      borderColor: o.bordercolor,
+      borderColor: o.icontintcolor,
       borderBottomWidth: 1,
       borderStyle: 'solid',
     },

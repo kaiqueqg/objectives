@@ -166,7 +166,7 @@ const LinkView = (props: LinkViewProps) => {
       color: o.itemtext,
 
       borderRadius: 5,
-      borderColor: o.bordercolor,
+      borderColor: o.icontintcolor,
       borderBottomWidth: 1,
       borderStyle: 'solid',
     },

@@ -121,7 +121,7 @@ const DividerView = (props: DividerViewProps) => {
       alignItems: 'center',
 
       color: t.textcolor,
-      borderColor: o.itemtext,
+      borderColor: o.icontintcolor,
     },
     image:{
       ...gs.baseSmallImage,

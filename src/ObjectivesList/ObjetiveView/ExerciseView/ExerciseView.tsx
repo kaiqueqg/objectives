@@ -248,7 +248,7 @@ const ExerciseView = (props: ExerciseViewProps) => {
       color: o.itemtext,
 
       borderRadius: 5,
-      borderColor: o.bordercolor,
+      borderColor: o.icontintcolor,
       borderBottomWidth: 1,
       borderStyle: 'solid',
     },

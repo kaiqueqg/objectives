@@ -73,7 +73,7 @@ const WaitView = (props: WaitViewProps) => {
     },
     inputStyle: {
       color: o.itemtext,
-      borderColor: o.itemtext,
+      borderColor: o.icontintcolor,
     },
     image:{
       ...gs.baseSmallImage,

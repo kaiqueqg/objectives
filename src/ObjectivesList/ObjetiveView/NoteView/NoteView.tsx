@@ -75,7 +75,7 @@ const NoteView = (props: NoteViewProps) => {
     },
     editingInput: {
       color: o.itemtext,
-      borderColor: o.itemtext,
+      borderColor: o.icontintcolor,
     },
     image:{
       height: 20,
