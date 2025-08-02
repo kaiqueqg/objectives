@@ -197,6 +197,7 @@ const ObjsListView = (props: ObjsListViewProps) => {
         style={[s.tagButtonContainer, selectedTags.some(tag => tag === item)? s.tagButtonContainerSelected:undefined]}
         textStyle={[s.text, selectedTags.some(tag => tag === item)? s.textSelected:undefined]}
         onPress={() => selectUnselectedTag(item)}
+        ellipsizeMode={'middle'}
         text={item}></PressText>
     )
   }

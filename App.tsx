@@ -4,13 +4,13 @@ import React, { useEffect, useState } from 'react';
 import { UserProvider } from './src/Contexts/UserContext';
 import Main from './src/Main';
 import { colorPalette, dark } from './src/Colors';
-import PopMessageContainer from './src/Log/PopMessageContainer';
 import { StorageProvider } from './src/Contexts/StorageContext';
 import { LogProvider } from './src/Contexts/LogContext';
 import { RequestProvider } from './src/Contexts/RequestContext';
 
 export default function App() {
   const [isLoadingFont, setIsLoadingFont] = useState<boolean>(false);
+
 
   useEffect(() => {
     //loadFonts();

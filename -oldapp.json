@@ -6,6 +6,10 @@
     "orientation": "portrait",
     "icon": "./public/images/appicon.png",
     "userInterfaceStyle": "light",
+    "updates": {
+      "enabled": true,
+      "fallbackToCacheTimeout": 0
+    },
     "splash": {
       "image": "./public/images/appicon.png",
       "resizeMode": "contain",

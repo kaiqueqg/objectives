@@ -4,6 +4,7 @@ import { Item, LogLevel, LoginModel, Objective, ObjectiveList, Step, User, UserP
 import { useLogContext } from './LogContext';
 import { useStorageContext } from './StorageContext';
 import * as FileSystem from 'expo-file-system';
+import Constants from 'expo-constants';
 
 interface RequestProviderProps {
   children: ReactNode;
@@ -35,6 +36,8 @@ const RequestContext = createContext<RequestContextType | undefined>(undefined);
 const currentLogLevel = LogLevel.Dev;
 
 export const RequestProvider: React.FC<RequestProviderProps> = ({ children }) => {
+  const config = Constants.expoConfig?.extra ?? {};
+  const { identityUrl, objectivesListUrl } = config;
   const { log, popMessage } = useLogContext();
   const { storage } = useStorageContext();
   
@@ -94,7 +97,7 @@ export const RequestProvider: React.FC<RequestProviderProps> = ({ children }) =>
     },
     async requestIdentity<T>(endpoint: string, method: string, body?: string, fError?: () => void): Promise<T|null>{
       try {
-        const resp = await request('https://68m8rbceac.execute-api.sa-east-1.amazonaws.com/dev', endpoint, method, body, fError);
+        const resp = await request(identityUrl, endpoint, method, body, fError);
 
         if(resp){
           const respData: Response<T> = await resp.json();
@@ -242,7 +245,8 @@ export const RequestProvider: React.FC<RequestProviderProps> = ({ children }) =>
     //! Responsable to parse and react to equal among all, know, request errors.
     async requestObjectivesList<T>(endpoint: string, method: string, body?: string, fError?: () => void, wakeup?: boolean): Promise<any>{
       try {
-        const resp = await request('https://0z58mhwlhf.execute-api.sa-east-1.amazonaws.com/dev', endpoint, method, body, fError);
+        const resp = await request(objectivesListUrl, endpoint, method, body, fError);
+        log.dev(objectivesListUrl);
 
         if(resp){
           const respData: Response<T> = await resp.json();

@@ -16,6 +16,7 @@ import { useRequestContext } from "./Contexts/RequestContext";
 import TagsView from "./TagsView/TagsView";
 import ArchivedView from "./ArchivedView/ArchivedView";
 import { SafeAreaView } from 'react-native-safe-area-context';
+import * as Updates from 'expo-updates';
 
 export interface MainProps{
 }
@@ -49,18 +50,6 @@ const Main = (props: MainProps) => {
         syncObjectivesList();
       }
     });
-
-    // const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
-    //   if(currentView === Views.IndividualView || currentView === Views.UserView || currentView === Views.AllView)
-    //     writeCurrentView(Views.ListView);
-    //   else
-    //     BackHandler.exitApp();
-      
-    //   return true;
-    // });
-    // return () => {
-    //   subscription.remove();
-    // };
   }, []);
   
   useEffect(()=>{
