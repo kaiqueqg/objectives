@@ -1,4 +1,4 @@
-import { View, StyleSheet, Text, Vibration, TextInput } from "react-native";
+import { View, StyleSheet, Text, Vibration, TextInput, BackHandler, Keyboard } from "react-native";
 import { Medicine, Pattern, ItemViewProps } from "../../../Types";
 import { colorPalette, globalStyle as gs } from "../../../Colors";
 import { FontPalette } from "../../../../fonts/Font";
@@ -7,6 +7,7 @@ import PressImage from "../../../PressImage/PressImage";
 import { useEffect, useState } from "react";
 import PressText from "../../../PressText/PressText";
 import React from "react";
+import { useLogContext } from "../../../Contexts/LogContext";
 
 export const New = () => {
   return(
@@ -27,10 +28,38 @@ export interface MedicineViewProps extends ItemViewProps {
 
 const MedicineView = (props: MedicineViewProps) => {
   const { userPrefs, theme: t, fontTheme: f, putItem } = useUserContext();
+  const { log } = useLogContext();
   const { objTheme: o, isEditingPos, onDeleteItem, loadMyItems, medicine } = props;
 
   const [isEditingMedicine, setIsEditingMedicine] = useState<boolean>(false);
   const [tempMedicine, setTempMedicine] = useState<Medicine>(props.medicine);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+
+  useEffect(() => {
+    const show = Keyboard.addListener("keyboardDidShow", () => {setKeyboardVisible(true);});
+    const hide = Keyboard.addListener("keyboardDidHide", () => {setKeyboardVisible(false);});
+
+    const backAction = () => {
+      if (keyboardVisible) {
+        Keyboard.dismiss();
+        return true;
+      }
+      
+      onCancelMedicine();
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => {
+      backHandler.remove();
+      show.remove();
+      hide.remove();
+    };
+  }, [keyboardVisible]);
 
   useEffect(()=>{
     setTempMedicine(props.medicine);
@@ -74,6 +103,11 @@ const MedicineView = (props: MedicineViewProps) => {
     // }
 
     return rtn;
+  }
+
+  const onEditingMedicine = () => {
+    if(!isEditingPos && !props.isLocked)setIsEditingMedicine(!isEditingMedicine)
+    else Vibration.vibrate(Pattern.Wrong);
   }
 
   const s = StyleSheet.create({
@@ -199,7 +233,8 @@ const MedicineView = (props: MedicineViewProps) => {
                 placeholderTextColor={o.itemtextfade}
                 placeholder="Title"
                 defaultValue={medicine.Title}
-                onChangeText={(value: string)=>{setTempMedicine({...tempMedicine, Title: value})}} autoFocus></TextInput>
+                onChangeText={(value: string)=>{setTempMedicine({...tempMedicine, Title: value})}} autoFocus
+                onSubmitEditing={onDoneMedicine}></TextInput>
               <TextInput 
                 style={s.inputStyle}
                 placeholderTextColor={o.itemtextfade}
@@ -209,19 +244,22 @@ const MedicineView = (props: MedicineViewProps) => {
                 onChangeText={(value: string)=>{
                   const numericValue = value.replace(/[^0-9]/g, '');
                   const quantity = numericValue !== '' ? parseInt(numericValue, 10) : 1;
-                  setTempMedicine({...tempMedicine, Quantity: quantity})}}></TextInput>
+                  setTempMedicine({...tempMedicine, Quantity: quantity})}}
+                onSubmitEditing={onDoneMedicine}></TextInput>
               <TextInput
                 style={s.inputStyle}
                 placeholderTextColor={o.itemtextfade}
                 placeholder="Unit"
                 defaultValue={medicine.Unit}
-                onChangeText={(value: string)=>{setTempMedicine({...tempMedicine, Unit: value})}}></TextInput>
+                onChangeText={(value: string)=>{setTempMedicine({...tempMedicine, Unit: value})}}
+                onSubmitEditing={onDoneMedicine}></TextInput>
               <TextInput 
                 style={s.inputStyle}
                 placeholderTextColor={o.itemtextfade}
                 placeholder="Purpose"
                 defaultValue={medicine.Purpose}
-                onChangeText={(value: string)=>{setTempMedicine({...tempMedicine, Purpose: value})}}></TextInput>
+                onChangeText={(value: string)=>{setTempMedicine({...tempMedicine, Purpose: value})}}
+                onSubmitEditing={onDoneMedicine}></TextInput>
             </View>
             <View style={s.inputsRight}>
               <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageDone]} source={require('../../../../public/images/done.png')} onPress={onDoneMedicine}></PressImage>
@@ -233,7 +271,8 @@ const MedicineView = (props: MedicineViewProps) => {
             style={s.titleContainer}
             textStyle={medicine.IsChecked? s.titleFade:s.title}
             text={getText()}
-            onPress={()=>{if(!isEditingPos)setIsEditingMedicine(!isEditingMedicine)}}
+            onPress={()=>{onEditingMedicine()}}
+            defaultStyle={o}
             ></PressText>
         }
         {!isEditingMedicine && !medicine.IsChecked && <PressImage pressStyle={gs.baseImageContainer} style={s.image} source={require('../../../../public/images/medicine.png')} onPress={() => {if(!isEditingPos)onChangeIsChecked();}}></PressImage>}

@@ -327,17 +327,43 @@ export const StorageProvider: React.FC<StorageProviderProps> = ({ children }) =>
       }
     },
     //^-------------------- ITEMS
-    async readItems(objectiveId: string): Promise<Item[]|null> {
+    async readItems(objectiveId?: string): Promise<Item[]|null> {
       try {
-        const data = await AsyncStorage.getItem(keys.Items+':'+objectiveId);
-        if(data !== null){
-          try {
-            const parsedData: Item[] = JSON.parse(data);
-            return parsedData;
-          } catch (err) {
-            log.err('readItems', 'Error parsing json');
+        if(objectiveId){
+          const data = await AsyncStorage.getItem(keys.Items+':'+objectiveId);
+          if(data !== null){
+            try {
+              const parsedData: Item[] = JSON.parse(data);
+              return parsedData;
+            } catch (err) {
+              log.err('readItems', 'Error parsing json');
+            }
           }
         }
+        else{
+          const objectives = await this.readObjectives();
+
+          if(objectives){
+            let allItems: Item[] = [];
+
+            for (let i = 0; i < objectives.length; i++) {
+              const obj = objectives[i];
+              const data = await AsyncStorage.getItem(keys.Items + ':' + obj.ObjectiveId);
+              if (data !== null) {
+                try {
+                  const parsedData: Item[] = JSON.parse(data);
+                  allItems = allItems.concat(parsedData);
+                } catch (err) {
+                  log.err('readItems', `Error parsing json for objective ${obj.ObjectiveId}`);
+                }
+              }
+            }
+
+            return allItems;
+          }
+        }
+
+        
         return null;
       } catch (err) {
         log.err('readItems', '[catch] reading items.');

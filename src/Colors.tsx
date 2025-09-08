@@ -12,6 +12,7 @@ export type ColorPalette = {
   bluelightlight: string,
 
   beige: string,
+  beigey: string,
   beigelightdark: string,
   beigedarky: string,
   beigedark: string,
@@ -87,6 +88,14 @@ export type ColorPalette = {
   itemCyan: string,
   itemPink: string,
 
+  itemBlueDark: string,
+  itemRedDark: string,
+  itemWhiteDark: string,
+  itemGreenDark: string,
+  itemNoThemeDark: string,
+  itemCyanDark: string,
+  itemPinkDark: string,
+
   itemBlueLight: string,
   itemRedLight: string,
   itemWhiteLight: string,
@@ -94,6 +103,14 @@ export type ColorPalette = {
   itemNoThemeLight: string,
   itemCyanLight: string,
   itemPinkLight: string,
+
+  itemBlueLightDark: string,
+  itemRedLightDark: string,
+  itemWhiteLightDark: string,
+  itemGreenLightDark: string,
+  itemNoThemeLightDark: string,
+  itemCyanLightDark: string,
+  itemPinkLightDark: string,
 };
 
 export const colorPalette: ColorPalette = {
@@ -108,7 +125,8 @@ export const colorPalette: ColorPalette = {
   bluelight: 'rgb(176, 211, 254)',
   bluelightlight: 'rgb(214, 228, 253)',
 
-  beige: 'rgb(245, 245, 220)',
+  beige: 'rgba(247, 247, 232, 1)',
+  beigey: 'rgb(245, 245, 220)',
   beigelightdark: 'rgb(185, 185, 160)',
   beigedarky: 'rgb(129, 129, 95)',
   beigedark: 'rgb(75, 75, 70)',
@@ -120,7 +138,7 @@ export const colorPalette: ColorPalette = {
   white: 'rgb(255, 255, 255)',
   black: 'rgb(0, 0, 0)',
   greydark: 'rgb(58, 58, 58)',
-  greydarky: 'rgb(102, 102, 102)',
+  greydarky: 'rgba(80, 80, 80, 1)',
   grey: 'rgb(117, 117, 117)',
   greylighty: 'rgb(176, 176, 176)',
   greylight: 'rgb(204, 204, 204)',
@@ -161,45 +179,59 @@ export const colorPalette: ColorPalette = {
 
   objNoTheme: 'rgb(40, 44, 52)',
   itemNoTheme: 'rgb(62, 68, 81)',
+  itemNoThemeDark: 'rgb(29, 32, 37)',
   
   objBlue: 'rgb(35, 49, 92)',
   itemBlue: 'rgb(49, 69, 129)',
+  itemBlueDark: 'rgb(28, 39, 73)',
 
   objRed: 'rgb(70, 0, 16)',
   itemRed: 'rgb(104, 18, 38)',
+  itemRedDark: 'rgb(53, 0, 12)',
 
   objGreen: 'rgb(0, 43, 23)',
-  itemGreen: 'rgb(22, 59, 42)',
+  itemGreen: 'rgba(27, 72, 51, 1)',
+  itemGreenDark: 'rgb(0, 32, 17)',
 
   objWhite: 'rgb(245, 245, 220)',
   itemWhite: 'rgb(216, 174, 126)',
+  itemWhiteDark: 'rgb(156, 125, 90)',
 
   objCyan: 'rgb(37, 99, 119)',
   itemCyan: 'rgb(50, 135, 164)',
+  itemCyanDark: 'rgba(30, 79, 96, 1)',
 
   objPink: 'rgb(249, 197, 213)',
   itemPink: 'rgb(244, 153, 181)',
+  itemPinkDark: 'rgba(234, 109, 146, 1)',
 
   objNoThemeLight: 'rgb(255, 255, 255)',
-  itemNoThemeLight: 'rgb(230, 230, 230)',
+  itemNoThemeLight: 'rgba(204, 204, 204, 1)',
+  itemNoThemeLightDark: 'rgba(170, 170, 170, 1)',
   
   objBlueLight: 'rgb(214, 228, 253)',
-  itemBlueLight: 'rgb(176, 211, 254)',
+  itemBlueLight: 'rgba(137, 186, 246, 1)',
+  itemBlueLightDark: 'rgba(88, 152, 230, 1)',
 
   objRedLight: 'rgb(254, 185, 184)',
-  itemRedLight: 'rgb(255, 140, 140)',
+  itemRedLight: 'rgba(238, 115, 115, 1)',
+  itemRedLightDark: 'rgba(225, 72, 72, 1)',
 
   objGreenLight: 'rgb(211, 244, 211)',
-  itemGreenLight: 'rgb(168, 227, 168)',
+  itemGreenLight: 'rgba(127, 196, 127, 1)',
+  itemGreenLightDark: 'rgba(68, 187, 68, 1)',
 
   objWhiteLight: 'rgb(245, 245, 220)',
   itemWhiteLight: 'rgb(216, 174, 126)',
+  itemWhiteLightDark: 'rgb(156, 125, 90)',
 
   objCyanLight: 'rgb(142, 201, 220)',
   itemCyanLight: 'rgb(95, 178, 206)',
+  itemCyanLightDark: 'rgba(77, 158, 184, 1)',
 
   objPinkLight: 'rgb(249, 197, 213)',
   itemPinkLight: 'rgb(244, 153, 181)',
+  itemPinkLightDark: 'rgba(234, 109, 146, 1)',
 };
 
 export type GlobalStyle = {
@@ -299,7 +331,7 @@ export type AppPalette = {
 
 export const light: AppPalette = {
   backgroundcolordarker: colorPalette.greylight,
-  backgroundcolordark: colorPalette.white,
+  backgroundcolordark: colorPalette.greylighter,
   backgroundcolor: colorPalette.white,
   backgroundcolorcontrast: colorPalette.black,
 
@@ -311,7 +343,7 @@ export const light: AppPalette = {
   bordercolorfade: colorPalette.grey,
 
   loginbuttonbk: colorPalette.beige,
-  logoutbuttonbk: colorPalette.reddarker,
+  logoutbuttonbk: colorPalette.redlightlight,
   bottombariconselected: colorPalette.bluedarky,
 
   icontint: colorPalette.black,
@@ -322,7 +354,7 @@ export const light: AppPalette = {
 
   actionicontint: colorPalette.bluedark,
   onlineicontint: colorPalette.green,
-  inprogressicontint: colorPalette.yellow,
+  inprogressicontint: colorPalette.black,
   offlineicontint: colorPalette.redlight,
 }
 
@@ -340,7 +372,7 @@ export const dark: AppPalette = {
   bordercolorfade: colorPalette.beigedark,
 
   loginbuttonbk: colorPalette.bluelight,
-  logoutbuttonbk: colorPalette.redlightlight,
+  logoutbuttonbk: colorPalette.redlight,
   bottombariconselected: colorPalette.bluelight,
 
   icontint: colorPalette.beige,
@@ -372,8 +404,10 @@ export type ObjectivePallete = {
   objtitle?: string,
 
   itembk?: string,
+  itembkdark?: string,
   itemtext?: string,
   itemtextfade?: string,
+  itemtextfadedark?: string,
   itemtextplaceholder?: string,
 
   borderRadius: number,
@@ -396,9 +430,11 @@ export const noTheme: ObjectivePallete = {
   objbk: colorPalette.objNoTheme,
   objtitle: colorPalette.beige,
 
-  itembk:  colorPalette.itemNoTheme,
+  itembk: colorPalette.itemNoTheme,
+  itembkdark: colorPalette.itemNoThemeDark,
   itemtext: colorPalette.beige,
   itemtextfade: colorPalette.grey,
+  itemtextfadedark: colorPalette.greydarky,
   itemtextplaceholder: colorPalette.beigedarker,
   
   borderRadius: 5,
@@ -419,11 +455,13 @@ export const lightNoTheme: ObjectivePallete = {
   trashicontint: colorPalette.reddarker,
   
   objbk: colorPalette.objNoThemeLight,
-  itembk:  colorPalette.itemNoThemeLight,
+  itembk: colorPalette.itemNoThemeLight,
+  itembkdark: colorPalette.itemNoThemeLightDark,
   
   objtitle: colorPalette.black,
   itemtext: colorPalette.black,
   itemtextfade: colorPalette.grey,
+  itemtextfadedark: colorPalette.greylighty,
   itemtextplaceholder: colorPalette.black,
   
   borderRadius: 5,
@@ -436,6 +474,7 @@ export const darkBlue: ObjectivePallete = {
   
   objbk: colorPalette.objBlue,
   itembk:  colorPalette.itemBlue,
+  itembkdark: colorPalette.itemBlueDark,
 }
 
 export const lightBlue: ObjectivePallete = {
@@ -448,6 +487,7 @@ export const lightBlue: ObjectivePallete = {
   
   objbk: colorPalette.objBlueLight,
   itembk:  colorPalette.itemBlueLight,
+  itembkdark: colorPalette.itemBlueLightDark,
 }
 export const darkRed: ObjectivePallete = {
   ...noTheme,
@@ -455,6 +495,7 @@ export const darkRed: ObjectivePallete = {
 
   objbk: colorPalette.objRed,
   itembk: colorPalette.itemRed,
+  itembkdark: colorPalette.itemRedDark,
 
   doneicontint: colorPalette.greenlight,
   trashicontint: colorPalette.redlightlight,
@@ -469,6 +510,7 @@ export const lightRed: ObjectivePallete = {
 
   objbk: colorPalette.objRedLight,
   itembk: colorPalette.itemRedLight,
+  itembkdark: colorPalette.itemRedLightDark,
 
   doneicontint: colorPalette.greendark,
   cancelicontint: colorPalette.yellow,
@@ -484,6 +526,7 @@ export const darkGreen: ObjectivePallete = {
 
   objbk: colorPalette.objGreen,
   itembk:  colorPalette.itemGreen,
+  itembkdark: colorPalette.itemGreenDark,
 }
 
 export const lightGreen: ObjectivePallete = {
@@ -495,6 +538,7 @@ export const lightGreen: ObjectivePallete = {
 
   objbk: colorPalette.objGreenLight,
   itembk:  colorPalette.itemGreenLight,
+  itembkdark: colorPalette.itemGreenLightDark,
 }
 
 export const darkWhite: ObjectivePallete = {
@@ -510,6 +554,7 @@ export const darkWhite: ObjectivePallete = {
   
   objbk: colorPalette.objWhite,
   itembk:  colorPalette.itemWhite,
+  itembkdark: colorPalette.itemWhiteDark,
   
   objtitle: colorPalette.black,
   itemtext: colorPalette.black,
@@ -527,6 +572,7 @@ export const lightWhite: ObjectivePallete = {
   
   objbk: colorPalette.objWhiteLight,
   itembk:  colorPalette.itemWhiteLight,
+  itembkdark: colorPalette.itemWhiteLightDark,
 }
 
 export const darkCyan: ObjectivePallete = {
@@ -536,6 +582,7 @@ export const darkCyan: ObjectivePallete = {
   objbk: colorPalette.objCyan,
   
   itembk:  colorPalette.itemCyan,
+  itembkdark: colorPalette.itemCyanDark,
   itemtextfade: colorPalette.beigelightdark,
 }
 
@@ -549,6 +596,7 @@ export const lightCyan: ObjectivePallete = {
 
   objbk: colorPalette.objCyanLight,
   itembk:  colorPalette.itemCyanLight,
+  itembkdark: colorPalette.itemCyanLightDark,
   
   objtitle: colorPalette.black,
 }
@@ -567,6 +615,7 @@ export const darkPink: ObjectivePallete = {
   objtitle: colorPalette.black,
 
   itembk:  colorPalette.itemPink,
+  itembkdark: colorPalette.itemPinkDark,
   itemtext: colorPalette.black,
 }
 
@@ -583,6 +632,7 @@ export const lightPink: ObjectivePallete = {
   
   objbk: colorPalette.objPinkLight,
   itembk:  colorPalette.itemPinkLight,
+  itembkdark: colorPalette.itemPinkLightDark,
   
   objtitle: colorPalette.black,
   itemtext: colorPalette.black,

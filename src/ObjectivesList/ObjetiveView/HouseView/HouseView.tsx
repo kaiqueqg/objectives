@@ -1,4 +1,4 @@
-import { View, StyleSheet, Text, Vibration, TextInput, Linking } from "react-native";
+import { View, StyleSheet, Text, Vibration, TextInput, Linking, Keyboard, BackHandler } from "react-native";
 import { House, Pattern, ItemViewProps, MessageType } from "../../../Types";
 import { colorPalette, globalStyle as gs } from "../../../Colors";
 import { FontPalette } from "../../../../fonts/Font";
@@ -37,6 +37,34 @@ export const HouseView = (props: HouseViewProps) => {
 
   const [isEditingHouse, setIsEditingHouse] = useState<boolean>(false);
   const [tempHouse, setTempHouse] = useState<House>(props.house);
+
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+    
+  useEffect(() => {
+    const show = Keyboard.addListener("keyboardDidShow", () => {setKeyboardVisible(true);});
+    const hide = Keyboard.addListener("keyboardDidHide", () => {setKeyboardVisible(false);});
+
+    const backAction = () => {
+      if (keyboardVisible) {
+        Keyboard.dismiss();
+        return true;
+      }
+      
+      onCancelHouse();
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => {
+      backHandler.remove();
+      show.remove();
+      hide.remove();
+    };
+  }, [keyboardVisible]);
 
   useEffect(()=>{
     setTempHouse(props.house);
@@ -77,7 +105,12 @@ export const HouseView = (props: HouseViewProps) => {
   }
 
   const onChangeIsEditing = () => {
-    if(!isEditingPos)setIsEditingHouse(!isEditingHouse);
+    if(props.isLocked){
+      Vibration.vibrate(Pattern.Wrong);
+    }
+    else{
+      if(!isEditingPos)setIsEditingHouse(!isEditingHouse);
+    }
   }
 
   const openLink = () => {
@@ -256,25 +289,29 @@ export const HouseView = (props: HouseViewProps) => {
                 placeholder="Title"
                 defaultValue={house.Title}
                 onChangeText={(value: string)=>{setTempHouse({...tempHouse, Title: value})}}
-                autoFocus></TextInput>
+                autoFocus
+                onSubmitEditing={onDoneHouse}></TextInput>
               <TextInput 
                 style={s.inputStyle}
                 placeholderTextColor={o.itemtextfade}
                 placeholder="Listing"
                 defaultValue={house.Listing}
-                onChangeText={(value: string)=>{setTempHouse({...tempHouse, Listing: value})}}></TextInput>
+                onChangeText={(value: string)=>{setTempHouse({...tempHouse, Listing: value})}}
+                onSubmitEditing={onDoneHouse}></TextInput>
               <TextInput 
                 style={s.inputStyle}
                 placeholderTextColor={o.itemtextfade}
                 placeholder="MapLink"
                 defaultValue={house.MapLink}
-                onChangeText={(value: string)=>{setTempHouse({...tempHouse, MapLink: value})}}></TextInput>
+                onChangeText={(value: string)=>{setTempHouse({...tempHouse, MapLink: value})}}
+                onSubmitEditing={onDoneHouse}></TextInput>
               <TextInput 
                 style={s.inputStyle}
                 placeholderTextColor={o.itemtextfade}
                 placeholder="m²"
                 defaultValue={house.MeterSquare}
-                onChangeText={(value: string)=>{setTempHouse({...tempHouse, MeterSquare: value})}}></TextInput>
+                onChangeText={(value: string)=>{setTempHouse({...tempHouse, MeterSquare: value})}}
+                onSubmitEditing={onDoneHouse}></TextInput>
               <TextInput 
                 style={s.inputStyle}
                 placeholderTextColor={o.itemtextfade}
@@ -284,25 +321,29 @@ export const HouseView = (props: HouseViewProps) => {
                 onChangeText={(value: string)=>{
                   const numericValue = value.replace(/[^0-9]/g, '');
                   const Rating = numericValue !== '' ? parseInt(numericValue, 10) : 1;
-                  setTempHouse({...tempHouse, Rating: Rating})}}></TextInput>
+                  setTempHouse({...tempHouse, Rating: Rating})}}
+                onSubmitEditing={onDoneHouse}></TextInput>
               <TextInput
                 style={s.inputStyle}
                 placeholderTextColor={o.itemtextfade}
                 placeholder="Address"
                 defaultValue={house.Address}
-                onChangeText={(value: string)=>{setTempHouse({...tempHouse, Address: value})}}></TextInput>
+                onChangeText={(value: string)=>{setTempHouse({...tempHouse, Address: value})}}
+                onSubmitEditing={onDoneHouse}></TextInput>
               <TextInput 
                 style={s.inputStyle}
                 placeholderTextColor={o.itemtextfade}
                 placeholder="Details"
                 defaultValue={house.Details}
-                onChangeText={(value: string)=>{setTempHouse({...tempHouse, Details: value})}}></TextInput>
+                onChangeText={(value: string)=>{setTempHouse({...tempHouse, Details: value})}}
+                onSubmitEditing={onDoneHouse}></TextInput>
               <TextInput 
                 style={s.inputStyle}
                 placeholderTextColor={o.itemtextfade}
                 placeholder="Attention"
                 defaultValue={house.Attention}
-                onChangeText={(value: string)=>{setTempHouse({...tempHouse, Attention: value})}}></TextInput>
+                onChangeText={(value: string)=>{setTempHouse({...tempHouse, Attention: value})}}
+                onSubmitEditing={onDoneHouse}></TextInput>
             </View>
             <View style={s.inputsRight}>
               <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageDone]} source={require('../../../../public/images/done.png')} onPress={onDoneHouse}></PressImage>
@@ -317,9 +358,10 @@ export const HouseView = (props: HouseViewProps) => {
                 style={s.titleContainer}
                 textStyle={house.WasContacted? s.titleFade:s.title}
                 text={house.Title}
-                onPress={onChangeIsEditing}
+                onPress={() => {onChangeIsEditing()}}
+                defaultStyle={o}
               ></PressText>
-              <PressText textStyle={{color: o.itemtext}} style={s.attentionContainer} onPress={onChangeIsEditing} text={getText()}></PressText>
+              <PressText textStyle={{color: o.itemtext}} style={s.attentionContainer} onPress={() => {onChangeIsEditing()}} text={getText()} defaultStyle={o}></PressText>
               {!isEditingHouse && house.Listing.trim() !== '' && <PressImage pressStyle={gs.baseImageContainer} style={s.image} source={require('../../../../public/images/link.png')} onPress={openLink}></PressImage>}
               {!isEditingHouse && house.MapLink.trim() !== '' && <PressImage pressStyle={gs.baseImageContainer} style={s.image} source={require('../../../../public/images/location-filled.png')} onPress={openUrl}></PressImage>}
               {!isEditingHouse && !house.WasContacted && <PressImage pressStyle={gs.baseImageContainer} style={s.image} source={require('../../../../public/images/home.png')} onPress={() => {if(!isEditingPos)onChangeWasContacted();}}></PressImage>}

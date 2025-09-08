@@ -97,7 +97,7 @@ export const RequestProvider: React.FC<RequestProviderProps> = ({ children }) =>
     },
     async requestIdentity<T>(endpoint: string, method: string, body?: string, fError?: () => void): Promise<T|null>{
       try {
-        const resp = await request(identityUrl, endpoint, method, body, fError);
+        const resp = await request("https://ptv4q6v3kf.execute-api.sa-east-1.amazonaws.com/dev", endpoint, method, body, fError);
 
         if(resp){
           const respData: Response<T> = await resp.json();
@@ -245,8 +245,7 @@ export const RequestProvider: React.FC<RequestProviderProps> = ({ children }) =>
     //! Responsable to parse and react to equal among all, know, request errors.
     async requestObjectivesList<T>(endpoint: string, method: string, body?: string, fError?: () => void, wakeup?: boolean): Promise<any>{
       try {
-        const resp = await request(objectivesListUrl, endpoint, method, body, fError);
-        log.dev(objectivesListUrl);
+        const resp = await request("https://xebiabbvic.execute-api.sa-east-1.amazonaws.com/dev", endpoint, method, body, fError);
 
         if(resp){
           const respData: Response<T> = await resp.json();

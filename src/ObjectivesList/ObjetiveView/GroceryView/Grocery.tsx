@@ -1,4 +1,4 @@
-import { View, StyleSheet, Text, Vibration, TextInput } from "react-native";
+import { View, StyleSheet, Text, Vibration, TextInput, Keyboard, BackHandler } from "react-native";
 import { Grocery, Item, Pattern, ItemViewProps } from "../../../Types";
 import { colorPalette, globalStyle as gs } from "../../../Colors";
 import { FontPalette } from "../../../../fonts/Font";
@@ -29,6 +29,34 @@ const GroceryView = (props: GroceryViewProps) => {
 
   const [isEditingGrocery, setIsEditingGrocery] = useState<boolean>(false);
   const [tempGrocery, setTempGrocery] = useState<Grocery>(props.grocery);
+
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+      
+  useEffect(() => {
+    const show = Keyboard.addListener("keyboardDidShow", () => {setKeyboardVisible(true);});
+    const hide = Keyboard.addListener("keyboardDidHide", () => {setKeyboardVisible(false);});
+
+    const backAction = () => {
+      if (keyboardVisible) {
+        Keyboard.dismiss();
+        return true;
+      }
+      
+      onCancelGrocery();
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => {
+      backHandler.remove();
+      show.remove();
+      hide.remove();
+    };
+  }, [keyboardVisible]);
 
   useEffect(()=>{
     setTempGrocery(props.grocery);
@@ -71,6 +99,11 @@ const GroceryView = (props: GroceryViewProps) => {
     }
 
     return rtn;
+  }
+
+  const onEditingGrocery = () => {
+    if(!isEditingPos && !props.isLocked)setIsEditingGrocery(!isEditingGrocery)
+    else Vibration.vibrate(Pattern.Wrong);
   }
 
   const s = StyleSheet.create({
@@ -188,29 +221,34 @@ const GroceryView = (props: GroceryViewProps) => {
                 placeholderTextColor={o.itemtextfade}
                 placeholder="Title"
                 defaultValue={grocery.Title}
-                onChangeText={(value: string)=>{setTempGrocery({...tempGrocery, Title: value})}} autoFocus></TextInput>
+                onChangeText={(value: string)=>{setTempGrocery({...tempGrocery, Title: value})}} 
+                onSubmitEditing={onDoneGrocery}
+                autoFocus={grocery.Title.trim() === ''}></TextInput>
               <TextInput 
                 style={s.inputStyle}
-                placeholder="Quatity"
+                placeholder="Quantity"
                 placeholderTextColor={o.itemtextfade}
                 defaultValue={grocery.Quantity?.toString()}
                 keyboardType="numeric" 
                 onChangeText={(value: string)=>{
                   const numericValue = value.replace(/[^0-9]/g, '');
                   const quantity = numericValue !== '' ? parseInt(numericValue, 10) : 1;
-                  setTempGrocery({...tempGrocery, Quantity: quantity})}}></TextInput>
+                  setTempGrocery({...tempGrocery, Quantity: quantity})}}
+                  onSubmitEditing={onDoneGrocery}></TextInput>
               <TextInput 
                 style={s.inputStyle}
                 placeholderTextColor={o.itemtextfade}
                 placeholder="Good price"
                 defaultValue={grocery.GoodPrice}
-                onChangeText={(value: string)=>{setTempGrocery({...tempGrocery, GoodPrice: value})}}></TextInput>
+                onChangeText={(value: string)=>{setTempGrocery({...tempGrocery, GoodPrice: value})}}
+                onSubmitEditing={onDoneGrocery}></TextInput>
               <TextInput
                 style={s.inputStyle}
                 placeholderTextColor={o.itemtextfade}
                 placeholder="Unit"
                 defaultValue={grocery.Unit}
-                onChangeText={(value: string)=>{setTempGrocery({...tempGrocery, Unit: value})}}></TextInput>
+                onChangeText={(value: string)=>{setTempGrocery({...tempGrocery, Unit: value})}}
+                onSubmitEditing={onDoneGrocery}></TextInput>
             </View>
             <View style={s.inputsRight}>
               <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageDone]} source={require('../../../../public/images/done.png')} onPress={onDoneGrocery}></PressImage>
@@ -222,7 +260,8 @@ const GroceryView = (props: GroceryViewProps) => {
             style={s.titleContainer}
             textStyle={grocery.IsChecked? s.titleFade:s.title}
             text={getText()}
-            onPress={()=>{if(!isEditingPos)setIsEditingGrocery(!isEditingGrocery)}}
+            onPress={()=>{onEditingGrocery()}}
+            defaultStyle={o}
             ></PressText>
         }
         {!isEditingGrocery && !grocery.IsChecked && <PressImage pressStyle={gs.baseImageContainer} style={s.image} source={require('../../../../public/images/grocery.png')} onPress={() => {if(!isEditingPos)onChangeIsChecked();}}></PressImage>}

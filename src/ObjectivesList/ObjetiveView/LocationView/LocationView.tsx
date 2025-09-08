@@ -1,5 +1,5 @@
-import { View, StyleSheet, Vibration, Alert, Linking, TextInput, Text,  } from "react-native";
-import { Item, Location, MessageType, ItemViewProps, ItemType } from "../../../Types";
+import { View, StyleSheet, Vibration, Alert, Linking, TextInput, Text, Keyboard, BackHandler,  } from "react-native";
+import { Item, Location, MessageType, ItemViewProps, ItemType, Pattern } from "../../../Types";
 import { colorPalette, dark, globalStyle as gs } from "../../../Colors";
 import { FontPalette } from "../../../../fonts/Font";
 import { useUserContext } from "../../../Contexts/UserContext";
@@ -36,6 +36,34 @@ const LocationView = (props: LocationViewProps) => {
   const [isGettingCurrentLocation, setIsGettingCurrentLocation] = useState<boolean>(false);
 
   const inputRef = useRef<TextInput>(null);
+
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+    
+  useEffect(() => {
+    const show = Keyboard.addListener("keyboardDidShow", () => {setKeyboardVisible(true);});
+    const hide = Keyboard.addListener("keyboardDidHide", () => {setKeyboardVisible(false);});
+
+    const backAction = () => {
+      if (keyboardVisible) {
+        Keyboard.dismiss();
+        return true;
+      }
+      
+      onCancelLocation();
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => {
+      backHandler.remove();
+      show.remove();
+      hide.remove();
+    };
+  }, [keyboardVisible]);
 
   useEffect(() => {
     fillCurrentLocation();
@@ -149,6 +177,11 @@ const LocationView = (props: LocationViewProps) => {
     }
 
     return null;
+  }
+
+  const onEditingLocation = () => {
+    if(!isEditingPos && !props.isLocked)setIsEditingLocation(!isEditingLocation)
+    else Vibration.vibrate(Pattern.Wrong);
   }
 
   const s = StyleSheet.create({
@@ -288,8 +321,8 @@ const LocationView = (props: LocationViewProps) => {
                 placeholderTextColor={o.itemtextfade}
                 placeholder="Title"
                 defaultValue={location.Title}
-                onChangeText={(value: string)=>{setTempLocation({...tempLocation, Title: value})}} autoFocus></TextInput>
-
+                onChangeText={(value: string)=>{setTempLocation({...tempLocation, Title: value})}} autoFocus
+                onSubmitEditing={onDoneLocation}></TextInput>
               <View style={s.urlInputContainer}>
                 <TextInput
                   ref={inputRef}
@@ -297,7 +330,8 @@ const LocationView = (props: LocationViewProps) => {
                   placeholderTextColor={o.itemtextfade}
                   placeholder="Url"
                   defaultValue={location.Url}
-                  onChangeText={(value: string)=>{setTempLocation({...tempLocation, Url: value})}}></TextInput>
+                  onChangeText={(value: string)=>{setTempLocation({...tempLocation, Url: value})}}
+                  onSubmitEditing={onDoneLocation}></TextInput>
                 {isGettingCurrentLocation?
                   <Loading theme={dark}></Loading>
                   :
@@ -317,7 +351,8 @@ const LocationView = (props: LocationViewProps) => {
               style={s.titleContainer}
               textStyle={s.title}
               text={location.Title}
-              onPress={()=>{if(!isEditingPos)setIsEditingLocation(!isEditingLocation)}}
+              onPress={()=>{onEditingLocation()}}
+              defaultStyle={o}
               ></PressText>
             </View>
             <View style={s.displayRight}>

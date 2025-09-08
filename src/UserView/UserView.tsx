@@ -1,15 +1,18 @@
 import { View, StyleSheet, Text, TextInput, Vibration , Pressable, BackHandler} from "react-native";
 import { useUserContext } from "../Contexts/UserContext";
 import React, { useEffect, useState } from "react";
-import PressInput from "../PressInput/PressInput";
 import PressText from "../PressText/PressText";
 import Loading from "../Loading/Loading";
 import { colorPalette, dark, globalStyle as gs } from "../Colors";
-import { Pattern, UserPrefs, Views } from "../Types";
+import { MessageType, Pattern, UserPrefs, Views } from "../Types";
 import { useLogContext } from "../Contexts/LogContext";
 import { useRequestContext } from "../Contexts/RequestContext";
 import PressImage from "../PressImage/PressImage";
 import Constants from 'expo-constants';
+
+import * as FileSystem from "expo-file-system";
+import { useStorageContext } from "../Contexts/StorageContext";
+const saf = FileSystem.StorageAccessFramework;
 
 export interface UserViewProps {
   syncObjectivesList: () => void,
@@ -18,6 +21,7 @@ const UserView = (props: UserViewProps) => {
   const { identityApi, objectivesApi } = useRequestContext();
   const { log, popMessage } = useLogContext();
   const { writeCurrentView } = useUserContext();
+  const { storage } = useStorageContext();
   const { theme: t, fontTheme: f, user, writeUser, writeJwtToken, userPrefs, writeUserPrefs, clearAllData } = useUserContext();
 
   const [email, setEmail] = useState<string>('');
@@ -115,6 +119,40 @@ const UserView = (props: UserViewProps) => {
     setIsBackingUpData(false);
   }
 
+  const saveToJSON = async () => {
+    try {
+      const perm = await saf.requestDirectoryPermissionsAsync();
+      if (!perm.granted) throw new Error("Permissão negada");
+      const dir = perm.directoryUri;
+
+      const objectives = await storage.readObjectives();
+      const items = await storage.readItems();
+
+      await writeSafFile(dir, "objectives.json", JSON.stringify(objectives, null, 2));
+      await writeSafFile(dir, "items.json", JSON.stringify(items, null, 2));
+
+      log.g('Salvo');
+      popMessage('Salvo.');
+    } 
+    catch (err) {
+      popMessage('Erro salvando arquivo.', MessageType.Error);
+      log.r('Error: ' + err);  
+    }
+  }
+
+  async function writeSafFile(directoryUri: string, name: string, content: string) {
+    try {
+      const files = await saf.readDirectoryAsync(directoryUri);
+      const existing = files.find((u) => u.endsWith("/" + name));
+      if (existing) await saf.deleteAsync(existing);
+    } catch {
+      popMessage('Erro ao salvar os dados.', MessageType.Error);
+    }
+
+    const fileUri = await saf.createFileAsync(directoryUri, name, "application/json");
+    await saf.writeAsStringAsync(fileUri, content);
+  }
+
   const s = StyleSheet.create({
     container: {
       flex: 1,
@@ -157,10 +195,31 @@ const UserView = (props: UserViewProps) => {
       width: '50%',
       color: t.textcolor,
     },
+    //^ TOOLS ----------------
+    prefsTools:{
+      flexDirection: 'row',
+      alignItems: "center",
+      padding: 5,
+      marginTop: 10,
+      backgroundColor: t.backgroundcolordarker,
+
+      borderRadius: 2,
+      borderColor: t.bordercolorfade,
+      borderWidth: 1,
+      borderStyle: 'solid',
+    },
+    prefsToolsText:{
+      marginVertical: 5,
+      marginHorizontal: 5,
+      color: t.textcolor,
+    },
+    //^ Prefs buttons ----------------
     userPrefsContainerOn:{
       padding: 5,
       marginTop: 10,
       backgroundColor: t.backgroundcolordarker,
+      flexDirection: 'row',
+      alignItems: "center",
 
       borderRadius: 2,
       borderColor: t.bordercolorfade,
@@ -193,15 +252,19 @@ const UserView = (props: UserViewProps) => {
       marginBottom: 30,
     },
     logoutButton: {
-      borderRadius: 5,
       justifyContent: 'center',
       alignItems: 'center',
       backgroundColor: t.logoutbuttonbk,
       paddingVertical: 15,
       paddingHorizontal: 50,
+      
+      borderRadius: 2,
+      borderStyle: 'solid',
+      borderWidth: 1,
+      borderColor: colorPalette.black,
     },
     logoutButtonText: {
-      color: t.backgroundcolor,
+      color: colorPalette.black,
       fontSize: f.userViewLogoutButton.fontSize,
     },
     loginContainer:{
@@ -250,7 +313,7 @@ const UserView = (props: UserViewProps) => {
       tintColor: t.icontint,
     },
     backupImage:{
-      ...gs.baseImage,
+      ...gs.baseSmallImage,
       tintColor: t.icontint,
     },
     loginButton: {
@@ -280,11 +343,6 @@ const UserView = (props: UserViewProps) => {
         (user?
           <>
             <View style={s.contentContainer}>
-              {isBackingUpData?
-                <Loading theme={dark}></Loading>
-                :
-                <PressImage onPress={backupData} style={s.backupImage} pressStyle={gs.baseImageContainer} source={require('../../public/images/backup.png')}></PressImage>
-              }
               <Text style={s.header}>USER:</Text>
               <View style={s.userContainer}>
                 <View style={s.userView}>
@@ -308,35 +366,59 @@ const UserView = (props: UserViewProps) => {
                   <Text style={s.userText}>{user === null? "no user": user.Status}</Text>
                 </View>
               </View>
+              <Text style={s.header}>TOOLS:</Text>
+              {user.Role === 'Admin' &&
+              <PressText 
+                style={s.prefsTools}
+                textStyle={s.prefsToolsText}
+                onPress={() => {backupData()}}
+                isLoading={isBackingUpData}
+                imageStyle={s.backupImage}
+                imageSource={require('../../public/images/backup.png')}
+                text={"Save full data on AWS S3."}
+                defaultStyle={{itemtextfade: colorPalette.green}}></PressText>}
+              <PressText 
+                style={s.prefsTools}
+                textStyle={s.prefsToolsText}
+                onPress={() => {saveToJSON()}}
+                imageStyle={s.backupImage}
+                imageSource={require('../../public/images/download-files.png')}
+                text={"Download a JSON file of your data."}
+                defaultStyle={{itemtextfade: colorPalette.green}}
+                ></PressText>
               <Text style={s.header}>SETTINGS:</Text>
               <Text style={s.subHeader}>General</Text>
               <PressText 
                 style={s.userPrefsContainerOn}
                 textStyle={s.userPrefsTextOn}
                 onPress={() => onChangePrefs({...userPrefs, theme: userPrefs.theme === 'dark'?'light':'dark'})}
-                text={"Which theme? - " + (userPrefs.theme==='dark'? 'Dark.':'White.')}></PressText>
+                text={"Which theme? - " + (userPrefs.theme==='dark'? 'Dark.':'White.')}
+                defaultStyle={{itemtextfade: colorPalette.green}}></PressText>
               <PressText 
                 style={userPrefs.vibrate? s.userPrefsContainerOn:s.userPrefsContainerOff}
                 textStyle={userPrefs.vibrate? s.userPrefsTextOn:s.userPrefsTextOff}
                 onPress={() => onChangePrefs({...userPrefs, vibrate: !userPrefs.vibrate})}
-                text={"Should button vibrate? - " + (userPrefs.vibrate? 'Yes.':'No.')}>
+                text={"Should button vibrate? - " + (userPrefs.vibrate? 'Yes.':'No.')}
+                defaultStyle={{itemtextfade: colorPalette.green}}>
               </PressText>
               <PressText 
                 style={userPrefs.autoSync? s.userPrefsContainerOn:s.userPrefsContainerOff}
                 textStyle={userPrefs.autoSync? s.userPrefsTextOn:s.userPrefsTextOff}
                 onPress={() => onChangePrefs({...userPrefs, autoSync: !userPrefs.autoSync})}
-                text={"Should automatically sync? - " + (userPrefs.autoSync? 'Yes.':'No.')}>
+                text={"Should automatically sync? - " + (userPrefs.autoSync? 'Yes.':'No.')}
+                defaultStyle={{itemtextfade: colorPalette.green}}>
               </PressText>
               <Text style={s.subHeader}>Location</Text>
               <PressText 
                 style={userPrefs.allowLocation? s.userPrefsContainerOn:s.userPrefsContainerOff}
                 textStyle={userPrefs.allowLocation? s.userPrefsTextOn:s.userPrefsTextOff}
                 onPress={()=>onChangePrefs({...userPrefs, allowLocation: !userPrefs.allowLocation})}
-                text={"Use location? - " + (userPrefs.allowLocation? 'Yes.':'No.')}>
+                text={"Use location? - " + (userPrefs.allowLocation? 'Yes.':'No.')}
+                defaultStyle={{itemtextfade: colorPalette.green}}>
               </PressText>
             </View>
             <View style={s.logoutView}>
-              <PressText text={'Logout'} textStyle={s.logoutButtonText} style={s.logoutButton} onPress={logout}></PressText>
+              <PressText text={'Logout'} textStyle={s.logoutButtonText} style={s.logoutButton} onPress={logout} defaultStyle={{itemtextfade: colorPalette.green}}></PressText>
             </View>
           </>
         :
@@ -355,14 +437,15 @@ const UserView = (props: UserViewProps) => {
             <Loading theme={dark}></Loading>
             :
             <>
-              <Pressable style={s.loginButton} onPress={login}>
+              {/* <Pressable style={s.loginButton} onPress={login}>
                 <Text style={s.loginButtonText}>Login</Text>
               </Pressable>
               <PressText 
                 style={s.userPrefsContainerOn}
                 textStyle={s.userPrefsTextOn}
                 onPress={() => onChangePrefs({...userPrefs, theme: userPrefs.theme === 'dark'?'light':'dark'})}
-                text={"Which theme? - " + (userPrefs.theme==='dark'? 'Dark.':'White.')}></PressText>
+                text={"Which theme? - " + (userPrefs.theme==='dark'? 'Dark.':'White.')}
+                defaultStyle={{itemtextfade: colorPalette.green}}></PressText> */}
             </>}
           </View>
         )

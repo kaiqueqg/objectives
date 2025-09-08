@@ -53,7 +53,6 @@ const PressImage = (props: PressImageProps) => {
 
     if(!props.disable) {
       if(props.confirm){
-        if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
         setText(2000);
         confirm();
       }
@@ -81,16 +80,24 @@ const PressImage = (props: PressImageProps) => {
     )
   }
 
+  const onPressAfterConfirmed = () => {
+    setIsConfirming(false);
+    if(props.onPress) {
+      if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
+      props.onPress();
+    }
+  }
+
   const getConfirmingImage = () => {
     return(
-      <Pressable style={props.pressStyle} onPressOut={props.onPress} onPressIn={props.onPressIn} onLongPress={handleLongPress} delayLongPress={props.delayLongPress??800}>
+      <Pressable style={props.pressStyle} onPressOut={onPressAfterConfirmed} onPressIn={props.onPressIn} onLongPress={handleLongPress} delayLongPress={props.delayLongPress??800}>
         <Image style={[(props.confirmStyle??props.style as ImageStyle)]} source={require('../../public/images/done.png')}></Image>
       </Pressable>
     )
   }
 
   const confirm = async () => {
-    if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
+    if(userPrefs.vibrate) Vibration.vibrate(Pattern.Short);
     setIsConfirming(true);
 
     setTimeout(()=>{

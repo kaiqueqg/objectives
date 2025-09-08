@@ -1,4 +1,4 @@
-import { View, StyleSheet, Text, Vibration, TextInput } from "react-native";
+import { View, StyleSheet, Text, Vibration, TextInput, Keyboard, BackHandler } from "react-native";
 import { Pattern,  Step, ItemViewProps, StepImportance } from "../../../Types";
 import { colorPalette, globalStyle as gs, ObjectivePallete } from "../../../Colors";
 import { FontPalette } from "../../../../fonts/Font";
@@ -26,13 +26,41 @@ export interface StepViewProps extends ItemViewProps {
 const StepView = (props: StepViewProps) => {
   const { userPrefs, theme: t, fontTheme: f, putItem } = useUserContext();
   const { log } = useLogContext();
-  const { objTheme: o, isEditingPos, onDeleteItem, loadMyItems, step} = props;
+  const { objTheme: o, isEditingPos, onDeleteItem: onDelete, loadMyItems, step} = props;
 
   const [isEditingStep, setIsEditingStep] = useState<boolean>(false);
   const [tempStep, setTempStep] = useState<Step>(step);
 
-  const onDelete = async () => {
-    await onDeleteItem(step);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+      
+    useEffect(() => {
+      const show = Keyboard.addListener("keyboardDidShow", () => {setKeyboardVisible(true);});
+      const hide = Keyboard.addListener("keyboardDidHide", () => {setKeyboardVisible(false);});
+  
+      const backAction = () => {
+        if (keyboardVisible) {
+          Keyboard.dismiss();
+          return true;
+        }
+        
+        onCancelStep();
+        return true;
+      };
+  
+      const backHandler = BackHandler.addEventListener(
+        "hardwareBackPress",
+        backAction
+      );
+  
+      return () => {
+        backHandler.remove();
+        show.remove();
+        hide.remove();
+      };
+    }, [keyboardVisible]);
+
+  const onDeleteItem = async () => {
+    await onDelete(step);
   }
 
   const onDoneStep = async (newImp?: StepImportance) => {
@@ -42,12 +70,22 @@ const StepView = (props: StepViewProps) => {
     loadMyItems();
   }
 
+  const onChangeAutoDestroy = () => {
+    setTempStep({...tempStep, AutoDestroy: !tempStep.AutoDestroy});
+  }
+
   const onCancelStep = async () => {
     setIsEditingStep(false);
   }
 
   const onChangeIsDone = async () => {
     if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
+
+    if(step.AutoDestroy && !step.Done) { 
+      await onDeleteItem(); 
+      return;
+    }
+
     const newStep = {...step, Done: !step.Done};
     await putItem(newStep);
     loadMyItems();
@@ -84,6 +122,11 @@ const StepView = (props: StepViewProps) => {
         return <></>;
       }
     }
+  }
+
+  const onEditingStep = () => {
+    if(!isEditingPos && !props.isLocked)setIsEditingStep(!isEditingStep);
+    else Vibration.vibrate(Pattern.Wrong);
   }
 
   const s = StyleSheet.create({
@@ -179,6 +222,12 @@ const StepView = (props: StepViewProps) => {
       justifyContent: 'center',
       alignItems: 'center',
     },
+    importanceImageSelected:{
+      borderWidth: 1,
+      borderStyle: 'solid',
+      borderColor: o.bordercolorlight,
+      borderRadius: 5,
+    },
     image:{
       ...gs.baseImage,
       tintColor: o.icontintcolor,
@@ -217,28 +266,28 @@ const StepView = (props: StepViewProps) => {
         {!isEditingPos && isEditingStep?
           <View style={s.inputContainer}>
             <View style={s.inputsLeft}>
-              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageDelete]} confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete}></PressImage>
+              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageDelete]} confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDeleteItem}></PressImage>
             </View>
             <View style={s.inputsCenter}>
               <View style={[s.titleRowContainer]}>
-                {isEditingStep && getImportanceImage()}
                 <TextInput 
                   style={s.inputStyle}
                   placeholderTextColor={o.itemtextfade}
                   placeholder="Title"
                   defaultValue={tempStep.Title}
                   onSubmitEditing={()=>{onDoneStep()}}
-                  onChangeText={(value: string)=>{setTempStep({...tempStep, Title: value})}} autoFocus></TextInput>
+                  onChangeText={(value: string)=>{setTempStep({...tempStep, Title: value})}} autoFocus={step.Title.trim() === ''}></TextInput>
+                <PressImage pressStyle={[gs.baseImageContainer]} style={[s.image, tempStep.AutoDestroy?undefined:s.imageFade]} source={require('../../../../public/images/explode.png')} onPress={onChangeAutoDestroy}></PressImage>
               </View>
               <View style={[s.importanceIconContainer]}>
-                <PressImage pressStyle={gs.baseImageContainer} style={s.stepImageImportance} source={require('../../../../public/images/cancel.png')} onPress={() => {if(!isEditingPos)onDoneStep(StepImportance.None);}}></PressImage>
-                <PressImage pressStyle={gs.baseImageContainer} style={gs.baseImage} source={require('../../../../public/images/low.png')} onPress={() => {if(!isEditingPos)onDoneStep(StepImportance.Low);}}></PressImage>
-                <PressImage pressStyle={gs.baseImageContainer} style={gs.baseImage} source={require('../../../../public/images/med.png')} onPress={() => {if(!isEditingPos)onDoneStep(StepImportance.Medium);}}></PressImage>
-                <PressImage pressStyle={gs.baseImageContainer} style={gs.baseImage} source={require('../../../../public/images/high.png')} onPress={() => {if(!isEditingPos)onDoneStep(StepImportance.High);}}></PressImage>
-                <PressImage pressStyle={gs.baseImageContainer} style={gs.baseImage} source={require('../../../../public/images/ladybug.png')} onPress={() => {if(!isEditingPos)onDoneStep(StepImportance.Ladybug);}}></PressImage>
-                <PressImage pressStyle={gs.baseImageContainer} style={s.stepImageImportance} source={require('../../../../public/images/questionmark.png')} onPress={() => {if(!isEditingPos)onDoneStep(StepImportance.Question);}}></PressImage>
-                <PressImage pressStyle={gs.baseImageContainer} style={s.stepImageImportance} source={require('../../../../public/images/wait.png')} onPress={() => {if(!isEditingPos)onDoneStep(StepImportance.Waiting);}}></PressImage>
-                <PressImage pressStyle={gs.baseImageContainer} style={s.stepImageImportance} source={require('../../../../public/images/inprogress.png')} onPress={() => {if(!isEditingPos)onDoneStep(StepImportance.InProgress);}}></PressImage>
+                <PressImage pressStyle={[gs.baseImageContainer, step.Importance === StepImportance.None? s.importanceImageSelected:undefined]} style={s.stepImageImportance} source={require('../../../../public/images/cancel.png')} onPress={() => {if(!isEditingPos)onDoneStep(StepImportance.None);}}></PressImage>
+                <PressImage pressStyle={[gs.baseImageContainer, step.Importance === StepImportance.Low? s.importanceImageSelected:undefined]} style={gs.baseImage} source={require('../../../../public/images/low.png')} onPress={() => {if(!isEditingPos)onDoneStep(StepImportance.Low);}}></PressImage>
+                <PressImage pressStyle={[gs.baseImageContainer, step.Importance === StepImportance.Medium? s.importanceImageSelected:undefined]} style={gs.baseImage} source={require('../../../../public/images/med.png')} onPress={() => {if(!isEditingPos)onDoneStep(StepImportance.Medium);}}></PressImage>
+                <PressImage pressStyle={[gs.baseImageContainer, step.Importance === StepImportance.High? s.importanceImageSelected:undefined]} style={gs.baseImage} source={require('../../../../public/images/high.png')} onPress={() => {if(!isEditingPos)onDoneStep(StepImportance.High);}}></PressImage>
+                <PressImage pressStyle={[gs.baseImageContainer, step.Importance === StepImportance.Ladybug? s.importanceImageSelected:undefined]} style={gs.baseImage} source={require('../../../../public/images/ladybug.png')} onPress={() => {if(!isEditingPos)onDoneStep(StepImportance.Ladybug);}}></PressImage>
+                <PressImage pressStyle={[gs.baseImageContainer, step.Importance === StepImportance.Question? s.importanceImageSelected:undefined]} style={s.stepImageImportance} source={require('../../../../public/images/questionmark.png')} onPress={() => {if(!isEditingPos)onDoneStep(StepImportance.Question);}}></PressImage>
+                <PressImage pressStyle={[gs.baseImageContainer, step.Importance === StepImportance.Waiting? s.importanceImageSelected:undefined]} style={s.stepImageImportance} source={require('../../../../public/images/wait.png')} onPress={() => {if(!isEditingPos)onDoneStep(StepImportance.Waiting);}}></PressImage>
+                <PressImage pressStyle={[gs.baseImageContainer, step.Importance === StepImportance.InProgress? s.importanceImageSelected:undefined]} style={s.stepImageImportance} source={require('../../../../public/images/inprogress.png')} onPress={() => {if(!isEditingPos)onDoneStep(StepImportance.InProgress);}}></PressImage>
               </View>
             </View>
             <View style={s.inputsRight}>
@@ -251,11 +300,25 @@ const StepView = (props: StepViewProps) => {
             style={s.titleContainer}
             textStyle={step.Done? s.titleFade:s.title}
             text={step.Title}
-            onPress={()=>{if(!isEditingPos)setIsEditingStep(!isEditingStep)}}
+            onPress={()=>{onEditingStep()}}
+            defaultStyle={o}
             ></PressText>
         }
-        {!isEditingStep && !step.Done && <PressImage pressStyle={gs.baseImageContainer} style={s.image} source={require('../../../../public/images/step-black.png')} onPress={() => {if(!isEditingPos)onChangeIsDone();}}></PressImage>}
-        {!isEditingStep && step.Done && <PressImage pressStyle={gs.baseImageContainer} style={s.imageFade} source={require('../../../../public/images/step-filled-black.png')} onPress={() => {if(!isEditingPos)onChangeIsDone();}}></PressImage>}
+        {!isEditingStep && !step.Done && 
+          <PressImage 
+            pressStyle={gs.baseImageContainer}
+            style={s.image}
+            source={require('../../../../public/images/step.png')}
+            onPress={() => {if(!isEditingPos)onChangeIsDone();}}
+            confirm={step.AutoDestroy}>
+          </PressImage>}
+        {!isEditingStep && step.Done && 
+          <PressImage 
+            pressStyle={gs.baseImageContainer}
+            style={s.imageFade}
+            source={require('../../../../public/images/step-filled.png')}
+            onPress={() => {if(!isEditingPos)onChangeIsDone();}}>
+          </PressImage>}
       </View>
     </View>
   );

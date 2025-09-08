@@ -1,4 +1,4 @@
-import { Text, TextInput, View, StyleSheet } from "react-native";
+import { Text, TextInput, View, StyleSheet, Vibration } from "react-native";
 import { useEffect, useState } from "react";
 import PressImage from "../PressImage/PressImage";
 import { useUserContext } from "../Contexts/UserContext";
@@ -6,6 +6,7 @@ import { ObjectivePallete, globalStyle as gs } from "../Colors";
 import { FontPalette } from "../../fonts/Font";
 import React from "react";
 import { useLogContext } from "../Contexts/LogContext";
+import { Pattern } from "../Types";
 
 export interface PressInputProps {
   onDone: (newText: string) => void,
@@ -35,7 +36,7 @@ export interface PressInputProps {
 }
 
 const PressInput = (props: PressInputProps) => {
-  const { theme: t, fontTheme: f } = useUserContext();
+  const { theme: t, fontTheme: f, userPrefs } = useUserContext();
   const { log } = useLogContext();
   const { objTheme: o } = props;
 
@@ -86,6 +87,15 @@ const PressInput = (props: PressInputProps) => {
     setInputHeight(event.nativeEvent.contentSize.height);
   }
 
+  const changeIsEditing = (v: boolean) => {
+    if(props.uneditable){
+      if(userPrefs.vibrate) Vibration.vibrate(Pattern.Wrong);
+    }
+    else {
+      setIsEditing(v);
+    }
+  }
+
   const s = StyleSheet.create({
     container:{
       flex: 1,
@@ -134,6 +144,11 @@ const PressInput = (props: PressInputProps) => {
     defaultText:{
       color: t.textcolorfade,
       marginLeft: 5,
+      width: '100%',
+      
+      borderBottomWidth: 1,
+      borderStyle: 'solid',
+      borderColor: o.itemtextfade,
     },
   });
 
@@ -153,7 +168,7 @@ const PressInput = (props: PressInputProps) => {
             onSubmitEditing={onDone}
             onChangeText={handleChangeText}
             onContentSizeChange={onChange}
-            selectionColor={t.textcolor}
+            selectionColor={t.textcolorcontrast}
             >
           </TextInput>
           {props.onDelete && <PressImage pressStyle={[s.imagePress, props.containerStyle]} style={[s.cancelImage, props.cancelImageStyle]} onPress={onCancel} source={require('../../public/images/cancel.png')}></PressImage>}
@@ -162,9 +177,9 @@ const PressInput = (props: PressInputProps) => {
         :
         <>
           {props.text === '' ?
-            <Text style={[s.defaultText, props.defaultStyle]} onPress={()=>{if(!props.uneditable)changeEditing(true);}}>{props.defaultText}</Text>
+            <Text style={[s.defaultText, props.defaultStyle]} onPress={()=>{changeIsEditing(true);}}>{props.defaultText}</Text>
             :
-            <Text style={[s.text, props.textStyle]} onPress={()=>{if(!props.uneditable)changeEditing(true);}}>{props.text}</Text>
+            <Text style={[s.text, props.textStyle]} onPress={()=>{changeIsEditing(true);}}>{props.text}</Text>
           }
         </>
       }

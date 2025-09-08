@@ -1,11 +1,11 @@
-import { View, StyleSheet,Text, Image, Vibration, TextInput } from "react-native";
-import { ItemViewProps, Question } from "../../../Types";
+import { View, StyleSheet,Text, Image, Vibration, TextInput, Keyboard, BackHandler } from "react-native";
+import { ItemViewProps, Pattern, Question } from "../../../Types";
 import { FontPalette, fontWhite } from "../../../../fonts/Font";
 import { colorPalette, globalStyle as gs } from "../../../Colors";
 import { useUserContext } from "../../../Contexts/UserContext";
 import PressInput from "../../../PressInput/PressInput";
 import PressImage from "../../../PressImage/PressImage";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import PressText from "../../../PressText/PressText";
 import React from "react";
 
@@ -29,6 +29,34 @@ const QuestionView = (props: QuestionViewProps) => {
   const [isEditingQuestion, setIsEditingQuestion] = useState<boolean>(false);
   const [tempQuestion, setTempQuestion] = useState<Question>(props.question);
 
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+  
+  useEffect(() => {
+    const show = Keyboard.addListener("keyboardDidShow", () => {setKeyboardVisible(true);});
+    const hide = Keyboard.addListener("keyboardDidHide", () => {setKeyboardVisible(false);});
+
+    const backAction = () => {
+      if (keyboardVisible) {
+        Keyboard.dismiss();
+        return true;
+      }
+      
+      onCancelQuestion();
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => {
+      backHandler.remove();
+      show.remove();
+      hide.remove();
+    };
+  }, [keyboardVisible]);
+
   const onDoneQuestion = async () => {
     let newQuestion = {...tempQuestion};
     newQuestion.Statement = newQuestion.Statement.trim();
@@ -44,6 +72,11 @@ const QuestionView = (props: QuestionViewProps) => {
 
   const onDelete = async () => {
     await onDeleteItem(question);
+  }
+
+  const onEditingQuestion = () => {
+    if(!isEditingPos && !props.isLocked)setIsEditingQuestion(!isEditingQuestion);
+    else Vibration.vibrate(Pattern.Wrong);
   }
 
   const s = StyleSheet.create({
@@ -179,13 +212,15 @@ const QuestionView = (props: QuestionViewProps) => {
                 placeholderTextColor={o.itemtextfade}
                 placeholder="Statement"
                 defaultValue={question.Statement}
-                onChangeText={(value: string)=>{setTempQuestion({...tempQuestion, Statement: value})}} autoFocus></TextInput>
+                onChangeText={(value: string)=>{setTempQuestion({...tempQuestion, Statement: value})}} autoFocus
+                onSubmitEditing={onDoneQuestion}></TextInput>
               <TextInput 
                 style={s.inputStyle}
                 placeholderTextColor={o.itemtextfade}
                 placeholder="Answer"
                 defaultValue={question.Answer}
-                onChangeText={(value: string)=>{setTempQuestion({...tempQuestion, Answer: value})}}></TextInput>
+                onChangeText={(value: string)=>{setTempQuestion({...tempQuestion, Answer: value})}}
+                onSubmitEditing={onDoneQuestion}></TextInput>
             </View>
             <View style={s.inputsRight}>
               <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageDone]} source={require('../../../../public/images/done.png')} onPress={onDoneQuestion}></PressImage>
@@ -199,7 +234,8 @@ const QuestionView = (props: QuestionViewProps) => {
                 style={s.textContainer}
                 textStyle={s.text}
                 text={question.Statement}
-                onPress={()=>{if(!isEditingPos)setIsEditingQuestion(!isEditingQuestion)}}
+                onPress={()=>{onEditingQuestion()}}
+                defaultStyle={o}
                 ></PressText>
             </View>
             <View style={s.answerContainer}>
@@ -208,7 +244,8 @@ const QuestionView = (props: QuestionViewProps) => {
                 style={s.textContainer}
                 textStyle={s.text}
                 text={question.Answer}
-                onPress={()=>{if(!isEditingPos)setIsEditingQuestion(!isEditingQuestion)}}
+                onPress={()=>{onEditingQuestion()}}
+                defaultStyle={o}
                 ></PressText>
             </View>
           </View>

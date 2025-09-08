@@ -1,10 +1,10 @@
-import { View, StyleSheet, Text } from "react-native";
+import { View, StyleSheet, Text, Keyboard, BackHandler } from "react-native";
 import { colorPalette, globalStyle as gs } from "../../../Colors";
 import { useUserContext } from "../../../Contexts/UserContext";
 import { Divider, Item, ItemType, ItemViewProps } from "../../../Types";
 import PressImage from "../../../PressImage/PressImage";
 import PressInput from "../../../PressInput/PressInput";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import React from "react";
 
 export const New = () => {
@@ -29,6 +29,34 @@ const DividerView = (props: DividerViewProps) => {
   const [isEditingTitle, setIsEditingTitle] = useState<boolean>(false);
   const [isItemsOpen, setIsItemsOpen] = useState<boolean>(false);
   const [isItemOpenLocked, setIsItemOpenLocked] = useState<boolean>(false);
+
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+      
+    useEffect(() => {
+      const show = Keyboard.addListener("keyboardDidShow", () => {setKeyboardVisible(true);});
+      const hide = Keyboard.addListener("keyboardDidHide", () => {setKeyboardVisible(false);});
+  
+      const backAction = () => {
+        if (keyboardVisible) {
+          Keyboard.dismiss();
+          return true;
+        }
+        
+        onEditingTitle(false);
+        return true;
+      };
+  
+      const backHandler = BackHandler.addEventListener(
+        "hardwareBackPress",
+        backAction
+      );
+  
+      return () => {
+        backHandler.remove();
+        show.remove();
+        hide.remove();
+      };
+    }, [keyboardVisible]);
 
   const onDelete = async () => {
     onDeleteItem(divider);
@@ -77,10 +105,10 @@ const DividerView = (props: DividerViewProps) => {
       alignItems: 'center',
       marginHorizontal: o.marginHorizontal,
       marginVertical: o.marginVertical,
+
       borderRadius: o.borderRadius,
     },
     dividerContainerOpen:{
-      borderColor: colorPalette.black,
       borderWidth: 1,
       borderStyle: 'solid',
       borderRadius: 5,
@@ -98,10 +126,12 @@ const DividerView = (props: DividerViewProps) => {
       justifyContent: 'center',
       alignItems: 'center',
 
-      borderRadius: 5,
       borderWidth: 1,
+      borderRadius: 5,
       borderStyle: 'solid',
       borderColor: o.objbk,
+      
+      backgroundColor: o.itembkdark,
     },
     titleContainerSelected:{
       borderStyle: 'dashed',
@@ -152,7 +182,7 @@ const DividerView = (props: DividerViewProps) => {
           onDelete={onDelete}
           confirmDelete={true}
           onDone={onChangeTitle}
-          uneditable={isEditingPos}
+          uneditable={isEditingPos || props.isLocked}
           onEditingState={onEditingTitle}
 
           textStyle={s.inputTextStyle}
@@ -162,11 +192,11 @@ const DividerView = (props: DividerViewProps) => {
         </PressInput>
         {!isEditingTitle &&
           <>
-            <PressImage pressStyle={gs.baseImageContainer} style={[s.image, isItemsOpen&&s.imageFade]} disable={isItemsOpen} onPress={() => {orderDividerItems(divider)}} source={require('../../../../public/images/atoz.png')}></PressImage>
+            <PressImage pressStyle={gs.baseImageContainer} style={[s.image, isItemsOpen&&s.imageFade]} disable={isItemsOpen || props.isLocked} confirm={true} onPress={() => {orderDividerItems(divider)}} source={require('../../../../public/images/atoz.png')}></PressImage>
             {isItemOpenLocked?
               <PressImage pressStyle={gs.baseImageContainer} style={[s.image, {tintColor: 'red'}]} onPress={addingNewItem} source={require('../../../../public/images/add-lock.png')}></PressImage>
               :
-              <PressImage pressStyle={gs.baseImageContainer} style={[s.image]} onPress={addingNewItem} source={require('../../../../public/images/add.png')}></PressImage>
+              <PressImage pressStyle={gs.baseImageContainer} style={[s.image]} onPress={addingNewItem} disable={isItemsOpen || props.isLocked} source={require('../../../../public/images/add.png')}></PressImage>
             }
           </>
         }

@@ -1,11 +1,11 @@
-import { View, StyleSheet, Text } from "react-native";
+import { View, StyleSheet, Text, Keyboard, BackHandler } from "react-native";
 import { globalStyle as gs } from "../../../Colors";
 import { FontPalette } from "../../../../fonts/Font";
 import { useUserContext } from "../../../Contexts/UserContext";
 import { ItemViewProps, Wait } from "../../../Types";
 import PressImage from "../../../PressImage/PressImage";
 import PressInput from "../../../PressInput/PressInput";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export const New = () => {
   return(
@@ -25,6 +25,34 @@ const WaitView = (props: WaitViewProps) => {
 
   const [isEditingTitle, setIsEditingTitle] = useState<boolean>(false);
 
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+    
+  useEffect(() => {
+    const show = Keyboard.addListener("keyboardDidShow", () => {setKeyboardVisible(true);});
+    const hide = Keyboard.addListener("keyboardDidHide", () => {setKeyboardVisible(false);});
+
+    const backAction = () => {
+      if (keyboardVisible) {
+        Keyboard.dismiss();
+        return true;
+      }
+      
+      onCancelWait();
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => {
+      backHandler.remove();
+      show.remove();
+      hide.remove();
+    };
+  }, [keyboardVisible]);
+
   const onDelete = async () => {
     await onDeleteItem(wait);
   }
@@ -33,6 +61,10 @@ const WaitView = (props: WaitViewProps) => {
     const newWait = {...wait, Title: newText.trim()};
     await putItem(newWait);
     loadMyItems();
+  }
+
+  const onCancelWait = () => {
+    onEditingTitle(false);
   }
 
   const onEditingTitle = async (editingState: boolean) => {
@@ -94,7 +126,7 @@ const WaitView = (props: WaitViewProps) => {
           onDelete={onDelete}
           onDone={onChangeTitle}
           onEditingState={onEditingTitle}
-          uneditable={isEditingPos}
+          uneditable={isEditingPos || props.isLocked}
 
           textStyle={s.inputTextStyle}
           inputStyle={s.inputStyle}

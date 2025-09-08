@@ -11,7 +11,7 @@ export default {
     splash: {
       image: "./public/images/appicon.png",
       resizeMode: "contain",
-      backgroundColor: "#21242B"
+      backgroundColor: "#ffffff"
     },
     ios: {
       supportsTablet: true
@@ -19,7 +19,7 @@ export default {
     android: {
       adaptiveIcon: {
         foregroundImage: "./public/images/appicon.png",
-        backgroundColor: "#21242B"
+        backgroundColor: "#ffffff"
       },
       package: "com.kayqg.Objectives"
     },

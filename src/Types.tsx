@@ -15,6 +15,7 @@ export interface Objective {
   Theme: string,
   IsArchived: boolean,
   IsShowing: boolean,
+  IsLocked: boolean,
   LastModified: string,
   Pos: number,
   IsShowingCheckedGrocery?: boolean,
@@ -31,6 +32,7 @@ export interface ItemViewProps {
   isEditingPos: boolean,
   isEndingPos: boolean,
   isSelected: boolean,
+  isLocked: boolean,
   onDeleteItem: (item: Item) => void,
   loadMyItems: () => void,
 }
@@ -67,6 +69,7 @@ export interface Step extends Item {
   Title: string,
   Done: boolean,
   Importance: StepImportance,
+  AutoDestroy: boolean,
 }
 
 export interface Wait extends Item {
@@ -151,6 +154,11 @@ export interface House extends Item{
   Attention: string,
 }
 
+export interface ItemFake extends Item{
+  Title: string,
+  Fade: boolean,
+}
+
 export interface PresignedUrl { url: string }
 
 //^local
@@ -218,6 +226,7 @@ export const Pattern = {
   Ok: 7,
   Wrong: [0, 20, 100, 20],
   Short: [0, 100],
+  Alert: [0, 20, 100, 200],
 };
 
 export enum Views { UserView, ListView, AllView, IndividualView, DevView, TagsView, ArchivedView }

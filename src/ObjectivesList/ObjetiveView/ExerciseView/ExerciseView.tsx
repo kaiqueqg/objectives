@@ -1,6 +1,6 @@
-import { View, StyleSheet, Text, Vibration, TextInput } from "react-native";
+import { View, StyleSheet, Vibration, TextInput, Text } from "react-native";
 import { Exercise, Pattern, ItemViewProps, Weekdays } from "../../../Types";
-import { colorPalette, globalStyle as gs } from "../../../Colors";
+import { colorPalette, getObjTheme, globalStyle as gs } from "../../../Colors";
 import { FontPalette } from "../../../../fonts/Font";
 import { useUserContext } from "../../../Contexts/UserContext";
 import PressImage from "../../../PressImage/PressImage";
@@ -101,46 +101,31 @@ const ExerciseView = (props: ExerciseViewProps) => {
     else{
       setNewExercise({...newExercise, Weekdays: [...newExercise.Weekdays, weekday]});
     }
-  };
-
-  const getText = () => {
-    let title = '';
-    if(exercise.Reps > 1 || exercise.Series > 1) title += exercise.Series + 'x' + exercise.Reps + ' ';
-    title += exercise.Title;
-    if(exercise.MaxWeight) title += ' ('+exercise.MaxWeight+')';
-    title += exercise.Weekdays.includes(Weekdays.Monday)?' M':'';
-    title += exercise.Weekdays.includes(Weekdays.Tuesday)?' T':'';
-    title += exercise.Weekdays.includes(Weekdays.Wednesday)?' W':'';
-    title += exercise.Weekdays.includes(Weekdays.Thursday)?' Th':'';
-    title += exercise.Weekdays.includes(Weekdays.Friday)?' F':'';
-    title += exercise.Weekdays.includes(Weekdays.Saturday)?' S':'';
-
-    return title;
   }
 
   const getWeekdayButton = (weekday: Weekdays) => {
     let t = '';
     switch (weekday) {
       case Weekdays.Monday:
-        t='M'
+        t='Mo'
         break;
       case Weekdays.Tuesday:
-        t='T'
+        t='Tu'
         break;
       case Weekdays.Wednesday:
-        t='W'
+        t='We'
         break;
       case Weekdays.Thursday:
-        t='T'
+        t='Th'
         break;
       case Weekdays.Friday:
-        t='F'
+        t='Fr'
         break;
       case Weekdays.Saturday:
-        t='S'
+        t='Sa'
         break;
       case Weekdays.Sunday:
-        t='S'
+        t='Su'
         break;
     }
 
@@ -151,6 +136,47 @@ const ExerciseView = (props: ExerciseViewProps) => {
         <Text style={[s.exerciseWeekdaysButtonText, isSelected?s.exerciseWeekdaysButtonTextSelected:'']}>{t}</Text>
       </View>
     );
+  }
+
+  const onEditingExercise = () => {
+    if(!isEditingPos && !props.isLocked) setIsEditingExercise(!isEditingExercise);
+    else Vibration.vibrate(Pattern.Wrong);
+  }
+
+  const getTitleDisplay = () => {
+    let exerciseRepSerie = '';
+    if(exercise.Reps > 1 || exercise.Series > 1) exerciseRepSerie += exercise.Series + 'x' + exercise.Reps + ' ';
+
+    let daysOfWeek = '';
+    
+    daysOfWeek += exercise.Weekdays.includes(Weekdays.Monday)?' M':'';
+    daysOfWeek += exercise.Weekdays.includes(Weekdays.Tuesday)?' t':'';
+    daysOfWeek += exercise.Weekdays.includes(Weekdays.Wednesday)?' W':'';
+    daysOfWeek += exercise.Weekdays.includes(Weekdays.Thursday)?' T':'';
+    daysOfWeek += exercise.Weekdays.includes(Weekdays.Friday)?' F':'';
+    daysOfWeek += exercise.Weekdays.includes(Weekdays.Saturday)?' s':'';
+    daysOfWeek += exercise.Weekdays.includes(Weekdays.Saturday)?' S':'';
+
+    return (
+      <View style={s.exerciseMainRow}>
+        <View style={s.exerciseTopRow}>
+          <PressText
+            style={s.textContainer}
+            textStyle={exercise.IsDone? s.titleFade:s.titleText}
+            text={exercise.Title}
+            onPress={()=>{onEditingExercise()}}
+            defaultStyle={o}
+            hideDefaultTextBorder={true}
+          ></PressText>
+          <PressText style={[s.textContainer, {flex: 1}]} textStyle={s.maxText} defaultStyle={o} text={exercise.MaxWeight} onPress={onEditingExercise} hideDefaultTextBorder={true}></PressText>
+          <PressText style={s.textContainer} textStyle={s.daysText} defaultStyle={o} text={daysOfWeek} onPress={onEditingExercise} hideDefaultTextBorder={true}></PressText>
+          <PressText style={[s.textContainer]} textStyle={s.seriesRepsText} defaultStyle={o} text={exerciseRepSerie} onPress={onEditingExercise} hideDefaultTextBorder={true}></PressText>
+        </View>
+        <View style={s.exerciseBottomRow}>
+          {exercise.Description && <PressText style={s.descriptionContainer} textStyle={[s.descriptionText, exercise.IsDone? {color: o.itemtextfadedark}:undefined]} text={exercise.Description} onPress={()=>{if(!isEditingPos && !props.isLocked)setIsEditingExercise(!isEditingExercise)}} defaultStyle={o} hideDefaultTextBorder={true}></PressText>}
+        </View>
+      </View>
+    )
   }
 
   const s = StyleSheet.create({
@@ -182,17 +208,62 @@ const ExerciseView = (props: ExerciseViewProps) => {
       borderStyle: 'solid',
       borderColor: o.bordercolorselected,
     },
-    titleContainer:{
+    exerciseMainRow:{
+      flex: 1,
+      minHeight: 40,
+    },
+    exerciseTopRow:{
+      flexDirection: 'row',
+    },
+    exerciseBottomRow: {
+      flexDirection: 'row',
+    },
+    descriptionContainer:{
       flex: 1,
       justifyContent: 'center',
-
-      minHeight: 40,
-      margin: 2,
       paddingLeft: 10,
-      color: 'beige',
     },
-    title:{
+    descriptionText:{
+      flex: 1,
+      flexWrap: 'wrap',
+      width: '100%',
+      verticalAlign: 'middle',
+      justifyContent: 'center',
+      alignItems: 'center',
+      color: o.itemtextfade,
+      fontSize: 12,
+
+      marginBottom: 6,
+    },
+    textContainer:{
+      justifyContent: 'center',
+      paddingLeft: 10,
+    },
+    titleText:{
+      flex: 1,
+      verticalAlign: 'middle',
       color: o.itemtext,
+    },
+    daysText:{
+      minHeight: 40,
+      textAlign: "right",
+      verticalAlign: 'middle',
+      color: o.itemtextfade,
+      paddingLeft: 5,
+    },
+    maxText:{
+      minHeight: 40,
+      textAlign: "left",
+      verticalAlign: 'middle',
+      color: o.itemtextfade,
+      paddingLeft: 5,
+    },
+    seriesRepsText:{
+      minHeight: 40,
+      textAlign: "right",
+      verticalAlign: 'middle',
+      color: o.itemtext,
+      paddingLeft: 5,
     },
     titleFade:{
       color: o.itemtextfade,
@@ -287,7 +358,9 @@ const ExerciseView = (props: ExerciseViewProps) => {
                 placeholderTextColor={o.itemtextfade}
                 placeholder="Title"
                 defaultValue={exercise.Title}
-                onChangeText={(value: string)=>{setNewExercise({...newExercise, Title: value})}} autoFocus></TextInput>
+                onChangeText={(value: string)=>{setNewExercise({...newExercise, Title: value})}} autoFocus
+                onSubmitEditing={doneEdit}>
+              </TextInput>
               <TextInput 
                 style={s.inputStyle}
                 placeholderTextColor={o.itemtextfade}
@@ -297,7 +370,8 @@ const ExerciseView = (props: ExerciseViewProps) => {
                 onChangeText={(value: string)=>{
                   const numericValue = value.replace(/[^0-9]/g, '');
                   const quantity = numericValue !== '' ? parseInt(numericValue, 10) : 1;
-                  setNewExercise({...newExercise, Series: quantity})}}></TextInput>
+                  setNewExercise({...newExercise, Series: quantity})}}
+                onSubmitEditing={doneEdit}></TextInput>
               <TextInput 
                 style={s.inputStyle}
                 placeholderTextColor={o.itemtextfade}
@@ -307,19 +381,23 @@ const ExerciseView = (props: ExerciseViewProps) => {
                 onChangeText={(value: string)=>{
                   const numericValue = value.replace(/[^0-9]/g, '');
                   const quantity = numericValue !== '' ? parseInt(numericValue, 10) : 1;
-                  setNewExercise({...newExercise, Reps: quantity})}}></TextInput>
+                  setNewExercise({...newExercise, Reps: quantity})}}
+                onSubmitEditing={doneEdit}></TextInput>
               <TextInput 
                 style={s.inputStyle}
                 placeholderTextColor={o.itemtextfade}
                 placeholder="Max"
                 defaultValue={exercise.MaxWeight}
-                onChangeText={(value: string)=>{setNewExercise({...newExercise, MaxWeight: value})}}></TextInput>
+                onChangeText={(value: string)=>{setNewExercise({...newExercise, MaxWeight: value})}}
+                onSubmitEditing={doneEdit}></TextInput>
               <TextInput 
                 style={s.inputStyle}
                 placeholderTextColor={o.itemtextfade}
                 placeholder="Description"
                 defaultValue={exercise.Description}
-                onChangeText={(value: string)=>{setNewExercise({...newExercise, Description: value})}}></TextInput>
+                onChangeText={(value: string)=>{setNewExercise({...newExercise, Description: value})}}
+                onSubmitEditing={doneEdit}
+                ></TextInput>
               <View style={s.exerciseWeekdaysContainer}>
                 {getWeekdayButton(Weekdays.Monday)}
                 {getWeekdayButton(Weekdays.Tuesday)}
@@ -337,14 +415,7 @@ const ExerciseView = (props: ExerciseViewProps) => {
             </View>
           </View>
           :
-          <>
-            <PressText
-              style={s.titleContainer}
-              textStyle={exercise.IsDone? s.titleFade:s.title}
-              text={getText()}
-              onPress={()=>{if(!isEditingPos)setIsEditingExercise(!isEditingExercise)}}
-              ></PressText>
-          </>
+          getTitleDisplay()
         }
         {!isEditingExercise && !exercise.IsDone && <PressImage pressStyle={gs.baseImageContainer} style={s.image} source={require('../../../../public/images/exercise.png')} onPress={() => {if(!isEditingPos)onChangeIsDone();}}></PressImage>}
         {!isEditingExercise && exercise.IsDone && <PressImage pressStyle={gs.baseImageContainer} style={s.imageFade} source={require('../../../../public/images/exercise-filled.png')} onPress={() => {if(!isEditingPos)onChangeIsDone();}}></PressImage>}

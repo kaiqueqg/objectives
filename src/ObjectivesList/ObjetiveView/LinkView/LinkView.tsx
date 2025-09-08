@@ -1,4 +1,4 @@
-import { View, StyleSheet, Text, TextInput, Linking, Vibration } from "react-native";
+import { View, StyleSheet, Text, TextInput, Linking, Vibration, Keyboard, BackHandler } from "react-native";
 import { Link, ItemViewProps,  MessageType, Pattern } from "../../../Types";
 import { colorPalette, globalStyle as gs } from "../../../Colors";
 import { FontPalette } from "../../../../fonts/Font";
@@ -31,6 +31,36 @@ const LinkView = (props: LinkViewProps) => {
   const [newLink, setNewLink] = useState<string>(link.Link);
   const [isEditingLinks, setIsEditingLinks] = useState<boolean>(false);
 
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+    
+  useEffect(() => {
+    const show = Keyboard.addListener("keyboardDidShow", () => {setKeyboardVisible(true);});
+    const hide = Keyboard.addListener("keyboardDidHide", () => {setKeyboardVisible(false);});
+
+    const backAction = () => {
+      log.w('test')
+      if (keyboardVisible) {
+        Keyboard.dismiss();
+        return true;
+      }
+      
+      log.w('test2')
+      onCancelLink();
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => {
+      backHandler.remove();
+      show.remove();
+      hide.remove();
+    };
+  }, [keyboardVisible]);
+
   useEffect(()=>{
   }, [link])
 
@@ -41,16 +71,12 @@ const LinkView = (props: LinkViewProps) => {
   const onDoneLink = async () => {
     if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
 
-    const newValue: Link = {
-      ...link, 
-      Title: newTitle.trim(), 
-      Link: newLink,
-      LastModified: new Date().toISOString()};
+    const newLinkValue: Link = {...link}; 
+    newLinkValue.Title = newTitle.trim(), 
+    newLinkValue.Link = newLink,
 
-    await putItem(newValue);
+    await putItem(newLinkValue);
     setIsEditingLinks(false);
-    setNewTitle('');
-    setNewLink('');
     loadMyItems();
   }
 
@@ -69,6 +95,15 @@ const LinkView = (props: LinkViewProps) => {
           }
         })
         .catch((err) => {});
+    }
+  }
+
+  const onEditingLink = () => {
+    if(!isEditingPos && !props.isLocked){
+      setIsEditingLinks(!isEditingLinks);
+    }
+    else{
+      Vibration.vibrate(Pattern.Wrong);
     }
   }
 
@@ -221,7 +256,8 @@ const LinkView = (props: LinkViewProps) => {
                 placeholder="Title"
                 defaultValue={link.Title}
                 onSubmitEditing={onDoneLink}
-                onChangeText={(value: string)=>{setNewTitle(value)}} autoFocus></TextInput>
+                onChangeText={(value: string)=>{setNewTitle(value)}} autoFocus
+                ></TextInput>
               <TextInput 
                 style={s.inputStyle}
                 placeholderTextColor={o.itemtextfade}
@@ -236,7 +272,7 @@ const LinkView = (props: LinkViewProps) => {
             </View>
           </View>
           :
-          <PressText style={s.titleContainer} textStyle={s.title} text={link.Title} onPress={()=>{if(!isEditingPos)setIsEditingLinks(!isEditingLinks)}}></PressText>
+          <PressText style={s.titleContainer} textStyle={s.title} text={link.Title} onPress={()=>{onEditingLink()}} defaultStyle={o}></PressText>
         }
         {!isEditingLinks && <PressImage pressStyle={gs.baseImageContainer} style={[s.image, link.Link.trim() !== ''?{}:s.imageFade]} source={require('../../../../public/images/link.png')} onPress={() => { if(!isEditingPos)openLink();}}></PressImage>}
       </View>

@@ -2,16 +2,20 @@ import { View, StyleSheet, Text } from "react-native";
 import { ObjectivePallete } from "../../../Colors";
 import { FontPalette } from "../../../../fonts/Font";
 import { useUserContext } from "../../../Contexts/UserContext";
+import { ItemFake } from "../../../Types";
 
 export const New = () => {
   return(
     {
+      Text: '',
+      Fade: false,
     }
   )
 }
 
 export interface ItemFakeViewProps{
   objTheme: ObjectivePallete,
+  itemFake: ItemFake,
 }
 
 const ItemFakeView = (props: ItemFakeViewProps) => {
@@ -26,19 +30,19 @@ const ItemFakeView = (props: ItemFakeViewProps) => {
       marginBottom: 4,
       marginHorizontal: 6,
       minHeight: 40,
-      borderColor: o.objtitle,
-      borderWidth: 1,
+      borderColor: props.itemFake.Fade? o.itemtextfade:o.objtitle,
+      borderWidth: props.itemFake.Fade? 0:1,
       borderStyle: 'dashed',
       borderRadius: 5,
     },
     titleText:{
-      color: o.objtitle,
+      color: props.itemFake.Fade? o.itemtextfade:o.objtitle,
     },
   });
 
   return (
     <View style={s.itemFakeContainer}>
-      <Text style={s.titleText}>click to be the first</Text>
+      <Text style={s.titleText}>{props.itemFake.Title}</Text>
     </View>
   );
 };

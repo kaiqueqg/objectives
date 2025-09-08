@@ -12,7 +12,7 @@ import PressText from "../../PressText/PressText";
 import PressImage from "../../PressImage/PressImage";
 import PressInput from "../../PressInput/PressInput";
 
-import { Item, ItemType, Note, Objective, Question, Step, Views, Wait, Location, Divider, Grocery, Pattern, MessageType, Medicine, Exercise, Weekdays, StepImportance, ItemNew, Link, Image, House } from "../../Types";
+import { Item, ItemType, Note, Objective, Question, Step, Views, Wait, Location, Divider, Grocery, Pattern, MessageType, Medicine, Exercise, Weekdays, StepImportance, ItemNew, Link, Image, House, ItemFake } from "../../Types";
 import { useEffect, useState } from "react";
 
 import QuestionView, {New as QuestionNew} from "./QuestionView/QuestionView";
@@ -48,6 +48,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     currentView, writeCurrentView } = useUserContext();
     const { obj } = props;
   const o = getObjTheme(userPrefs.theme, props.obj.Theme);
+  let hiddenItems = 0;
 
   const [items, setItems] = useState<Item[]>([]);
 
@@ -57,6 +58,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
   const [isPaletteOpen, setIsPaletteOpen] = useState<boolean>(false);
   const [isCheckedOpen, setIsCheckedOpen] = useState<boolean>(false);
   const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
+  const [alertLock, setAlertLock] = useState<boolean>(false);
 
   const [isEditingTitle, setIsEditingTitle] = useState<boolean>(false);
   const [isEditingPos, setIsEditingPos] = useState<boolean>(false);
@@ -202,6 +204,14 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
 
   const onUnarchive = async () => {
     await putObjective({...obj, IsArchived: false, LastModified: (new Date()).toISOString() });
+  }
+
+  const onLock = async () => {
+    await putObjective({...obj, IsLocked: !obj.IsLocked, LastModified: (new Date()).toISOString() });
+  }
+
+  const lockAlertCallback = () => {
+    setAlertLock(false);
   }
 
   const onChangeIsPaletteOpen = () => {
@@ -431,6 +441,11 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
   }
 
   const onChangeTags = async (tag: string) => {
+    if(tag.toLowerCase() === 'all' || tag.toLowerCase() === 'none'){
+      popMessage('You can\' add this tag: ' + tag, MessageType.Error);
+      return;
+    }
+
     if(tag.trim() !== '') {
       const uniqueTags = Array.from(new Set([...obj.Tags, tag.trim()]));
       await putObjective({...obj, Tags: [...uniqueTags], LastModified: (new Date()).toISOString() });
@@ -509,7 +524,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     for(let i = 0; i < obj.Tags.length; i++){
       const cTag = obj.Tags[i];
       tagList.push(
-        <PressText key={cTag} onPress={()=>removeTag(cTag)} style={s.tagContainer} textStyle={s.tagText} text={cTag}></PressText>
+        <PressText key={cTag} onPress={()=>removeTag(cTag)} style={s.tagContainer} textStyle={s.tagText} text={cTag} defaultStyle={o}></PressText>
       )
     }
     if(obj.Tags.length === 0){
@@ -581,13 +596,19 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       filteredItems.push(...partialItems);
     }
 
+    hiddenItems = (items.length - filteredItems.length);
+    const hiddenItemsText = hiddenItems.toString() + ' hidden item' + (hiddenItems > 1?'s.':'.');
+    if(hiddenItems > 0) filteredItems.push({ItemId:'', LastModified: '', Pos:-1, UserIdObjectiveId: '',  Type: ItemType.ItemFake, Title: hiddenItemsText, Fade: true } as ItemFake);
+
     //?End item to give fake distance in the bottom
-    filteredItems.push({ItemId:'', LastModified: '', Pos:-1, UserIdObjectiveId: '',  Type: ItemType.Unknown})
+    filteredItems.push({ItemId:'', LastModified: '', Pos:-1, UserIdObjectiveId: '',  Type: ItemType.Unknown, Title: '', Fade: false} as ItemFake)
+
 
     return <FlatList data={filteredItems} renderItem={getItemView}></FlatList>
   }
 
   const getItemView = ({item}:any):JSX.Element => {
+
     let rtnItem;
     const itemSelected = itemsSelected.find((i: Item)=>i.ItemId === item.ItemId);
     if(item.Type === ItemType.Divider){
@@ -597,6 +618,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
         isEditingPos={isEditingPos}
         isEndingPos={isEndingPos}
         isSelected={itemSelected?true:false}
+        isLocked={obj.IsLocked}
         objTheme={o}
         divider={item as Divider}
         orderDividerItems={orderDividerItems}
@@ -605,40 +627,40 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
         ></DividerView>  
     }
     else if(item.Type === ItemType.Step){
-      rtnItem = <StepView key={item.ItemId} isEditingPos={isEditingPos} isEndingPos={isEndingPos} isSelected={itemSelected?true:false} loadMyItems={loadItems} objTheme={o} step={item as Step} onDeleteItem={onDeleteItem} ></StepView>
+      rtnItem = <StepView key={item.ItemId} isEditingPos={isEditingPos} isEndingPos={isEndingPos} isSelected={itemSelected?true:false} isLocked={obj.IsLocked} loadMyItems={loadItems} objTheme={o} step={item as Step} onDeleteItem={onDeleteItem} ></StepView>
     }
     else if(item.Type === ItemType.Grocery){
-      rtnItem = <GroceryView key={item.ItemId} isEditingPos={isEditingPos} isEndingPos={isEndingPos} isSelected={itemSelected?true:false} loadMyItems={loadItems} objTheme={o} grocery={item as Grocery} onDeleteItem={onDeleteItem} ></GroceryView>
+      rtnItem = <GroceryView key={item.ItemId} isEditingPos={isEditingPos} isEndingPos={isEndingPos} isSelected={itemSelected?true:false} isLocked={obj.IsLocked} loadMyItems={loadItems} objTheme={o} grocery={item as Grocery} onDeleteItem={onDeleteItem} ></GroceryView>
     }
     else if(item.Type === ItemType.Medicine){
-      rtnItem = <MedicineView key={item.ItemId} isEditingPos={isEditingPos} isEndingPos={isEndingPos} isSelected={itemSelected?true:false} loadMyItems={loadItems} objTheme={o} medicine={item as Medicine} onDeleteItem={onDeleteItem} ></MedicineView>
+      rtnItem = <MedicineView key={item.ItemId} isEditingPos={isEditingPos} isEndingPos={isEndingPos} isSelected={itemSelected?true:false} isLocked={obj.IsLocked} loadMyItems={loadItems} objTheme={o} medicine={item as Medicine} onDeleteItem={onDeleteItem} ></MedicineView>
     }
     else if(item.Type === ItemType.Exercise){
-      rtnItem = <ExerciseView key={item.ItemId} isEditingPos={isEditingPos} isEndingPos={isEndingPos} isSelected={itemSelected?true:false} loadMyItems={loadItems} objTheme={o} exercise={item as Exercise} onDeleteItem={onDeleteItem} ></ExerciseView>
+      rtnItem = <ExerciseView key={item.ItemId} isEditingPos={isEditingPos} isEndingPos={isEndingPos} isSelected={itemSelected?true:false} isLocked={obj.IsLocked} loadMyItems={loadItems} objTheme={o} exercise={item as Exercise} onDeleteItem={onDeleteItem} ></ExerciseView>
     }
     else if(item.Type === ItemType.Location){
-      rtnItem = <LocationView key={item.ItemId} isEditingPos={isEditingPos} isEndingPos={isEndingPos} isSelected={itemSelected?true:false} loadMyItems={loadItems} objTheme={o} location={item as Location} onDeleteItem={onDeleteItem} ></LocationView>
+      rtnItem = <LocationView key={item.ItemId} isEditingPos={isEditingPos} isEndingPos={isEndingPos} isSelected={itemSelected?true:false} isLocked={obj.IsLocked} loadMyItems={loadItems} objTheme={o} location={item as Location} onDeleteItem={onDeleteItem} ></LocationView>
     }
     else if(item.Type === ItemType.Note){
-      rtnItem = <NoteView key={item.ItemId} isEditingPos={isEditingPos} isEndingPos={isEndingPos} isSelected={itemSelected?true:false} loadMyItems={loadItems} objTheme={o} note={item as Note} onDeleteItem={onDeleteItem} ></NoteView>
+      rtnItem = <NoteView key={item.ItemId} isEditingPos={isEditingPos} isEndingPos={isEndingPos} isSelected={itemSelected?true:false} isLocked={obj.IsLocked} loadMyItems={loadItems} objTheme={o} note={item as Note} onDeleteItem={onDeleteItem} ></NoteView>
     }
     else if(item.Type === ItemType.Question){
-      rtnItem = <QuestionView key={item.ItemId} isEditingPos={isEditingPos} isEndingPos={isEndingPos} isSelected={itemSelected?true:false} loadMyItems={loadItems} objTheme={o} question={item as Question} onDeleteItem={onDeleteItem} ></QuestionView>
+      rtnItem = <QuestionView key={item.ItemId} isEditingPos={isEditingPos} isEndingPos={isEndingPos} isSelected={itemSelected?true:false} isLocked={obj.IsLocked} loadMyItems={loadItems} objTheme={o} question={item as Question} onDeleteItem={onDeleteItem} ></QuestionView>
     }
     else if(item.Type === ItemType.Wait){
-      rtnItem = <WaitView key={item.ItemId} isEditingPos={isEditingPos} isEndingPos={isEndingPos} isSelected={itemSelected?true:false} loadMyItems={loadItems} objTheme={o} wait={item as Wait} onDeleteItem={onDeleteItem} ></WaitView>
+      rtnItem = <WaitView key={item.ItemId} isEditingPos={isEditingPos} isEndingPos={isEndingPos} isSelected={itemSelected?true:false} isLocked={obj.IsLocked} loadMyItems={loadItems} objTheme={o} wait={item as Wait} onDeleteItem={onDeleteItem} ></WaitView>
     }
     else if(item.Type === ItemType.Link){
-      rtnItem = <LinkView key={item.ItemId} isEditingPos={isEditingPos} isEndingPos={isEndingPos} isSelected={itemSelected?true:false} loadMyItems={loadItems} objTheme={o} link={item as Link} onDeleteItem={onDeleteItem} ></LinkView>
+      rtnItem = <LinkView key={item.ItemId} isEditingPos={isEditingPos} isEndingPos={isEndingPos} isSelected={itemSelected?true:false} isLocked={obj.IsLocked} loadMyItems={loadItems} objTheme={o} link={item as Link} onDeleteItem={onDeleteItem} ></LinkView>
     }
     else if(item.Type === ItemType.Image){
-      rtnItem = <ImageView key={item.ItemId} isEditingPos={isEditingPos} isEndingPos={isEndingPos} isSelected={itemSelected?true:false} loadMyItems={loadItems} objTheme={o} image={item as Image} onDeleteItem={onDeleteItem} ></ImageView>
+      rtnItem = <ImageView key={item.ItemId} isEditingPos={isEditingPos} isEndingPos={isEndingPos} isSelected={itemSelected?true:false} isLocked={obj.IsLocked} loadMyItems={loadItems} objTheme={o} image={item as Image} onDeleteItem={onDeleteItem} ></ImageView>
     }
     else if(item.Type === ItemType.House){
-      rtnItem = <HouseView key={item.ItemId} isEditingPos={isEditingPos} isEndingPos={isEndingPos} isSelected={itemSelected?true:false} loadMyItems={loadItems} objTheme={o} house={item as House} onDeleteItem={onDeleteItem} ></HouseView>
+      rtnItem = <HouseView key={item.ItemId} isEditingPos={isEditingPos} isEndingPos={isEndingPos} isSelected={itemSelected?true:false} isLocked={obj.IsLocked} loadMyItems={loadItems} objTheme={o} house={item as House} onDeleteItem={onDeleteItem} ></HouseView>
     }
     else if(item.Type === ItemType.ItemFake){
-      rtnItem = <ItemFakeView objTheme={o}></ItemFakeView>
+      rtnItem = <ItemFakeView itemFake={item as ItemFake} objTheme={o} ></ItemFakeView>
     }
     else{
       return <View style={{height:700}}></View>
@@ -717,12 +739,14 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
         return isPaletteOpen || isTagOpen || isEditingPos || isEndingPos || isCheckedOpen || isSearchOpen;
       case BottomIcons.Search:
         return isPaletteOpen || isTagOpen || isEditingPos || isEndingPos || isCheckedOpen || isItemsOpen || isItemOpenLocked || items.length < 1;
+      case BottomIcons.IsLocked:
+        return isPaletteOpen || isTagOpen || isEditingPos || isEndingPos || isCheckedOpen || isSearchOpen;
       default:
         return false;
     }
   }
 
-  enum BottomIcons {Archive, Unarchive, Palette, Checked, Tags, Sorted, Pos, Add, Search};
+  enum BottomIcons {Archive, Unarchive, Palette, Checked, Tags, Sorted, Pos, Add, Search, IsLocked};
 
   const s = StyleSheet.create(
   {
@@ -772,10 +796,6 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       alignItems: 'center',
       justifyContent: 'space-between',
       backgroundColor: o.itembk,
-
-      borderColor: o.bordercolor,
-      borderTopWidth: 1,
-      borderStyle: 'solid',
     },
     tagEditingContainer:{
       flexDirection: 'column',
@@ -888,6 +908,10 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     imageFade:{
       ...gs.baseSmallImage,
       tintColor: o.icontintcolorfade,
+    },
+    imageLock: {
+      ...gs.baseSmallImage,
+      tintColor: o.trashicontint,
     },
     inputStyle: {
       textAlign: 'center',
@@ -1030,6 +1054,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
             style={s.image}
             disable={shouldDisable(BottomIcons.Unarchive)}
             disableStyle={s.imageFade}
+            confirm={true}
             onPress={()=>showBottomItem(BottomIcons.Unarchive)}
             source={require('../../../public/images/unarchive.png')}></PressImage>
           :
@@ -1038,6 +1063,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
             style={s.image}
             disable={shouldDisable(BottomIcons.Archive)}
             disableStyle={s.imageFade}
+            confirm={true}
             onPress={()=>showBottomItem(BottomIcons.Archive)}
             source={require('../../../public/images/archive.png')}></PressImage>
         }
@@ -1055,7 +1081,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
           pressStyle={gs.baseBiggerImageContainer}
           onPress={()=>showBottomItem(BottomIcons.Tags)}
           source={require('../../../public/images/tag.png')}></PressImage>
-          <PressImage
+        <PressImage
           style={s.image}
           disable={shouldDisable(BottomIcons.Sorted)}
           disableStyle={s.imageFade}
@@ -1064,13 +1090,13 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
           confirm={true}
           confirmStyle={[s.image, s.greenImageColor]}
           source={require('../../../public/images/atoz.png')}></PressImage>
-        <PressImage 
+        {/* <PressImage 
           style={s.image}
           disable={shouldDisable(BottomIcons.Search)}
           disableStyle={s.imageFade}
           pressStyle={[gs.baseBiggerImageContainer]}
           onPress={()=>showBottomItem(BottomIcons.Search)}
-          source={require('../../../public/images/search.png')}></PressImage>
+          source={require('../../../public/images/search.png')}></PressImage> */}
         {!isEditingPos && <PressImage 
             style={s.image}
             disable={shouldDisable(BottomIcons.Pos)}
@@ -1085,6 +1111,15 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
           hide={itemsSelected.length=== 0 || itemsSelected.length === items.length || isEndingPos}
           onPress={onEditingPosTo}
           source={require('../../../public/images/arrow-right-filled.png')}></PressImage>}
+        <PressImage 
+          pressStyle={gs.baseBiggerImageContainer}
+          disable={shouldDisable(BottomIcons.IsLocked)}
+          disableStyle={s.imageFade}
+          style={[s.image, obj.IsLocked?s.imageLock:s.imageFade]}
+          onPress={()=>onLock()}
+          confirm={obj.IsLocked}
+          confirmStyle={[s.image, s.greenImageColor]}
+          source={require('../../../public/images/lock.png')}></PressImage>
         {obj.IsShowingCheckedGrocery && <PressImage
           style={[s.image]}
           disable={shouldDisable(BottomIcons.Checked)}

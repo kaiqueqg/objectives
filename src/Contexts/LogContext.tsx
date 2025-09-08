@@ -233,27 +233,14 @@ export const LogProvider: React.FC<LogProviderProps> = ({ children }) => {
     if(timeoutInSeconds && timeoutInSeconds > 30) timeout = 30000;
     if(timeoutInSeconds && timeoutInSeconds < 1) timeout = 1000;
 
-    messageList.push({
+    const msg: PopMessage = {
       id: randomId(),
-      text: text,
+      text,
       type: type ?? MessageType.Normal,
-      timeout: timeout,
-    });
+      timeout,
+    };
 
-    setMessageList(messageList);
-
-    // let timeout = 3000;
-    // if(timeoutInSeconds && timeoutInSeconds > 30) timeout = 30000;
-    // if(timeoutInSeconds && timeoutInSeconds < 1) timeout = 1000;
-    // setMessageList((prevList) => [
-    //   ...prevList,
-    //   {
-    //     id: randomId(),
-    //     text: text,
-    //     type: type ?? MessageType.Normal,
-    //     timeout: timeout,
-    //   },
-    // ]);
+    setMessageList(prev => [...prev, msg]);
   }
   const removeMessage = (removeId: string) => {
     setMessageList(prevMessages => prevMessages.filter(msg => msg.id !== removeId));

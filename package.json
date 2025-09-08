@@ -6,8 +6,8 @@
     "start": "npx expo start",
     "startt": "npx expo start --tunnel",
     "build": "eas build -p android --profile preview",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "web": "expo start --web"
   },
   "dependencies": {

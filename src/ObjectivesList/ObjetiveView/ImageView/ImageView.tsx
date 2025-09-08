@@ -1,4 +1,4 @@
-import { View, StyleSheet, Text, Vibration, TextInput, Platform, Image as ReactImage, TouchableOpacity, Button } from "react-native";
+import { View, StyleSheet, Text, Vibration, TextInput, Platform, Image as ReactImage, TouchableOpacity, Button, Keyboard, BackHandler } from "react-native";
 import { Item, Image, Pattern, ItemViewProps, ItemNew, StoredImage } from "../../../Types";
 import { dark, globalStyle as gs } from "../../../Colors";
 import { FontPalette } from "../../../../fonts/Font";
@@ -56,8 +56,35 @@ const ImageView = (props: ImageViewProps) => {
   const [viewWidth, setViewWidth] = useState<number>(0);
   const [viewHeight, setViewHeight] = useState<number>(0);
 
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+    
+  useEffect(() => {
+    const show = Keyboard.addListener("keyboardDidShow", () => {setKeyboardVisible(true);});
+    const hide = Keyboard.addListener("keyboardDidHide", () => {setKeyboardVisible(false);});
+
+    const backAction = () => {
+      if (keyboardVisible) {
+        Keyboard.dismiss();
+        return true;
+      }
+      
+      onCancelImage();
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => {
+      backHandler.remove();
+      show.remove();
+      hide.remove();
+    };
+  }, [keyboardVisible]);
+
   useEffect(()=>{
-    // a();
     if(image.Name) loadImage();
   },[storedImage]);
 
@@ -201,6 +228,11 @@ const ImageView = (props: ImageViewProps) => {
   const getTitle = (): string => {
     //image.Name? 'has name': log.b('not image name');
     return image.Title;
+  }
+
+  const onEditingImage = () => {
+    if(!isEditingPos && !props.isLocked)setIsEditingImage(!isEditingImage);
+    else Vibration.vibrate(Pattern.Wrong);
   }
 
   const s = StyleSheet.create({
@@ -353,7 +385,9 @@ const ImageView = (props: ImageViewProps) => {
                 placeholderTextColor={o.itemtextfade}
                 placeholder="Title"
                 defaultValue={getTitle()}
-                onChangeText={(value: string)=>{setTempImage({...tempImage, Title: value})}}></TextInput>
+                onChangeText={(value: string)=>{setTempImage({...tempImage, Title: value})}}
+                onSubmitEditing={onDoneImage}
+                autoFocus={image.Title.trim() === ''}></TextInput>
               <View style={s.buttonsRowContainer}>
                 <PressImage pressStyle={gs.baseImageContainer} style={[s.image]} source={require('../../../../public/images/camera.png')} onPress={openCamera}></PressImage>
                 <PressImage pressStyle={gs.baseImageContainer} style={[s.image]} source={require('../../../../public/images/image.png')} onPress={pickImage}></PressImage>
@@ -374,7 +408,8 @@ const ImageView = (props: ImageViewProps) => {
                 style={s.titleContainer}
                 textStyle={s.title}
                 text={getTitle()}
-                onPress={()=>{if(!isEditingPos)setIsEditingImage(!isEditingImage)}}
+                onPress={()=>{onEditingImage()}}
+                defaultStyle={o}
               ></PressText>
               {storedImage?
                 <PressImage pressStyle={[gs.baseImageContainer]} style={[s.image, image.IsDisplaying? null:s.imageFade]} source={require('../../../../public/images/image-filled.png')} onPress={() => {if(!isEditingPos)onChangeIsDisplaying();}}></PressImage>

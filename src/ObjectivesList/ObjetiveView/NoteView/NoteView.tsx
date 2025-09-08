@@ -1,10 +1,11 @@
-import { View, StyleSheet, Vibration } from "react-native";
+import { View, StyleSheet, Vibration, Keyboard, BackHandler } from "react-native";
 import { globalStyle as gs } from "../../../Colors";
 import { useUserContext } from "../../../Contexts/UserContext";
 import { Note, ItemViewProps } from "../../../Types";
 import PressImage from "../../../PressImage/PressImage";
 import PressInput from "../../../PressInput/PressInput";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useLogContext } from "../../../Contexts/LogContext";
 
 export const New = () => {
   return(
@@ -20,10 +21,40 @@ export interface NoteViewProps extends ItemViewProps {
 
 const NoteView = (props: NoteViewProps) => {
   const { userPrefs, theme: t, fontTheme: f, putItem } = useUserContext();
+  const { log } = useLogContext();
   const { objTheme: o, isEditingPos, onDeleteItem, loadMyItems, note } = props;
 
   const [isEditingTitle, setIsEditingTitle] = useState<boolean>(false);
   const [shouldUpdate, setShouldUpdate] = useState<boolean>(false);
+
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+
+  useEffect(() => {
+    const show = Keyboard.addListener("keyboardDidShow", () => {setKeyboardVisible(true);});
+    const hide = Keyboard.addListener("keyboardDidHide", () => {setKeyboardVisible(false);});
+
+    const backAction = () => {
+      if (keyboardVisible) {
+        Keyboard.dismiss();
+        return true;
+      }
+      
+      log.r('return icis')
+      onEditingTitle(false);
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => {
+      backHandler.remove();
+      show.remove();
+      hide.remove();
+    };
+  }, [keyboardVisible]);
 
   const onDelete = async () => {
     await onDeleteItem(note);
@@ -103,7 +134,7 @@ const NoteView = (props: NoteViewProps) => {
           onDone={onChangeText}
           onEditingState={onEditingTitle}
           multiline={true}
-          uneditable={isEditingPos}
+          uneditable={isEditingPos || props.isLocked}
           
           textStyle={s.editingText}
           inputStyle={s.editingInput}

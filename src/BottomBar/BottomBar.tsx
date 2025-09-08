@@ -52,10 +52,6 @@ const BottomBar = (props: BottomBarProps) => {
       alignItems: 'center',
       backgroundColor: t.backgroundcolordarker,
 
-      borderStyle: 'solid',
-      borderTopWidth: 1,
-      borderBottomWidth: 1,
-      borderColor: t.bordercolorfade,
     },
     leftContainer: {
       flexDirection: 'row',
@@ -108,7 +104,7 @@ const BottomBar = (props: BottomBarProps) => {
           <PressImage pressStyle={gs.baseBiggerImageContainer} style={[s.bottomImage, s.cancelImage]} onPress={() => changeToView(Views.UserView)} source={require('../../public/images/user.png')}></PressImage>
         }
         <PressImage pressStyle={gs.baseBiggerImageContainer} style={[s.bottomImage]} onPress={changeTheme} source={require('../../public/images/theme.png')}></PressImage>
-        {user && user.Role !== 'Guest' && <PressImage pressStyle={currentView === Views.DevView? s.bottomImageSelected:gs.baseImageContainer} style={[s.bottomImage, currentView === Views.DevView&&s.bottomImageSelected]} onPress={() => changeToView(Views.DevView)} source={require('../../public/images/dev.png')}></PressImage>}
+        {/*user && user.Role !== 'Guest' &&*/ <PressImage pressStyle={currentView === Views.DevView? s.bottomImageSelected:gs.baseImageContainer} style={[s.bottomImage, currentView === Views.DevView&&s.bottomImageSelected]} onPress={() => changeToView(Views.DevView)} source={require('../../public/images/dev.png')}></PressImage>}
         {user?
           <>
             {!isSyncing && isLambdaCold && <PressImage pressStyle={gs.baseBiggerImageContainer} style={[s.bottomImage, {tintColor: colorPalette.bluelight}]} onPress={()=>{}} source={require('../../public/images/cold.png')}></PressImage>}
