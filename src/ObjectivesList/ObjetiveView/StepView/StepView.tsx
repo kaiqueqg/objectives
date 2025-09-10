@@ -33,31 +33,31 @@ const StepView = (props: StepViewProps) => {
 
   const [keyboardVisible, setKeyboardVisible] = useState(false);
       
-    useEffect(() => {
-      const show = Keyboard.addListener("keyboardDidShow", () => {setKeyboardVisible(true);});
-      const hide = Keyboard.addListener("keyboardDidHide", () => {setKeyboardVisible(false);});
-  
-      const backAction = () => {
-        if (keyboardVisible) {
-          Keyboard.dismiss();
-          return true;
-        }
-        
-        onCancelStep();
+  useEffect(() => {
+    const show = Keyboard.addListener("keyboardDidShow", () => {setKeyboardVisible(true);});
+    const hide = Keyboard.addListener("keyboardDidHide", () => {setKeyboardVisible(false);});
+
+    const backAction = () => {
+      if (keyboardVisible) {
+        Keyboard.dismiss();
         return true;
-      };
-  
-      const backHandler = BackHandler.addEventListener(
-        "hardwareBackPress",
-        backAction
-      );
-  
-      return () => {
-        backHandler.remove();
-        show.remove();
-        hide.remove();
-      };
-    }, [keyboardVisible]);
+      }
+      
+      onCancelStep();
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => {
+      backHandler.remove();
+      show.remove();
+      hide.remove();
+    };
+  }, [keyboardVisible]);
 
   const onDeleteItem = async () => {
     await onDelete(step);
@@ -302,6 +302,7 @@ const StepView = (props: StepViewProps) => {
             text={step.Title}
             onPress={()=>{onEditingStep()}}
             defaultStyle={o}
+            ellipsizeMode='middle'
             ></PressText>
         }
         {!isEditingStep && !step.Done && 

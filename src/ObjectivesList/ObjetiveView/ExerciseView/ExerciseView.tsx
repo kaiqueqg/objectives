@@ -1,4 +1,4 @@
-import { View, StyleSheet, Vibration, TextInput, Text } from "react-native";
+import { View, StyleSheet, Vibration, TextInput, Text, Keyboard, BackHandler } from "react-native";
 import { Exercise, Pattern, ItemViewProps, Weekdays } from "../../../Types";
 import { colorPalette, getObjTheme, globalStyle as gs } from "../../../Colors";
 import { FontPalette } from "../../../../fonts/Font";
@@ -36,6 +36,34 @@ const ExerciseView = (props: ExerciseViewProps) => {
   const [isEditingExercise, setIsEditingExercise] = useState<boolean>(false);
   const [newExercise, setNewExercise] = useState<Exercise>(exercise);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
+
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+        
+  useEffect(() => {
+    const show = Keyboard.addListener("keyboardDidShow", () => {setKeyboardVisible(true);});
+    const hide = Keyboard.addListener("keyboardDidHide", () => {setKeyboardVisible(false);});
+
+    const backAction = () => {
+      if (keyboardVisible) {
+        Keyboard.dismiss();
+        return true;
+      }
+      
+      onCancelExercise();
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => {
+      backHandler.remove();
+      show.remove();
+      hide.remove();
+    };
+  }, [keyboardVisible]);
 
   useEffect(()=>{
     const now = new Date();
@@ -93,6 +121,7 @@ const ExerciseView = (props: ExerciseViewProps) => {
   }
 
   const weekdayChange = async (weekday: Weekdays) => {
+    if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
     const includes = newExercise.Weekdays.includes(weekday);
   
     if(includes){
@@ -167,6 +196,7 @@ const ExerciseView = (props: ExerciseViewProps) => {
             onPress={()=>{onEditingExercise()}}
             defaultStyle={o}
             hideDefaultTextBorder={true}
+            ellipsizeMode='middle'
           ></PressText>
           <PressText style={[s.textContainer, {flex: 1}]} textStyle={s.maxText} defaultStyle={o} text={exercise.MaxWeight} onPress={onEditingExercise} hideDefaultTextBorder={true}></PressText>
           <PressText style={s.textContainer} textStyle={s.daysText} defaultStyle={o} text={daysOfWeek} onPress={onEditingExercise} hideDefaultTextBorder={true}></PressText>

@@ -192,7 +192,6 @@ export const HouseView = (props: HouseViewProps) => {
       minHeight: 40,
       margin: 2,
       paddingLeft: 10,
-      color: 'beige',
     },
     title:{
       color: o.itemtext,
@@ -360,8 +359,10 @@ export const HouseView = (props: HouseViewProps) => {
                 text={house.Title}
                 onPress={() => {onChangeIsEditing()}}
                 defaultStyle={o}
+                hideDefaultTextBorder={true}
+                ellipsizeMode='middle'
               ></PressText>
-              <PressText textStyle={{color: o.itemtext}} style={s.attentionContainer} onPress={() => {onChangeIsEditing()}} text={getText()} defaultStyle={o}></PressText>
+              <PressText style={s.attentionContainer} textStyle={{color: o.itemtext}} onPress={() => {onChangeIsEditing()}} text={getText()} defaultStyle={o} hideDefaultTextBorder={true}></PressText>
               {!isEditingHouse && house.Listing.trim() !== '' && <PressImage pressStyle={gs.baseImageContainer} style={s.image} source={require('../../../../public/images/link.png')} onPress={openLink}></PressImage>}
               {!isEditingHouse && house.MapLink.trim() !== '' && <PressImage pressStyle={gs.baseImageContainer} style={s.image} source={require('../../../../public/images/location-filled.png')} onPress={openUrl}></PressImage>}
               {!isEditingHouse && !house.WasContacted && <PressImage pressStyle={gs.baseImageContainer} style={s.image} source={require('../../../../public/images/home.png')} onPress={() => {if(!isEditingPos)onChangeWasContacted();}}></PressImage>}

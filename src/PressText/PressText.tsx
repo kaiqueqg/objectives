@@ -26,18 +26,30 @@ const PressText = (props: PressTextProps) => {
   const { theme: t } = useUserContext();
   const { defaultStyle: o } = props;
 
+  const getDefautTextStyle = () => {
+    return [s.text, props.textStyle, s.textDefault, props.hideDefaultTextBorder?undefined:s.textDefaultBorder];
+  }
+
+  const getTextStyle = () => {
+    return [s.text, props.textStyle];
+  }
+
+  const getContainerStyle = () => {
+    return [s.pressTextStyle, props.style];
+  }
+
   const s = StyleSheet.create({
     pressTextStyle: {
-      
+      minWidth: 0,
+      flexShrink: 1,
+      overflow: 'hidden',
     },
     text: {
       color: t.textcolor,
       fontSize: 16,
-      // width: '100%',
     },
     textDefault: {
       color: t.textcolorfade,
-      // width: '100%',
       fontSize: 16,
     },
     textDefaultBorder:{
@@ -50,16 +62,26 @@ const PressText = (props: PressTextProps) => {
   });
 
   return (
-    <Pressable style={[s.pressTextStyle, props.style]} onPress={props.onPress}>
+    <Pressable style={getContainerStyle()} onPress={props.onPress}>
       {props.isLoading?
         <Loading theme={t} ></Loading>
         :
         (props.imageSource && props.imageStyle && <Image style={props.imageStyle} source={props.imageSource}></Image>)
       }
       {props.text.trim() === ''?
-        <Text numberOfLines={props.numberOfLines??1} ellipsizeMode={props.ellipsizeMode??"head"} style={[s.text, props.textStyle, s.textDefault, props.hideDefaultTextBorder?undefined:s.textDefaultBorder]}>{props.defaultText}</Text>
+        <Text
+          style={getDefautTextStyle()}
+          numberOfLines={props.numberOfLines?? 1}
+          ellipsizeMode={props.ellipsizeMode?? "head"}>
+            {props.defaultText}
+        </Text>
         :
-        <Text numberOfLines={props.numberOfLines??1} ellipsizeMode={props.ellipsizeMode??"head"} style={[s.text, props.textStyle]}>{props.text}</Text>
+        <Text 
+          style={getTextStyle()}
+          numberOfLines={props.numberOfLines?? 1}
+          ellipsizeMode={props.ellipsizeMode?? "head"}>
+            {props.text}
+        </Text>
       }
     </Pressable>
   )
