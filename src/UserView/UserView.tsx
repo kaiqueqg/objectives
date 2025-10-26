@@ -1,35 +1,28 @@
-import { View, StyleSheet, Text, TextInput, Vibration , Pressable, BackHandler} from "react-native";
+import { View, StyleSheet, Text, TextInput, Vibration , Pressable, BackHandler, ScrollView} from "react-native";
 import { useUserContext } from "../Contexts/UserContext";
 import React, { useEffect, useState } from "react";
 import PressText from "../PressText/PressText";
 import Loading from "../Loading/Loading";
 import { colorPalette, dark, globalStyle as gs } from "../Colors";
-import { MessageType, Pattern, UserPrefs, Views } from "../Types";
+import { MessageType, ObjBottomIcons, Pattern, UserPrefs, Views } from "../Types";
 import { useLogContext } from "../Contexts/LogContext";
-import { useRequestContext } from "../Contexts/RequestContext";
 import PressImage from "../PressImage/PressImage";
-import Constants from 'expo-constants';
+import Constants, { ExecutionEnvironment } from 'expo-constants';
 
 import * as FileSystem from "expo-file-system";
 import { useStorageContext } from "../Contexts/StorageContext";
-const saf = FileSystem.StorageAccessFramework;
+import LoginView from "./LoginView";
+const saf = (FileSystem as any).StorageAccessFramework;
 
 export interface UserViewProps {
-  syncObjectivesList: () => void,
 }
 const UserView = (props: UserViewProps) => {
-  const { identityApi, objectivesApi } = useRequestContext();
   const { log, popMessage } = useLogContext();
   const { writeCurrentView } = useUserContext();
   const { storage } = useStorageContext();
-  const { theme: t, fontTheme: f, user, writeUser, writeJwtToken, userPrefs, writeUserPrefs, clearAllData } = useUserContext();
+  const { theme: t, fontTheme: f, user, userPrefs, writeUserPrefs } = useUserContext();
 
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [isLogging, setIsLogging] = useState<boolean>(false);
-  const [isLogged, setIsLogged] = useState<boolean>(false);
-  const [isShowingPassword, setIsShowingPassword] = useState<boolean>(false);
-  const [isBackingUpData, setIsBackingUpData] = useState<boolean>(false);
+  const showLoginStuff: boolean = true;//Constants.executionEnvironment === ExecutionEnvironment.StoreClient || process.env.LOGIN_VIEW === 'true';
 
   useEffect(()=>{
     const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -52,71 +45,9 @@ const UserView = (props: UserViewProps) => {
     return JSON.parse(jsonPayload);
   }
 
-  const login = async () => {
-    if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
-
-    const loginBody = { Email: email.trim(), Password: password.trim() };
-
-    if(loginBody.Email === ""){
-      popMessage("Type email to login!");
-      return;
-    }
-
-    if(loginBody.Password === ""){
-      popMessage("Type password to login!");
-      return;
-    }
-
-    setIsLogging(true);
-    try {
-      const data = await identityApi.login(JSON.stringify(loginBody), () => {});
-
-      if(data && data.User && data.Token) {
-        writeUser(data.User);
-        writeJwtToken(data.Token);
-        setIsLogged(true);
-
-        props.syncObjectivesList();
-      }
-    } 
-    catch (err) {
-      log.err(JSON.stringify(err));
-    }
-
-    setIsLogging(false);
-  }
-
-  const logout = async () => {
-    if(userPrefs.vibrate) Vibration.vibrate(Pattern.Wrong);
-    await clearAllData();
-    setIsLogged(false);
-  }
-  
-  const onChangeEmail = (value: string) => {
-    setEmail(value);
-  }
-
-  const onChangePassword = (value: string) => {
-    setPassword(value);
-  }
-
   const onChangePrefs = (newPrefs: UserPrefs) => {
     if(newPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
     writeUserPrefs(newPrefs);
-  }
-
-  const backupData = async () => {
-    setIsBackingUpData(true);
-    const data = await objectivesApi.backupData(() => {});
-
-    if(data){
-      popMessage("Backup Ok");
-    }
-    else{
-      popMessage("Backup Fail");
-    }
-
-    setIsBackingUpData(false);
   }
 
   const saveToJSON = async () => {
@@ -131,19 +62,17 @@ const UserView = (props: UserViewProps) => {
       await writeSafFile(dir, "objectives.json", JSON.stringify(objectives, null, 2));
       await writeSafFile(dir, "items.json", JSON.stringify(items, null, 2));
 
-      log.g('Salvo');
       popMessage('Salvo.');
     } 
     catch (err) {
       popMessage('Erro salvando arquivo.', MessageType.Error);
-      log.r('Error: ' + err);  
     }
   }
 
   async function writeSafFile(directoryUri: string, name: string, content: string) {
     try {
       const files = await saf.readDirectoryAsync(directoryUri);
-      const existing = files.find((u) => u.endsWith("/" + name));
+      const existing = files.find((u: any) => u.endsWith("/" + name));
       if (existing) await saf.deleteAsync(existing);
     } catch {
       popMessage('Erro ao salvar os dados.', MessageType.Error);
@@ -151,6 +80,159 @@ const UserView = (props: UserViewProps) => {
 
     const fileUri = await saf.createFileAsync(directoryUri, name, "application/json");
     await saf.writeAsStringAsync(fileUri, content);
+  }
+
+  const shouldShowTools = () => {
+    return (user.Role === 'Admin' || saf !== undefined);
+  }
+
+  const getToolsView = () => {
+    if(!shouldShowTools()) return;
+
+    return(
+      <>
+        <Text style={s.header}>TOOLS:</Text>
+        {saf !== undefined && <PressText 
+          style={s.prefsTools}
+          textStyle={s.prefsToolsText}
+          onPress={() => {saveToJSON()}}
+          imageStyle={s.backupImage}
+          imageSource={require('../../public/images/download-files.png')}
+          text={"Download a JSON file of your data."}
+          defaultStyle={{itemtextfade: colorPalette.green}}
+          ></PressText>}
+      </>
+    )
+  }
+
+  const onAddIconToDisplay = (icon: string) => {
+    if (userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
+
+    let newIcons: string[];
+
+    if (userPrefs.ObjectivesPrefs.iconsToDisplay.includes(icon)) {
+      newIcons = userPrefs.ObjectivesPrefs.iconsToDisplay.filter(i => i !== icon);
+    } else {
+      newIcons = [...userPrefs.ObjectivesPrefs.iconsToDisplay, icon];
+    }
+
+    const newPrefs: UserPrefs = {
+      ...userPrefs,
+      ObjectivesPrefs: {
+        ...userPrefs.ObjectivesPrefs,
+        iconsToDisplay: newIcons,
+      },
+    };
+
+    writeUserPrefs(newPrefs);
+  };
+
+  const shouldFadeIcon = (icon: ObjBottomIcons) => {
+    return (!userPrefs.ObjectivesPrefs.iconsToDisplay.includes(ObjBottomIcons[icon]))
+  }
+
+  const getObjectiveIconsView = () => {
+    return(
+      <>
+        <PressImage 
+          pressStyle={gs.baseBiggerImageContainer}
+          style={[s.image, shouldFadeIcon(ObjBottomIcons.Unarchive) && s.imageFade]}
+          onPress={()=>onAddIconToDisplay(ObjBottomIcons[ObjBottomIcons.Unarchive])}
+          source={require('../../public/images/unarchive.png')}></PressImage>
+        <PressImage 
+          pressStyle={gs.baseBiggerImageContainer}
+          style={[s.image, shouldFadeIcon(ObjBottomIcons.Archive) && s.imageFade]}
+          onPress={()=>onAddIconToDisplay(ObjBottomIcons[ObjBottomIcons.Archive])}
+          source={require('../../public/images/archive.png')}></PressImage>
+        <PressImage 
+          pressStyle={gs.baseBiggerImageContainer}
+          style={[s.image, shouldFadeIcon(ObjBottomIcons.Palette) && s.imageFade]}
+          onPress={()=>onAddIconToDisplay(ObjBottomIcons[ObjBottomIcons.Palette])}
+          source={require('../../public/images/palette.png')}></PressImage>
+        <PressImage 
+          pressStyle={gs.baseBiggerImageContainer}
+          style={[s.image, shouldFadeIcon(ObjBottomIcons.Tags) && s.imageFade]}
+          onPress={()=>onAddIconToDisplay(ObjBottomIcons[ObjBottomIcons.Tags])}
+          source={require('../../public/images/tag.png')}></PressImage>
+        <PressImage 
+          pressStyle={gs.baseBiggerImageContainer}
+          style={[s.image, shouldFadeIcon(ObjBottomIcons.Sorted) && s.imageFade]}
+          onPress={()=>onAddIconToDisplay(ObjBottomIcons[ObjBottomIcons.Sorted])}
+          source={require('../../public/images/atoz.png')}></PressImage>
+        <PressImage 
+          pressStyle={gs.baseBiggerImageContainer}
+          style={[s.image, shouldFadeIcon(ObjBottomIcons.Search) && s.imageFade]}
+          onPress={()=>onAddIconToDisplay(ObjBottomIcons[ObjBottomIcons.Search])}
+          source={require('../../public/images/search.png')}></PressImage>
+        <PressImage 
+          pressStyle={gs.baseBiggerImageContainer}
+          style={[s.image, shouldFadeIcon(ObjBottomIcons.Pos) && s.imageFade]}
+          onPress={()=>onAddIconToDisplay(ObjBottomIcons[ObjBottomIcons.Pos])}
+          source={require('../../public/images/change.png')}></PressImage>
+        <PressImage 
+          pressStyle={gs.baseBiggerImageContainer}
+          style={[s.image, shouldFadeIcon(ObjBottomIcons.IsLocked) && s.imageFade]}
+          onPress={()=>onAddIconToDisplay(ObjBottomIcons[ObjBottomIcons.IsLocked])}
+          source={require('../../public/images/lock.png')}></PressImage>
+        <PressImage 
+          pressStyle={gs.baseBiggerImageContainer}
+          style={[s.image, shouldFadeIcon(ObjBottomIcons.Checked) && s.imageFade]}
+          onPress={()=>onAddIconToDisplay(ObjBottomIcons[ObjBottomIcons.Checked])}
+          source={require('../../public/images/checked.png')}></PressImage>
+        <PressImage 
+          pressStyle={gs.baseBiggerImageContainer}
+          style={[s.image, shouldFadeIcon(ObjBottomIcons.Add) && s.imageFade]}
+          onPress={()=>onAddIconToDisplay(ObjBottomIcons[ObjBottomIcons.Add])}
+          source={require('../../public/images/add.png')}></PressImage>
+      </>
+    );
+  }
+
+  const getSettingsView = () => {
+    return(
+      <>
+        <Text style={s.header}>SETTINGS:</Text>
+        <Text style={s.subHeader}>General</Text>
+        <PressText
+          style={s.userPrefsContainerOn}
+          textStyle={s.userPrefsTextOn}
+          onPress={() => {onChangePrefs({...userPrefs, theme: userPrefs.theme === 'dark'?'light':'dark'})}}
+          text={"Which theme? - " + (userPrefs.theme==='dark'? 'Dark.':'White.')}>
+        </PressText>
+        <PressText 
+          style={userPrefs.vibrate? s.userPrefsContainerOn:s.userPrefsContainerOff}
+          textStyle={userPrefs.vibrate? s.userPrefsTextOn:s.userPrefsTextOff}
+          onPress={() => {onChangePrefs({...userPrefs, vibrate: !userPrefs.vibrate})}}
+          text={"Should button vibrate? - " + (userPrefs.vibrate? 'Yes.':'No.')}>
+        </PressText>
+        {
+        <PressText 
+          style={userPrefs.autoSync? s.userPrefsContainerOn:s.userPrefsContainerOff}
+          textStyle={userPrefs.autoSync? s.userPrefsTextOn:s.userPrefsTextOff}
+          onPress={() => {onChangePrefs({...userPrefs, autoSync: !userPrefs.autoSync})}}
+          text={"Should automatically sync? - " + (userPrefs.autoSync? 'Yes.':'No.')}>
+        </PressText>}
+        <Text style={s.subHeader}>Objectives - Fast Access Icons</Text>
+        <View style={s.objectiveIconContainer}>
+          {getObjectiveIconsView()}
+        </View>
+        <Text style={s.subHeader}>Location</Text>
+        <PressText 
+          style={userPrefs.allowLocation? s.userPrefsContainerOn:s.userPrefsContainerOff}
+          textStyle={userPrefs.allowLocation? s.userPrefsTextOn:s.userPrefsTextOff}
+          onPress={()=>{onChangePrefs({...userPrefs, allowLocation: !userPrefs.allowLocation})}}
+          text={"Use location? - " + (userPrefs.allowLocation? 'Yes.':'No.')}>
+        </PressText>
+        <PressText 
+          style={userPrefs.warmLocationOff? s.userPrefsContainerOn:s.userPrefsContainerOff}
+          textStyle={userPrefs.warmLocationOff? s.userPrefsTextOn:s.userPrefsTextOff}
+          onPress={()=>{onChangePrefs({...userPrefs, warmLocationOff: !userPrefs.warmLocationOff})}}
+          ellipsizeMode="head"
+          numberOfLines={3}
+          text={"Warm about necessity of location of proximity of location? - " + (userPrefs.warmLocationOff? 'Yes.':'No.')}>
+        </PressText>
+      </>
+    )
   }
 
   const s = StyleSheet.create({
@@ -163,8 +245,13 @@ const UserView = (props: UserViewProps) => {
     contentContainer:{
       flex: 1,
       height: '100%',
-      paddingHorizontal: 10,
+      width: '100%',
       backgroundColor: t.backgroundcolor,
+    },
+    scrollView:{
+      paddingBottom: 25,
+      paddingTop: 10,
+      paddingHorizontal: 10,
     },
     header:{
       color: t.textcolor,
@@ -177,13 +264,6 @@ const UserView = (props: UserViewProps) => {
       color: t.textcolor,
       fontSize: 15,
       marginTop: 10,
-    },
-    userContainer: {
-      marginTop: 10,
-      justifyContent: 'center',
-    },
-    userView: {
-      flexDirection: 'row',
     },
     userTextDef:{
       fontSize: 15,
@@ -214,11 +294,16 @@ const UserView = (props: UserViewProps) => {
       color: t.textcolor,
     },
     //^ Prefs buttons ----------------
+    objectiveIconContainer:{
+      flexDirection: 'row',
+      flexWrap: "wrap",
+      minHeight: 45,
+    },
     userPrefsContainerOn:{
+      flexDirection: 'row',
       padding: 5,
       marginTop: 10,
       backgroundColor: t.backgroundcolordarker,
-      flexDirection: 'row',
       alignItems: "center",
 
       borderRadius: 2,
@@ -236,42 +321,18 @@ const UserView = (props: UserViewProps) => {
       borderStyle: 'solid',
     },
     userPrefsTextOn:{
+      flex: 1,
+      flexWrap: "wrap",
       marginVertical: 5,
       marginHorizontal: 5,
       color: t.textcolor,
     },
     userPrefsTextOff:{
+      flex: 1,
+      flexWrap: "wrap",
       marginVertical: 5,
       marginHorizontal: 5,
       color: t.textcolorfade,
-    },
-    logoutView:{
-      width: '100%',
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginBottom: 30,
-    },
-    logoutButton: {
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: t.logoutbuttonbk,
-      paddingVertical: 15,
-      paddingHorizontal: 50,
-      
-      borderRadius: 2,
-      borderStyle: 'solid',
-      borderWidth: 1,
-      borderColor: colorPalette.black,
-    },
-    logoutButtonText: {
-      color: colorPalette.black,
-      fontSize: f.userViewLogoutButton.fontSize,
-    },
-    loginContainer:{
-      flex: 1,
-      width: '100%',
-      justifyContent: 'center',
-      alignItems: 'center',
     },
     objectivesText: {
       fontSize: 25,
@@ -280,176 +341,30 @@ const UserView = (props: UserViewProps) => {
       color: t.textcolor,
       textAlign: 'center',
     },
-    emailInput:{
-      height: 50,
-      width: '90%',
-      color: t.textcolor,
-      borderStyle: 'solid',
-      borderWidth: 1,
-      borderColor: t.bordercolorfade,
-      borderRadius: 2,
-      padding: 10,
-      marginVertical: 10,
-    },
-    passwordContainer:{
-      height: 50,
-      width: '90%',
-      justifyContent: 'center',
-      alignItems: 'center',
-      flexDirection: 'row',
-    },
-    passwordInput: {
-      height: 50,
-      flex: 1,
-      color: t.textcolor,
-      borderStyle: 'solid',
-      borderWidth: 1,
-      borderColor: t.bordercolorfade,
-      borderRadius: 2,
-      padding: 10,
-    },
     image:{
       ...gs.baseImage,
       tintColor: t.icontint,
+    },
+    imageFade:{
+      ...gs.baseImage,
+      tintColor: t.icontintfade,
     },
     backupImage:{
       ...gs.baseSmallImage,
       tintColor: t.icontint,
     },
-    loginButton: {
-      justifyContent: 'center',
-      alignItems: 'center',
-      width: '90%',
-      margin: 10,
-      color: t.textcolor,
-      backgroundColor: t.loginbuttonbk,
-      padding: 10,
-
-      borderStyle: 'solid',
-      borderWidth: 1,
-      borderColor: t.bordercolorfade,
-      borderRadius: 2,
-    },
-    loginButtonText: {
-      fontSize: 18,
-    },
   });
 
   return (
     <View style={s.container}>
-      {isLogging?
-        <Loading theme={dark}></Loading>
-        :
-        (user?
-          <>
-            <View style={s.contentContainer}>
-              <Text style={s.header}>USER:</Text>
-              <View style={s.userContainer}>
-                <View style={s.userView}>
-                  <Text style={s.userTextDef}>Build:</Text>
-                  <Text style={s.userText}>{Constants.easBuildNumber}</Text>
-                </View>
-                <View style={s.userView}>
-                  <Text style={s.userTextDef}>Email:</Text>
-                  <Text style={s.userText}>{user === null? "no user": user.Email}</Text>
-                </View>
-                <View style={s.userView}>
-                  <Text style={s.userTextDef}>Username:</Text>
-                  <Text style={s.userText}>{user === null? "no user": user.Username}</Text>
-                </View>
-                <View style={s.userView}>
-                  <Text style={s.userTextDef}>Role:</Text>
-                  <Text style={s.userText}>{user === null? "no user": user.Role}</Text>
-                </View>
-                <View style={s.userView}>
-                  <Text style={s.userTextDef}>Status:</Text>
-                  <Text style={s.userText}>{user === null? "no user": user.Status}</Text>
-                </View>
-              </View>
-              <Text style={s.header}>TOOLS:</Text>
-              {user.Role === 'Admin' &&
-              <PressText 
-                style={s.prefsTools}
-                textStyle={s.prefsToolsText}
-                onPress={() => {backupData()}}
-                isLoading={isBackingUpData}
-                imageStyle={s.backupImage}
-                imageSource={require('../../public/images/backup.png')}
-                text={"Save full data on AWS S3."}
-                defaultStyle={{itemtextfade: colorPalette.green}}></PressText>}
-              <PressText 
-                style={s.prefsTools}
-                textStyle={s.prefsToolsText}
-                onPress={() => {saveToJSON()}}
-                imageStyle={s.backupImage}
-                imageSource={require('../../public/images/download-files.png')}
-                text={"Download a JSON file of your data."}
-                defaultStyle={{itemtextfade: colorPalette.green}}
-                ></PressText>
-              <Text style={s.header}>SETTINGS:</Text>
-              <Text style={s.subHeader}>General</Text>
-              <PressText 
-                style={s.userPrefsContainerOn}
-                textStyle={s.userPrefsTextOn}
-                onPress={() => onChangePrefs({...userPrefs, theme: userPrefs.theme === 'dark'?'light':'dark'})}
-                text={"Which theme? - " + (userPrefs.theme==='dark'? 'Dark.':'White.')}
-                defaultStyle={{itemtextfade: colorPalette.green}}></PressText>
-              <PressText 
-                style={userPrefs.vibrate? s.userPrefsContainerOn:s.userPrefsContainerOff}
-                textStyle={userPrefs.vibrate? s.userPrefsTextOn:s.userPrefsTextOff}
-                onPress={() => onChangePrefs({...userPrefs, vibrate: !userPrefs.vibrate})}
-                text={"Should button vibrate? - " + (userPrefs.vibrate? 'Yes.':'No.')}
-                defaultStyle={{itemtextfade: colorPalette.green}}>
-              </PressText>
-              <PressText 
-                style={userPrefs.autoSync? s.userPrefsContainerOn:s.userPrefsContainerOff}
-                textStyle={userPrefs.autoSync? s.userPrefsTextOn:s.userPrefsTextOff}
-                onPress={() => onChangePrefs({...userPrefs, autoSync: !userPrefs.autoSync})}
-                text={"Should automatically sync? - " + (userPrefs.autoSync? 'Yes.':'No.')}
-                defaultStyle={{itemtextfade: colorPalette.green}}>
-              </PressText>
-              <Text style={s.subHeader}>Location</Text>
-              <PressText 
-                style={userPrefs.allowLocation? s.userPrefsContainerOn:s.userPrefsContainerOff}
-                textStyle={userPrefs.allowLocation? s.userPrefsTextOn:s.userPrefsTextOff}
-                onPress={()=>onChangePrefs({...userPrefs, allowLocation: !userPrefs.allowLocation})}
-                text={"Use location? - " + (userPrefs.allowLocation? 'Yes.':'No.')}
-                defaultStyle={{itemtextfade: colorPalette.green}}>
-              </PressText>
-            </View>
-            <View style={s.logoutView}>
-              <PressText text={'Logout'} textStyle={s.logoutButtonText} style={s.logoutButton} onPress={logout} defaultStyle={{itemtextfade: colorPalette.green}}></PressText>
-            </View>
-          </>
-        :
-          <View style={s.loginContainer}>
-            <Text style={s.objectivesText}>
-              Objectives
-            </Text>
-
-            <TextInput autoCapitalize="none" placeholder="Email" placeholderTextColor={'grey'} style={s.emailInput} onChangeText={onChangeEmail}></TextInput>
-            <View style={s.passwordContainer}>
-              <TextInput autoCapitalize="none" placeholder="Password" placeholderTextColor={'grey'} style={s.passwordInput} secureTextEntry={!isShowingPassword} onChangeText={onChangePassword}></TextInput>
-              {!isShowingPassword && <PressImage onPress={()=>{setIsShowingPassword(!isShowingPassword)}} style={s.image} pressStyle={gs.baseImageContainer} source={require('../../public/images/show.png')}></PressImage>}
-              {isShowingPassword && <PressImage onPress={()=>{setIsShowingPassword(!isShowingPassword)}} style={s.image} pressStyle={gs.baseImageContainer} source={require('../../public/images/hide.png')}></PressImage>}
-            </View>
-            {isLogging?
-            <Loading theme={dark}></Loading>
-            :
-            <>
-              {/* <Pressable style={s.loginButton} onPress={login}>
-                <Text style={s.loginButtonText}>Login</Text>
-              </Pressable>
-              <PressText 
-                style={s.userPrefsContainerOn}
-                textStyle={s.userPrefsTextOn}
-                onPress={() => onChangePrefs({...userPrefs, theme: userPrefs.theme === 'dark'?'light':'dark'})}
-                text={"Which theme? - " + (userPrefs.theme==='dark'? 'Dark.':'White.')}
-                defaultStyle={{itemtextfade: colorPalette.green}}></PressText> */}
-            </>}
-          </View>
-        )
-      }
+      <View style={s.contentContainer}>
+        <ScrollView style={s.scrollView} persistentScrollbar={true}>
+          {showLoginStuff && <LoginView viewType="Full"></LoginView>}
+          {getToolsView()}
+          {getSettingsView()}
+          <View style={{height: 100}}></View>
+        </ScrollView>
+      </View>
     </View>
   );
 };

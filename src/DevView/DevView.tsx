@@ -11,15 +11,11 @@ import { useLogContext } from "../Contexts/LogContext";
 import PressImage from "../PressImage/PressImage";
 import PressText from "../PressText/PressText";
 export interface MainProps{
-  syncObjectivesList: (objList?: ObjectiveList)=>void,
 }
 
 const DevView = (props: MainProps) => {
   const { log, consoleLogs, deleteLog } = useLogContext();
   const { writeCurrentView, theme: t } = useUserContext();
-  const { syncObjectivesList } = props;
-
-  const [isSyncing, setIsSyncing] = useState<boolean>(false);
 
   useEffect(()=>{
     const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -34,26 +30,6 @@ const DevView = (props: MainProps) => {
 
   const clear = () => {
     deleteLog();
-  }
-
-  const testSync = async () => {
-    // setIsSyncing(true);
-
-    // let first:ObjectiveList = {
-    //   Objectives: [],
-    //   Items: [],
-    //   DeleteObjectives: [],
-    //   DeleteItems: [],
-    // }
-
-    // const data = await syncObjectivesList(first);
-
-    // if(data){
-    // }
-    // else{
-    // }
-
-    // setIsSyncing(false);
   }
 
   const s = StyleSheet.create({
@@ -115,11 +91,6 @@ const DevView = (props: MainProps) => {
       </ScrollView>
       <View style={s.devButtonRow}>
         <PressImage style={s.image} pressStyle={gs.baseImageContainer} source={require('../../public/images/trash.png')} onPress={clear}></PressImage>
-        {/* {isSyncing?
-          <Loading theme={dark}></Loading>
-          :
-          <PressText style={s.devButton} textStyle={s.devButtonText} onPress={testSync} text="Test async"></PressText>
-        } */}
       </View>
     </View>
   )

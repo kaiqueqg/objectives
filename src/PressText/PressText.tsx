@@ -9,7 +9,7 @@ interface PressTextProps{
   textStyle: any,
   text: string,
   defaultText?: string,
-  defaultStyle: {itemtextfade?: any},
+  defaultStyle?: {itemtextfade?: any},
   hideDefaultTextBorder?: boolean,
   onPress: () => void,
   imageSource?: ImageSourcePropType,
@@ -19,8 +19,6 @@ interface PressTextProps{
 
   isLoading?: boolean,
 }
-
-interface PressTextProps{}
 
 const PressText = (props: PressTextProps) => {
   const { theme: t } = useUserContext();
@@ -56,7 +54,7 @@ const PressText = (props: PressTextProps) => {
       ...props.defaultStyle,
       borderBottomWidth: 1,
       borderStyle: 'solid',
-      borderColor: o.itemtextfade,
+      borderColor: o?.itemtextfade?? t.textcolorfade,
       borderRadius: 5,
     },
   });

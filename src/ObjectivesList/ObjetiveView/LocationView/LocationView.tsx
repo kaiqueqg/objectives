@@ -180,8 +180,14 @@ const LocationView = (props: LocationViewProps) => {
   }
 
   const onEditingLocation = () => {
-    if(!isEditingPos && !props.isLocked)setIsEditingLocation(!isEditingLocation)
-    else Vibration.vibrate(Pattern.Wrong);
+    if(props.isLocked) {
+      Vibration.vibrate(Pattern.Wrong);
+      return;
+    }
+
+    if(!isEditingPos){
+      setIsEditingLocation(!isEditingLocation);
+    }
   }
 
   const s = StyleSheet.create({

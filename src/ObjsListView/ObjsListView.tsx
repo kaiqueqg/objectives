@@ -105,6 +105,8 @@ const ObjsListView = (props: ObjsListViewProps) => {
   }
 
   const cancelEditingPos = () => {
+    if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
+
     setObjectivesSelected([]);
     setIsEditingPos(false);
     setIsEndingPos(false);
@@ -127,6 +129,8 @@ const ObjsListView = (props: ObjsListViewProps) => {
   }
 
   const endChangingPos = (itemTo: Objective) => {
+    if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
+    
     const newList = objectives.filter((o: Objective) => !objectivesSelected.includes(o));
     const index = newList.indexOf(itemTo);
     const before = newList.slice(0, index+1);
@@ -165,7 +169,6 @@ const ObjsListView = (props: ObjsListViewProps) => {
   }
 
   const selectUnselectedTag = (tag: string) => {
-    log.w('selectUnselectedTag ' + tag);
     if(tag.trim() !== 'Pin') {
       if(onlySelectOneTag) {
         writeSelectedTags([tag]);
@@ -202,7 +205,6 @@ const ObjsListView = (props: ObjsListViewProps) => {
     const matchingTags = selectedTags.filter(tag => item.Tags.includes(tag));
     const shouldShowTag =  matchingTags.length === 1 && matchingTags[0] === 'Pin';
 
-    // Skip rendering if the tag doesn't match
     if(!tagShow) return null;
     if(item.IsArchived) return null;
 
@@ -263,13 +265,20 @@ const ObjsListView = (props: ObjsListViewProps) => {
     let listOfTags: JSX.Element[] = [
       <Text key={storage.randomId()} style={[s.tag, s.tagSpecial]} onPress={() => {selectAllTags()}}>{'All'}</Text>,
       <Text key={storage.randomId()} style={[s.tag, s.tagSpecial]} onPress={() => {unselectAllTags()}}>{'None'}</Text>,
-      <Text key={'Pin'} style={[s.tag, s.tagSelected]} onPress={() => {selectUnselectedTag('Pin')}}>{'Pin'}</Text>,];
+      <Text key={'Pin'} style={[s.tag, s.tagSelected]} onPress={() => {selectUnselectedTag('Pin')}}>{'Pin'}</Text>,
+    ];
     
-    for(let i = 0; i < availableTags.length; i++){
-      if(availableTags[i] !== 'Pin'){
-        const isSelected = selectedTags.some(obj => obj === availableTags[i]);
+    const availableTagsSorted = availableTags.sort((a, b) => {
+      if (a === "Pin") return -1;
+      if (b === "Pin") return 1;
+      return a.localeCompare(b);
+    });
+
+    for(let i = 0; i < availableTagsSorted.length; i++){
+      if(availableTagsSorted[i] !== 'Pin'){
+        const isSelected = selectedTags.some(obj => obj === availableTagsSorted[i]);
         listOfTags.push(
-          <Text key={availableTags[i]} style={[s.tag, isSelected? s.tagSelected:undefined]} onPress={()=>selectUnselectedTag(availableTags[i])}>{availableTags[i]}</Text>
+          <Text key={availableTagsSorted[i]} style={[s.tag, isSelected? s.tagSelected:undefined]} onPress={()=>selectUnselectedTag(availableTagsSorted[i])}>{availableTagsSorted[i]}</Text>
         )
       }
     }
@@ -301,6 +310,7 @@ const ObjsListView = (props: ObjsListViewProps) => {
       fontWeight: 'bold',
       margin: 5,
       padding: 5,
+      minWidth: 50,
 
       borderColor: t.backgroundcolor,
       borderWidth: 1,
@@ -308,10 +318,10 @@ const ObjsListView = (props: ObjsListViewProps) => {
       borderRadius: 15,
     },
     tagSelected:{
-      backgroundColor: t.backgroundcolor,
+      backgroundColor: t.backgroundcolordark,
       color: t.textcolor,
       
-      borderColor: t.textcolor,
+      borderColor: t.textcolorcontrast,
       borderWidth: 1,
       borderStyle: 'solid',
     },
@@ -422,6 +432,12 @@ const ObjsListView = (props: ObjsListViewProps) => {
     imageUpDown:{
       ...gs.baseSmallImage,
       tintColor: t.icontint,
+    },
+    redImageColor:{
+      tintColor: t.cancelicontint,
+    },
+    greenImageColor:{
+      tintColor: t.doneicontint,
     },
     imageFade:{
       tintColor: t.icontintfade,
@@ -575,8 +591,8 @@ const ObjsListView = (props: ObjsListViewProps) => {
             disable={objectives.length < 2}
             source={require('../../public/images/change.png')}
           ></PressImage>}
-          {isEditingPos && <PressImage pressStyle={gs.baseBiggerImageContainer} style={s.image} onPress={cancelEditingPos} source={require('../../public/images/cancel.png')}></PressImage>}
-          {isEditingPos && <PressImage pressStyle={gs.baseBiggerImageContainer} hide={objectivesSelected.length=== 0 || isEndingPos} style={s.image} onPress={onEditingPosTo} source={require('../../public/images/arrow-right-filled.png')}></PressImage>}
+          {isEditingPos && <PressImage pressStyle={gs.baseBiggerImageContainer} style={[s.image, s.redImageColor]} onPress={cancelEditingPos} source={require('../../public/images/cancel.png')}></PressImage>}
+          {isEditingPos && <PressImage pressStyle={gs.baseBiggerImageContainer} hide={objectivesSelected.length=== 0 || isEndingPos} style={[s.image, s.greenImageColor]} onPress={onEditingPosTo} source={require('../../public/images/next.png')}></PressImage>}
           <PressImage style={[s.image, isEditingPos&&s.imageFade]} pressStyle={gs.baseBiggerImageContainer} onPress={onAddNewObjective} disable={isEditingPos} source={require('../../public/images/plus-one.png')}></PressImage>
         </View>
       </View>

@@ -9,6 +9,8 @@ import { useLogContext } from "../Contexts/LogContext";
 import { Pattern } from "../Types";
 
 export interface PressInputProps {
+  onLongPress?: () => void,
+  delayLongPress?: number,
   onDone: (newText: string) => void,
   onChangeText?: (newText: string) => void,
 
@@ -49,7 +51,13 @@ const PressInput = (props: PressInputProps) => {
     setNewText(props.text);
   }, [props.text])
 
-  const changeEditing = (newState: boolean) => {
+  const changeIsEditing = (newState: boolean) => {
+    if(props.uneditable){
+      if(userPrefs.vibrate) Vibration.vibrate(Pattern.Wrong);
+
+      return;
+    }
+
     setIsEditing(newState) ;
     if(props.onEditingState) props.onEditingState(newState);
   };
@@ -63,13 +71,13 @@ const PressInput = (props: PressInputProps) => {
     setIsDeleting(false);
     props.onDone(newText);
     setNewText(props.text);
-    if(!props.shouldntEndEditOnDone) changeEditing(false);
+    if(!props.shouldntEndEditOnDone) changeIsEditing(false);
   }
 
   const onCancel = () => {
     setNewText(props.text);
     setIsDeleting(false);
-    changeEditing(false);
+    changeIsEditing(false);
   }
 
   const onDelete = () => {
@@ -87,19 +95,15 @@ const PressInput = (props: PressInputProps) => {
     setInputHeight(event.nativeEvent.contentSize.height);
   }
 
-  const changeIsEditing = (v: boolean) => {
-    if(props.uneditable){
-      if(userPrefs.vibrate) Vibration.vibrate(Pattern.Wrong);
-    }
-    else {
-      setIsEditing(v);
-    }
-  }
-
   const s = StyleSheet.create({
     container:{
       flex: 1,
       padding: 5,
+    },
+    containerWithoutText:{
+      borderBottomWidth: 1,
+      borderStyle: 'solid',
+      borderColor: o.itemtextfade,
     },
     inputContainer:{
       flexDirection: 'row',
@@ -108,8 +112,8 @@ const PressInput = (props: PressInputProps) => {
       minHeight: 30,
     },
     imagePress:{
-      maxHeight: 30,
-      maxWidth: 30,
+      minHeight: 30,
+      minWidth: 30,
       marginHorizontal: 5,
       alignItems: 'center',
       justifyContent: 'center',
@@ -129,11 +133,10 @@ const PressInput = (props: PressInputProps) => {
     input:{
       flex: 1,
       color: t.backgroundcolordarker,
-      borderRadius: 2,
       marginHorizontal: 5,
       padding: 5,
-
-      borderColor: t.backgroundcolordarker,
+      
+      borderColor: o.itemtextfade,
       borderBottomWidth: 1,
       borderStyle: 'solid',
     },
@@ -143,21 +146,23 @@ const PressInput = (props: PressInputProps) => {
     },
     defaultText:{
       color: t.textcolorfade,
-      marginLeft: 5,
       width: '100%',
-      
-      borderBottomWidth: 1,
-      borderStyle: 'solid',
-      borderColor: o.itemtextfade,
     },
   });
 
   return (
     <View 
-      style={[s.container, props.containerStyle??undefined]}>
+      style={[s.container, (props.text.trim()===''&&!isEditing?s.containerWithoutText:undefined), props.containerStyle??undefined]}>
       {isEditing?
         <View style={[s.inputContainer, props.inputContainerStyle]}>
-          {isDeleting && props.onDelete && <PressImage pressStyle={[s.imagePress, props.containerStyle]} style={[s.trashImage, props.trashImageStyle]} onPress={props.onDelete} source={require('../../public/images/done.png')}></PressImage>}
+          {isDeleting && props.onDelete && 
+            <PressImage
+              pressStyle={[s.imagePress, props.containerStyle]} 
+              style={[s.trashImage, props.trashImageStyle]}
+              onPress={props.onDelete}
+              source={require('../../public/images/done.png')}>
+            </PressImage>
+          }
           {!isDeleting && props.onDelete && <PressImage pressStyle={[s.imagePress, props.containerStyle]} style={[s.trashImage, props.trashImageStyle]} onPress={onDelete} source={require('../../public/images/trash.png')}></PressImage>}
           {!props.onDelete && <PressImage pressStyle={[s.imagePress, props.containerStyle]} style={[s.cancelImage, props.cancelImageStyle]} onPress={onCancel} source={require('../../public/images/cancel.png')}></PressImage>}
           <TextInput 
@@ -168,7 +173,7 @@ const PressInput = (props: PressInputProps) => {
             onSubmitEditing={onDone}
             onChangeText={handleChangeText}
             onContentSizeChange={onChange}
-            selectionColor={t.textcolorcontrast}
+            selectionColor={o.itemtext}
             >
           </TextInput>
           {props.onDelete && <PressImage pressStyle={[s.imagePress, props.containerStyle]} style={[s.cancelImage, props.cancelImageStyle]} onPress={onCancel} source={require('../../public/images/cancel.png')}></PressImage>}
@@ -177,9 +182,9 @@ const PressInput = (props: PressInputProps) => {
         :
         <>
           {props.text === '' ?
-            <Text style={[s.defaultText, props.defaultStyle]} onPress={()=>{changeIsEditing(true);}}>{props.defaultText}</Text>
+            <Text style={[s.defaultText, props.defaultStyle]} onPress={()=>{changeIsEditing(true);}} onLongPress={props.onLongPress}>{props.defaultText}</Text>
             :
-            <Text style={[s.text, props.textStyle]} onPress={()=>{changeIsEditing(true);}}>{props.text}</Text>
+            <Text style={[s.text, props.textStyle]} onPress={()=>{changeIsEditing(true);}} onLongPress={props.onLongPress}>{props.text}</Text>
           }
         </>
       }

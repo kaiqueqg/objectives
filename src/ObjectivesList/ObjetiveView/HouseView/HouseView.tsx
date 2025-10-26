@@ -105,11 +105,13 @@ export const HouseView = (props: HouseViewProps) => {
   }
 
   const onChangeIsEditing = () => {
-    if(props.isLocked){
+    if(props.isLocked) {
       Vibration.vibrate(Pattern.Wrong);
+      return;
     }
-    else{
-      if(!isEditingPos)setIsEditingHouse(!isEditingHouse);
+
+    if(!isEditingPos){
+      setIsEditingHouse(!isEditingHouse);
     }
   }
 

@@ -102,8 +102,14 @@ const GroceryView = (props: GroceryViewProps) => {
   }
 
   const onEditingGrocery = () => {
-    if(!isEditingPos && !props.isLocked)setIsEditingGrocery(!isEditingGrocery)
-    else Vibration.vibrate(Pattern.Wrong);
+    if(props.isLocked) {
+      Vibration.vibrate(Pattern.Wrong);
+      return;
+    }
+
+    if(!isEditingPos){
+      setIsEditingGrocery(!isEditingGrocery);
+    }
   }
 
   const s = StyleSheet.create({

@@ -49,16 +49,17 @@ const TagsView = (props: TagsViewProps) => {
     }
   }
 
-  const getTagView = (item: string):JSX.Element => {
-    const isSelected = selectedTags.some(obj => obj === item);
-    return <Text key={item} style={[s.tag, isSelected? s.tagSelected:undefined]} onPress={()=>selectUnselectedTag(item)}>{item}</Text>
-  }
-
   const getTagsListView = ()=> {
     if(tags.length === 0) return <Text style={s.textEmpty}>No tags</Text>
 
+    const availableTagsSorted = tags.sort((a, b) => {
+      if (a === "Pin") return -1;
+      if (b === "Pin") return 1;
+      return a.localeCompare(b);
+    });
+
     return (
-      tags.map((item)=>{
+      availableTagsSorted.map((item)=>{
         const isSelected = selectedTags.some(obj => obj === item);
         return <Text key={item} style={[s.tag, isSelected? s.tagSelected:undefined]} onPress={()=>selectUnselectedTag(item)}>{item}</Text>
       })

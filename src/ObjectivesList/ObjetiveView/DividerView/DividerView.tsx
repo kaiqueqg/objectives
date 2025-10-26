@@ -1,11 +1,12 @@
 import { View, StyleSheet, Text, Keyboard, BackHandler } from "react-native";
 import { colorPalette, globalStyle as gs } from "../../../Colors";
 import { useUserContext } from "../../../Contexts/UserContext";
-import { Divider, Item, ItemType, ItemViewProps } from "../../../Types";
+import { Divider, Item, ItemType, ItemViewProps, MessageType } from "../../../Types";
 import PressImage from "../../../PressImage/PressImage";
 import PressInput from "../../../PressInput/PressInput";
 import { useEffect, useState } from "react";
 import React from "react";
+import { useLogContext } from "../../../Contexts/LogContext";
 
 export const New = () => {
   return(
@@ -24,6 +25,7 @@ export interface DividerViewProps extends ItemViewProps{
 
 const DividerView = (props: DividerViewProps) => {
   const { theme: t, fontTheme: f, putItem } = useUserContext();
+  const { log, popMessage } = useLogContext();
   const { objTheme: o, isEditingPos, onDeleteItem, loadMyItems, divider, orderDividerItems, choseNewItemToAdd, } = props;
 
   const [isEditingTitle, setIsEditingTitle] = useState<boolean>(false);
@@ -31,32 +33,35 @@ const DividerView = (props: DividerViewProps) => {
   const [isItemOpenLocked, setIsItemOpenLocked] = useState<boolean>(false);
 
   const [keyboardVisible, setKeyboardVisible] = useState(false);
-      
-    useEffect(() => {
-      const show = Keyboard.addListener("keyboardDidShow", () => {setKeyboardVisible(true);});
-      const hide = Keyboard.addListener("keyboardDidHide", () => {setKeyboardVisible(false);});
-  
-      const backAction = () => {
-        if (keyboardVisible) {
-          Keyboard.dismiss();
-          return true;
-        }
-        
-        onEditingTitle(false);
+    
+  useEffect(() => {
+  }, [isEditingTitle])
+
+  useEffect(() => {
+    const show = Keyboard.addListener("keyboardDidShow", () => {setKeyboardVisible(true);});
+    const hide = Keyboard.addListener("keyboardDidHide", () => {setKeyboardVisible(false);});
+
+    const backAction = () => {
+      if (keyboardVisible) {
+        Keyboard.dismiss();
         return true;
-      };
-  
-      const backHandler = BackHandler.addEventListener(
-        "hardwareBackPress",
-        backAction
-      );
-  
-      return () => {
-        backHandler.remove();
-        show.remove();
-        hide.remove();
-      };
-    }, [keyboardVisible]);
+      }
+      
+      onEditingTitle(false);
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => {
+      backHandler.remove();
+      show.remove();
+      hide.remove();
+    };
+  }, [keyboardVisible]);
 
   const onDelete = async () => {
     onDeleteItem(divider);
@@ -125,12 +130,14 @@ const DividerView = (props: DividerViewProps) => {
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
+      minHeight: 40,
+      paddingHorizontal: 5,
 
       borderWidth: 1,
       borderRadius: 5,
       borderStyle: 'solid',
       borderColor: o.objbk,
-      
+
       backgroundColor: o.itembkdark,
     },
     titleContainerSelected:{
@@ -203,7 +210,7 @@ const DividerView = (props: DividerViewProps) => {
       </View>
       {isItemsOpen && 
         <View style={[s.dividerNewItemContainer]}>
-          <PressImage pressStyle={gs.baseImageContainer} style={s.image} onPress={()=>{addNewItem(ItemType.Wait);}} source={require('../../../../public/images/wait.png')}></PressImage>
+          {/* <PressImage pressStyle={gs.baseImageContainer} style={s.image} onPress={()=>{addNewItem(ItemType.Wait);}} source={require('../../../../public/images/wait.png')}></PressImage> */}
           <PressImage pressStyle={gs.baseImageContainer} style={s.image} onPress={()=>{addNewItem(ItemType.Link);}} source={require('../../../../public/images/link.png')}></PressImage>
           <PressImage pressStyle={gs.baseImageContainer} style={s.image} onPress={()=>{addNewItem(ItemType.Exercise);}} source={require('../../../../public/images/exercise-filled.png')}></PressImage>
           <PressImage pressStyle={gs.baseImageContainer} style={s.image} onPress={()=>{addNewItem(ItemType.Divider);}} source={require('../../../../public/images/minus.png')}></PressImage>
@@ -213,7 +220,7 @@ const DividerView = (props: DividerViewProps) => {
           <PressImage pressStyle={gs.baseImageContainer} style={s.image} onPress={()=>{addNewItem(ItemType.Question);}} source={require('../../../../public/images/questionfilled.png')}></PressImage>
           <PressImage pressStyle={gs.baseImageContainer} style={s.image} onPress={()=>{addNewItem(ItemType.Note);}} source={require('../../../../public/images/note.png')}></PressImage>
           <PressImage pressStyle={gs.baseImageContainer} style={s.image} onPress={()=>{addNewItem(ItemType.Step);}} source={require('../../../../public/images/step-filled.png')}></PressImage>
-          <PressImage pressStyle={gs.baseImageContainer} style={s.image} onPress={()=>{addNewItem(ItemType.Image);}} source={require('../../../../public/images/image-filled.png')}></PressImage>
+          <PressImage pressStyle={gs.baseImageContainer} style={s.image} onPress={()=>{popMessage('Image: Under construction...', MessageType.Error)}} source={require('../../../../public/images/image-filled.png')}></PressImage>
         </View>}
     </View>
   );

@@ -4,7 +4,6 @@ import { colorPalette, globalStyle as gs, ObjectivePallete } from "../../../Colo
 import { FontPalette } from "../../../../fonts/Font";
 import { useUserContext } from "../../../Contexts/UserContext";
 import PressImage from "../../../PressImage/PressImage";
-import PressInput from "../../../PressInput/PressInput";
 import { useEffect, useState } from "react";
 import { useLogContext } from "../../../Contexts/LogContext";
 import React from "react";
@@ -33,6 +32,10 @@ const StepView = (props: StepViewProps) => {
 
   const [keyboardVisible, setKeyboardVisible] = useState(false);
       
+  useEffect(() => {
+    setTempStep(step);
+  }, [step])
+
   useEffect(() => {
     const show = Keyboard.addListener("keyboardDidShow", () => {setKeyboardVisible(true);});
     const hide = Keyboard.addListener("keyboardDidHide", () => {setKeyboardVisible(false);});
@@ -64,7 +67,12 @@ const StepView = (props: StepViewProps) => {
   }
 
   const onDoneStep = async (newImp?: StepImportance) => {
-    const newStep:Step = {...tempStep, Title: tempStep.Title.trim(), Importance: newImp??tempStep.Importance};
+    const newStep:Step = {
+      ...tempStep,
+      Title: tempStep.Title.trim(),
+      Importance: newImp??tempStep.Importance,
+      AutoDestroy: tempStep.AutoDestroy,
+    };
     await putItem(newStep);
     setIsEditingStep(false);
     loadMyItems();
@@ -104,6 +112,12 @@ const StepView = (props: StepViewProps) => {
     else if(step.Importance === StepImportance.Ladybug){
       return <PressImage pressStyle={gs.baseImageContainer} style={gs.baseImage} source={require('../../../../public/images/ladybug.png')}></PressImage>;
     }
+    else if(step.Importance === StepImportance.LadybugYellow){
+      return <PressImage pressStyle={gs.baseImageContainer} style={gs.baseImage} source={require('../../../../public/images/ladybugyellow.png')}></PressImage>;
+    }
+    else if(step.Importance === StepImportance.LadybugGreen){
+      return <PressImage pressStyle={gs.baseImageContainer} style={gs.baseImage} source={require('../../../../public/images/ladybuggreen.png')}></PressImage>;
+    }
     else if(step.Importance === StepImportance.Question){
       return <PressImage pressStyle={gs.baseImageContainer} style={s.stepImageImportance} source={require('../../../../public/images/questionmark.png')}></PressImage>;
     }
@@ -125,8 +139,14 @@ const StepView = (props: StepViewProps) => {
   }
 
   const onEditingStep = () => {
-    if(!isEditingPos && !props.isLocked)setIsEditingStep(!isEditingStep);
-    else Vibration.vibrate(Pattern.Wrong);
+    if(props.isLocked) {
+      Vibration.vibrate(Pattern.Wrong);
+      return;
+    }
+
+    if(!isEditingPos){
+      setIsEditingStep(!isEditingStep);
+    }
   }
 
   const s = StyleSheet.create({
@@ -284,6 +304,8 @@ const StepView = (props: StepViewProps) => {
                 <PressImage pressStyle={[gs.baseImageContainer, step.Importance === StepImportance.Low? s.importanceImageSelected:undefined]} style={gs.baseImage} source={require('../../../../public/images/low.png')} onPress={() => {if(!isEditingPos)onDoneStep(StepImportance.Low);}}></PressImage>
                 <PressImage pressStyle={[gs.baseImageContainer, step.Importance === StepImportance.Medium? s.importanceImageSelected:undefined]} style={gs.baseImage} source={require('../../../../public/images/med.png')} onPress={() => {if(!isEditingPos)onDoneStep(StepImportance.Medium);}}></PressImage>
                 <PressImage pressStyle={[gs.baseImageContainer, step.Importance === StepImportance.High? s.importanceImageSelected:undefined]} style={gs.baseImage} source={require('../../../../public/images/high.png')} onPress={() => {if(!isEditingPos)onDoneStep(StepImportance.High);}}></PressImage>
+                <PressImage pressStyle={[gs.baseImageContainer, step.Importance === StepImportance.LadybugGreen? s.importanceImageSelected:undefined]} style={gs.baseImage} source={require('../../../../public/images/ladybuggreen.png')} onPress={() => {if(!isEditingPos)onDoneStep(StepImportance.LadybugGreen);}}></PressImage>
+                <PressImage pressStyle={[gs.baseImageContainer, step.Importance === StepImportance.LadybugYellow? s.importanceImageSelected:undefined]} style={gs.baseImage} source={require('../../../../public/images/ladybugyellow.png')} onPress={() => {if(!isEditingPos)onDoneStep(StepImportance.LadybugYellow);}}></PressImage>
                 <PressImage pressStyle={[gs.baseImageContainer, step.Importance === StepImportance.Ladybug? s.importanceImageSelected:undefined]} style={gs.baseImage} source={require('../../../../public/images/ladybug.png')} onPress={() => {if(!isEditingPos)onDoneStep(StepImportance.Ladybug);}}></PressImage>
                 <PressImage pressStyle={[gs.baseImageContainer, step.Importance === StepImportance.Question? s.importanceImageSelected:undefined]} style={s.stepImageImportance} source={require('../../../../public/images/questionmark.png')} onPress={() => {if(!isEditingPos)onDoneStep(StepImportance.Question);}}></PressImage>
                 <PressImage pressStyle={[gs.baseImageContainer, step.Importance === StepImportance.Waiting? s.importanceImageSelected:undefined]} style={s.stepImageImportance} source={require('../../../../public/images/wait.png')} onPress={() => {if(!isEditingPos)onDoneStep(StepImportance.Waiting);}}></PressImage>
@@ -305,7 +327,7 @@ const StepView = (props: StepViewProps) => {
             ellipsizeMode='middle'
             ></PressText>
         }
-        {!isEditingStep && !step.Done && 
+        {!step.AutoDestroy && !isEditingStep && !step.Done && 
           <PressImage 
             pressStyle={gs.baseImageContainer}
             style={s.image}
@@ -319,6 +341,14 @@ const StepView = (props: StepViewProps) => {
             style={s.imageFade}
             source={require('../../../../public/images/step-filled.png')}
             onPress={() => {if(!isEditingPos)onChangeIsDone();}}>
+          </PressImage>}
+          {!isEditingStep && step.AutoDestroy && 
+          <PressImage 
+            pressStyle={gs.baseImageContainer}
+            style={s.image}
+            source={require('../../../../public/images/explode.png')}
+            onPress={() => {if(!isEditingPos)onDeleteItem();}}
+            confirm>
           </PressImage>}
       </View>
     </View>

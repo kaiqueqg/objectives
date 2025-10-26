@@ -7,6 +7,7 @@ import PressImage from "../../../PressImage/PressImage";
 import { useEffect, useState } from "react";
 import PressText from "../../../PressText/PressText";
 import React from "react";
+import { useLogContext } from "../../../Contexts/LogContext";
 
 export const New = () => {
   return(
@@ -19,6 +20,7 @@ export const New = () => {
       Description: '',
       Weekdays: [],
       LastDone: '',
+      BodyImages: [],
     }
   )
 }
@@ -27,18 +29,47 @@ export interface ExerciseViewProps extends ItemViewProps {
   exercise: Exercise,
 }
 
+export const bodyImages: Record<string, any> = {
+  cancel: require('../../../../public/images/cancel.png'),
+  abs: require('../../../../public/images/128px/abs.png'),
+  anteriorforearm: require('../../../../public/images/128px/anteriorforearm.png'),
+  backoutside: require('../../../../public/images/128px/backoutside.png'),
+  biceps: require('../../../../public/images/128px/biceps.png'),
+  calves: require('../../../../public/images/128px/calves.png'),
+  chest: require('../../../../public/images/128px/chest.png'),
+  innerthigh: require('../../../../public/images/128px/innerthigh.png'),
+  externalobliques: require('../../../../public/images/128px/externalobliques.png'),
+  frontthigh: require('../../../../public/images/128px/frontthigh.png'),
+  glutes: require('../../../../public/images/128px/glutes.png'),
+  hamstrings: require('../../../../public/images/128px/hamstrings.png'),
+  lower: require('../../../../public/images/128px/lower.png'),
+  lumbar: require('../../../../public/images/128px/lumbar.png'),
+  obliques: require('../../../../public/images/128px/obliques.png'),
+  pectorals: require('../../../../public/images/128px/pectorals.png'),
+  posteriorforearm: require('../../../../public/images/128px/posteriorforearm.png'),
+  quadriceps: require('../../../../public/images/128px/quadriceps.png'),
+  rectusabdominis: require('../../../../public/images/128px/rectusabdominis.png'),
+  shoulderback: require('../../../../public/images/128px/shoulderback.png'),
+  shoulderfront: require('../../../../public/images/128px/shoulderfront.png'),
+  topback: require('../../../../public/images/128px/topback.png'),
+  outerthigh: require('../../../../public/images/128px/outerthigh.png'),
+  trapezius: require('../../../../public/images/128px/trapezius.png'),
+  triceps: require('../../../../public/images/128px/triceps.png'),
+  cardio: require('../../../../public/images/128px/cardio.png'),
+  stretching: require('../../../../public/images/128px/stretching.png'),
+  warmup: require('../../../../public/images/128px/warmup.png'),
+};
+
 const ExerciseView = (props: ExerciseViewProps) => {
   const { userPrefs, theme: t, fontTheme: f, putItem } = useUserContext();
   const { objTheme: o, isEditingPos, onDeleteItem, loadMyItems, exercise } = props;
+  const { log } = useLogContext();
 
-  const [isSavingExercise, setIsSavingExercise] = useState<boolean>(false);
-  const [isSavingIsDone, setIsSavingIsDone] = useState<boolean>(false);
   const [isEditingExercise, setIsEditingExercise] = useState<boolean>(false);
   const [newExercise, setNewExercise] = useState<Exercise>(exercise);
-  const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
   const [keyboardVisible, setKeyboardVisible] = useState(false);
-        
+
   useEffect(() => {
     const show = Keyboard.addListener("keyboardDidShow", () => {setKeyboardVisible(true);});
     const hide = Keyboard.addListener("keyboardDidHide", () => {setKeyboardVisible(false);});
@@ -79,7 +110,7 @@ const ExerciseView = (props: ExerciseViewProps) => {
       onChangeIsDone();
     }
   }, []);
-
+  
   useEffect(() => {
   }, [exercise, newExercise]);
 
@@ -97,8 +128,8 @@ const ExerciseView = (props: ExerciseViewProps) => {
       newItem.Pos !== exercise.Pos ||
       newItem.Description !== exercise.Description ||
       newItem.Weekdays !== exercise.Weekdays ||
-      newItem.LastDone !== exercise.LastDone) {
-      setIsSavingExercise(true);
+      newItem.LastDone !== exercise.LastDone || 
+      newItem.BodyImages !== exercise.BodyImages){
 
       await putItem(newItem);
       setIsEditingExercise(false);
@@ -167,10 +198,64 @@ const ExerciseView = (props: ExerciseViewProps) => {
     );
   }
 
+  const onChangeBodyImage = (bodyImage: string) => {
+    if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
+
+    if(bodyImage === 'cancel') {
+      setNewExercise({...newExercise, BodyImages: []}); 
+      return;
+    }
+
+    if(!newExercise.BodyImages){ //! fixing old BodyImages
+      setNewExercise({...newExercise, BodyImages: [bodyImage]});
+      return;
+    }
+    
+    const includes = newExercise.BodyImages.includes(bodyImage);
+    if(includes){
+      setNewExercise({...newExercise, BodyImages: newExercise.BodyImages.filter((item)=>item!==bodyImage)});
+    }
+    else{
+      setNewExercise({...newExercise, BodyImages: [...newExercise.BodyImages, bodyImage]});
+    }
+  };
+
+  const getBodyImage = (bodyImage: string, view: boolean = false) => {
+    if (!bodyImage || !bodyImages[bodyImage]) return <></>;
+
+    return (
+      <PressImage
+        key={bodyImage}
+        pressStyle={[view?gs.baseImageContainer:s.bodyImageContainer, (newExercise.BodyImages !== undefined && newExercise.BodyImages.includes(bodyImage)) && isEditingExercise && s.imageBodySelected]}
+        style={[s.bodyImage]}
+        source={bodyImages[bodyImage]}
+        onPress={() => {if(view) onEditingExercise(); else onChangeBodyImage(bodyImage);}}
+      />
+    );
+  };  
+
   const onEditingExercise = () => {
-    if(!isEditingPos && !props.isLocked) setIsEditingExercise(!isEditingExercise);
-    else Vibration.vibrate(Pattern.Wrong);
+    if(props.isLocked) {
+      Vibration.vibrate(Pattern.Wrong);
+      return;
+    }
+
+    if(!isEditingPos){
+      setIsEditingExercise(!isEditingExercise);
+    }
   }
+
+  const getBodyImages = () => {
+    if (!exercise.BodyImages || exercise.BodyImages === undefined || exercise.BodyImages.includes('cancel')) return <></>;
+
+    const rtn = [];
+
+    for (let i = 0; i < exercise.BodyImages.length; i++) {
+      rtn.push(getBodyImage(exercise.BodyImages[i], true));
+    }
+
+    return <>{rtn}</>;
+  };
 
   const getTitleDisplay = () => {
     let exerciseRepSerie = '';
@@ -188,27 +273,30 @@ const ExerciseView = (props: ExerciseViewProps) => {
 
     return (
       <View style={s.exerciseMainRow}>
-        <View style={s.exerciseTopRow}>
+        <View style={s.exerciseTitleRow}>
+          {getBodyImages()}
           <PressText
-            style={s.textContainer}
-            textStyle={exercise.IsDone? s.titleFade:s.titleText}
+            style={s.titleContainer}
+            textStyle={[s.titleText, exercise.IsDone && s.titleFade]}
             text={exercise.Title}
             onPress={()=>{onEditingExercise()}}
             defaultStyle={o}
             hideDefaultTextBorder={true}
             ellipsizeMode='middle'
           ></PressText>
-          <PressText style={[s.textContainer, {flex: 1}]} textStyle={s.maxText} defaultStyle={o} text={exercise.MaxWeight} onPress={onEditingExercise} hideDefaultTextBorder={true}></PressText>
-          <PressText style={s.textContainer} textStyle={s.daysText} defaultStyle={o} text={daysOfWeek} onPress={onEditingExercise} hideDefaultTextBorder={true}></PressText>
-          <PressText style={[s.textContainer]} textStyle={s.seriesRepsText} defaultStyle={o} text={exerciseRepSerie} onPress={onEditingExercise} hideDefaultTextBorder={true}></PressText>
+          {exerciseRepSerie && <PressText style={s.seriesRepsContainer} textStyle={[s.seriesRepsText, exercise.IsDone && s.titleFade]} defaultStyle={o} text={exerciseRepSerie} onPress={onEditingExercise} hideDefaultTextBorder={true}></PressText>}
         </View>
-        <View style={s.exerciseBottomRow}>
-          {exercise.Description && <PressText style={s.descriptionContainer} textStyle={[s.descriptionText, exercise.IsDone? {color: o.itemtextfadedark}:undefined]} text={exercise.Description} onPress={()=>{if(!isEditingPos && !props.isLocked)setIsEditingExercise(!isEditingExercise)}} defaultStyle={o} hideDefaultTextBorder={true}></PressText>}
-        </View>
+        {(exercise.MaxWeight || daysOfWeek) && 
+        <View style={s.exerciseSecondaryRow}>
+          <PressText style={s.maxContainer} textStyle={s.maxText} defaultStyle={o} text={exercise.MaxWeight} onPress={onEditingExercise} hideDefaultTextBorder={true}></PressText>
+          <PressText style={s.daysContainer} textStyle={s.daysText} defaultStyle={o} text={daysOfWeek} onPress={onEditingExercise} hideDefaultTextBorder={true}></PressText>
+        </View>}
+        {exercise.Description && 
+          <PressText style={s.descriptionContainer} textStyle={[s.descriptionText, exercise.IsDone? {color: o.itemtextfadedark}:undefined]} text={exercise.Description} onPress={()=>{if(!isEditingPos && !props.isLocked)setIsEditingExercise(!isEditingExercise)}} defaultStyle={o} hideDefaultTextBorder={true} ellipsizeMode="tail"></PressText>
+        }
       </View>
     )
   }
-
   const s = StyleSheet.create({
     container: {
       flex: 1,
@@ -241,55 +329,97 @@ const ExerciseView = (props: ExerciseViewProps) => {
     exerciseMainRow:{
       flex: 1,
       minHeight: 40,
+      flexDirection: 'column',
+
+      // borderWidth: 1,
+      // borderStyle: 'solid',
+      // borderColor: 'red',
+      // borderRadius: 5,
     },
-    exerciseTopRow:{
+    exerciseTitleRow: {
+      width: '100%',
+      flex: 1,
+      minHeight: 40,
       flexDirection: 'row',
+      paddingLeft: 5,
+
+      // borderWidth: 2,
+      // borderStyle: 'solid',
+      // borderColor: 'green',
+      // borderRadius: 5,
     },
-    exerciseBottomRow: {
+    exerciseSecondaryRow:{
+      minHeight: 20,
       flexDirection: 'row',
+      paddingLeft: 10,
+
+      // borderWidth: 1,
+      // borderStyle: 'solid',
+      // borderColor: 'yellow',
+      // borderRadius: 5,
     },
     descriptionContainer:{
-      flex: 1,
-      justifyContent: 'center',
       paddingLeft: 10,
     },
     descriptionText:{
-      flex: 1,
-      flexWrap: 'wrap',
-      width: '100%',
-      verticalAlign: 'middle',
-      justifyContent: 'center',
-      alignItems: 'center',
       color: o.itemtextfade,
       fontSize: 12,
-
       marginBottom: 6,
     },
-    textContainer:{
-      justifyContent: 'center',
-      paddingLeft: 10,
+    titleContainer:{
+      width: '100%',
+      paddingLeft: 5,
+
+      // borderWidth: 1,
+      // borderStyle: 'solid',
+      // borderColor: 'white',
+      // borderRadius: 5,
     },
     titleText:{
       flex: 1,
       verticalAlign: 'middle',
       color: o.itemtext,
+
+      // borderWidth: 1,
+      // borderStyle: 'solid',
+      // borderColor: 'purple',
+      // borderRadius: 5,
+    },
+    daysContainer: {
+      // borderWidth: 1,
+      // borderStyle: 'solid',
+      // borderColor: 'cyan',
+      // borderRadius: 5,
     },
     daysText:{
-      minHeight: 40,
       textAlign: "right",
       verticalAlign: 'middle',
       color: o.itemtextfade,
-      paddingLeft: 5,
+      fontSize: 12,
+    },
+    maxContainer:{
+      // borderWidth: 1,
+      // borderStyle: 'solid',
+      // borderColor: 'fuchsia',
+      // borderRadius: 5,
     },
     maxText:{
-      minHeight: 40,
       textAlign: "left",
       verticalAlign: 'middle',
       color: o.itemtextfade,
-      paddingLeft: 5,
+      fontSize: 12,
+    },
+    seriesRepsContainer:{
+      minWidth: '20%',
+      justifyContent: "center",
+      alignItems:"flex-end",
+
+      // borderWidth: 1,
+      // borderStyle: 'solid',
+      // borderColor: 'cyan',
+      // borderRadius: 5,
     },
     seriesRepsText:{
-      minHeight: 40,
       textAlign: "right",
       verticalAlign: 'middle',
       color: o.itemtext,
@@ -297,6 +427,26 @@ const ExerciseView = (props: ExerciseViewProps) => {
     },
     titleFade:{
       color: o.itemtextfade,
+    },
+    bodyImageContainer:{
+      ...gs.baseImageContainer,
+
+      padding: 10,
+      margin: 5,
+
+      // borderColor: 'green',
+      // borderWidth: 1,
+      // borderRadius: 5,
+      // borderStyle: 'solid',
+    },
+    bodyImage:{
+      ...gs.baseBiggerImage,
+    },
+    imageBodySelected:{
+      borderColor: o.bordercolorlight,
+      borderWidth: 2,
+      borderRadius: 5,
+      borderStyle: 'solid',
     },
     image:{
       ...gs.baseImage,
@@ -336,6 +486,11 @@ const ExerciseView = (props: ExerciseViewProps) => {
       width: '15%',
       justifyContent: 'center',
       alignItems: 'center',
+
+      // borderColor: 'green',
+      // borderWidth: 1,
+      // borderRadius: 5,
+      // borderStyle: 'solid',
     },
     inputStyle:{
       flex: 1,
@@ -371,7 +526,13 @@ const ExerciseView = (props: ExerciseViewProps) => {
     },
     exerciseWeekdaysButtonTextSelected:{
       color: o.itemtext,
-    }
+    },
+    exerciseImageContainer:{
+      flexWrap: "wrap",
+      justifyContent: 'center',
+      alignItems: 'center',
+      flexDirection: "row",
+    },
   });
 
   return (
@@ -380,7 +541,7 @@ const ExerciseView = (props: ExerciseViewProps) => {
         {!isEditingPos && isEditingExercise?
           <View style={s.inputsContainer}>
             <View style={s.inputsLeft}>
-              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageDelete]} confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete}></PressImage>
+              <PressImage pressStyle={[gs.baseImageContainer]} style={[s.image, s.imageDelete]} confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete}></PressImage>
             </View>
             <View style={s.inputsCenter}>
               <TextInput 
@@ -388,7 +549,7 @@ const ExerciseView = (props: ExerciseViewProps) => {
                 placeholderTextColor={o.itemtextfade}
                 placeholder="Title"
                 defaultValue={exercise.Title}
-                onChangeText={(value: string)=>{setNewExercise({...newExercise, Title: value})}} autoFocus
+                onChangeText={(value: string)=>{setNewExercise({...newExercise, Title: value})}} autoFocus={exercise.Title.trim() === ''}
                 onSubmitEditing={doneEdit}>
               </TextInput>
               <TextInput 
@@ -437,11 +598,41 @@ const ExerciseView = (props: ExerciseViewProps) => {
                 {getWeekdayButton(Weekdays.Saturday)}
                 {getWeekdayButton(Weekdays.Sunday)}
               </View>
+              <View style={s.exerciseImageContainer}>
+                {getBodyImage('chest')}
+                {getBodyImage('triceps')}
+                {getBodyImage('shoulderfront')}
+                {getBodyImage('anteriorforearm')}
+                {getBodyImage('trapezius')}
+                {getBodyImage('biceps')}
+                {getBodyImage('posteriorforearm')}
+                {getBodyImage('shoulderback')}
+                {getBodyImage('backoutside')}
+                {getBodyImage('topback')}
+                {getBodyImage('abs')}
+                {getBodyImage('pectorals')}
+                {getBodyImage('lower')}
+                {getBodyImage('obliques')}
+                {getBodyImage('externalobliques')}
+                {getBodyImage('hamstrings')}
+                {getBodyImage('frontthigh')}
+                {getBodyImage('quadriceps')}
+                {getBodyImage('innerthigh')}
+                {getBodyImage('outerthigh')}
+                {getBodyImage('glutes')}
+                {getBodyImage('lumbar')}
+                {getBodyImage('calves')}
+                {getBodyImage('rectusabdominis')}
+                {getBodyImage('cardio')}
+                {getBodyImage('warmup')}
+                {getBodyImage('stretching')}
+                {getBodyImage('cancel')}
+              </View>
             </View>  
             <View style={s.inputsRight}>
-              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageDone]} source={require('../../../../public/images/done.png')} onPress={doneEdit}></PressImage>
+              <PressImage pressStyle={[gs.baseImageContainer]} style={[s.image, s.imageDone]} source={require('../../../../public/images/done.png')} onPress={doneEdit}></PressImage>
               <View style={gs.baseImageContainer}></View>
-              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageCancel]} source={require('../../../../public/images/cancel.png')} onPress={onCancelExercise}></PressImage>
+              <PressImage pressStyle={[gs.baseImageContainer]} style={[s.image, s.imageCancel]} source={require('../../../../public/images/cancel.png')} onPress={onCancelExercise}></PressImage>
             </View>
           </View>
           :

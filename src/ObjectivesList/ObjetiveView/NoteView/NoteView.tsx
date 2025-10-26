@@ -39,7 +39,6 @@ const NoteView = (props: NoteViewProps) => {
         return true;
       }
       
-      log.r('return icis')
       onEditingTitle(false);
       return true;
     };
@@ -86,6 +85,7 @@ const NoteView = (props: NoteViewProps) => {
       justifyContent: 'center',
       alignItems: 'center',
       backgroundColor: note.Text.trim() === ''?o.itembk:o.objbk,
+      paddingLeft: 10,
       
       borderColor: note.Text.trim() === ''?o.bordercolor:o.objbk,
       borderWidth: 1,

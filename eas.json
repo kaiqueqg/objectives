@@ -3,20 +3,22 @@
     "version": ">= 3.17.1"
   },
   "build": {
-    "preview": {
+    "release_login": {
+      "env": {
+        "LOGIN_VIEW": "true"
+      },
       "android": {
         "buildType": "apk"
       }
     },
-    "preview2": {
-      "android": {
-        "gradleCommand": ":app:assembleRelease"
+    "release_no_login":{
+      "env": {
+        "LOGIN_VIEW": "false"
+      },
+      "android":{
+        "buildType": "apk"
       }
-    },
-    "preview3": {
-      "ios": {}
-    },
-    "production": {}
+    }
   },
   "submit": {
     "production": {}

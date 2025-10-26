@@ -1,7 +1,7 @@
 // LogContext.tsx
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Item, ItemImage, LogLevel, LoginModel, Objective, Step, StorageInfo, User, UserPrefs, Views } from "../Types";
+import { DefaultUser, Item, Image as ItemImage, LogLevel, LoginModel, Objective, Step, StorageInfo, User, UserPrefs, Views } from "../Types";
 import { useLogContext } from './LogContext';
 
 interface StorageProviderProps {
@@ -47,7 +47,7 @@ export const StorageProvider: React.FC<StorageProviderProps> = ({ children }) =>
     NewImages: '@Objectives:NewImages',
   };
 
-  const storage = {
+  const storage: StorageService = {
   
     randomId(size?: number){
       const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -65,11 +65,10 @@ export const StorageProvider: React.FC<StorageProviderProps> = ({ children }) =>
         await AsyncStorage.setItem(keys.User, JSON.stringify(user));
       } catch (err) {
         log.err('writeUser', 'catch] writing user.');
-        return null;
       }
     },
   
-    async readUser(){
+    async readUser(): Promise<User>{
       try {
         const user = await AsyncStorage.getItem(keys.User);
         if(user !== null){
@@ -78,13 +77,15 @@ export const StorageProvider: React.FC<StorageProviderProps> = ({ children }) =>
             return parsedUser;
           } catch (err) {
             log.err('readUser', 'Error parsing json');
+            return DefaultUser;
           }
         }
-        log.err('readUser', 'returning null')
-        return null;
+        else{
+          return DefaultUser;
+        }
       } catch (err) {
         log.err('readUser', '[catch] reading user.');
-        return null;
+        return DefaultUser;
       }
     },
   
@@ -115,7 +116,7 @@ export const StorageProvider: React.FC<StorageProviderProps> = ({ children }) =>
           return token;
         }
       } catch (err) {
-        log.war('readJwtToken', '[catch] error: ' + err);
+        log.err('readJwtToken', '[catch] error: ' + err);
         return null
       }
     },
@@ -525,7 +526,77 @@ export const StorageProvider: React.FC<StorageProviderProps> = ({ children }) =>
 };
 
 interface StorageContextType {
-  storage:any,
+  storage:StorageService,
+}
+
+export interface StorageService {
+  /** Gera um ID aleatório (default 40 chars). */
+  randomId(size?: number): string;
+
+  // USER
+  writeUser(user: User): Promise<void>;
+  readUser(): Promise<User>;
+  deleteUser(): Promise<void>;
+
+  // JWT
+  writeJwtToken(token: string): Promise<void>;
+  readJwtToken(): Promise<string | null>;
+  deleteJwtToken(): Promise<void>;
+
+  // USER PREFS
+  writeUserPrefs(userPrefs: UserPrefs): Promise<void>;
+  readUserPrefs(): Promise<UserPrefs | null>;
+
+  // VIEW
+  writeCurrentView(view: Views): Promise<void>;
+  readCurrentView(): Promise<Views | null>;
+  deleteCurrentView(): Promise<void>;
+
+  // CURRENT OBJECTIVE
+  writeCurrentObjectiveId(id: string): Promise<void>;
+  readCurrentObjectiveId(): Promise<string | null>;
+  deleteCurrentObjectiveId(): Promise<void>;
+
+  // TAGS
+  writeAvailableTags(tags: string[]): Promise<void>;
+  readAvailableTags(): Promise<string[] | null>;
+  writeSelectedTags(tags: string[]): Promise<void>;
+  readSelectedTags(): Promise<string[] | null>;
+
+  // SYNC
+  readLastSync(): Promise<Date | null>;
+  writeLastSync(now: Date): Promise<void>;
+
+  // OBJECTIVES
+  readObjectives(): Promise<Objective[] | null>;
+  writeObjectives(objs: Objective[]): Promise<void>;
+  deleteObjectives(): Promise<void>;
+
+  // ITEMS
+  readItems(objectiveId?: string): Promise<Item[] | null>;
+  writeItems(objectiveId: string, items: Item[]): Promise<void>;
+  deleteItems(): Promise<void>;
+
+  // DELETED (trash)
+  readDeletedObjectives(): Promise<Objective[] | null>;
+  writeDeletedObjectives(objectives: Objective[]): Promise<void>;
+  deleteDeletedObjectives(): Promise<void>;
+
+  readDeletedItems(): Promise<Item[] | null>;
+  writeDeletedItems(items: Item[]): Promise<void>;
+  deleteDeletedItems(): Promise<void>;
+
+  // IMAGES
+  readImages(): Promise<ItemImage[] | null>;
+  writeImages(images: ItemImage[]): Promise<void>;
+  deleteImages(): Promise<void>;
+
+  readNewImages(): Promise<ItemImage[] | null>;
+  writeNewImages(images: ItemImage[]): Promise<void>;
+  deleteNewImages(): Promise<void>;
+
+  // UTILS
+  clear(): Promise<void>;
 }
 
 export const useStorageContext = () => {

@@ -38,13 +38,11 @@ const LinkView = (props: LinkViewProps) => {
     const hide = Keyboard.addListener("keyboardDidHide", () => {setKeyboardVisible(false);});
 
     const backAction = () => {
-      log.w('test')
       if (keyboardVisible) {
         Keyboard.dismiss();
         return true;
       }
       
-      log.w('test2')
       onCancelLink();
       return true;
     };
@@ -99,11 +97,13 @@ const LinkView = (props: LinkViewProps) => {
   }
 
   const onEditingLink = () => {
-    if(!isEditingPos && !props.isLocked){
-      setIsEditingLinks(!isEditingLinks);
-    }
-    else{
+    if(props.isLocked) {
       Vibration.vibrate(Pattern.Wrong);
+      return;
+    }
+
+    if(!isEditingPos){
+      setIsEditingLinks(!isEditingLinks);
     }
   }
 

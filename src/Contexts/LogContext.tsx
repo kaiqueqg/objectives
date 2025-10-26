@@ -113,7 +113,7 @@ export const LogProvider: React.FC<LogProviderProps> = ({ children }) => {
         putLog(...formattedTexts);
       }
     },
-    w(...texts: any[]){
+    w(safe?: boolean, ...texts: any[]){
       if (currentLogLevel <= LogLevel.Dev) {
         const formattedTexts = texts.map(text => {
           if(text === null) return 'null';

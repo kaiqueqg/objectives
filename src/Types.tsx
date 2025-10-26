@@ -26,6 +26,7 @@ export interface Objective {
 }
 
 export enum ItemType{ Step, Wait, Question, Note, Location, Divider, Grocery, Medicine, Exercise, Link, ItemFake, Image, House, /*put new before here*/ Unknown,  }
+export enum ObjBottomIcons {Menu, Archive, Unarchive, Palette, Checked, Tags, Sorted, Pos, Add, Search, IsLocked};
 
 export interface ItemViewProps {
   objTheme: ObjectivePallete,
@@ -64,6 +65,8 @@ export enum StepImportance {
   Waiting,
   InProgress,
   Ladybug,
+  LadybugYellow,
+  LadybugGreen,
 }
 export interface Step extends Item {
   Title: string,
@@ -125,6 +128,7 @@ export interface Exercise extends Item{
   Description: string,
   Weekdays: Weekdays[],
   LastDone: string,
+  BodyImages: string[],
 }
 
 export interface Link extends Item{
@@ -173,6 +177,24 @@ export interface ImageInfo {
   fileName: string;
 }
 
+export const DefaultUserPrefs: UserPrefs = {
+  theme: 'light',
+  allowLocation: false,
+  vibrate: true,
+  autoSync: false,
+  ObjectivesPrefs: {iconsToDisplay: []},
+}
+
+export const DefaultUser:User = {
+  UserId: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+  Email: '',
+  Username: 'Demo',
+  Password: '',
+  Role: 'Basic',
+  Status: 'Active',
+  userPrefs: DefaultUserPrefs,
+}
+
 export interface User{
   UserId: string,
   Email: string
@@ -186,8 +208,14 @@ export interface User{
 export interface UserPrefs{
   theme: string,
   allowLocation: boolean,
+  warmLocationOff: boolean,
   vibrate: boolean,
   autoSync: boolean,
+  ObjectivesPrefs: ObjectivesPrefs,
+}
+
+export interface ObjectivesPrefs{
+  iconsToDisplay: string[],
 }
 
 export interface LoginModel{
@@ -203,11 +231,9 @@ export interface StorageInfo<T>{
 }
 
 export interface Response<T> {
-  Data?: T,
-  Message?: string,
-  Exception?: string,
-  WasAnError: boolean,
-  Code?: number,
+  data: T,
+  success: boolean,
+  message?: string,
 }
 
 export const Codes = {
@@ -224,7 +250,8 @@ export const Codes = {
 
 export const Pattern = {
   Ok: 7,
-  Wrong: [0, 20, 100, 20],
+  //Wrong: [0, 20, 100, 20],
+  Wrong: [0, 100],
   Short: [0, 100],
   Alert: [0, 20, 100, 200],
 };

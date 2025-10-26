@@ -18,16 +18,15 @@ interface RequestContextType {
   },
   objectivesApi: {
     isUpObjective: (fError?: () => void) => Promise<any>,
-    wakeupSync: (fError?: () => void) => Promise<any>,
-    getObjectivesList: (fError?: () => void) => Promise<ObjectiveList>,
-    syncObjectivesList: (objectivesList: ObjectiveList, fError?: () => void) => Promise<ObjectiveList>,
-    backupData: (fError?: () => void) => Promise<boolean>,
-    generateGetPresignedUrl: (fileInfo: ImageInfo, fError?: () => void) => Promise<PresignedUrl>,
-    generatePutPresignedUrl: (fileInfo: ImageInfo, fError?: () => void) => Promise<PresignedUrl>,
-    generateDeletePresignedUrl: (fileInfo: ImageInfo, fError?: () => void) => Promise<PresignedUrl>,
+    getObjectivesList: (fError?: () => void) => Promise<ObjectiveList|null>,
+    syncObjectivesList: (objectivesList: ObjectiveList, fError?: () => void) => Promise<ObjectiveList|null>,
+    backupData: (fError?: () => void) => Promise<boolean|null>,
+    generateGetPresignedUrl: (fileInfo: ImageInfo, fError?: () => void) => Promise<PresignedUrl|null>,
+    generatePutPresignedUrl: (fileInfo: ImageInfo, fError?: () => void) => Promise<PresignedUrl|null>,
+    generateDeletePresignedUrl: (fileInfo: ImageInfo, fError?: () => void) => Promise<PresignedUrl|null>,
     getImage: (imageInfo: ImageInfo, fError?: () => void) => Promise<string | null>,
-    sendImage: (itemId: string, file: File, fError?: () => void) => Promise<boolean>,
-    deleteImage: (itemId: string, file: File, fError?: () => void) => Promise<boolean>,
+    sendImage: (itemId: string, file: File, fError?: () => void) => Promise<boolean|null>,
+    deleteImage: (itemId: string, file: File, fError?: () => void) => Promise<boolean|null>,
     requestObjectivesList: <T>(endpoint: string, method: string, body?: string, fError?: () => void, wakeup?: boolean) => Promise<T | null>,
   }
 }
@@ -41,10 +40,7 @@ export const RequestProvider: React.FC<RequestProviderProps> = ({ children }) =>
   const { log, popMessage } = useLogContext();
   const { storage } = useStorageContext();
   
-  const errorsWithMessageInResponse = [400, 401, 404, 409, 500, 503];
-
-  const request = async (url: string, endpoint: string, method: string, body?: string, fError?: () => void, wakeup?: boolean): Promise<any> => {
-    
+  const request = async (url: string, endpoint: string, method: string, body?: string, fError?: () => void): Promise<any> => {
     //^Headers
     const headers: {[key: string]: string} = {};
     headers['Content-Type'] = 'application/json';
@@ -52,9 +48,7 @@ export const RequestProvider: React.FC<RequestProviderProps> = ({ children }) =>
     //^Authorization
     const token = await storage.readJwtToken();
     if(token !== null) {
-      if(!wakeup){
-        headers['Authorization'] = "Bearer " + token;
-      }
+      headers['Authorization'] = "Bearer " + token;
     }
 
     //^To cancel
@@ -68,7 +62,9 @@ export const RequestProvider: React.FC<RequestProviderProps> = ({ children }) =>
 
     //^Fetch
     try {
+      console.log('fetch')
       const response = await fetch(url + endpoint, { headers, method, mode: 'cors', body: body, signal });
+      console.log(response)
       clearTimeout(timeoutId);
       if(response){
         return response;
@@ -77,6 +73,7 @@ export const RequestProvider: React.FC<RequestProviderProps> = ({ children }) =>
       return null;
     } 
     catch (error){
+      popMessage('Something really wrong with server route.', MessageType.Alert);
       if(fError !== undefined){
         fError();
       }
@@ -93,24 +90,30 @@ export const RequestProvider: React.FC<RequestProviderProps> = ({ children }) =>
       return this.requestIdentity('/IsUp', 'GET', body, fError);
     },
     async login(body?: string, fError?: () => void): Promise<LoginModel|null>{
+      log.b('request login - ', body)
       return this.requestIdentity<LoginModel|null>('/Login', 'POST', body, fError);
     },
     async requestIdentity<T>(endpoint: string, method: string, body?: string, fError?: () => void): Promise<T|null>{
       try {
+        log.b('requestIdentity login - ', body)
         const resp = await request("https://ptv4q6v3kf.execute-api.sa-east-1.amazonaws.com/dev", endpoint, method, body, fError);
+        log.b('requestIdentity resp - ', resp)
 
         if(resp){
           const respData: Response<T> = await resp.json();
-          if(!respData.WasAnError && respData.Data){
-            return respData.Data;
-          }
+            log.b('requestIdentity respData - ', respData)
+          // if(!resp.ok) popMessage(respData.message?? 'There was a problem with the server. No explanation', MessageType.Error);
+          if(respData.data)
+            return respData.data;
           else{
-            // log.err('Response data:', respData)
-            // log.pop(respData.Message);
+            if(fError) {
+              log.g(respData.message);
+              fError();
+            }
           }
         }
       } catch (err) {
-        // log.err('Error: ', endpoint, err);
+        log.err('Error: ', endpoint, err);
       }
       return null;
     },
@@ -120,27 +123,24 @@ export const RequestProvider: React.FC<RequestProviderProps> = ({ children }) =>
     async isUpObjective(fError?: () => void): Promise<any>{
       return this.requestObjectivesList('/IsUpObjective', 'GET', undefined, fError);
     },
-    async wakeupSync(fError?: () => void): Promise<any>{
-      return this.requestObjectivesList('/SyncObjectivesList', 'PUT', undefined, fError, true);
-    },
-    async getObjectivesList(fError?: () => void): Promise<ObjectiveList>{
+    async getObjectivesList(fError?: () => void): Promise<ObjectiveList|null>{
       return this.requestObjectivesList<ObjectiveList>('/GetObjectivesList', 'GET', undefined, fError);
     },
-    async syncObjectivesList(objectivesList: ObjectiveList, fError?: () => void): Promise<ObjectiveList>{
+    async syncObjectivesList(objectivesList: ObjectiveList, fError?: () => void): Promise<ObjectiveList|null>{
       const rtn = await this.requestObjectivesList<ObjectiveList>('/SyncObjectivesList', 'PUT', JSON.stringify(objectivesList), fError);
       return rtn;
     },
-    async backupData(fError?: () => void): Promise<boolean>{
+    async backupData(fError?: () => void): Promise<boolean|null>{
       return this.requestObjectivesList<boolean>('/BackupData', 'GET', undefined, fError);
     },
-    async generateGetPresignedUrl(fileInfo: ImageInfo, fError?: () => void): Promise<PresignedUrl>{
-      return this.requestObjectivesList<ImageInfo>('/GenerateGetPresignedUrl', 'PUT', JSON.stringify(fileInfo), fError);
+    async generateGetPresignedUrl(fileInfo: ImageInfo, fError?: () => void): Promise<PresignedUrl|null>{
+      return this.requestObjectivesList<PresignedUrl>('/GenerateGetPresignedUrl', 'PUT', JSON.stringify(fileInfo), fError);
     },
-    async generatePutPresignedUrl(fileInfo: ImageInfo, fError?: () => void): Promise<PresignedUrl>{
-      return this.requestObjectivesList<ImageInfo>('/GeneratePutPresignedUrl', 'PUT', JSON.stringify(fileInfo), fError);
+    async generatePutPresignedUrl(fileInfo: ImageInfo, fError?: () => void): Promise<PresignedUrl|null>{
+      return this.requestObjectivesList<PresignedUrl>('/GeneratePutPresignedUrl', 'PUT', JSON.stringify(fileInfo), fError);
     },
-    async generateDeletePresignedUrl(fileInfo: ImageInfo, fError?: () => void): Promise<PresignedUrl>{
-      return this.requestObjectivesList<ImageInfo>('/GenerateDeletePresignedUrl', 'PUT', JSON.stringify(fileInfo), fError);
+    async generateDeletePresignedUrl(fileInfo: ImageInfo, fError?: () => void): Promise<PresignedUrl|null>{
+      return this.requestObjectivesList<PresignedUrl>('/GenerateDeletePresignedUrl', 'PUT', JSON.stringify(fileInfo), fError);
     },
     // async getImage(imageInfo: ImageInfo, fError?: () => void): Promise<File | null> {
     //   const presignedUrlReturn = await this.generateGetPresignedUrl(imageInfo);
@@ -164,110 +164,108 @@ export const RequestProvider: React.FC<RequestProviderProps> = ({ children }) =>
     //   }
     // },
     async getImage(imageInfo: ImageInfo, fError?: () => void): Promise<string | null> {
-      const presignedUrlReturn = await this.generateGetPresignedUrl(imageInfo);
+      // const presignedUrlReturn = await this.generateGetPresignedUrl(imageInfo);
     
-      try {
-        if (!presignedUrlReturn?.url) return null;
+      // try {
+      //   if (!presignedUrlReturn?.url) return null;
     
-        const localUri = FileSystem.documentDirectory + imageInfo.fileName;
+      //   const localUri = FileSystem.documentDirectory + imageInfo.fileName;
     
-        const downloadRes = await FileSystem.downloadAsync(
-          presignedUrlReturn.url,
-          localUri
-        );
+      //   const downloadRes = await FileSystem.downloadAsync(
+      //     presignedUrlReturn.url,
+      //     localUri
+      //   );
     
-        if (downloadRes.status === 200) {
-          return downloadRes.uri; // This is the local file path
-        }
+      //   if (downloadRes.status === 200) {
+      //     return downloadRes.uri; // This is the local file path
+      //   }
     
-        return null;
-      } catch (err) {
-        if (fError !== undefined) fError();
-        else log.err('Error downloading image from S3', err);
+      //   return null;
+      // } catch (err) {
+      //   if (fError !== undefined) fError();
+      //   else log.err('Error downloading image from S3', err);
     
-        return null;
-      }
+      //   return null;
+      // }
+      return null;
     },
-    async sendImage(itemId:string, file: File, fError?: () => void): Promise<boolean>{
+    async sendImage(itemId:string, file: File, fError?: () => void): Promise<boolean|null>{
       const imageInfo: ImageInfo = { itemId: itemId, fileName: file.name };
-      const presignedUrlReturn:PresignedUrl = await this.generatePutPresignedUrl(imageInfo);
-      try {
-        const uploadResponse = await fetch(presignedUrlReturn?.url, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': file.type,
-          },
-          body: file,
-        });
-  
-        if(uploadResponse.ok){
-          return true;
+      const presignedUrlReturn:PresignedUrl|null = await this.generatePutPresignedUrl(imageInfo);
+
+      if(presignedUrlReturn) {
+        try {
+          const uploadResponse = await fetch(presignedUrlReturn?.url, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': file.type,
+            },
+            body: file,
+          });
+    
+          if(uploadResponse.ok){
+            return true;
+          }
+    
+          return false;
+        } catch (err) {
+          if(fError !== undefined) fError();
+          else log.err('Error sending image to S3', err);
+    
+          return false;
         }
-  
-        return false;
-      } catch (err) {
-        if(fError !== undefined) fError();
-        else log.err('Error sending image to S3', err);
-  
-        return false;
       }
+      return null;
     },
-    async deleteImage(itemId:string, file: File, fError?: () => void): Promise<boolean>{
-      log.b('delete');
+    async deleteImage(itemId:string, file: File, fError?: () => void): Promise<boolean|null>{
       const imageInfo: ImageInfo = { itemId: itemId, fileName: file.name };
-      log.b('imageInfo', imageInfo);
-      const presignedUrlReturn:PresignedUrl = await this.generateDeletePresignedUrl(imageInfo);
-      log.b('presignedUrlReturn', presignedUrlReturn);
+      const presignedUrlReturn:PresignedUrl|null = await this.generateDeletePresignedUrl(imageInfo);
   
-      if(presignedUrlReturn.url === null){
-        return false;
-      }
-  
-      try {
-        const uploadResponse = await fetch(presignedUrlReturn?.url, {
-          method: 'DELETE',
-        });
-  
-        log.b('uploadResponse', uploadResponse);
-  
-        if(uploadResponse.ok){
-          return true;
+      if(presignedUrlReturn) {
+        try {
+          const uploadResponse = await fetch(presignedUrlReturn?.url, {
+            method: 'DELETE',
+          });
+    
+          log.b('uploadResponse', uploadResponse);
+    
+          if(uploadResponse.ok){
+            return true;
+          }
+    
+          return false;
+        } catch (err) {
+          if(fError !== undefined) fError();
+          else log.err('Error deleting image from S3', err);
+    
+          return false;
         }
-  
-        return false;
-      } catch (err) {
-        if(fError !== undefined) fError();
-        else log.err('Error deleting image from S3', err);
-  
-        return false;
       }
+
+      return null;
     },
     //! Responsable to parse and react to equal among all, know, request errors.
-    async requestObjectivesList<T>(endpoint: string, method: string, body?: string, fError?: () => void, wakeup?: boolean): Promise<any>{
+    async requestObjectivesList<T>(endpoint: string, method: string, body?: string, fError?: () => void): Promise<T|null>{
       try {
-        const resp = await request("https://xebiabbvic.execute-api.sa-east-1.amazonaws.com/dev", endpoint, method, body, fError);
+        const resp = await request("https://6gbemhsxx4.execute-api.sa-east-1.amazonaws.com/dev", endpoint, method, body, fError);
 
         if(resp){
           const respData: Response<T> = await resp.json();
-          // if(wakeup){
-          //   return {};
-          // }
-          if(!respData.WasAnError && respData.Data){
-            return respData.Data;
+          if(!resp.ok){
+            log.r(respData.message)
+            popMessage(respData.message?? 'There was a problem with the server. No explanation', MessageType.Error);
           }
+          if(respData.data)
+            return respData.data;
           else{
-            switch(respData.Code){
-              case 401:
-                popMessage(respData.Message??"Unauthorized", MessageType.Error);
-                break;
-              default:
-                //popMessage('Default');
-                break;
+            if(fError) {
+              log.err(respData.message);
+              fError();
             }
           }
         }
       } catch (err) {
-        if(!wakeup) log.err('Error: ', endpoint, err);
+        log.err('Error: ', endpoint, err);
       }
       return null;
     },

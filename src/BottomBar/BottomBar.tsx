@@ -7,20 +7,16 @@ import Loading from "../Loading/Loading";
 import { useLogContext } from "../Contexts/LogContext";
 import React, { useEffect, useState } from "react";
 import Constants, { ExecutionEnvironment } from 'expo-constants';
+import LoginView from "../UserView/LoginView";
 
 export interface BottomBarProps {
-  isSyncing: boolean,
-  doneSync: boolean,
-  failedSync: boolean,
-  isLambdaCold: boolean,
-  isServerUp: boolean,
-  syncObjectivesList: () => void,
 }
 
 const BottomBar = (props: BottomBarProps) => {
   const { user, userPrefs, theme: t, fontTheme: f, currentView, writeCurrentView, availableTags, selectedTags, currentObjectiveId, writeUserPrefs } = useUserContext();
   const { log } = useLogContext();
-  const { isSyncing, doneSync, failedSync, isLambdaCold, syncObjectivesList } = props;
+
+  const showLoginStuff: boolean = true;//Constants.executionEnvironment === ExecutionEnvironment.StoreClient || process.env.LOGIN_VIEW === 'true';
 
   useEffect(() => {}, [availableTags, selectedTags]);
 
@@ -82,8 +78,10 @@ const BottomBar = (props: BottomBarProps) => {
     },
     textImage:{
       position: 'absolute',
+      bottom: 5,
+      left: 5,
       color: colorPalette.beige,
-      fontSize: 12,
+      fontSize: 5,
       fontWeight: 'bold',
     },
     loadingImage:{
@@ -93,7 +91,6 @@ const BottomBar = (props: BottomBarProps) => {
   return (
     <View style={s.container}>
       <View style={s.leftContainer}>
-        {/* <PressImage pressStyle={gs.baseImageContainer} style={[s.bottomImage, (currentView === Views.UserView)?s.bottomImageSelected:(s.cancelImage, user&&s.doneImage) ]} onPress={() => changeToView(Views.UserView)} source={require('../../public/images/user.png')}></PressImage> */}
         {user?
           (Constants.executionEnvironment === ExecutionEnvironment.StoreClient?
             <PressImage text="dev" textStyle={{color: colorPalette.red}} pressStyle={gs.baseBiggerImageContainer} style={[s.bottomImage, currentView === Views.UserView&&s.bottomImageSelected]} onPress={() => changeToView(Views.UserView)} source={require('../../public/images/user.png')}></PressImage>
@@ -104,16 +101,8 @@ const BottomBar = (props: BottomBarProps) => {
           <PressImage pressStyle={gs.baseBiggerImageContainer} style={[s.bottomImage, s.cancelImage]} onPress={() => changeToView(Views.UserView)} source={require('../../public/images/user.png')}></PressImage>
         }
         <PressImage pressStyle={gs.baseBiggerImageContainer} style={[s.bottomImage]} onPress={changeTheme} source={require('../../public/images/theme.png')}></PressImage>
-        {/*user && user.Role !== 'Guest' &&*/ <PressImage pressStyle={currentView === Views.DevView? s.bottomImageSelected:gs.baseImageContainer} style={[s.bottomImage, currentView === Views.DevView&&s.bottomImageSelected]} onPress={() => changeToView(Views.DevView)} source={require('../../public/images/dev.png')}></PressImage>}
-        {user?
-          <>
-            {!isSyncing && isLambdaCold && <PressImage pressStyle={gs.baseBiggerImageContainer} style={[s.bottomImage, {tintColor: colorPalette.bluelight}]} onPress={()=>{}} source={require('../../public/images/cold.png')}></PressImage>}
-            {isSyncing &&  !isLambdaCold && <Loading theme={dark}></Loading>}
-            {!isSyncing && !isLambdaCold && <PressImage pressStyle={gs.baseBiggerImageContainer} style={[s.bottomImage, failedSync&&s.cancelImage, doneSync&&s.doneImage]} onPress={syncObjectivesList} source={require('../../public/images/sync.png')}></PressImage>}
-          </>
-          :
-          <PressImage pressStyle={gs.baseBiggerImageContainer} style={s.bottomImage} onPress={syncObjectivesList} source={require('../../public/images/cloud-offline.png')}></PressImage>
-        }
+        {showLoginStuff && <PressImage pressStyle={currentView === Views.DevView? s.bottomImageSelected:gs.baseImageContainer} style={[s.bottomImage, currentView === Views.DevView&&s.bottomImageSelected]} onPress={() => changeToView(Views.DevView)} source={require('../../public/images/dev.png')}></PressImage>}
+        {showLoginStuff && <LoginView viewType="Image"></LoginView>}
       </View>
       <View style={s.rightContainer}>
         <PressImage pressStyle={gs.baseBiggerImageContainer} style={[s.bottomImage, currentView === Views.ArchivedView && s.bottomImageSelected]} textStyle={s.textImage} onPress={()=>{changeToView(Views.ArchivedView)}} source={require('../../public/images/archived.png')} ></PressImage>

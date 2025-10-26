@@ -231,8 +231,14 @@ const ImageView = (props: ImageViewProps) => {
   }
 
   const onEditingImage = () => {
-    if(!isEditingPos && !props.isLocked)setIsEditingImage(!isEditingImage);
-    else Vibration.vibrate(Pattern.Wrong);
+    if(props.isLocked) {
+      Vibration.vibrate(Pattern.Wrong);
+      return;
+    }
+
+    if(!isEditingPos){
+      setIsEditingImage(!isEditingImage);
+    }
   }
 
   const s = StyleSheet.create({

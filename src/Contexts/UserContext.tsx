@@ -1,6 +1,6 @@
 // UserContext.tsx
 import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
-import { Item, Objective, MessageType, User, UserPrefs, Views, PopMessage, StoredImage } from '../Types';
+import { Item, Objective, MessageType, User, UserPrefs, Views, PopMessage, StoredImage, DefaultUser } from '../Types';
 import { AppPalette, dark, globalStyle as gs, light } from '../Colors';
 import { FontPalette, fontDark, fontPaper, fontWhite } from '../../fonts/Font';
 import { useStorageContext } from './StorageContext';
@@ -35,11 +35,37 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     loadLastSync();
   }, []);
 
+  const checkUserInteg = () => {
+    
+  }
+
   const loadObjectives = async () => {
     const storageList = await storage.readObjectives();
     if(storageList) {
       setObjectives(storageList);
 
+      const tags = ['Pin'];
+      for(let i = 0; i < storageList.length; i++){
+        tags.push(...storageList[i].Tags);
+      }
+      const uniqueTags = Array.from(new Set(tags));
+      setAvailableTags(uniqueTags);
+      await storage.writeAvailableTags(uniqueTags);
+
+      const v = await storage.readSelectedTags();
+      if (v) {
+        const filteredTags = v.filter((tag: string) => uniqueTags.includes(tag));
+        setSelectedTags(filteredTags);
+        await storage.writeSelectedTags(filteredTags);
+      } else {
+        // log.err('no selected tags');
+      }
+    }
+  }
+
+  const loadAvailableTags = async (objsList: Objective[]) => {
+    const storageList = await storage.readObjectives();
+    if(storageList) {
       const tags = [];
       for(let i = 0; i < storageList.length; i++){
         tags.push(...storageList[i].Tags);
@@ -54,7 +80,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         setSelectedTags(filteredTags);
         await storage.writeSelectedTags(filteredTags);
       } else {
-        log.err('no selected tags');
+        // log.err('no selected tags');
       }
     }
   }
@@ -66,7 +92,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   }
 
   //^-------------------- USER
-  const [user, setUser] = useState<User|null>(null);
+  const [user, setUser] = useState<User>(DefaultUser);
   const writeUser = async (user: User) => {
     try {
       await storage.writeUser(user);
@@ -80,7 +106,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     try {
       await storage.deleteUser();
       await storage.deleteJwtToken();
-      setUser(null);
+      setUser(DefaultUser);
       setJwtToken(null);
     } catch (error) {
       log.err('deleteUser', '[catch] deleting user.');
@@ -93,6 +119,9 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       allowLocation: false,
       vibrate: true,
       autoSync: false, 
+      ObjectivesPrefs: {iconsToDisplay: [
+        'Archive', 'Unarchive', 'Palette', 'Checked', 'Tags', 'Sorted', 'Pos', 'Add', 'Search', 'IsLocked'
+      ]}
     });
   const writeUserPrefs = async (userPrefs: UserPrefs) => {
     try {
@@ -164,6 +193,33 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       log.err('removeAvailableTags', 'Problem removing available tags', err);
     }
   };
+  const removeAvailableTagsIfUnique = async (tags: string[]) => {
+    try {
+      const objs = await storage.readObjectives();
+      if (!objs || objs.length === 0) return;
+
+      const requested = Array.from(new Set(tags));
+
+      let tagsToRemove:string[] = [];
+
+      for (let i = 0; i < requested.length; i++) {
+        const tag = requested[i];
+        let objsWithTag = 0;
+        
+        for (let j = 0; j < objs.length; j++) {
+          const o = objs[j];
+          if(o.Tags.includes(tag)) objsWithTag++;
+        }
+
+        if(objsWithTag === 0) tagsToRemove.push(tag); //unique
+      }
+
+      const newTags = availableTags.filter(t => !tagsToRemove.includes(t));
+      await writeAvailableTags(newTags);
+    } catch (err) {
+      log.err('removeAvailableTags', 'Problem removing available tags', err);
+    }
+  }
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const writeSelectedTags = async (selectedTags: string[]) => {
     try {
@@ -439,10 +495,10 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   };
   const clearAllData = async () =>{ 
     await storage.clear();
-    setUser(null);
+    setUser(DefaultUser);
     setJwtToken(null);
-    setAvailableTags([]);
-    setSelectedTags([]);
+    setAvailableTags(['Pin']);
+    setSelectedTags(['Pin']);
     setCurrentObjectiveId('');
     setLastSync(null);
     setObjectives([]);
@@ -479,7 +535,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         currentView, writeCurrentView,
         currentObjectiveId, writeCurrentObjectiveId,
         //^TAGS
-        availableTags, putAvailableTags, removeAvailableTags, writeAvailableTags, 
+        availableTags, putAvailableTags, removeAvailableTags, writeAvailableTags, removeAvailableTagsIfUnique,
         selectedTags, putSelectedTags, removeSelectedTags, writeSelectedTags,
         //^SYNC
         lastSync, writeLastSync,
@@ -501,7 +557,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
 interface UserContextType {
   //^USER
-  user: User|null, writeUser: (user: User) => void,
+  user: User, writeUser: (user: User) => void,
   userPrefs: UserPrefs,  writeUserPrefs: (userPrefs: UserPrefs) => void,
   theme: AppPalette, fontTheme: FontPalette,
   //^JWT TOKEN
@@ -511,7 +567,7 @@ interface UserContextType {
   currentObjectiveId: string, writeCurrentObjectiveId: (view: string) => void,
   //^TAGS
   availableTags: string[], writeAvailableTags: (availableTags: string[]) => void, putAvailableTags: (tag: string[]) => void, removeAvailableTags: (tag: string[]) => void,
-  selectedTags: string[], writeSelectedTags: (selectedTags: string[]) => void, putSelectedTags: (tags: string[]) => void, removeSelectedTags: (tags: string[]) => void,
+  selectedTags: string[], writeSelectedTags: (selectedTags: string[]) => void, putSelectedTags: (tags: string[]) => void, removeSelectedTags: (tags: string[]) => void, removeAvailableTagsIfUnique: (tags: string[]) => void
   //^SYNC
   lastSync: Date|null, writeLastSync: (date: Date) => void,
   //^OBJECTIVE LIST

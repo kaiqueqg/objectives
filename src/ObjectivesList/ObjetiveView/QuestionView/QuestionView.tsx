@@ -75,8 +75,14 @@ const QuestionView = (props: QuestionViewProps) => {
   }
 
   const onEditingQuestion = () => {
-    if(!isEditingPos && !props.isLocked)setIsEditingQuestion(!isEditingQuestion);
-    else Vibration.vibrate(Pattern.Wrong);
+    if(props.isLocked) {
+      Vibration.vibrate(Pattern.Wrong);
+      return;
+    }
+
+    if(!isEditingPos){
+      setIsEditingQuestion(!isEditingQuestion);
+    }
   }
 
   const s = StyleSheet.create({

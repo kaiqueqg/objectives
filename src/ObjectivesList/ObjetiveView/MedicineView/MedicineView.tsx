@@ -106,8 +106,14 @@ const MedicineView = (props: MedicineViewProps) => {
   }
 
   const onEditingMedicine = () => {
-    if(!isEditingPos && !props.isLocked)setIsEditingMedicine(!isEditingMedicine)
-    else Vibration.vibrate(Pattern.Wrong);
+    if(props.isLocked) {
+      Vibration.vibrate(Pattern.Wrong);
+      return;
+    }
+
+    if(!isEditingPos){
+      setIsEditingMedicine(!isEditingMedicine);
+    }
   }
 
   const s = StyleSheet.create({
