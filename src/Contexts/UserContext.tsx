@@ -5,6 +5,7 @@ import { AppPalette, dark, globalStyle as gs, light } from '../Colors';
 import { FontPalette, fontDark, fontPaper, fontWhite } from '../../fonts/Font';
 import { useStorageContext } from './StorageContext';
 import { useLogContext } from './LogContext';
+import * as LocalAuthentication from 'expo-local-authentication';
 
 interface UserProviderProps {
   children: ReactNode;
@@ -121,7 +122,11 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       autoSync: false, 
       ObjectivesPrefs: {iconsToDisplay: [
         'Archive', 'Unarchive', 'Palette', 'Checked', 'Tags', 'Sorted', 'Pos', 'Add', 'Search', 'IsLocked'
-      ]}
+      ]},
+      warmLocationOff: true,
+      singleTagSelected: false,
+      shouldLockOnOpen: false,
+      shouldLockOnReopen: false,
     });
   const writeUserPrefs = async (userPrefs: UserPrefs) => {
     try {
@@ -522,6 +527,18 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     
   };
 
+  //^-------------------- Security
+  const requestBiometricAuth = async (message: string, fallbackMessage: string): Promise<boolean> => {
+    
+
+    const result = await LocalAuthentication.authenticateAsync({
+      promptMessage: 'Comfirm with your fingerprint',
+      fallbackLabel: 'User the code.',
+    });
+
+    return result.success;
+  }
+
   return (
     <UserContext.Provider 
       value={{
@@ -549,6 +566,9 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
         //^HELPERS
         clearAllData,
+
+        //^SECURITY
+        requestBiometricAuth,
       }}>
       {children}
     </UserContext.Provider>
@@ -581,6 +601,8 @@ interface UserContextType {
   deletedItems: Item[], pushDeletedItem: (item: Item) => void,  deleteDeletedItems: () => void,
   //^HELPERS
   clearAllData: () => void,
+  //^SECURITY
+  requestBiometricAuth: () => Promise<boolean>
 }
 
 export const useUserContext = () => {

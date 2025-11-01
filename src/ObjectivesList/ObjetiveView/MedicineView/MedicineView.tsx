@@ -130,9 +130,9 @@ const MedicineView = (props: MedicineViewProps) => {
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      backgroundColor: medicine.IsChecked? o.objbk:o.itembk,
+      backgroundColor: (medicine.IsChecked && !isEditingMedicine)? colorPalette.transparent:o.itembk,
       
-      borderColor: medicine.IsChecked?colorPalette.transparent:o.bordercolor,
+      borderColor: (medicine.IsChecked && !isEditingMedicine)?colorPalette.transparent:o.bordercolor,
       borderWidth: 1,
       borderStyle: 'solid',
       borderRadius: o.borderRadius,

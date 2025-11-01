@@ -160,9 +160,9 @@ export const HouseView = (props: HouseViewProps) => {
       flexDirection: 'column',
       justifyContent: 'center',
       alignItems: 'center',
-      backgroundColor: house.WasContacted? o.objbk:o.itembk,
+      backgroundColor: (house.WasContacted && !isEditingHouse)? colorPalette.transparent:o.itembk,
       
-      borderColor: house.WasContacted?colorPalette.transparent:o.bordercolor,
+      borderColor: (house.WasContacted && !isEditingHouse)?colorPalette.transparent:o.bordercolor,
       borderWidth: 1,
       borderStyle: 'solid',
       borderRadius: o.borderRadius,

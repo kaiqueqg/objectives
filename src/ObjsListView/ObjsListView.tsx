@@ -24,13 +24,12 @@ const ObjsListView = (props: ObjsListViewProps) => {
     writeCurrentObjectiveId,
     writeCurrentView,
     availableTags, selectedTags, putSelectedTags, removeSelectedTags, writeSelectedTags,
-    user, userPrefs,
+    user, userPrefs, writeUserPrefs,
   } = useUserContext();
 
   const [isEditingPos, setIsEditingPos] = useState<boolean>(false);
   const [isEndingPos, setIsEndingPos] = useState<boolean>(false);
   const [objectivesSelected, setObjectivesSelected] = useState<Objective[]>([]);
-  const [onlySelectOneTag, setOnlySelectOneTag] = useState<boolean>(true);
   const [unarchivedObjectives, setUnarchivedObjectives] = useState<Objective[]>([]);
   const [unarchivedTags, setUnarchivedTags] = useState<string[]>([]);
 
@@ -170,7 +169,7 @@ const ObjsListView = (props: ObjsListViewProps) => {
 
   const selectUnselectedTag = (tag: string) => {
     if(tag.trim() !== 'Pin') {
-      if(onlySelectOneTag) {
+      if(userPrefs.singleTagSelected) {
         writeSelectedTags([tag]);
       }
       else{
@@ -224,9 +223,9 @@ const ObjsListView = (props: ObjsListViewProps) => {
             style={[s.objectiveButtonContainer, 
               isEditingPos && isSelected? s.objectiveButtonContainerSelected:undefined,
               isEndingPos && isSelected? s.objectiveButtonContainerEnding:undefined]}
-            textStyle={[s.text, {color: objTheme.objtitle}]}
+            textStyle={[s.text]}
             onPress={() => onSelectCurrentObj(item.ObjectiveId)}
-            text={item.Title + item.Pos}
+            text={item.Title}
             defaultStyle={objTheme}></PressText>
         </View>
       </>
@@ -248,6 +247,10 @@ const ObjsListView = (props: ObjsListViewProps) => {
       </View>
     )
   };
+
+  const changeSingleTag = () => {
+    writeUserPrefs({...userPrefs, singleTagSelected: !userPrefs.singleTagSelected})
+  }
 
   const getObjectivesTitle = () => {
     return (
@@ -298,37 +301,6 @@ const ObjsListView = (props: ObjsListViewProps) => {
   }
 
   const s = StyleSheet.create({
-    tagList: {
-      flexWrap: "wrap",
-      flexDirection: 'row',
-      padding: 10,
-    },
-    tag: {
-      textAlign: 'center',
-      verticalAlign: 'middle',
-      color: t.textcolor,
-      fontWeight: 'bold',
-      margin: 5,
-      padding: 5,
-      minWidth: 50,
-
-      borderColor: t.backgroundcolor,
-      borderWidth: 1,
-      borderStyle: 'solid',
-      borderRadius: 15,
-    },
-    tagSelected:{
-      backgroundColor: t.backgroundcolordark,
-      color: t.textcolor,
-      
-      borderColor: t.textcolorcontrast,
-      borderWidth: 1,
-      borderStyle: 'solid',
-    },
-    tagSpecial:{
-      backgroundColor: t.textcolor,
-      color: t.textcolorcontrast,
-    },
     container: {
       flex: 1,
       justifyContent: 'center',
@@ -377,6 +349,39 @@ const ObjsListView = (props: ObjsListViewProps) => {
       padding: 10,
       width: '100%',
     },
+    tagList: {
+      flexWrap: "wrap",
+      flexDirection: 'row',
+      padding: 10,
+    },
+    tag: {
+      textAlign: 'center',
+      verticalAlign: 'middle',
+      color: t.textcolor,
+      fontWeight: 'bold',
+      margin: 5,
+      paddingVertical: 5,
+      paddingHorizontal: 10,
+      minWidth: 50,
+      maxHeight: 30,
+
+      borderColor: t.backgroundcolor,
+      borderWidth: 1,
+      borderStyle: 'solid',
+      borderRadius: 15,
+    },
+    tagSelected:{
+      backgroundColor: t.backgroundcolordark,
+      color: t.textcolor,
+      
+      borderColor: t.textcolorcontrast,
+      borderWidth: 1,
+      borderStyle: 'solid',
+    },
+    tagSpecial:{
+      backgroundColor: t.textcolor,
+      color: t.textcolorcontrast,
+    },
     tagsList:{
       paddingTop: 10,
       paddingBottom: 15,
@@ -393,6 +398,11 @@ const ObjsListView = (props: ObjsListViewProps) => {
       justifyContent: 'flex-end',
       alignItems: 'center',
       backgroundColor: t.backgroundcolordark,
+
+      borderColor: 'black',
+      borderTopWidth: 1,
+      borderBottomWidth: 1,
+      borderStyle: 'solid',
     },
     leftBottomMenu:{
       flex: 1,
@@ -465,7 +475,7 @@ const ObjsListView = (props: ObjsListViewProps) => {
       justifyContent: 'center',
       alignItems: 'center',
 
-      minHeight: 50,
+      minHeight: 45,
       marginVertical: 5,
 
       borderWidth: 1,
@@ -575,10 +585,10 @@ const ObjsListView = (props: ObjsListViewProps) => {
       </View>
       <View style={s.bottomMenu}>
         <View style={s.leftBottomMenu}>
-          {onlySelectOneTag?
-            <PressImage style={[s.image]} pressStyle={gs.baseBiggerImageContainer} onPress={()=>{setOnlySelectOneTag(!onlySelectOneTag)}} disable={isEditingPos} source={require('../../public/images/tagsingle.png')}></PressImage>
+          {userPrefs.singleTagSelected?
+            <PressImage style={[s.image]} pressStyle={gs.baseBiggerImageContainer} onPress={changeSingleTag} disable={isEditingPos} source={require('../../public/images/tagsingle.png')}></PressImage>
             :
-            <PressImage style={[s.image]} pressStyle={gs.baseBiggerImageContainer} onPress={()=>{setOnlySelectOneTag(!onlySelectOneTag)}} disable={isEditingPos} source={require('../../public/images/tag.png')}></PressImage>
+            <PressImage style={[s.image]} pressStyle={gs.baseBiggerImageContainer} onPress={changeSingleTag} disable={isEditingPos} source={require('../../public/images/tag.png')}></PressImage>
           }
         </View>
         <View style={s.rightBottomMenu}>

@@ -121,9 +121,9 @@ const LinkView = (props: LinkViewProps) => {
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      backgroundColor: (link.Title.trim() !=='')?colorPalette.transparent:o.itembk,
+      backgroundColor: (link.Title.trim() !=='' && !isEditingLinks)?colorPalette.transparent:o.itembk,
       
-      borderColor: (link.Title.trim() !=='')?colorPalette.transparent:o.bordercolor,
+      borderColor: (link.Title.trim() !=='' && !isEditingLinks)?colorPalette.transparent:o.bordercolor,
       borderWidth: 1,
       borderStyle: 'solid',
       borderRadius: o.borderRadius,
@@ -166,7 +166,7 @@ const LinkView = (props: LinkViewProps) => {
     },
     imageFade:{
       ...gs.baseImage,
-      tintColor: o.itemtextfade,
+      tintColor: o.icontintcolorfade,
     },
     linksDoneImage:{
       tintColor: o.doneicontint,

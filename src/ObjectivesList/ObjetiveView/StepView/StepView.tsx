@@ -163,9 +163,9 @@ const StepView = (props: StepViewProps) => {
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      backgroundColor: step.Done? o.objbk:o.itembk,
+      backgroundColor: (step.Done && !isEditingStep)? o.objbk:o.itembk,
       
-      borderColor: step.Done?colorPalette.transparent:o.bordercolor,
+      borderColor: (step.Done && !isEditingStep)?colorPalette.transparent:o.bordercolor,
       borderWidth: 1,
       borderStyle: 'solid',
       borderRadius: o.borderRadius,
@@ -243,6 +243,8 @@ const StepView = (props: StepViewProps) => {
       alignItems: 'center',
     },
     importanceImageSelected:{
+      backgroundColor: o.itembkdark,
+
       borderWidth: 1,
       borderStyle: 'solid',
       borderColor: o.bordercolorlight,

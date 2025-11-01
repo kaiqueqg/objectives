@@ -62,9 +62,7 @@ export const RequestProvider: React.FC<RequestProviderProps> = ({ children }) =>
 
     //^Fetch
     try {
-      console.log('fetch')
       const response = await fetch(url + endpoint, { headers, method, mode: 'cors', body: body, signal });
-      console.log(response)
       clearTimeout(timeoutId);
       if(response){
         return response;
@@ -90,24 +88,18 @@ export const RequestProvider: React.FC<RequestProviderProps> = ({ children }) =>
       return this.requestIdentity('/IsUp', 'GET', body, fError);
     },
     async login(body?: string, fError?: () => void): Promise<LoginModel|null>{
-      log.b('request login - ', body)
       return this.requestIdentity<LoginModel|null>('/Login', 'POST', body, fError);
     },
     async requestIdentity<T>(endpoint: string, method: string, body?: string, fError?: () => void): Promise<T|null>{
       try {
-        log.b('requestIdentity login - ', body)
         const resp = await request("https://ptv4q6v3kf.execute-api.sa-east-1.amazonaws.com/dev", endpoint, method, body, fError);
-        log.b('requestIdentity resp - ', resp)
-
         if(resp){
           const respData: Response<T> = await resp.json();
-            log.b('requestIdentity respData - ', respData)
-          // if(!resp.ok) popMessage(respData.message?? 'There was a problem with the server. No explanation', MessageType.Error);
+          if(!resp.ok) popMessage(respData.message?? 'There was a problem with the server. No explanation', MessageType.Error);
           if(respData.data)
             return respData.data;
           else{
             if(fError) {
-              log.g(respData.message);
               fError();
             }
           }
@@ -252,7 +244,6 @@ export const RequestProvider: React.FC<RequestProviderProps> = ({ children }) =>
         if(resp){
           const respData: Response<T> = await resp.json();
           if(!resp.ok){
-            log.r(respData.message)
             popMessage(respData.message?? 'There was a problem with the server. No explanation', MessageType.Error);
           }
           if(respData.data)

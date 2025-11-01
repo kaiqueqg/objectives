@@ -330,7 +330,7 @@ export type AppPalette = {
 };
 
 export const light: AppPalette = {
-  backgroundcolordarker: colorPalette.greylight,
+  backgroundcolordarker: "#E0E0E0",
   backgroundcolordark: colorPalette.greylighter,
   backgroundcolor: colorPalette.white,
   backgroundcolorcontrast: colorPalette.black,
@@ -556,7 +556,7 @@ export const darkWhite: ObjectivePallete = {
   objbk: colorPalette.objWhite,
   itembk:  colorPalette.itemWhite,
   itembkdark: colorPalette.itemWhiteDark,
-  itemtextfade: colorPalette.beige,
+  itemtextfade: colorPalette.greydarky,
   
   objtitle: colorPalette.black,
   itemtext: colorPalette.black,
@@ -575,7 +575,7 @@ export const lightWhite: ObjectivePallete = {
   objbk: colorPalette.objWhiteLight,
   itembk:  colorPalette.itemWhiteLight,
   itembkdark: colorPalette.itemWhiteLightDark,
-  itemtextfade: colorPalette.beige,
+  itemtextfade: colorPalette.greydarky,
 }
 
 export const darkCyan: ObjectivePallete = {

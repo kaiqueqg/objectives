@@ -69,15 +69,17 @@ const PressText = (props: PressTextProps) => {
       {props.text.trim() === ''?
         <Text
           style={getDefautTextStyle()}
-          numberOfLines={props.numberOfLines?? 1}
-          ellipsizeMode={props.ellipsizeMode?? "head"}>
+          numberOfLines={props.numberOfLines??undefined}
+          ellipsizeMode={props.ellipsizeMode??undefined}
+          >
             {props.defaultText}
         </Text>
         :
         <Text 
           style={getTextStyle()}
-          numberOfLines={props.numberOfLines?? 1}
-          ellipsizeMode={props.ellipsizeMode?? "head"}>
+          numberOfLines={props.numberOfLines?? undefined}
+          ellipsizeMode={props.ellipsizeMode?? undefined}
+          >
             {props.text}
         </Text>
       }

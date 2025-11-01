@@ -136,11 +136,8 @@ const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
   
       setIsSyncing(true);
       //^ Sync all
-      const t1 = performance.now();
       const data = await objectivesApi.syncObjectivesList(objectiveList);
-      console.log(`END ${(performance.now() - t1).toFixed(2)} ms`)
       
-      log.b(data)
       if(data !== null && data !==undefined && data.Objectives){
         syncTags(data.Objectives);
         
@@ -211,7 +208,6 @@ const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
 
     setIsLogging(true);
     try {
-      console.log('login - ', loginBody)
       const data = await identityApi.login(JSON.stringify(loginBody), () => {});
 
       if(data && data.User && data.Token) {
@@ -292,7 +288,6 @@ const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
             imageSource={require('../../public/images/sync.png')}
             text={"Sync data."}>  
           </PressText>
-          {/* {user.Role === 'Admin' && */}
           <PressText 
             style={s.prefsTools}
             textStyle={s.prefsToolsText}

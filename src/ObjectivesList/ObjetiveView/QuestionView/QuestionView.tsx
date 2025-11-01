@@ -99,9 +99,9 @@ const QuestionView = (props: QuestionViewProps) => {
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      backgroundColor: (question.Statement.trim() !== '' && question.Answer.trim() !== '')? o.objbk:o.itembk,
+      backgroundColor: (question.Statement.trim() !== '' && question.Answer.trim() !== '' && !isEditingQuestion)? o.objbk:o.itembk,
       
-      borderColor: (question.Statement.trim() !== '' && question.Answer.trim() !== '')?colorPalette.transparent:o.bordercolor,
+      borderColor: (question.Statement.trim() !== '' && question.Answer.trim() !== '' && !isEditingQuestion)?colorPalette.transparent:o.bordercolor,
       borderWidth: 1,
       borderStyle: 'solid',
       borderRadius: o.borderRadius,

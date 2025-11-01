@@ -1,5 +1,5 @@
 import { View, StyleSheet, Vibration, Keyboard, BackHandler } from "react-native";
-import { globalStyle as gs } from "../../../Colors";
+import { colorPalette, globalStyle as gs } from "../../../Colors";
 import { useUserContext } from "../../../Contexts/UserContext";
 import { Note, ItemViewProps } from "../../../Types";
 import PressImage from "../../../PressImage/PressImage";
@@ -84,10 +84,10 @@ const NoteView = (props: NoteViewProps) => {
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      backgroundColor: note.Text.trim() === ''?o.itembk:o.objbk,
       paddingLeft: 10,
+      backgroundColor: (note.Text.trim() !== '' && !isEditingTitle)?colorPalette.transparent:o.itembk,
       
-      borderColor: note.Text.trim() === ''?o.bordercolor:o.objbk,
+      borderColor: (note.Text.trim() !== '' && !isEditingTitle)?colorPalette.transparent:o.bordercolor,
       borderWidth: 1,
       borderStyle: 'solid',
       borderRadius: o.borderRadius,

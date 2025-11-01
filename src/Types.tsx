@@ -183,6 +183,10 @@ export const DefaultUserPrefs: UserPrefs = {
   vibrate: true,
   autoSync: false,
   ObjectivesPrefs: {iconsToDisplay: []},
+  warmLocationOff: true,
+  singleTagSelected: false,
+  shouldLockOnOpen: false,
+  shouldLockOnReopen: false,
 }
 
 export const DefaultUser:User = {
@@ -212,6 +216,9 @@ export interface UserPrefs{
   vibrate: boolean,
   autoSync: boolean,
   ObjectivesPrefs: ObjectivesPrefs,
+  singleTagSelected: boolean,
+  shouldLockOnOpen: boolean,
+  shouldLockOnReopen: boolean,
 }
 
 export interface ObjectivesPrefs{

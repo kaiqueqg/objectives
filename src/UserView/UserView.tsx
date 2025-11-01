@@ -6,13 +6,22 @@ import Loading from "../Loading/Loading";
 import { colorPalette, dark, globalStyle as gs } from "../Colors";
 import { MessageType, ObjBottomIcons, Pattern, UserPrefs, Views } from "../Types";
 import { useLogContext } from "../Contexts/LogContext";
+import { useStorageContext } from "../Contexts/StorageContext";
 import PressImage from "../PressImage/PressImage";
 import Constants, { ExecutionEnvironment } from 'expo-constants';
 
-import * as FileSystem from "expo-file-system";
-import { useStorageContext } from "../Contexts/StorageContext";
 import LoginView from "./LoginView";
-const saf = (FileSystem as any).StorageAccessFramework;
+
+import * as FileSystem from 'expo-file-system';
+interface StorageAccessFrameworkType {
+  requestDirectoryPermissionsAsync: () => Promise<{ granted: boolean; directoryUri: string }>;
+  createFileAsync: (dirUri: string, fileName: string, mimeType: string) => Promise<string>;
+  writeAsStringAsync: (fileUri: string, content: string) => Promise<void>;
+  readDirectoryAsync: (dirUri: string) => Promise<string[]>;
+  deleteAsync: (uri: string) => Promise<void>;
+}
+
+const saf: StorageAccessFrameworkType = (FileSystem as any).StorageAccessFramework;
 
 export interface UserViewProps {
 }
@@ -50,10 +59,10 @@ const UserView = (props: UserViewProps) => {
     writeUserPrefs(newPrefs);
   }
 
-  const saveToJSON = async () => {
+  const saveToJSON = async (): Promise<void> => {
     try {
       const perm = await saf.requestDirectoryPermissionsAsync();
-      if (!perm.granted) throw new Error("Permissão negada");
+      if (!perm.granted) throw new Error("Permission denied");
       const dir = perm.directoryUri;
 
       const objectives = await storage.readObjectives();
@@ -62,25 +71,57 @@ const UserView = (props: UserViewProps) => {
       await writeSafFile(dir, "objectives.json", JSON.stringify(objectives, null, 2));
       await writeSafFile(dir, "items.json", JSON.stringify(items, null, 2));
 
-      popMessage('Salvo.');
-    } 
-    catch (err) {
-      popMessage('Erro salvando arquivo.', MessageType.Error);
+      popMessage("Saved.");
+    } catch (err) {
+      console.error(err);
+      popMessage("Error saving JSON files.", MessageType.Error);
     }
   }
 
-  async function writeSafFile(directoryUri: string, name: string, content: string) {
+  const writeSafFile = async (directoryUri: string, name: string, content: string): Promise<void> => {
     try {
       const files = await saf.readDirectoryAsync(directoryUri);
-      const existing = files.find((u: any) => u.endsWith("/" + name));
-      if (existing) await saf.deleteAsync(existing);
-    } catch {
-      popMessage('Erro ao salvar os dados.', MessageType.Error);
+      const existing = files.find((u) => u.endsWith("/" + name));
+      if (existing) await saf.deleteAsync(existing); // overwrite if exists
+    } catch (err) {
+      console.warn("Error deleting existing file", err);
     }
 
     const fileUri = await saf.createFileAsync(directoryUri, name, "application/json");
     await saf.writeAsStringAsync(fileUri, content);
   }
+
+  // const saveToJSON = async () => {
+  //   try {
+  //     const perm = await saf.requestDirectoryPermissionsAsync();
+  //     if (!perm.granted) throw new Error("Permissão negada");
+  //     const dir = perm.directoryUri;
+
+  //     const objectives = await storage.readObjectives();
+  //     const items = await storage.readItems();
+
+  //     await writeSafFile(dir, "objectives.json", JSON.stringify(objectives, null, 2));
+  //     await writeSafFile(dir, "items.json", JSON.stringify(items, null, 2));
+
+  //     popMessage('Salvo.');
+  //   } 
+  //   catch (err) {
+  //     popMessage('Erro salvando arquivo.', MessageType.Error);
+  //   }
+  // }
+
+  // async function writeSafFile(directoryUri: string, name: string, content: string) {
+  //   try {
+  //     const files = await saf.readDirectoryAsync(directoryUri);
+  //     const existing = files.find((u: any) => u.endsWith("/" + name));
+  //     if (existing) await saf.deleteAsync(existing);
+  //   } catch {
+  //     popMessage('Erro ao salvar os dados.', MessageType.Error);
+  //   }
+
+  //   const fileUri = await saf.createFileAsync(directoryUri, name, "application/json");
+  //   await saf.writeAsStringAsync(fileUri, content);
+  // }
 
   const shouldShowTools = () => {
     return (user.Role === 'Admin' || saf !== undefined);
@@ -188,6 +229,20 @@ const UserView = (props: UserViewProps) => {
     );
   }
 
+  const inChangeLockOpen = () => {
+    if(userPrefs.shouldLockOnOpen)
+      onChangePrefs({...userPrefs, shouldLockOnOpen: false, shouldLockOnReopen: false});
+    else
+      onChangePrefs({...userPrefs, shouldLockOnOpen: true});
+  }
+
+  const onChangeLockReopen = () => {
+    if(userPrefs.shouldLockOnReopen)
+      onChangePrefs({...userPrefs, shouldLockOnReopen: false})
+    else
+      onChangePrefs({...userPrefs, shouldLockOnReopen: true, shouldLockOnOpen: true})
+  }
+
   const getSettingsView = () => {
     return(
       <>
@@ -200,18 +255,29 @@ const UserView = (props: UserViewProps) => {
           text={"Which theme? - " + (userPrefs.theme==='dark'? 'Dark.':'White.')}>
         </PressText>
         <PressText 
+          style={userPrefs.shouldLockOnOpen? s.userPrefsContainerOn:s.userPrefsContainerOff}
+          textStyle={userPrefs.shouldLockOnOpen? s.userPrefsTextOn:s.userPrefsTextOff}
+          onPress={inChangeLockOpen}
+          text={"Should lock app on first open? - " + (userPrefs.shouldLockOnOpen? 'Yes.':'No.')}>
+        </PressText>
+        <PressText 
+          style={userPrefs.shouldLockOnReopen? s.userPrefsContainerOn:s.userPrefsContainerOff}
+          textStyle={userPrefs.shouldLockOnReopen? s.userPrefsTextOn:s.userPrefsTextOff}
+          onPress={onChangeLockReopen}
+          text={"Should lock app every times it's open? - " + (userPrefs.shouldLockOnReopen? 'Yes.':'No.')}>
+        </PressText>
+        <PressText 
           style={userPrefs.vibrate? s.userPrefsContainerOn:s.userPrefsContainerOff}
           textStyle={userPrefs.vibrate? s.userPrefsTextOn:s.userPrefsTextOff}
           onPress={() => {onChangePrefs({...userPrefs, vibrate: !userPrefs.vibrate})}}
           text={"Should button vibrate? - " + (userPrefs.vibrate? 'Yes.':'No.')}>
         </PressText>
-        {
         <PressText 
           style={userPrefs.autoSync? s.userPrefsContainerOn:s.userPrefsContainerOff}
           textStyle={userPrefs.autoSync? s.userPrefsTextOn:s.userPrefsTextOff}
           onPress={() => {onChangePrefs({...userPrefs, autoSync: !userPrefs.autoSync})}}
           text={"Should automatically sync? - " + (userPrefs.autoSync? 'Yes.':'No.')}>
-        </PressText>}
+        </PressText>
         <Text style={s.subHeader}>Objectives - Fast Access Icons</Text>
         <View style={s.objectiveIconContainer}>
           {getObjectiveIconsView()}

@@ -126,9 +126,9 @@ const GroceryView = (props: GroceryViewProps) => {
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      backgroundColor: grocery.IsChecked? o.objbk:o.itembk,
+      backgroundColor: (grocery.IsChecked && !isEditingGrocery)? o.objbk:o.itembk,
       
-      borderColor: grocery.IsChecked?colorPalette.transparent:o.bordercolor,
+      borderColor: (grocery.IsChecked && !isEditingGrocery)?colorPalette.transparent:o.bordercolor,
       borderWidth: 1,
       borderStyle: 'solid',
       borderRadius: o.borderRadius,

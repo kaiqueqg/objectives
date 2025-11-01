@@ -1,5 +1,5 @@
-import React, { JSX } from "react";
-import { View, StyleSheet, Pressable, Vibration, Alert, FlatList, Text, BackHandler, KeyboardAvoidingView, Platform, TextInput } from "react-native";
+import React, { JSX, useRef } from "react";
+import { View, StyleSheet, Pressable, Vibration, Alert, FlatList, Text, BackHandler, KeyboardAvoidingView, Platform, TextInput, ScrollView } from "react-native";
 import * as ExpoLocation from 'expo-location';
 
 import { colorPalette, getObjTheme, globalStyle as gs, lightBlue, noTheme, lightNoTheme, darkBlue } from "../../Colors";
@@ -68,6 +68,8 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
   const [itemSearchToShow, setItemSearchToShow] = useState<string[]>([]);
   const [searchText, setSearchText] = useState<string>('');
   const [searchNoItemFound, setSearchNoItemFound] = useState<boolean>(false);
+
+  const [newTag, setNewTag] = useState<string>('');
 
   const [devItemNumber, setDevItemNumber] = useState<boolean>(false);
 
@@ -467,23 +469,48 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     setIsTagOpen(!isTagOpen);
   }
 
+  const onHandleSubmit = (event: any) => {
+    onAddNewTag(event.nativeEvent.text);
+  }
+
   const onAddNewTag = async (tag: string) => {
     if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
 
-    if(tag.toLowerCase() === 'all' || tag.toLowerCase() === 'none'){
-      popMessage('You can\' add this tag: ' + tag, MessageType.Error);
+    if(tag.length > 100) {
+      popMessage(`That's one big tag...`, MessageType.Alert);
+    }
+    if(tag.trim() === '') {
+      if(tag.length > 0){
+        popMessage('Clever girl!', MessageType.Alert);
+        setNewTag('');
+      }
+      else{
+        popMessage('Type something for the tag...', MessageType.Alert);
+        if(userPrefs.vibrate) Vibration.vibrate(Pattern.Wrong);
+      }
+
       return;
     }
 
-    if(tag.trim() !== '') {
-      const uniqueTags = Array.from(new Set([...obj.Tags, tag.trim()]));
-      await putObjective({...obj, Tags: [...uniqueTags], LastModified: (new Date()).toISOString() });
-      await putAvailableTags([tag]);
-      await putSelectedTags([tag]);
+    const tagToAdd = tag.trim();
+
+    if(tagToAdd.toLowerCase() === 'all' || tagToAdd.toLowerCase() === 'none'){
+      popMessage('All and None are protected tags', MessageType.Error);
+      return;
     }
-    else{
-      if(userPrefs.vibrate) Vibration.vibrate(Pattern.Wrong);
-    }
+
+    const sortedTags = [...obj.Tags].sort((a, b) => a.localeCompare(b));
+
+    let uniqueTags = [];
+    if(sortedTags.includes('Pin'))
+      uniqueTags = Array.from(new Set(['Pin', ...sortedTags, tagToAdd]));
+    else
+      uniqueTags = Array.from(new Set([...sortedTags, tagToAdd]));
+
+    await putObjective({...obj, Tags: [...uniqueTags], LastModified: (new Date()).toISOString() });
+    await putAvailableTags([tagToAdd]);
+    await putSelectedTags([tagToAdd]);
+    setNewTag('');
   }
 
   const onSearchTextChange = (value: string) => {
@@ -491,8 +518,24 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
   }
 
   const onEraseSearch = () => {
-    setSearchText('');
-    setItemSearchToShow([]);
+    if(newTag.trim() === '' && userPrefs.vibrate) {
+      Vibration.vibrate(Pattern.Wrong);
+    } 
+    else{
+      if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
+      setSearchText('');
+      setItemSearchToShow([]);
+    }
+  }
+
+  const onEraseNewTag = () => {
+    if(newTag.trim() === '' && userPrefs.vibrate) {
+      Vibration.vibrate(Pattern.Wrong);
+    }
+    else{
+      if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
+      setNewTag('');
+    }
   }
 
   const doSearchText = (search: string) => {
@@ -562,14 +605,27 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
   const getTagList = () => {
     let tagList = [];
 
+    obj.Tags.sort((a, b) => {
+      if (a === "Pin") return -1;
+      if (b === "Pin") return 1;
+      return a.localeCompare(b);
+    });
+
     for(let i = 0; i < obj.Tags.length; i++){
       const cTag = obj.Tags[i];
       tagList.push(
-        <PressText key={cTag} onPress={()=>removeTag(cTag)} style={s.tagContainer} textStyle={s.tagText} text={cTag} defaultStyle={o}></PressText>
+        <PressText 
+          key={cTag}
+          onPress={()=>removeTag(cTag)}
+          style={[s.tagContainer, cTag === 'Pin'?s.tagContainerPin:undefined]}
+          textStyle={[s.tagText, cTag === 'Pin'?s.tagTextPin:undefined]}
+          text={cTag}
+          defaultStyle={o}>
+        </PressText>
       )
     }
     if(obj.Tags.length === 0){
-      return<></>;
+      return <Text style={s.noObjectiveTag}>NO TAGS</Text>
     }
     else{
       return (
@@ -583,12 +639,25 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
   const getAvailableTagList = () => {
     let tagList = [];
 
-    for(let i = 0; i < availableTags.length; i++){
-      const cTag = availableTags[i];
+    const availableTagsSorted = availableTags.sort((a, b) => {
+      if (a === "Pin") return -1;
+      if (b === "Pin") return 1;
+      return a.localeCompare(b);
+    });
+
+    for(let i = 0; i < availableTagsSorted.length; i++){
+      const cTag = availableTagsSorted[i];
       // if(obj.Tags.includes(cTag)) break;
 
       tagList.push(
-        <PressText key={cTag} onPress={()=>onAddNewTag(cTag)} style={s.tagContainer} textStyle={s.tagText} text={cTag} defaultStyle={o}></PressText>
+        <PressText 
+          key={cTag}
+          onPress={()=>onAddNewTag(cTag)}
+          style={[s.tagContainer, cTag === 'Pin'?s.tagContainerPin:undefined]}
+          textStyle={[s.tagText, cTag === 'Pin'?s.tagTextPin:undefined]}
+          text={cTag}
+          defaultStyle={o}>
+        </PressText>
       )
     }
     if(availableTags.length === 0){
@@ -614,18 +683,17 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
         {getTagList()}
         <Text style={s.tagEditTagTitle}>NEW</Text>
         <View style={s.tagListContainer}>
-          <PressInput
-            text={''}
-            objTheme={o} 
-            onDone={onAddNewTag}
-            onEditingState={onIsEditingTitle}
-            containerStyle={s.tagInputContainerStyle}
-            inputStyle={s.tagInputContainer}
-            textStyle={s.tagInputText}
-            defaultText={'click to insert tag'}
-            defaultStyle={{color: o.objtitle}}
-            trashImageStyle={{tintColor: o.trashicontint}}>
-          </PressInput>
+          <TextInput
+            style={s.inputStyle}
+            value={newTag}
+            onChangeText={setNewTag}
+            placeholderTextColor={o.itemtextfade}
+            placeholder="click to insert tag"
+            submitBehavior="submit"
+            onSubmitEditing={onHandleSubmit}
+            autoFocus>
+          </TextInput>
+          <PressImage pressStyle={[s.imagePress]} style={[s.cancelImage]} onPress={onEraseNewTag} source={require('../../../public/images/eraser.png')}></PressImage>
         </View>
       </View>
     )
@@ -684,7 +752,6 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       </View>
     )
   }
-
 
   const getButtonIconViews = (icon: ObjBottomIcons, invert: boolean = false) => {
     switch (icon) {
@@ -1024,11 +1091,15 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     }
 
     return (
-      <View 
-        style={s.itemRow}
+      <View style={s.itemRow}
         onTouchEnd={() => {isEditingPos && (isEndingPos? endChangingPos(item) : addRemoveToSelected(item))}}>
         {devItemNumber && <Text style={s.devItemRowNumber}>{item.Pos}</Text>}
         {rtnItem}
+        {/* {isEditingPos && (itemSelected?
+          <PressImage pressStyle={gs.baseBiggerImageContainer} style={s.image} onPress={()=>{addRemoveToSelected(item)}} source={require('../../../public/images/checked.png')}></PressImage>
+          :
+          <PressImage pressStyle={gs.baseBiggerImageContainer} style={s.image} onPress={()=>{addRemoveToSelected(item)}} source={require('../../../public/images/unchecked.png')}></PressImage>)
+        } */}
       </View>
     )
   }
@@ -1193,6 +1264,11 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       alignItems: 'center',
       justifyContent: 'space-between',
       backgroundColor: o.itembk,
+
+      borderColor: o.bordercolor,
+      borderTopWidth: 1,
+      borderBottomWidth: 1,
+      borderStyle: 'solid',
     },
     tagEditingContainer:{
       justifyContent: 'center',
@@ -1204,9 +1280,17 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       borderWidth: 1,
       borderStyle: 'solid',
     },
+    tagListContainerScroll:{
+      marginVertical: 5,
+
+      borderColor: o.bordercolor,
+      borderWidth: 1,
+      borderStyle: 'solid',
+    },
     tagListContainer:{
-      justifyContent: 'center',
+      flexDirection: 'row',
       flexWrap: 'wrap',
+      justifyContent: 'flex-start',
       margin: 5,
     },
     tagInputContainerStyle:{
@@ -1227,10 +1311,10 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     tagEditTagTitle:{
       width: '100%',
       verticalAlign: 'middle',
-      paddingVertical: 5,
+      paddingTop: 2,
       paddingHorizontal: 10,
 
-      fontSize: 20,
+      fontSize: 15,
       fontWeight: 'bold',
       color: o.objtitle,
     },
@@ -1250,6 +1334,22 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     },
     tagText:{
       color: o.objtitle,
+    },
+    tagContainerPin:{
+      backgroundColor: o.objtitle,
+    },
+    tagTextPin:{
+      color: o.objbk,
+    },
+    noObjectiveTag:{
+      width: '100%',
+      verticalAlign: 'middle',
+      paddingVertical: 5,
+      paddingHorizontal: 10,
+      lineHeight: 37,
+
+      fontSize: 10,
+      color: o.itemtextfade,
     },
     searchContainer:{
       justifyContent: 'center',
