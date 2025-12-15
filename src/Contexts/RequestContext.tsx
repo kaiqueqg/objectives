@@ -1,6 +1,6 @@
 // LogContext.tsx
 import React, { createContext, useState, useContext, ReactNode } from 'react';
-import { Item, LogLevel, LoginModel, Objective, ObjectiveList, Step, User, UserPrefs, Views, Response, MessageType, ImageInfo, PresignedUrl } from "../Types";
+import { Item, LogLevel, LoginResponse, Objective, ObjectiveList, Step, User, UserPrefs, Views, Response, MessageType, ImageInfo, PresignedUrl, TwoFactorAuthRequest } from "../Types";
 import { useLogContext } from './LogContext';
 import { useStorageContext } from './StorageContext';
 import * as FileSystem from 'expo-file-system';
@@ -13,7 +13,10 @@ interface RequestProviderProps {
 interface RequestContextType {
   identityApi: {
     isUp: (body?: string, fError?: () => void) => Promise<any>,
-    login: (body?: string, fError?: () => void) => Promise<LoginModel | null>,
+    login: (body?: string, fError?: () => void) => Promise<LoginResponse | null>,
+    activateTwoFA(request: TwoFactorAuthRequest, fError?: () => void): Promise<string|null>;
+    deactivateTwoFA(request: TwoFactorAuthRequest, fError?: () => void): Promise<string|null>;
+    validateTwoFA(code: TwoFactorAuthRequest, fError?: () => void): Promise<LoginResponse|null>;
     requestIdentity: <T>(endpoint: string, method: string, body?: string, fError?: () => void) => Promise<T | null>,
   },
   objectivesApi: {
@@ -87,25 +90,45 @@ export const RequestProvider: React.FC<RequestProviderProps> = ({ children }) =>
     async isUp(body?: string, fError?: () => void): Promise<any>{
       return this.requestIdentity('/IsUp', 'GET', body, fError);
     },
-    async login(body?: string, fError?: () => void): Promise<LoginModel|null>{
-      return this.requestIdentity<LoginModel|null>('/Login', 'POST', body, fError);
+    async login(body?: string, fError?: () => void): Promise<LoginResponse|null>{
+      return this.requestIdentity<LoginResponse|null>('/Login', 'POST', body, fError);
+    },
+    async activateTwoFA(code: TwoFactorAuthRequest, fError?: () => void): Promise<string|null>{
+      return await this.requestIdentity<string>('/ActivateTwoFA', 'POST', JSON.stringify(code), fError);
+    },
+    async deactivateTwoFA(code: TwoFactorAuthRequest, fError?: () => void): Promise<string|null>{
+      return await this.requestIdentity<string>('/DeactivateTwoFA', 'POST', JSON.stringify(code), fError);
+    },
+    async validateTwoFA(code: TwoFactorAuthRequest, fError?: () => void): Promise<LoginResponse|null>{
+      return await this.requestIdentity<LoginResponse|null>('/ValidateTwoFA', 'POST', JSON.stringify(code), fError);
     },
     async requestIdentity<T>(endpoint: string, method: string, body?: string, fError?: () => void): Promise<T|null>{
       try {
         const resp = await request("https://ptv4q6v3kf.execute-api.sa-east-1.amazonaws.com/dev", endpoint, method, body, fError);
         if(resp){
           const respData: Response<T> = await resp.json();
-          if(!resp.ok) popMessage(respData.message?? 'There was a problem with the server. No explanation', MessageType.Error);
-          if(respData.data)
+          if(resp.ok && respData.data){
+            if(respData.message) 
+              popMessage(respData.message);
+
             return respData.data;
-          else{
-            if(fError) {
-              fError();
+          }else{
+            if(resp.status === 500){
+              log.r('Response: ', resp);
             }
+            else if(respData.message){
+              popMessage(respData.message, MessageType.Error);
+            }
+            else{
+              popMessage('No info error.', MessageType.Error);
+            }
+
+            return null;
           }
         }
       } catch (err) {
         log.err('Error: ', endpoint, err);
+        return null;
       }
       return null;
     },
@@ -239,24 +262,28 @@ export const RequestProvider: React.FC<RequestProviderProps> = ({ children }) =>
     //! Responsable to parse and react to equal among all, know, request errors.
     async requestObjectivesList<T>(endpoint: string, method: string, body?: string, fError?: () => void): Promise<T|null>{
       try {
-        const resp = await request("https://6gbemhsxx4.execute-api.sa-east-1.amazonaws.com/dev", endpoint, method, body, fError);
-
-        if(resp){
-          const respData: Response<T> = await resp.json();
-          if(!resp.ok){
-            popMessage(respData.message?? 'There was a problem with the server. No explanation', MessageType.Error);
+        const resp =await request("https://6gbemhsxx4.execute-api.sa-east-1.amazonaws.com/dev", endpoint, method, body, fError);
+        
+        const respData: Response<T> = await resp.json();
+        if(resp.ok && respData.data){
+          return respData.data;
+        }else{
+          if(resp.status === 401){
+            popMessage('Unauthorized, you need to refresh token...', MessageType.Error);
           }
-          if(respData.data)
-            return respData.data;
+          else if(resp.status === 500){
+            log.r('Response: ', resp);
+          }
+          else if(respData.message){
+            popMessage(respData.message, MessageType.Error);
+          }
           else{
-            if(fError) {
-              log.err(respData.message);
-              fError();
-            }
+            popMessage('No info error.', MessageType.Error, 5);
           }
         }
       } catch (err) {
         log.err('Error: ', endpoint, err);
+        if(fError) fError();
       }
       return null;
     },

@@ -1,3 +1,8 @@
-"colorize.languages":[
-	"javascript",
-]
+{
+  "workbench.colorCustomizations": {
+    "titleBar.activeBackground": "#162977",
+    "titleBar.inactiveBackground": "#162977",
+    "titleBar.activeForeground": "#F5F5DC",
+    "titleBar.inactiveForeground": "#F5F5DC"
+  }
+}

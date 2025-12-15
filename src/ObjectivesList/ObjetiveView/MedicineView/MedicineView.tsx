@@ -29,7 +29,7 @@ export interface MedicineViewProps extends ItemViewProps {
 const MedicineView = (props: MedicineViewProps) => {
   const { userPrefs, theme: t, fontTheme: f, putItem } = useUserContext();
   const { log } = useLogContext();
-  const { objTheme: o, isEditingPos, onDeleteItem, loadMyItems, medicine } = props;
+  const { objTheme: o, wasJustAdded, isSelected, isSelecting, isDisabled, onDeleteItem, loadMyItems, medicine } = props;
 
   const [isEditingMedicine, setIsEditingMedicine] = useState<boolean>(false);
   const [tempMedicine, setTempMedicine] = useState<Medicine>(props.medicine);
@@ -111,7 +111,8 @@ const MedicineView = (props: MedicineViewProps) => {
       return;
     }
 
-    if(!isEditingPos){
+    if(!isDisabled){
+      props.itemsListScrollTo(medicine.ItemId);
       setIsEditingMedicine(!isEditingMedicine);
     }
   }
@@ -125,6 +126,14 @@ const MedicineView = (props: MedicineViewProps) => {
       marginHorizontal: o.marginHorizontal,
       marginVertical: o.marginVertical,
     },
+    containerSelecting:{
+      borderStyle: 'solid',
+      borderColor: o.bordercolorselecting,
+    },
+    containerSelected:{
+      borderStyle: 'dashed',
+      borderColor: o.bordercolorselected,
+    },
     medicineContainer:{
       flex: 1,
       flexDirection: 'row',
@@ -136,14 +145,6 @@ const MedicineView = (props: MedicineViewProps) => {
       borderWidth: 1,
       borderStyle: 'solid',
       borderRadius: o.borderRadius,
-    },
-    medicineContainerSelected:{
-      borderStyle: 'dashed',
-      borderColor: o.bordercolorselected,
-    },
-    medicineContainerEnding:{
-      borderStyle: 'solid',
-      borderColor: o.bordercolorselected,
     },
     titleContainer:{
       flex: 1,
@@ -222,13 +223,10 @@ const MedicineView = (props: MedicineViewProps) => {
   });
 
   return (
-    <View style={s.container}>
+    <View style={[s.container]}>
       <View style={
-        [s.medicineContainer, 
-          props.isSelected && s.medicineContainerSelected, 
-          props.isSelected && props.isEndingPos &&
-          s.medicineContainerEnding]}>
-        {!isEditingPos && isEditingMedicine?
+        [s.medicineContainer, isSelecting && s.containerSelecting, isSelected && s.containerSelected]}>
+        {!isDisabled && isEditingMedicine?
           <View style={s.inputsContainer}>
             <View style={s.inputsLeft}>
               <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageDelete]} confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete}></PressImage>
@@ -281,8 +279,8 @@ const MedicineView = (props: MedicineViewProps) => {
             defaultStyle={o}
             ></PressText>
         }
-        {!isEditingMedicine && !medicine.IsChecked && <PressImage pressStyle={gs.baseImageContainer} style={s.image} source={require('../../../../public/images/medicine.png')} onPress={() => {if(!isEditingPos)onChangeIsChecked();}}></PressImage>}
-        {!isEditingMedicine && medicine.IsChecked && <PressImage pressStyle={gs.baseImageContainer} style={s.imageFade} source={require('../../../../public/images/medicine-filled.png')} onPress={() => {if(!isEditingPos)onChangeIsChecked();}}></PressImage>}
+        {!isEditingMedicine && !medicine.IsChecked && <PressImage pressStyle={gs.baseImageContainer} style={s.image} source={require('../../../../public/images/medicine.png')} onPress={() => {if(!isDisabled)onChangeIsChecked();}}></PressImage>}
+        {!isEditingMedicine && medicine.IsChecked && <PressImage pressStyle={gs.baseImageContainer} style={s.imageFade} source={require('../../../../public/images/medicine-filled.png')} onPress={() => {if(!isDisabled)onChangeIsChecked();}}></PressImage>}
       </View>
     </View>
   );

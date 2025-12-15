@@ -25,7 +25,7 @@ export interface GroceryViewProps extends ItemViewProps {
 
 const GroceryView = (props: GroceryViewProps) => {
   const { userPrefs, theme: t, fontTheme: f, putItem } = useUserContext();
-  const { objTheme: o, isEditingPos, onDeleteItem, loadMyItems, grocery } = props;
+  const { objTheme: o, wasJustAdded, isSelected, isSelecting, isDisabled, onDeleteItem, loadMyItems, grocery } = props;
 
   const [isEditingGrocery, setIsEditingGrocery] = useState<boolean>(false);
   const [tempGrocery, setTempGrocery] = useState<Grocery>(props.grocery);
@@ -107,7 +107,8 @@ const GroceryView = (props: GroceryViewProps) => {
       return;
     }
 
-    if(!isEditingPos){
+    if(!isDisabled){
+      props.itemsListScrollTo(grocery.ItemId);
       setIsEditingGrocery(!isEditingGrocery);
     }
   }
@@ -133,12 +134,12 @@ const GroceryView = (props: GroceryViewProps) => {
       borderStyle: 'solid',
       borderRadius: o.borderRadius,
     },
-    groceryContainerSelected:{
-      borderStyle: 'dashed',
-      borderColor: o.bordercolorselected,
-    },
-    groceryContainerEnding:{
+    containerSelecting:{
       borderStyle: 'solid',
+      borderColor: o.bordercolorselecting,
+    },
+    containerSelected:{
+      borderStyle: 'dashed',
       borderColor: o.bordercolorselected,
     },
     titleContainer:{
@@ -214,9 +215,9 @@ const GroceryView = (props: GroceryViewProps) => {
   });
 
   return (
-    <View style={s.container}>
-      <View style={[s.groceryContainer, props.isSelected && s.groceryContainerSelected, props.isSelected && props.isEndingPos && s.groceryContainerEnding]}>
-        {!isEditingPos && isEditingGrocery?
+    <View style={[s.container]}>
+      <View style={[s.groceryContainer, isSelecting && s.containerSelecting, isSelected && s.containerSelected]}>
+        {!isDisabled && isEditingGrocery?
           <View style={s.inputsContainer}>
             <View style={s.inputsLeft}>
               <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageDelete]} confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete}></PressImage>
@@ -270,8 +271,8 @@ const GroceryView = (props: GroceryViewProps) => {
             defaultStyle={o}
             ></PressText>
         }
-        {!isEditingGrocery && !grocery.IsChecked && <PressImage pressStyle={gs.baseImageContainer} style={s.image} source={require('../../../../public/images/grocery.png')} onPress={() => {if(!isEditingPos)onChangeIsChecked();}}></PressImage>}
-        {!isEditingGrocery && grocery.IsChecked && <PressImage pressStyle={gs.baseImageContainer} style={s.imageFade} source={require('../../../../public/images/grocery-filled.png')} onPress={() => {if(!isEditingPos)onChangeIsChecked();}}></PressImage>}
+        {!isEditingGrocery && !grocery.IsChecked && <PressImage pressStyle={gs.baseImageContainer} style={s.image} source={require('../../../../public/images/grocery.png')} onPress={() => {if(!isDisabled)onChangeIsChecked();}}></PressImage>}
+        {!isEditingGrocery && grocery.IsChecked && <PressImage pressStyle={gs.baseImageContainer} style={s.imageFade} source={require('../../../../public/images/grocery-filled.png')} onPress={() => {if(!isDisabled)onChangeIsChecked();}}></PressImage>}
       </View>
     </View>
   );

@@ -24,7 +24,7 @@ export interface LinkViewProps extends ItemViewProps {
 const LinkView = (props: LinkViewProps) => {
   const { log, popMessage } = useLogContext();
   const { userPrefs, theme: t, fontTheme: f, putItem } = useUserContext();
-  const { objTheme: o, isEditingPos, onDeleteItem, loadMyItems, link } = props;
+  const { objTheme: o, wasJustAdded, isSelected, isSelecting, isDisabled, onDeleteItem, loadMyItems, link } = props;
 
   
   const [newTitle, setNewTitle] = useState<string>(link.Title);
@@ -102,7 +102,8 @@ const LinkView = (props: LinkViewProps) => {
       return;
     }
 
-    if(!isEditingPos){
+    if(!isDisabled){
+      props.itemsListScrollTo(link.ItemId);
       setIsEditingLinks(!isEditingLinks);
     }
   }
@@ -128,12 +129,12 @@ const LinkView = (props: LinkViewProps) => {
       borderStyle: 'solid',
       borderRadius: o.borderRadius,
     },
-    linksContainerSelected:{
-      borderStyle: 'dashed',
-      borderColor: o.bordercolorselected,
-    },
-    linksContainerEnding:{
+    containerSelecting:{
       borderStyle: 'solid',
+      borderColor: o.bordercolorselecting,
+    },
+    containerSelected:{
+      borderStyle: 'dashed',
       borderColor: o.bordercolorselected,
     },
     titleContainer:{
@@ -242,9 +243,9 @@ const LinkView = (props: LinkViewProps) => {
   });
 
   return (
-    <View style={s.container}>
-      <View style={[s.linksContainer, props.isSelected && s.linksContainerSelected, props.isSelected && props.isEndingPos && s.linksContainerEnding]}>
-        {!isEditingPos && isEditingLinks?
+    <View style={[s.container]}>
+      <View style={[s.linksContainer, isSelecting && s.containerSelecting, isSelected && s.containerSelected]}>
+        {!isDisabled && isEditingLinks?
           <View style={s.inputsContainer}>
             <View style={s.inputsLeft}>
               <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageDelete]} confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete}></PressImage>
@@ -274,7 +275,7 @@ const LinkView = (props: LinkViewProps) => {
           :
           <PressText style={s.titleContainer} textStyle={s.title} text={link.Title} onPress={()=>{onEditingLink()}} defaultStyle={o}></PressText>
         }
-        {!isEditingLinks && <PressImage pressStyle={gs.baseImageContainer} style={[s.image, link.Link.trim() !== ''?{}:s.imageFade]} source={require('../../../../public/images/link.png')} onPress={() => { if(!isEditingPos)openLink();}}></PressImage>}
+        {!isEditingLinks && <PressImage pressStyle={gs.baseImageContainer} style={[s.image, link.Link.trim() !== ''?{}:s.imageFade]} source={require('../../../../public/images/link.png')} onPress={() => { if(!isDisabled)openLink();}}></PressImage>}
       </View>
     </View>
   );

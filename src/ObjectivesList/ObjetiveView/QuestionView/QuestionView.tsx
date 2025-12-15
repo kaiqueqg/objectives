@@ -24,7 +24,7 @@ export interface QuestionViewProps extends ItemViewProps{
 
 const QuestionView = (props: QuestionViewProps) => {
   const { userPrefs, theme: t, fontTheme: f, putItem } = useUserContext();
-  const { objTheme: o, isEditingPos, onDeleteItem, loadMyItems, question } = props;
+  const { objTheme: o, wasJustAdded, isSelected, isSelecting, isDisabled, onDeleteItem, loadMyItems, question } = props;
 
   const [isEditingQuestion, setIsEditingQuestion] = useState<boolean>(false);
   const [tempQuestion, setTempQuestion] = useState<Question>(props.question);
@@ -80,7 +80,8 @@ const QuestionView = (props: QuestionViewProps) => {
       return;
     }
 
-    if(!isEditingPos){
+    if(!isDisabled){
+      props.itemsListScrollTo(question.ItemId);
       setIsEditingQuestion(!isEditingQuestion);
     }
   }
@@ -105,6 +106,14 @@ const QuestionView = (props: QuestionViewProps) => {
       borderWidth: 1,
       borderStyle: 'solid',
       borderRadius: o.borderRadius,
+    },
+    containerSelecting:{
+      borderStyle: 'solid',
+      borderColor: o.bordercolorselecting,
+    },
+    containerSelected:{
+      borderStyle: 'dashed',
+      borderColor: o.bordercolorselected,
     },
     questionContainerSelected:{
       borderStyle: 'dashed',
@@ -206,8 +215,8 @@ const QuestionView = (props: QuestionViewProps) => {
 
   return (
     <View style={s.container}>
-      <View style={[s.questionContainer, props.isSelected && s.questionContainerSelected, props.isSelected && props.isEndingPos && s.questionContainerEnding]}>
-        {!isEditingPos && isEditingQuestion?
+      <View style={[s.questionContainer, props.isSelecting && s.containerSelecting, props.isSelected && s.containerSelected]}>
+        {!isDisabled && isEditingQuestion?
           <View style={s.inputsContainer}>
             <View style={s.inputsLeft}>
               <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageDelete]} confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete}></PressImage>

@@ -1,6 +1,6 @@
 // LogContext.tsx
 import React, { createContext, useState, useContext, ReactNode } from 'react';
-import { Divider, Grocery, Item, ItemType, Location, LogLevel, MessageType, Note, PopMessage, Question, Step, Wait, Objective } from '../Types';
+import { Divider, Grocery, Item, ItemType, Location, LogLevel, MessageType, PopMessage, Note, Question, Step, Wait, Objective } from '../Types';
 
 interface LogProviderProps {
   children: ReactNode;
@@ -8,6 +8,27 @@ interface LogProviderProps {
 
 const LogContext = createContext<LogContextType | undefined>(undefined);
 const currentLogLevel = LogLevel.Dev;
+
+export interface LogInterface {
+  arr: (title: string, array: any[], f?: (e: any) => string) => void;
+  arrg: (title: string, array: any[], f?: (e: any) => string) => void;
+  arrb: (title: string, array: any[], f?: (e: any) => string) => void;
+  arrr: (title: string, array: any[], f?: (e: any) => string) => void;
+  arry: (title: string, array: any[], f?: (e: any) => string) => void;
+
+  dev: (...texts: any[]) => void;
+  o: (...objs: Objective[]) => void;
+  i: (...texts: Item[]) => void;
+
+  w: (...texts: any[]) => void;
+  y: (...texts: any[]) => void;
+  r: (...texts: any[]) => void;
+  b: (...texts: any[]) => void;
+  g: (...texts: any[]) => void;
+
+  war: (...texts: any[]) => void;
+  err: (...texts: any[]) => void;
+}
 
 export const LogProvider: React.FC<LogProviderProps> = ({ children }) => {
   
@@ -25,52 +46,57 @@ export const LogProvider: React.FC<LogProviderProps> = ({ children }) => {
   const [consoleLogs, setConsoleLogs] = useState<string>('');
   const putLog = (...messages: (string | undefined)[]) => {
     const newLogEntry = messages.join('\n');
-    setConsoleLogs((prevLogs) => `${prevLogs}\n${newLogEntry}`);
+    // setConsoleLogs((prevLogs) => `${prevLogs}\n${newLogEntry}`);
   };
 
   const deleteLog = () => {
-    setConsoleLogs('');
+    // setConsoleLogs('');
   };
 
-  const log = {
-    arr(array: any[], f?:(e:any)=>string){
+  const log: LogInterface = {
+    arr(title: string, array: any[], f?:(e:any)=>string){
+      log.w(title +' ---------------------');
       for(let i = 0; i < array.length; i++){
         if(f)
-          log.dev(f(array[i]));
+          log.w(f(array[i]));
         else
-          log.dev(array[i]);
+          log.w(array[i]);
       }
     },
-    arrg(array: any[], f?:(e:any)=>string){
+    arrg(title: string, array: any[], f?:(e:any)=>string){
+      log.g(title +' ---------------------');
       for(let i = 0; i < array.length; i++){
         if(f)
-          log.dev(f(array[i]));
+          log.g(f(array[i]));
         else
-          log.dev(array[i]);
+          log.g(array[i]);
       }
     },
-    arrb(array: any[], f?:(e:any)=>string){
+    arrb(title: string, array: any[], f?:(e:any)=>string){
+      log.b(title +' ---------------------');
       for(let i = 0; i < array.length; i++){
         if(f)
-          log.dev(f(array[i]));
+          log.b(f(array[i]));
         else
-          log.dev(array[i]);
+          log.b(array[i]);
       }
     },
-    arrr(array: any[], f?:(e:any)=>string){
+    arrr(title: string, array: any[], f?:(e:any)=>string){
+      log.r(title +' ---------------------');
       for(let i = 0; i < array.length; i++){
         if(f)
-          log.dev(f(array[i]));
+          log.r(f(array[i]));
         else
-          log.dev(array[i]);
+          log.r(array[i]);
       }
     },
-    arry(array: any[], f?:(e:any)=>string){
+    arry(title: string, array: any[], f?:(e:any)=>string){
+      log.y(title +' ---------------------');
       for(let i = 0; i < array.length; i++){
         if(f)
-          log.dev(f(array[i]));
+          log.y(f(array[i]));
         else
-          log.dev(array[i]);
+          log.y(array[i]);
       }
     },
     dev(...texts: any[]) {
@@ -96,7 +122,7 @@ export const LogProvider: React.FC<LogProviderProps> = ({ children }) => {
         return text.Title;
       });
       console.log(`\x1b[38;2;255;255;80m[DEV]`, ...formattedTexts);
-      putLog(...formattedTexts);
+      // putLog(...formattedTexts);
     },
     i(...texts: Item[]){
       if (currentLogLevel <= LogLevel.Dev) {
@@ -110,10 +136,10 @@ export const LogProvider: React.FC<LogProviderProps> = ({ children }) => {
           if(text.Type===ItemType.Wait) return (text as Wait).Title;
         });
         console.log(`\x1b[38;2;255;255;80m[DEV]`, ...formattedTexts);
-        putLog(...formattedTexts);
+        // putLog(...formattedTexts);
       }
     },
-    w(safe?: boolean, ...texts: any[]){
+    w(...texts: any[]){
       if (currentLogLevel <= LogLevel.Dev) {
         const formattedTexts = texts.map(text => {
           if(text === null) return 'null';
@@ -125,7 +151,7 @@ export const LogProvider: React.FC<LogProviderProps> = ({ children }) => {
           }
         });
         console.log(`\x1b[38;2;255;255;255m[DEV]`, ...formattedTexts);
-        putLog(...formattedTexts);
+        // putLog(...formattedTexts);
       }
     },
     y(...texts: any[]){
@@ -140,7 +166,7 @@ export const LogProvider: React.FC<LogProviderProps> = ({ children }) => {
           }
         });
         console.log(`\x1b[38;2;255;255;80m[DEV]`, ...formattedTexts);
-        putLog(...formattedTexts);
+        // putLog(...formattedTexts);
       }
     },
     r(...texts: any[]){
@@ -155,7 +181,7 @@ export const LogProvider: React.FC<LogProviderProps> = ({ children }) => {
           }
         });
         console.log(`\x1b[38;2;255;80;80m[DEV]`, ...formattedTexts);
-        putLog(...formattedTexts);
+        // putLog(...formattedTexts);
       }
     },
     b(...texts: any[]){
@@ -170,7 +196,7 @@ export const LogProvider: React.FC<LogProviderProps> = ({ children }) => {
           }
         });
         console.log(`\x1b[38;2;80;80;255m[DEV]`, ...formattedTexts);
-        putLog(...formattedTexts);
+        // putLog(...formattedTexts);
       }
     },
     g(...texts: any[]){
@@ -185,7 +211,7 @@ export const LogProvider: React.FC<LogProviderProps> = ({ children }) => {
           }
         });
         console.log(`\x1b[38;2;80;255;80m[DEV]`, ...formattedTexts);
-        putLog(...formattedTexts);
+        // putLog(...formattedTexts);
       }
     },
     war(...texts: any[]){
@@ -201,7 +227,7 @@ export const LogProvider: React.FC<LogProviderProps> = ({ children }) => {
         });
     
         console.log(`\x1b[38;2;255;255;80m[WAR]`, ...formattedTexts);
-        putLog(...formattedTexts);
+        // putLog(...formattedTexts);
       }
     },
     err(...texts: any[]){
@@ -217,7 +243,7 @@ export const LogProvider: React.FC<LogProviderProps> = ({ children }) => {
         });
     
         console.log(`\x1b[38;2;255;80;80m[ERR]`, ...formattedTexts);
-        putLog(...formattedTexts);
+        // putLog(...formattedTexts);
       }
     },
   }
@@ -259,20 +285,19 @@ export const LogProvider: React.FC<LogProviderProps> = ({ children }) => {
   );
 };
 
-interface LogContextType {
-  log: any,
-  consoleLogs: string,
-  deleteLog: () => void,
-  //^Message
-  messageList: PopMessage[],
-  popMessage: (text: string, type?: MessageType, timeoutInSeconds?: number) => void,
-  removeMessage: (removeId: string) => void,
+export interface LogContextType {
+  log: LogInterface;
+
+  consoleLogs: string;
+  deleteLog: () => void;
+
+  messageList: PopMessage[];
+  popMessage: (text: string, type?: MessageType, timeoutInSeconds?: number) => void;
+  removeMessage: (removeId: string) => void;
 }
 
 export const useLogContext = () => {
   const context = useContext(LogContext);
-  if (!context) {
-    throw new Error('useLogContext must be used within a LogProvider');
-  }
+  if (!context) throw new Error('useLogContext must be used within a LogProvider');
   return context;
 };

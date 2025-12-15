@@ -26,7 +26,7 @@ export interface DividerViewProps extends ItemViewProps{
 const DividerView = (props: DividerViewProps) => {
   const { theme: t, fontTheme: f, putItem } = useUserContext();
   const { log, popMessage } = useLogContext();
-  const { objTheme: o, isEditingPos, onDeleteItem, loadMyItems, divider, orderDividerItems, choseNewItemToAdd, } = props;
+  const { objTheme: o, wasJustAdded, isDisabled, isSelecting, isSelected, onDeleteItem, loadMyItems, divider, orderDividerItems, choseNewItemToAdd, } = props;
 
   const [isEditingTitle, setIsEditingTitle] = useState<boolean>(false);
   const [isItemsOpen, setIsItemsOpen] = useState<boolean>(false);
@@ -74,6 +74,7 @@ const DividerView = (props: DividerViewProps) => {
   }
 
   const onEditingTitle = async (editingState: boolean) => {
+    if(editingState) props.itemsListScrollTo(divider.ItemId);
     setIsEditingTitle(editingState);
   }
 
@@ -83,18 +84,20 @@ const DividerView = (props: DividerViewProps) => {
     loadMyItems();
   }
 
-  //Responsable for open, close and lock icon and menu.
+  /// Responsable for open, close and lock icon and menu.
   const addingNewItem = async () => {
+    if(isDisabled) return;
+    
     if(isItemsOpen){
-      if(isItemOpenLocked){ //turn all off
+      if(isItemOpenLocked){ /// turn all off
         setIsItemOpenLocked(false);
         setIsItemsOpen(false);
       }
-      else{//adding but now lock
+      else{/// adding but now lock
         setIsItemOpenLocked(true);
       }
     }
-    else{//start adding item
+    else{/// start adding item
       setIsItemsOpen(true);
     }
   }
@@ -136,16 +139,16 @@ const DividerView = (props: DividerViewProps) => {
       borderWidth: 1,
       borderRadius: 5,
       borderStyle: 'solid',
-      borderColor: o.objbk,
+      borderColor: o.bordercolor,
 
       backgroundColor: o.itembkdark,
     },
-    titleContainerSelected:{
-      borderStyle: 'dashed',
-      borderColor: o.bordercolorselected,
-    },
-    titleContainerEnding:{
+    containerSelecting:{
       borderStyle: 'solid',
+      borderColor: o.bordercolorselecting,
+    },
+    containerSelected:{
+      borderStyle: 'dashed',
       borderColor: o.bordercolorselected,
     },
     inputTextStyle:{
@@ -172,13 +175,13 @@ const DividerView = (props: DividerViewProps) => {
 
   return (
     <View style={[s.dividerContainer, isItemsOpen && s.dividerContainerOpen]} >
-      <View style={[s.titleContainer, props.isSelected && s.titleContainerSelected, props.isSelected && props.isEndingPos && s.titleContainerEnding]}>
+      <View style={[s.titleContainer, isSelecting && s.containerSelecting, isSelected && s.containerSelected]}>
         {!isEditingTitle &&
           <>
             {divider.IsOpen?
-              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, isItemsOpen&&s.imageFade]} disable={isItemsOpen} onPress={() => {if(!isEditingPos)onChangeIsOpen();}} source={require('../../../../public/images/down-chevron.png')}></PressImage>
+              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, isItemsOpen&&s.imageFade]} disable={isItemsOpen} onPress={() => {if(!isDisabled)onChangeIsOpen();}} source={require('../../../../public/images/down-chevron.png')}></PressImage>
               :
-              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, isItemsOpen&&s.imageFade]} disable={isItemsOpen} onPress={() => {if(!isEditingPos)onChangeIsOpen();}} source={require('../../../../public/images/up-chevron.png')}></PressImage>
+              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, isItemsOpen&&s.imageFade]} disable={isItemsOpen} onPress={() => {if(!isDisabled)onChangeIsOpen();}} source={require('../../../../public/images/up-chevron.png')}></PressImage>
             }
             <View style={gs.baseImageContainer}></View>
           </>
@@ -189,7 +192,7 @@ const DividerView = (props: DividerViewProps) => {
           onDelete={onDelete}
           confirmDelete={true}
           onDone={onChangeTitle}
-          uneditable={isEditingPos || props.isLocked}
+          uneditable={isDisabled || props.isLocked}
           onEditingState={onEditingTitle}
 
           textStyle={s.inputTextStyle}
@@ -199,11 +202,21 @@ const DividerView = (props: DividerViewProps) => {
         </PressInput>
         {!isEditingTitle &&
           <>
-            <PressImage pressStyle={gs.baseImageContainer} style={[s.image, isItemsOpen&&s.imageFade]} disable={isItemsOpen || props.isLocked} confirm={true} onPress={() => {orderDividerItems(divider)}} source={require('../../../../public/images/atoz.png')}></PressImage>
+            <PressImage pressStyle={gs.baseImageContainer} style={[s.image, isItemsOpen&&s.imageFade]} disable={isItemsOpen || props.isLocked || isDisabled} confirm onPress={() => {if(!isDisabled)orderDividerItems(divider);}} source={require('../../../../public/images/atoz.png')}></PressImage>
             {isItemOpenLocked?
-              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, {tintColor: 'red'}]} onPress={addingNewItem} source={require('../../../../public/images/add-lock.png')}></PressImage>
+              <PressImage
+                pressStyle={gs.baseImageContainer}
+                style={[s.image, {tintColor: 'red'}]}
+                onPress={addingNewItem}
+                source={require('../../../../public/images/add-lock.png')}>
+              </PressImage>
               :
-              <PressImage pressStyle={gs.baseImageContainer} style={[s.image]} onPress={addingNewItem} disable={isItemsOpen || props.isLocked} source={require('../../../../public/images/add.png')}></PressImage>
+              <PressImage 
+                pressStyle={gs.baseImageContainer}
+                style={[s.image]}
+                onPress={addingNewItem}
+                source={require('../../../../public/images/add.png')}>
+              </PressImage>
             }
           </>
         }

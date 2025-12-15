@@ -21,7 +21,7 @@ export interface WaitViewProps extends ItemViewProps{
 
 const WaitView = (props: WaitViewProps) => {
   const { theme: t, fontTheme: f, putItem } = useUserContext();
-  const { objTheme: o, wait, isEditingPos, onDeleteItem, loadMyItems } = props;
+  const { objTheme: o, wait, isDisabled, onDeleteItem, loadMyItems } = props;
 
   const [isEditingTitle, setIsEditingTitle] = useState<boolean>(false);
 
@@ -119,14 +119,14 @@ const WaitView = (props: WaitViewProps) => {
 
   return (
     <View style={s.container}>
-    <View style={[s.titleContainer, props.isSelected && s.titleContainerSelected, props.isSelected && props.isEndingPos && s.titleContainerEnding]}>
+    <View style={[s.titleContainer, props.isSelected && s.titleContainerSelected, props.isSelected && isDisabled && s.titleContainerEnding]}>
         <PressInput 
           objTheme={o}
           text={wait.Title}
           onDelete={onDelete}
           onDone={onChangeTitle}
           onEditingState={onEditingTitle}
-          uneditable={isEditingPos || props.isLocked}
+          uneditable={isDisabled || props.isLocked}
 
           textStyle={s.inputTextStyle}
           inputStyle={s.inputStyle}

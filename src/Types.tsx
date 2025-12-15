@@ -25,25 +25,61 @@ export interface Objective {
   Tags: string[],
 }
 
-export enum ItemType{ Step, Wait, Question, Note, Location, Divider, Grocery, Medicine, Exercise, Link, ItemFake, Image, House, /*put new before here*/ Unknown,  }
-export enum ObjBottomIcons {Menu, Archive, Unarchive, Palette, Checked, Tags, Sorted, Pos, Add, Search, IsLocked};
+export enum ItemType {
+  Step = 'Step',
+  Wait = 'Wait',
+  Question = 'Question',
+  Note = 'Note',
+  Location = 'Location',
+  Divider = 'Divider',
+  Grocery = 'Grocery',
+  Medicine = 'Medicine',
+  Exercise = 'Exercise',
+  Link = 'Link',
+  Image = 'Image',
+  House = 'House',
+
+  //Helpers to display
+  Separator = 'Separator',
+  HiddenItemText = 'HiddenItemText',
+  StartPlaceholder = 'StartPlaceholder',
+  Unknown = 'Unknown',
+}
+export enum ObjBottomIcons {
+  Menu = 'Menu',
+  Archive = 'Archive',
+  Unarchive = 'Unarchive',
+  Palette = 'Palette',
+  Checked = 'Checked',
+  Tags = 'Tags',
+  Sorted = 'Sorted',
+  Pos = 'Pos',
+  Add = 'Add',
+  Search = 'Search',
+  IsLocked = 'IsLocked',
+  FoldUnfoldAll = 'FoldUnfoldAll',
+  GoingTopDown = 'GoingTopDown',
+}
 
 export interface ItemViewProps {
   objTheme: ObjectivePallete,
-  isEditingPos: boolean,
-  isEndingPos: boolean,
+  isSelecting: boolean,
   isSelected: boolean,
+  isDisabled: boolean,
   isLocked: boolean,
+  wasJustAdded:boolean,
   onDeleteItem: (item: Item) => void,
   loadMyItems: () => void,
+  itemsListScrollTo: (itemId: string) => void,
 }
 
-export const ItemNew = (userId: string, objectiveId: string, itemId: string, type: ItemType, pos: number) => {
+export const ItemNew = (userId: string, objectiveId: string, itemId: string, type: ItemType, pos: number, title: string) => {
   return({
     UserIdObjectiveId: userId + objectiveId,
     ItemId: itemId,
     Pos: pos,
     Type: type,
+    Title: title,
     LastModified: (new Date()).toISOString(),
   });
 }
@@ -53,6 +89,7 @@ export interface Item {
   UserIdObjectiveId: string,
   Type: ItemType,
   Pos: number,
+  Title: string,
   LastModified: string,
 }
 
@@ -69,14 +106,12 @@ export enum StepImportance {
   LadybugGreen,
 }
 export interface Step extends Item {
-  Title: string,
   Done: boolean,
   Importance: StepImportance,
   AutoDestroy: boolean,
 }
 
 export interface Wait extends Item {
-  Title: string,
 }
 
 export interface Note extends Item {
@@ -89,18 +124,15 @@ export interface Question extends Item {
 }
 
 export interface Location extends Item {
-  Title: string,
   Url: string,
   IsShowingMap: boolean,
 }
 
 export interface Divider extends Item {
-  Title: string,
   IsOpen: boolean,
 }
 
 export interface Grocery extends Item {
-  Title: string,
   IsChecked: boolean,
   Quantity?: number,
   Unit?: string,
@@ -108,7 +140,6 @@ export interface Grocery extends Item {
 }
 
 export interface Medicine extends Item{
-  Title: string,
   IsChecked: boolean,
   Quantity?: number,
   Unit?: string,
@@ -120,7 +151,6 @@ export interface Medicine extends Item{
 export enum Weekdays{ Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday }
 
 export interface Exercise extends Item{
-  Title: string,
   IsDone: boolean,
   Reps: number,
   Series: number,
@@ -132,12 +162,10 @@ export interface Exercise extends Item{
 }
 
 export interface Link extends Item{
-  Title: string,
   Link: string,
 }
 
 export interface Image extends Item{
-  Title: string;
   Name: string,
   Size: number,
   Width: number,
@@ -146,7 +174,6 @@ export interface Image extends Item{
 }
 
 export interface House extends Item{
-  Title: string,
   Listing: string,
   MapLink: string,
   MeterSquare: string,
@@ -158,9 +185,7 @@ export interface House extends Item{
   Attention: string,
 }
 
-export interface ItemFake extends Item{
-  Title: string,
-  Fade: boolean,
+export interface GenericItem extends Item{
 }
 
 export interface PresignedUrl { url: string }
@@ -182,11 +207,25 @@ export const DefaultUserPrefs: UserPrefs = {
   allowLocation: false,
   vibrate: true,
   autoSync: false,
-  ObjectivesPrefs: {iconsToDisplay: []},
+  ObjectivesPrefs: {iconsToDisplay: [
+    // ObjBottomIcons.Archive,
+    // ObjBottomIcons.Unarchive,
+    ObjBottomIcons.Palette,
+    ObjBottomIcons.Checked,
+    ObjBottomIcons.Tags,
+    // ObjBottomIcons.Sorted,
+    ObjBottomIcons.Pos,
+    ObjBottomIcons.Add,
+    // ObjBottomIcons.Search,
+    ObjBottomIcons.IsLocked,
+    ObjBottomIcons.FoldUnfoldAll,
+    ObjBottomIcons.GoingTopDown,
+  ]},
   warmLocationOff: true,
   singleTagSelected: false,
   shouldLockOnOpen: false,
   shouldLockOnReopen: false,
+  isRightHand: true,
 }
 
 export const DefaultUser:User = {
@@ -197,6 +236,7 @@ export const DefaultUser:User = {
   Role: 'Basic',
   Status: 'Active',
   userPrefs: DefaultUserPrefs,
+  TwoFAActive: false,
 }
 
 export interface User{
@@ -205,6 +245,7 @@ export interface User{
   Username: string,
   Password: string,
   Role: string,
+  TwoFAActive: boolean,
   Status: string,
   userPrefs: UserPrefs,
 }
@@ -219,16 +260,34 @@ export interface UserPrefs{
   singleTagSelected: boolean,
   shouldLockOnOpen: boolean,
   shouldLockOnReopen: boolean,
+  isRightHand: boolean,
 }
 
 export interface ObjectivesPrefs{
   iconsToDisplay: string[],
 }
 
-export interface LoginModel{
+// export interface LoginModel{
+//   User?: User,
+//   Token: string,
+//   ErrorMessage: string
+// }
+
+export interface LoginRequest {
+  Password: string;
+  Email: string;
+  ExpoToken?: string;
+}
+export interface LoginResponse {
   User?: User,
-  Token: string,
-  ErrorMessage: string
+  Token?: string,
+  RequiringTwoFA: boolean,
+  TwoFATempToken?: string,
+}
+
+export interface TwoFactorAuthRequest { 
+  TwoFACode: string,
+  TwoFATempToken?: string,
 }
 
 export interface StorageInfo<T>{
@@ -283,6 +342,9 @@ export const GetViewsText = (view: Views): string => {
       return ''
   }
 }
+
+export enum MultiSelectType { MOVE = 'Move', COPY = 'Copy' }
+export interface MultiSelectAction { type: MultiSelectType, originObjectiveId: string, items: Item[] }
 
 export enum MessageType { Normal, Error, Alert, }
 

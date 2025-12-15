@@ -22,6 +22,9 @@ export interface PressImageProps{
   confirmStyle?: any,
   text?: string,
   textStyle?: any,
+
+  selected?: boolean,
+  selectedStyle?: any,
 }
 
 const PressImage = (props: PressImageProps) => {
@@ -69,7 +72,7 @@ const PressImage = (props: PressImageProps) => {
   const getNormalImage = () => {
     return(
       <Pressable 
-        style={[props.pressStyle]}
+        style={[props.pressStyle, props.selected? props.selectedStyle:{}]}
         onPressOut={normalTouchEnd}
         onPressIn={props.onPressIn}
         onLongPress={handleLongPress}

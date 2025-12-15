@@ -27,7 +27,7 @@ export interface LocationViewProps extends ItemViewProps {
 const LocationView = (props: LocationViewProps) => {
   const { popMessage, log } = useLogContext();
   const { theme: t, fontTheme: f, putItem, userPrefs } = useUserContext();
-  const { objTheme: o, isEditingPos, onDeleteItem, loadMyItems, location } = props;
+  const { objTheme: o, wasJustAdded, isSelected, isSelecting, isDisabled, onDeleteItem, loadMyItems, location } = props;
 
   const [isEditingLocation, setIsEditingLocation] = useState<boolean>(false);
   const [tempLocation, setTempLocation] = useState<Location>(props.location);
@@ -185,7 +185,8 @@ const LocationView = (props: LocationViewProps) => {
       return;
     }
 
-    if(!isEditingPos){
+    if(!isDisabled){
+      props.itemsListScrollTo(location.ItemId);
       setIsEditingLocation(!isEditingLocation);
     }
   }
@@ -211,12 +212,12 @@ const LocationView = (props: LocationViewProps) => {
       borderStyle: 'solid',
       borderRadius: o.borderRadius,
     },
-    locationContainerSelected:{
-      borderStyle: 'dashed',
-      borderColor: o.bordercolorselected,
-    },
-    locationContainerEnding:{
+    containerSelecting:{
       borderStyle: 'solid',
+      borderColor: o.bordercolorselecting,
+    },
+    containerSelected:{
+      borderStyle: 'dashed',
       borderColor: o.bordercolorselected,
     },
     titleContainer:{
@@ -314,9 +315,9 @@ const LocationView = (props: LocationViewProps) => {
   });
 
   return(
-    <View style={s.container}>
-      <View style={[s.locationContainer, props.isSelected && s.locationContainerSelected, props.isSelected && props.isEndingPos && s.locationContainerEnding]}>
-        {!isEditingPos && isEditingLocation?
+    <View style={[s.container]}>
+      <View style={[s.locationContainer, isSelecting && s.containerSelecting, isSelected && s.containerSelected]}>
+        {!isDisabled && isEditingLocation?
           <View style={s.inputsContainer}>
             <View style={s.inputsLeft}>
               <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageDelete]} confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete}></PressImage>
@@ -339,7 +340,7 @@ const LocationView = (props: LocationViewProps) => {
                   onChangeText={(value: string)=>{setTempLocation({...tempLocation, Url: value})}}
                   onSubmitEditing={onDoneLocation}></TextInput>
                 {isGettingCurrentLocation?
-                  <Loading theme={dark}></Loading>
+                  <Loading></Loading>
                   :
                   <PressImage pressStyle={gs.baseImageContainer} style={[s.image]} source={require('../../../../public/images/location-filled.png')} onPress={addCurrentLocation}></PressImage>
                 }
@@ -366,7 +367,7 @@ const LocationView = (props: LocationViewProps) => {
               {location.Url.trim() === ''?
                 <PressImage pressStyle={gs.baseImageContainer} style={s.image} source={require('../../../../public/images/location.png')}></PressImage>
                 :
-                <PressImage pressStyle={gs.baseImageContainer} style={s.image} source={require('../../../../public/images/location-filled.png')} onPress={() => {if(!isEditingPos)openUrl();}}></PressImage>
+                <PressImage pressStyle={gs.baseImageContainer} style={s.image} source={require('../../../../public/images/location-filled.png')} onPress={() => {if(!isDisabled)openUrl();}}></PressImage>
               }
             </View>
           </View>

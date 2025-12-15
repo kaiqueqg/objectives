@@ -1,7 +1,7 @@
 // LogContext.tsx
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { DefaultUser, Item, Image as ItemImage, LogLevel, LoginModel, Objective, Step, StorageInfo, User, UserPrefs, Views } from "../Types";
+import { DefaultUser, Item, Image as ItemImage, LogLevel, LoginResponse, Objective, Step, StorageInfo, User, UserPrefs, Views } from "../Types";
 import { useLogContext } from './LogContext';
 
 interface StorageProviderProps {
@@ -134,7 +134,6 @@ export const StorageProvider: React.FC<StorageProviderProps> = ({ children }) =>
         await AsyncStorage.setItem(keys.UserPrefs, JSON.stringify(userPrefs));
       } catch (err){
         log.err('writeUserPrefs', '[catch] writing user prefs.');
-        log.pop('Error getting user preferences.');
       }
     },
   

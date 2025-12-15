@@ -1,8 +1,8 @@
 import React from "react";
-import { Pressable, Text, Image, ImageSourcePropType, StyleSheet } from "react-native";
+import { Pressable, Text, Image, ImageSourcePropType, StyleSheet, View } from "react-native";
 import { useUserContext } from "../Contexts/UserContext";
 import Loading from "../Loading/Loading";
-import { ObjectivePallete } from "../Colors";
+import { ObjectivePallete, globalStyle as gs } from "../Colors";
 
 interface PressTextProps{
   style: any,
@@ -32,10 +32,6 @@ const PressText = (props: PressTextProps) => {
     return [s.text, props.textStyle];
   }
 
-  const getContainerStyle = () => {
-    return [s.pressTextStyle, props.style];
-  }
-
   const s = StyleSheet.create({
     pressTextStyle: {
       minWidth: 0,
@@ -57,14 +53,20 @@ const PressText = (props: PressTextProps) => {
       borderColor: o?.itemtextfade?? t.textcolorfade,
       borderRadius: 5,
     },
+    baseImage:{
+      ...gs.baseImage,
+      tintColor: t.icontint,
+    },
   });
 
   return (
-    <Pressable style={getContainerStyle()} onPress={props.onPress}>
-      {props.isLoading?
-        <Loading theme={t} ></Loading>
-        :
-        (props.imageSource && props.imageStyle && <Image style={props.imageStyle} source={props.imageSource}></Image>)
+    <Pressable style={[s.pressTextStyle, props.style]} onPress={props.onPress}>
+      {props.imageSource && 
+        (props.isLoading?
+          <Loading></Loading>
+          :
+          <Image style={[s.baseImage, props.imageStyle]} source={props.imageSource}></Image>
+        )
       }
       {props.text.trim() === ''?
         <Text

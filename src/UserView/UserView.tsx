@@ -91,38 +91,6 @@ const UserView = (props: UserViewProps) => {
     await saf.writeAsStringAsync(fileUri, content);
   }
 
-  // const saveToJSON = async () => {
-  //   try {
-  //     const perm = await saf.requestDirectoryPermissionsAsync();
-  //     if (!perm.granted) throw new Error("Permissão negada");
-  //     const dir = perm.directoryUri;
-
-  //     const objectives = await storage.readObjectives();
-  //     const items = await storage.readItems();
-
-  //     await writeSafFile(dir, "objectives.json", JSON.stringify(objectives, null, 2));
-  //     await writeSafFile(dir, "items.json", JSON.stringify(items, null, 2));
-
-  //     popMessage('Salvo.');
-  //   } 
-  //   catch (err) {
-  //     popMessage('Erro salvando arquivo.', MessageType.Error);
-  //   }
-  // }
-
-  // async function writeSafFile(directoryUri: string, name: string, content: string) {
-  //   try {
-  //     const files = await saf.readDirectoryAsync(directoryUri);
-  //     const existing = files.find((u: any) => u.endsWith("/" + name));
-  //     if (existing) await saf.deleteAsync(existing);
-  //   } catch {
-  //     popMessage('Erro ao salvar os dados.', MessageType.Error);
-  //   }
-
-  //   const fileUri = await saf.createFileAsync(directoryUri, name, "application/json");
-  //   await saf.writeAsStringAsync(fileUri, content);
-  // }
-
   const shouldShowTools = () => {
     return (user.Role === 'Admin' || saf !== undefined);
   }
@@ -214,7 +182,7 @@ const UserView = (props: UserViewProps) => {
           pressStyle={gs.baseBiggerImageContainer}
           style={[s.image, shouldFadeIcon(ObjBottomIcons.IsLocked) && s.imageFade]}
           onPress={()=>onAddIconToDisplay(ObjBottomIcons[ObjBottomIcons.IsLocked])}
-          source={require('../../public/images/lock.png')}></PressImage>
+          source={require('../../public/images/add-lock.png')}></PressImage>
         <PressImage 
           pressStyle={gs.baseBiggerImageContainer}
           style={[s.image, shouldFadeIcon(ObjBottomIcons.Checked) && s.imageFade]}
@@ -225,6 +193,16 @@ const UserView = (props: UserViewProps) => {
           style={[s.image, shouldFadeIcon(ObjBottomIcons.Add) && s.imageFade]}
           onPress={()=>onAddIconToDisplay(ObjBottomIcons[ObjBottomIcons.Add])}
           source={require('../../public/images/add.png')}></PressImage>
+        <PressImage 
+          pressStyle={gs.baseBiggerImageContainer}
+          style={[s.image, shouldFadeIcon(ObjBottomIcons.FoldUnfoldAll) && s.imageFade]}
+          onPress={()=>onAddIconToDisplay(ObjBottomIcons[ObjBottomIcons.FoldUnfoldAll])}
+          source={require('../../public/images/doubledown-chevron.png')}></PressImage>
+        <PressImage 
+          pressStyle={gs.baseBiggerImageContainer}
+          style={[s.image, shouldFadeIcon(ObjBottomIcons.GoingTopDown) && s.imageFade]}
+          onPress={()=>onAddIconToDisplay(ObjBottomIcons[ObjBottomIcons.GoingTopDown])}
+          source={require('../../public/images/to-bottom.png')}></PressImage>
       </>
     );
   }
@@ -252,47 +230,83 @@ const UserView = (props: UserViewProps) => {
           style={s.userPrefsContainerOn}
           textStyle={s.userPrefsTextOn}
           onPress={() => {onChangePrefs({...userPrefs, theme: userPrefs.theme === 'dark'?'light':'dark'})}}
+          imageStyle={s.image}
+          imageSource={require('../../public/images/theme.png')}
           text={"Which theme? - " + (userPrefs.theme==='dark'? 'Dark.':'White.')}>
         </PressText>
+        {userPrefs.isRightHand?
+          <PressText
+            style={s.userPrefsContainerOn}
+            textStyle={s.userPrefsTextOn}
+            onPress={() => {onChangePrefs({...userPrefs, isRightHand: !userPrefs.isRightHand})}}
+            imageStyle={s.image}
+            imageSource={require('../../public/images/righthand.png')}
+            text={"Which hand? - " + (userPrefs.isRightHand? 'Right hand.':'Left Hand.')}>
+          </PressText>
+            :
+          <PressText
+            style={s.userPrefsContainerOn}
+            textStyle={s.userPrefsTextOn}
+            onPress={() => {onChangePrefs({...userPrefs, isRightHand: !userPrefs.isRightHand})}}
+            imageStyle={s.image}
+            imageSource={require('../../public/images/lefthand.png')}
+            text={"Which hand? - " + (userPrefs.isRightHand? 'Right hand.':'Left Hand.')}>
+          </PressText>
+        }
+        
         <PressText 
           style={userPrefs.shouldLockOnOpen? s.userPrefsContainerOn:s.userPrefsContainerOff}
           textStyle={userPrefs.shouldLockOnOpen? s.userPrefsTextOn:s.userPrefsTextOff}
           onPress={inChangeLockOpen}
+          imageStyle={s.image}
+          imageSource={require('../../public/images/fingerprint.png')}
           text={"Should lock app on first open? - " + (userPrefs.shouldLockOnOpen? 'Yes.':'No.')}>
         </PressText>
         <PressText 
           style={userPrefs.shouldLockOnReopen? s.userPrefsContainerOn:s.userPrefsContainerOff}
           textStyle={userPrefs.shouldLockOnReopen? s.userPrefsTextOn:s.userPrefsTextOff}
           onPress={onChangeLockReopen}
+          imageStyle={s.image}
+          imageSource={require('../../public/images/fingerprint.png')}
           text={"Should lock app every times it's open? - " + (userPrefs.shouldLockOnReopen? 'Yes.':'No.')}>
         </PressText>
         <PressText 
           style={userPrefs.vibrate? s.userPrefsContainerOn:s.userPrefsContainerOff}
           textStyle={userPrefs.vibrate? s.userPrefsTextOn:s.userPrefsTextOff}
           onPress={() => {onChangePrefs({...userPrefs, vibrate: !userPrefs.vibrate})}}
+          imageStyle={s.image}
+          imageSource={require('../../public/images/vibrate.png')}
           text={"Should button vibrate? - " + (userPrefs.vibrate? 'Yes.':'No.')}>
         </PressText>
         <PressText 
           style={userPrefs.autoSync? s.userPrefsContainerOn:s.userPrefsContainerOff}
           textStyle={userPrefs.autoSync? s.userPrefsTextOn:s.userPrefsTextOff}
           onPress={() => {onChangePrefs({...userPrefs, autoSync: !userPrefs.autoSync})}}
+          imageStyle={s.imageSmall}
+          imageSource={require('../../public/images/sync.png')}
           text={"Should automatically sync? - " + (userPrefs.autoSync? 'Yes.':'No.')}>
         </PressText>
-        <Text style={s.subHeader}>Objectives - Fast Access Icons</Text>
+        <View style={s.contentDivider}></View>
+        <Text style={s.subHeader}>Objective bottom icons</Text>
         <View style={s.objectiveIconContainer}>
           {getObjectiveIconsView()}
         </View>
+        <View style={s.contentDivider}></View>
         <Text style={s.subHeader}>Location</Text>
         <PressText 
           style={userPrefs.allowLocation? s.userPrefsContainerOn:s.userPrefsContainerOff}
           textStyle={userPrefs.allowLocation? s.userPrefsTextOn:s.userPrefsTextOff}
           onPress={()=>{onChangePrefs({...userPrefs, allowLocation: !userPrefs.allowLocation})}}
+          imageStyle={s.imageSmall}
+          imageSource={require('../../public/images/location-filled.png')}
           text={"Use location? - " + (userPrefs.allowLocation? 'Yes.':'No.')}>
         </PressText>
         <PressText 
           style={userPrefs.warmLocationOff? s.userPrefsContainerOn:s.userPrefsContainerOff}
           textStyle={userPrefs.warmLocationOff? s.userPrefsTextOn:s.userPrefsTextOff}
           onPress={()=>{onChangePrefs({...userPrefs, warmLocationOff: !userPrefs.warmLocationOff})}}
+          imageStyle={s.imageSmall}
+          imageSource={require('../../public/images/location.png')}
           ellipsizeMode="head"
           numberOfLines={3}
           text={"Warm about necessity of location of proximity of location? - " + (userPrefs.warmLocationOff? 'Yes.':'No.')}>
@@ -329,7 +343,16 @@ const UserView = (props: UserViewProps) => {
       textAlign: 'center',
       color: t.textcolor,
       fontSize: 15,
-      marginTop: 10,
+      margin: 10,
+    },
+    contentDivider:{
+      marginTop: 20,
+      marginBottom: 9,
+      width: '100%',
+
+      borderColor: t.bordercolorfade,
+      borderTopWidth: 1,
+      borderStyle: 'solid',
     },
     userTextDef:{
       fontSize: 15,
@@ -368,7 +391,8 @@ const UserView = (props: UserViewProps) => {
     userPrefsContainerOn:{
       flexDirection: 'row',
       padding: 5,
-      marginTop: 10,
+      marginTop: 5,
+      paddingLeft: 10,
       backgroundColor: t.backgroundcolordarker,
       alignItems: "center",
 
@@ -378,8 +402,11 @@ const UserView = (props: UserViewProps) => {
       borderStyle: 'solid',
     },
     userPrefsContainerOff:{
+      flexDirection: 'row',
       padding: 5,
-      marginTop: 10,
+      marginTop: 5,
+      paddingLeft: 10,
+      alignItems: "center",
 
       borderRadius: 2,
       borderColor: t.bordercolorfade,
@@ -391,6 +418,7 @@ const UserView = (props: UserViewProps) => {
       flexWrap: "wrap",
       marginVertical: 5,
       marginHorizontal: 5,
+      paddingLeft: 10,
       color: t.textcolor,
     },
     userPrefsTextOff:{
@@ -398,6 +426,7 @@ const UserView = (props: UserViewProps) => {
       flexWrap: "wrap",
       marginVertical: 5,
       marginHorizontal: 5,
+      paddingLeft: 10,
       color: t.textcolorfade,
     },
     objectivesText: {
@@ -411,8 +440,16 @@ const UserView = (props: UserViewProps) => {
       ...gs.baseImage,
       tintColor: t.icontint,
     },
+    imageSmall:{
+      ...gs.baseSmallImage,
+      tintColor: t.icontint,
+    },
     imageFade:{
       ...gs.baseImage,
+      tintColor: t.icontintfade,
+    },
+    imageFadeSmall:{
+      ...gs.baseVerySmallImage,
       tintColor: t.icontintfade,
     },
     backupImage:{

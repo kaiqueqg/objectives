@@ -1,6 +1,6 @@
 // UserContext.tsx
 import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
-import { Item, Objective, MessageType, User, UserPrefs, Views, PopMessage, StoredImage, DefaultUser } from '../Types';
+import { Item, Objective, MessageType, User, UserPrefs, Views, PopMessage, StoredImage, DefaultUser, ObjBottomIcons, MultiSelectAction, Step, DefaultUserPrefs } from '../Types';
 import { AppPalette, dark, globalStyle as gs, light } from '../Colors';
 import { FontPalette, fontDark, fontPaper, fontWhite } from '../../fonts/Font';
 import { useStorageContext } from './StorageContext';
@@ -92,7 +92,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     else log.err('no last sync');
   }
 
-  //^-------------------- USER
+  ///-------------------- USER
   const [user, setUser] = useState<User>(DefaultUser);
   const writeUser = async (user: User) => {
     try {
@@ -116,17 +116,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
   const [userPrefs, setUserPrefs] = useState<UserPrefs>(
     {
-      theme: 'dark',
-      allowLocation: false,
-      vibrate: true,
-      autoSync: false, 
-      ObjectivesPrefs: {iconsToDisplay: [
-        'Archive', 'Unarchive', 'Palette', 'Checked', 'Tags', 'Sorted', 'Pos', 'Add', 'Search', 'IsLocked'
-      ]},
-      warmLocationOff: true,
-      singleTagSelected: false,
-      shouldLockOnOpen: false,
-      shouldLockOnReopen: false,
+      ...DefaultUserPrefs
     });
   const writeUserPrefs = async (userPrefs: UserPrefs) => {
     try {
@@ -150,7 +140,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const [theme, setTheme] = useState<AppPalette>(dark);
   const [fontTheme, setFontTheme] = useState<FontPalette>(fontDark);
 
-  //^-------------------- JWT TOKEN
+  ///-------------------- JWT TOKEN
   const [jwtToken, setJwtToken] = useState<string|null>(null);
   const writeJwtToken = async (token: string) => {
     try {
@@ -161,7 +151,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     }
   };
 
-  //^-------------------- VIEW
+  ///-------------------- VIEW
   const [currentView, setCurrentView] = useState<Views>(Views.ListView);
   const writeCurrentView = async (view: Views) => {
     try {
@@ -171,7 +161,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       log.err('writeCurrentView', 'Problem writing current view', err);
     }
   };
-  //^-------------------- TAGS
+  ///-------------------- TAGS
   const [availableTags, setAvailableTags] = useState<string[]>([]);
   const writeAvailableTags = async (availableTags: string[]) => {
     try {
@@ -252,7 +242,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     }
   };
 
-  //^-------------------- CURRENT OBJECTIVE
+  ///-------------------- CURRENT OBJECTIVE
   const [currentObjectiveId, setCurrentObjectiveId] = useState<string>('');
   const writeCurrentObjectiveId = async (id: string) => {
     try {
@@ -262,7 +252,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       log.err('writeCurrentView', 'Problem writing current objective id', err);
     }
   };
-  //^-------------------- SYNC
+  ///-------------------- SYNC
   const [lastSync, setLastSync] = useState<Date|null>(new Date());
   const writeLastSync = async (value: Date) => {
     try {
@@ -272,7 +262,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       log.err('writeLastSync', 'Problem writing last sync.', err);
     }
   }
-  //^-------------------- OBJECTIVES
+  ///-------------------- OBJECTIVES
   const [objectives, setObjectives] = useState<Objective[]>([]);
   const writeObjectives = async (objectives: Objective[]) => {
     try {
@@ -360,7 +350,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     }
   };
 
-  //^-------------------- ITEM
+  ///-------------------- ITEM
   const readItems = async (objectiveId: string) => {
     try {
       const items = await storage.readItems(objectiveId);
@@ -423,6 +413,27 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       log.err('deleteItem', 'Problem deleting item', err);
     }
   };
+  const deleteItems = async (objectiveId: string, items: Item[]) => {
+    try {
+      if (items.length === 0) return;
+
+      const dbItems = await storage.readItems(objectiveId);
+      if (!dbItems) return;
+
+      const toDelete = new Set(items.map(i => i.ItemId));
+
+      const newItems = dbItems.filter((s: Item) => !toDelete.has(s.ItemId));
+
+      await storage.writeItems(objectiveId, newItems);
+
+      const newDeleted = [...deletedItems, ...items];
+      setDeletedItems(newDeleted);
+      await storage.writeDeletedItems(newDeleted);
+
+    } catch (err) {
+      log.err('deleteItems', 'Problem deleting items', err);
+    }
+  }
   const putItems = async (objectiveId: string, its: Item[]) => {
     try {
       for(let i = 0; i < its.length; i++){
@@ -457,7 +468,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       log.err('putItem', 'Problem putting item', err);
     }
   };
-  //^-------------------- DELETED
+  ///-------------------- DELETED
   const [deletedObjectives, setDeletedObjectives] = useState<Objective[]>([]);
   const [deletedItems, setDeletedItems] = useState<Item[]>([]);
   const pushDeletedObjective = async (obj: Objective) => {
@@ -510,8 +521,9 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     setDeletedObjectives([]);
     setDeletedItems([]);
   };
-
-  //^-------------------- IMAGES
+  ///MULTI SELECT ITEMS
+  const [multiSelectAction, setMultiSelectAction] = useState<MultiSelectAction|null>(null);
+  ///-------------------- IMAGES
   const [storedImages, setStoredImages] = useState<StoredImage[]>([]);
   const putStoredImages = async (images: StoredImage[]) => {
     
@@ -527,13 +539,13 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     
   };
 
-  //^-------------------- Security
-  const requestBiometricAuth = async (message: string, fallbackMessage: string): Promise<boolean> => {
+  ///-------------------- Security
+  const requestBiometricAuth = async (message?: string, fallbackMessage?: string): Promise<boolean> => {
     
 
     const result = await LocalAuthentication.authenticateAsync({
-      promptMessage: 'Comfirm with your fingerprint',
-      fallbackLabel: 'User the code.',
+      promptMessage: message??'Confirm with your fingerprint',
+      fallbackLabel: fallbackMessage??'Use the code.',
     });
 
     return result.success;
@@ -542,32 +554,34 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   return (
     <UserContext.Provider 
       value={{
-        //^USER
+        ///USER
         user, writeUser,
         userPrefs, writeUserPrefs,
         theme, fontTheme,
-        //^JWT TOKEN
+        ///JWT TOKEN
         jwtToken, writeJwtToken,
-        //^VIEW
+        ///VIEW
         currentView, writeCurrentView,
         currentObjectiveId, writeCurrentObjectiveId,
-        //^TAGS
+        ///TAGS
         availableTags, putAvailableTags, removeAvailableTags, writeAvailableTags, removeAvailableTagsIfUnique,
         selectedTags, putSelectedTags, removeSelectedTags, writeSelectedTags,
-        //^SYNC
+        ///SYNC
         lastSync, writeLastSync,
-        //^OBJECTIVE LIST
+        ///OBJECTIVE LIST
         objectives,writeObjectives, putObjective, putObjectives, deleteObjective,
-        readItems, writeItems, putItem, deleteItem, putItems,
-        //^DELETED
+        readItems, writeItems, putItem, deleteItem, deleteItems, putItems,
+        ///DELETED
         deletedObjectives, pushDeletedObjective, deleteDeletedObjectives,
         deletedItems, pushDeletedItem, deleteDeletedItems,
-        //ÎMAGES
+        ///MULTI SELECT ITEMS
+        multiSelectAction, setMultiSelectAction,
+        ///IMAGES
 
-        //^HELPERS
+        ///HELPERS
         clearAllData,
 
-        //^SECURITY
+        ///SECURITY
         requestBiometricAuth,
       }}>
       {children}
@@ -576,33 +590,40 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 };
 
 interface UserContextType {
-  //^USER
+  ///USER
   user: User, writeUser: (user: User) => void,
   userPrefs: UserPrefs,  writeUserPrefs: (userPrefs: UserPrefs) => void,
   theme: AppPalette, fontTheme: FontPalette,
-  //^JWT TOKEN
+  ///JWT TOKEN
   jwtToken: string|null, writeJwtToken: (token: string) => void, 
-  //^VIEW
+  ///VIEW
   currentView: Views, writeCurrentView: (view: Views) => void,
   currentObjectiveId: string, writeCurrentObjectiveId: (view: string) => void,
-  //^TAGS
+  ///TAGS
   availableTags: string[], writeAvailableTags: (availableTags: string[]) => void, putAvailableTags: (tag: string[]) => void, removeAvailableTags: (tag: string[]) => void,
   selectedTags: string[], writeSelectedTags: (selectedTags: string[]) => void, putSelectedTags: (tags: string[]) => void, removeSelectedTags: (tags: string[]) => void, removeAvailableTagsIfUnique: (tags: string[]) => void
-  //^SYNC
+  ///SYNC
   lastSync: Date|null, writeLastSync: (date: Date) => void,
-  //^OBJECTIVE LIST
+  ///OBJECTIVE LIST
   objectives: Objective[],
   writeObjectives: (objective: Objective[]) => void, putObjective: (objective: Objective) => void, putObjectives: (objectives: Objective[]) => void,
   deleteObjective: (objective: Objective) => void,
-  readItems: (objectiveId: string) => Promise<Item[]>, writeItems: (objectiveId: string, items: Item[]) => void, putItem: (item: Item) => void,
-  deleteItem: (item: Item) => void, putItems: (objectiveId: string, items: Item[]) => void,
-  //^DELETED
+  writeItems: (objectiveId: string, items: Item[]) => void, 
+  readItems: (objectiveId: string) => Promise<Item[]>, 
+  putItem: (item: Item) => void,
+  putItems: (objectiveId: string, items: Item[]) => void,
+  deleteItem: (item: Item) => void, 
+  deleteItems: (objectiveId: string, items: Item[]) => void, 
+  ///DELETED
   deletedObjectives: Objective[], pushDeletedObjective: (obj: Objective) => void, deleteDeletedObjectives: () => void,
   deletedItems: Item[], pushDeletedItem: (item: Item) => void,  deleteDeletedItems: () => void,
-  //^HELPERS
+  ///MULTISELECT
+  multiSelectAction: MultiSelectAction|null, 
+  setMultiSelectAction: React.Dispatch<React.SetStateAction<MultiSelectAction | null>>,
+  ///HELPERS
   clearAllData: () => void,
-  //^SECURITY
-  requestBiometricAuth: () => Promise<boolean>
+  ///SECURITY
+  requestBiometricAuth: (message?: string, fallbackMessage?: string) => Promise<boolean>
 }
 
 export const useUserContext = () => {

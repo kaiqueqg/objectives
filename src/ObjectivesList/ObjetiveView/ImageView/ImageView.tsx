@@ -42,7 +42,7 @@ const ImageView = (props: ImageViewProps) => {
   const { log }= useLogContext();
   const { storage } = useStorageContext();
   const { objectivesApi } = useRequestContext();
-  const { objTheme: o, isEditingPos, onDeleteItem, loadMyItems, image } = props;
+  const { objTheme: o, isSelected, isSelecting, wasJustAdded, isDisabled, onDeleteItem, loadMyItems, image } = props;
 
   const [isEditingImage, setIsEditingImage] = useState<boolean>(false);
   const [tempImage, setTempImage] = useState<Image>(props.image);
@@ -236,7 +236,7 @@ const ImageView = (props: ImageViewProps) => {
       return;
     }
 
-    if(!isEditingPos){
+    if(!isDisabled){
       setIsEditingImage(!isEditingImage);
     }
   }
@@ -262,12 +262,12 @@ const ImageView = (props: ImageViewProps) => {
       borderStyle: 'solid',
       borderRadius: o.borderRadius,
     },
-    imageViewContainerSelected:{
-      borderStyle: 'dashed',
-      borderColor: o.bordercolorselected,
-    },
-    imageViewContainerEnding:{
+    containerSelecting:{
       borderStyle: 'solid',
+      borderColor: o.bordercolorselecting,
+    },
+    containerSelected:{
+      borderStyle: 'dashed',
       borderColor: o.bordercolorselected,
     },
     displayContainer:{
@@ -378,9 +378,9 @@ const ImageView = (props: ImageViewProps) => {
   });
 
   return (
-    <View style={s.container}>
-      <View style={[s.imageViewContainer, props.isSelected && s.imageViewContainerSelected, props.isSelected && props.isEndingPos && s.imageViewContainerEnding]}>
-        {!isEditingPos && isEditingImage?
+    <View style={[s.container]}>
+      <View style={[s.imageViewContainer, isSelecting && s.containerSelecting, isSelected && s.containerSelected]}>
+        {!isDisabled && isEditingImage?
           <View style={s.inputsContainer}>
             <View style={s.inputsLeft}>
               <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageDelete]} confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete}></PressImage>
@@ -418,14 +418,14 @@ const ImageView = (props: ImageViewProps) => {
                 defaultStyle={o}
               ></PressText>
               {storedImage?
-                <PressImage pressStyle={[gs.baseImageContainer]} style={[s.image, image.IsDisplaying? null:s.imageFade]} source={require('../../../../public/images/image-filled.png')} onPress={() => {if(!isEditingPos)onChangeIsDisplaying();}}></PressImage>
+                <PressImage pressStyle={[gs.baseImageContainer]} style={[s.image, image.IsDisplaying? null:s.imageFade]} source={require('../../../../public/images/image-filled.png')} onPress={() => {if(!isDisabled)onChangeIsDisplaying();}}></PressImage>
                 :
-                <PressImage pressStyle={[gs.baseImageContainer]} style={[s.image, image.IsDisplaying? null:s.imageFade]} source={require('../../../../public/images/image.png')} onPress={() => {if(!isEditingPos)onChangeIsDisplaying();}}></PressImage>
+                <PressImage pressStyle={[gs.baseImageContainer]} style={[s.image, image.IsDisplaying? null:s.imageFade]} source={require('../../../../public/images/image.png')} onPress={() => {if(!isDisabled)onChangeIsDisplaying();}}></PressImage>
               }
             </View>
           {image.IsDisplaying && storedImage?.ImageFile && 
           (isDownloadingImage?
-            <Loading theme={dark}></Loading>
+            <Loading></Loading>
             :
             <ReactImage source={{ uri: storedImage.ImageFile }} style={s.imagePreview} />
           )

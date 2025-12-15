@@ -1,20 +1,18 @@
 import React, { useEffect, useRef } from 'react';
-import { StyleSheet, ImageStyle, Animated, Easing, View } from 'react-native';
-import { AppPalette } from '../Colors';
+import { StyleSheet, ImageStyle, Animated, Easing, View, Image } from 'react-native';
+import { AppPalette, globalStyle as gs } from '../Colors';
 import { useUserContext } from '../Contexts/UserContext';
 
-interface Props {
-  theme: AppPalette;
-  // style?: ImageStyle;
+interface LoadingProps {
 }
 
-const Loading: React.FC<Props> = () => {
+const Loading = (props: LoadingProps) => {
   const rotateValue = useRef(new Animated.Value(0)).current;
 
-  const { theme } = useUserContext();
+  const { theme: t } = useUserContext();
 
   useEffect(() => {
-    // Start the rotation animation when the component mounts
+    
     const startRotation = () => {
       Animated.loop(
         Animated.timing(rotateValue, {
@@ -29,7 +27,9 @@ const Loading: React.FC<Props> = () => {
     startRotation();
 
     // Clean up the animation when the component unmounts
-    return () => rotateValue.stopAnimation();
+    return () => {
+      rotateValue.stopAnimation();
+    }
   }, [rotateValue]);
 
   const rotate = rotateValue.interpolate({
@@ -37,25 +37,28 @@ const Loading: React.FC<Props> = () => {
     outputRange: ['0deg', '360deg'],
   });
 
-  const s = (theme: AppPalette) => StyleSheet.create({
+  const s = StyleSheet.create({
     container: {
+      height: 40,
+      width: 40,
       alignItems: 'center',
       justifyContent: 'center',
-      width: 40,
-      height: 40,
     },
     image: {
-      width: 25,
-      height: 25,
-      tintColor: theme.inprogressicontint,
+      ...(gs.baseSmallImage as ImageStyle),
+      tintColor: t.inprogressicontint,
+    },
+    imageSmall: {
+      ...(gs.baseSmallImage as ImageStyle),
+      tintColor: t.inprogressicontint,
     },
   });
 
   return (
-    <View style={s(theme).container}>
+    <View style={[s.container]}>
       <Animated.Image
         style={[
-          s(theme).image,
+          s.image,
           { transform: [{ rotate }] },
         ]}
         source={require('../../public/images/refresh.png')}

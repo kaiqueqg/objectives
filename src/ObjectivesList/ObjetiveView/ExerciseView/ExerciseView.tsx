@@ -62,7 +62,7 @@ export const bodyImages: Record<string, any> = {
 
 const ExerciseView = (props: ExerciseViewProps) => {
   const { userPrefs, theme: t, fontTheme: f, putItem } = useUserContext();
-  const { objTheme: o, isEditingPos, onDeleteItem, loadMyItems, exercise } = props;
+  const { objTheme: o, wasJustAdded, isSelected, isSelecting, isDisabled, onDeleteItem, loadMyItems, exercise } = props;
   const { log } = useLogContext();
 
   const [isEditingExercise, setIsEditingExercise] = useState<boolean>(false);
@@ -240,7 +240,8 @@ const ExerciseView = (props: ExerciseViewProps) => {
       return;
     }
 
-    if(!isEditingPos){
+    if(!isDisabled){
+      props.itemsListScrollTo(exercise.ItemId);
       setIsEditingExercise(!isEditingExercise);
     }
   }
@@ -292,7 +293,7 @@ const ExerciseView = (props: ExerciseViewProps) => {
           <PressText style={s.daysContainer} textStyle={s.daysText} defaultStyle={o} text={daysOfWeek} onPress={onEditingExercise} hideDefaultTextBorder={true}></PressText>
         </View>}
         {exercise.Description && 
-          <PressText style={s.descriptionContainer} textStyle={[s.descriptionText, exercise.IsDone? {color: o.itemtextfadedark}:undefined]} text={exercise.Description} onPress={()=>{if(!isEditingPos && !props.isLocked)setIsEditingExercise(!isEditingExercise)}} defaultStyle={o} hideDefaultTextBorder={true} ellipsizeMode="tail"></PressText>
+          <PressText style={s.descriptionContainer} textStyle={[s.descriptionText, exercise.IsDone? {color: o.itemtextfadedark}:undefined]} text={exercise.Description} onPress={()=>{if(!isDisabled && !props.isLocked)setIsEditingExercise(!isEditingExercise)}} defaultStyle={o} hideDefaultTextBorder={true} ellipsizeMode="tail"></PressText>
         }
       </View>
     )
@@ -318,12 +319,12 @@ const ExerciseView = (props: ExerciseViewProps) => {
       borderStyle: 'solid',
       borderRadius: o.borderRadius,
     },
-    exerciseContainerSelected:{
-      borderStyle: 'dashed',
-      borderColor: o.bordercolorselected,
-    },
-    exerciseContainerEnding:{
+    containerSelecting:{
       borderStyle: 'solid',
+      borderColor: o.bordercolorselecting,
+    },
+    containerSelected:{
+      borderStyle: 'dashed',
       borderColor: o.bordercolorselected,
     },
     exerciseMainRow:{
@@ -486,11 +487,6 @@ const ExerciseView = (props: ExerciseViewProps) => {
       width: '15%',
       justifyContent: 'center',
       alignItems: 'center',
-
-      // borderColor: 'green',
-      // borderWidth: 1,
-      // borderRadius: 5,
-      // borderStyle: 'solid',
     },
     inputStyle:{
       flex: 1,
@@ -536,9 +532,9 @@ const ExerciseView = (props: ExerciseViewProps) => {
   });
 
   return (
-    <View style={s.container}>
-      <View style={[s.exerciseContainer, props.isSelected && s.exerciseContainerSelected, props.isSelected && props.isEndingPos && s.exerciseContainerEnding]}>
-        {!isEditingPos && isEditingExercise?
+    <View style={[s.container]}>
+      <View style={[s.exerciseContainer, isSelecting && s.containerSelecting, isSelected && s.containerSelected]}>
+        {!isDisabled && isEditingExercise?
           <View style={s.inputsContainer}>
             <View style={s.inputsLeft}>
               <PressImage pressStyle={[gs.baseImageContainer]} style={[s.image, s.imageDelete]} confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete}></PressImage>
@@ -638,8 +634,8 @@ const ExerciseView = (props: ExerciseViewProps) => {
           :
           getTitleDisplay()
         }
-        {!isEditingExercise && !exercise.IsDone && <PressImage pressStyle={gs.baseImageContainer} style={s.image} source={require('../../../../public/images/exercise.png')} onPress={() => {if(!isEditingPos)onChangeIsDone();}}></PressImage>}
-        {!isEditingExercise && exercise.IsDone && <PressImage pressStyle={gs.baseImageContainer} style={s.imageFade} source={require('../../../../public/images/exercise-filled.png')} onPress={() => {if(!isEditingPos)onChangeIsDone();}}></PressImage>}
+        {!isEditingExercise && !exercise.IsDone && <PressImage pressStyle={gs.baseImageContainer} style={s.image} source={require('../../../../public/images/exercise.png')} onPress={() => {if(!isDisabled)onChangeIsDone();}}></PressImage>}
+        {!isEditingExercise && exercise.IsDone && <PressImage pressStyle={gs.baseImageContainer} style={s.imageFade} source={require('../../../../public/images/exercise-filled.png')} onPress={() => {if(!isDisabled)onChangeIsDone();}}></PressImage>}
       </View>
     </View>
   );

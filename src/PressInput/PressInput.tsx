@@ -173,7 +173,7 @@ const PressInput = (props: PressInputProps) => {
             onSubmitEditing={onDone}
             onChangeText={handleChangeText}
             onContentSizeChange={onChange}
-            selectionColor={o.itemtext}
+            selectionColor={o.itemtextcontrast}
             >
           </TextInput>
           {props.onDelete && <PressImage pressStyle={[s.imagePress, props.containerStyle]} style={[s.cancelImage, props.cancelImageStyle]} onPress={onCancel} source={require('../../public/images/cancel.png')}></PressImage>}

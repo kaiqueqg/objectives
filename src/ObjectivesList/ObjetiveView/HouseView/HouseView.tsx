@@ -33,7 +33,7 @@ export interface HouseViewProps extends ItemViewProps {
 export const HouseView = (props: HouseViewProps) => {
   const { userPrefs, theme: t, fontTheme: f, putItem } = useUserContext();
   const { log, popMessage } = useLogContext();
-  const { objTheme: o, isEditingPos, onDeleteItem, loadMyItems, house } = props;
+  const { objTheme: o, wasJustAdded, isSelected, isSelecting, isDisabled, onDeleteItem, loadMyItems, house } = props;
 
   const [isEditingHouse, setIsEditingHouse] = useState<boolean>(false);
   const [tempHouse, setTempHouse] = useState<House>(props.house);
@@ -110,7 +110,8 @@ export const HouseView = (props: HouseViewProps) => {
       return;
     }
 
-    if(!isEditingPos){
+    if(!isDisabled){
+      props.itemsListScrollTo(house.ItemId);
       setIsEditingHouse(!isEditingHouse);
     }
   }
@@ -167,12 +168,12 @@ export const HouseView = (props: HouseViewProps) => {
       borderStyle: 'solid',
       borderRadius: o.borderRadius,
     },
-    houseContainerSelected:{
-      borderStyle: 'dashed',
-      borderColor: o.bordercolorselected,
-    },
-    houseContainerEnding:{
+    containerSelecting:{
       borderStyle: 'solid',
+      borderColor: o.bordercolorselecting,
+    },
+    containerSelected:{
+      borderStyle: 'dashed',
       borderColor: o.bordercolorselected,
     },
     displayContainer:{
@@ -276,9 +277,9 @@ export const HouseView = (props: HouseViewProps) => {
   });
 
   return (
-    <View style={s.container}>
-      <View style={[s.houseContainer, props.isSelected && s.houseContainerSelected, props.isSelected && props.isEndingPos && s.houseContainerEnding]}>
-        {!isEditingPos && isEditingHouse ?
+    <View style={[s.container]}>
+      <View style={[s.houseContainer, isSelecting && s.containerSelecting, isSelected && s.containerSelected]}>
+        {!isDisabled && isEditingHouse ?
           <View style={s.inputsContainer}>
             <View style={s.inputsLeft}>
               <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageDelete]} confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete}></PressImage>
@@ -367,8 +368,8 @@ export const HouseView = (props: HouseViewProps) => {
               <PressText style={s.attentionContainer} textStyle={{color: o.itemtext}} onPress={() => {onChangeIsEditing()}} text={getText()} defaultStyle={o} hideDefaultTextBorder={true}></PressText>
               {!isEditingHouse && house.Listing.trim() !== '' && <PressImage pressStyle={gs.baseImageContainer} style={s.image} source={require('../../../../public/images/link.png')} onPress={openLink}></PressImage>}
               {!isEditingHouse && house.MapLink.trim() !== '' && <PressImage pressStyle={gs.baseImageContainer} style={s.image} source={require('../../../../public/images/location-filled.png')} onPress={openUrl}></PressImage>}
-              {!isEditingHouse && !house.WasContacted && <PressImage pressStyle={gs.baseImageContainer} style={s.image} source={require('../../../../public/images/home.png')} onPress={() => {if(!isEditingPos)onChangeWasContacted();}}></PressImage>}
-              {!isEditingHouse && house.WasContacted && <PressImage pressStyle={gs.baseImageContainer} style={s.imageFade} source={require('../../../../public/images/done.png')} onPress={() => {if(!isEditingPos)onChangeWasContacted();}}></PressImage>}
+              {!isEditingHouse && !house.WasContacted && <PressImage pressStyle={gs.baseImageContainer} style={s.image} source={require('../../../../public/images/home.png')} onPress={() => {if(!isDisabled)onChangeWasContacted();}}></PressImage>}
+              {!isEditingHouse && house.WasContacted && <PressImage pressStyle={gs.baseImageContainer} style={s.imageFade} source={require('../../../../public/images/done.png')} onPress={() => {if(!isDisabled)onChangeWasContacted();}}></PressImage>}
             </View>
             {!isEditingHouse && house.Details.trim() !== '' && <View style={s.detailsContainer}><Text style={s.detaisText}>{house.Details}</Text></View>}
             {!isEditingHouse && house.Attention.trim() !== '' && <View style={s.attentionContainer}><Text style={s.attentionText}>{house.Attention}</Text></View>}

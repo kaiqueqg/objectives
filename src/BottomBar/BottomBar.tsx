@@ -48,9 +48,9 @@ const BottomBar = (props: BottomBarProps) => {
       alignItems: 'center',
       backgroundColor: t.backgroundcolordarker,
 
-      borderColor: 'black',
-      borderBottomWidth: 1,
-      borderStyle: 'solid',
+      // borderColor: 'black',
+      // borderTopWidth: 1,
+      // borderStyle: 'solid',
     },
     leftContainer: {
       flexDirection: 'row',

@@ -5,7 +5,7 @@ import { useUserContext } from "../Contexts/UserContext";
 import PressText from "../PressText/PressText";
 import { MessageType, Objective, Pattern, Views } from "../Types";
 import PressImage from "../PressImage/PressImage";
-import React, { JSX, useEffect, useState } from "react";
+import React, { JSX, useEffect, useRef, useState } from "react";
 import { useLogContext } from "../Contexts/LogContext";
 import { useStorageContext } from "../Contexts/StorageContext";
 
@@ -32,6 +32,9 @@ const ObjsListView = (props: ObjsListViewProps) => {
   const [objectivesSelected, setObjectivesSelected] = useState<Objective[]>([]);
   const [unarchivedObjectives, setUnarchivedObjectives] = useState<Objective[]>([]);
   const [unarchivedTags, setUnarchivedTags] = useState<string[]>([]);
+
+  const [isTagsListFolded, setIsTagsListFolded] = useState<boolean>(false);
+  const [isObjectiveListFolded, setIsObjectiveListFolded] = useState<boolean>(false);
 
   useEffect(()=>{
     const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -253,8 +256,17 @@ const ObjsListView = (props: ObjsListViewProps) => {
   }
 
   const getObjectivesTitle = () => {
+    // popMessage('qsdqsds')
     return (
-      <Text style={s.containerObjectivesListTitle}>OBJECTIVES</Text>
+      <View style={s.containerListTagsTitle}>
+        <View style={gs.baseBiggerImageContainer}></View>
+        <Text style={s.containerObjectiveTitleText}>{'OBJECTIVES'}</Text>
+        {isObjectiveListFolded?
+          <PressImage style={[s.image]} pressStyle={gs.baseBiggerImageContainer} onPress={()=>{setIsObjectiveListFolded(false)}} disable={isEditingPos} source={require('../../public/images/up-chevron.png')}></PressImage>
+          :
+          <PressImage style={[s.image]} pressStyle={gs.baseBiggerImageContainer} onPress={()=>{setIsObjectiveListFolded(true)}} disable={isEditingPos} source={require('../../public/images/down-chevron.png')}></PressImage>
+        }
+      </View>
     )
   }
 
@@ -295,7 +307,13 @@ const ObjsListView = (props: ObjsListViewProps) => {
   const getTagsTitle = () => {
     return (
       <View style={s.containerListTagsTitle}>
-        <Text style={s.containerTagTitleText}>{'TAGS'}</Text>
+        <View style={gs.baseBiggerImageContainer}></View>
+        <Text style={[s.containerTagTitleText]}>{'TAGS'}</Text>
+        {isTagsListFolded?
+          <PressImage style={[s.image]} pressStyle={gs.baseBiggerImageContainer} onPress={()=>{setIsTagsListFolded(false)}} disable={isEditingPos} source={require('../../public/images/up-chevron.png')}></PressImage>
+          :
+          <PressImage style={[s.image]} pressStyle={gs.baseBiggerImageContainer} onPress={()=>{setIsTagsListFolded(true)}} disable={isEditingPos} source={require('../../public/images/down-chevron.png')}></PressImage>
+        }
       </View>
     )
   }
@@ -312,10 +330,13 @@ const ObjsListView = (props: ObjsListViewProps) => {
       flexDirection: 'column',
       alignItems: 'center',
       width: '100%',
+
+      backgroundColor: 'black',
     },
     containerListTag:{
       flexDirection: "column",
       width: '100%',
+      backgroundColor: t.backgroundcolordark,
     },
     containerListTagsTitle:{
       flexDirection: "row",
@@ -330,7 +351,14 @@ const ObjsListView = (props: ObjsListViewProps) => {
       padding: 10,
     },
     containerTagTitleText:{
-      color: t.textcolor,
+      flex: 1,
+      color: isTagsListFolded ? t.textcolorfade:t.textcolor,
+      textAlign: 'center',
+      fontWeight: 'bold',
+    },
+    containerObjectiveTitleText:{
+      flex: 1,
+      color: isObjectiveListFolded ? t.textcolorfade:t.textcolor,
       textAlign: 'center',
       fontWeight: 'bold',
     },
@@ -338,6 +366,7 @@ const ObjsListView = (props: ObjsListViewProps) => {
       flex: 1,
       flexDirection: "column",
       width: '100%',
+      backgroundColor: t.backgroundcolordark,
     },
     containerObjectivesListTitle:{
       fontWeight: 'bold',
@@ -353,6 +382,8 @@ const ObjsListView = (props: ObjsListViewProps) => {
       flexWrap: "wrap",
       flexDirection: 'row',
       padding: 10,
+
+      backgroundColor: t.backgroundcolor,
     },
     tag: {
       textAlign: 'center',
@@ -391,6 +422,7 @@ const ObjsListView = (props: ObjsListViewProps) => {
       flex: 1,
       paddingVertical: 15,
       paddingHorizontal: 5,
+      backgroundColor: t.backgroundcolor,
     },
     bottomMenu: {
       width: '100%',
@@ -399,10 +431,9 @@ const ObjsListView = (props: ObjsListViewProps) => {
       alignItems: 'center',
       backgroundColor: t.backgroundcolordark,
 
-      borderColor: 'black',
-      borderTopWidth: 1,
-      borderBottomWidth: 1,
-      borderStyle: 'solid',
+      // borderColor: 'black',
+      // borderTopWidth: 1,
+      // borderStyle: 'solid',
     },
     leftBottomMenu:{
       flex: 1,
@@ -438,6 +469,11 @@ const ObjsListView = (props: ObjsListViewProps) => {
     image:{
       ...gs.baseSmallImage,
       tintColor: t.icontint,
+    },
+    imageNewFile:{
+      tintColor: t.icontint,
+      height: 27,
+      width: 27,
     },
     imageUpDown:{
       ...gs.baseSmallImage,
@@ -576,11 +612,11 @@ const ObjsListView = (props: ObjsListViewProps) => {
       <View style={s.containerList}>
         <View style={s.containerListTag}>
           {getTagsTitle()}
-          {getTagsList()}
+          {!isTagsListFolded && getTagsList()}
         </View>
         <View style={s.containerListObjs}>
           {getObjectivesTitle()}
-          {getObjectivesList()}
+          {!isObjectiveListFolded &&  getObjectivesList()}
         </View>
       </View>
       <View style={s.bottomMenu}>
@@ -602,8 +638,8 @@ const ObjsListView = (props: ObjsListViewProps) => {
             source={require('../../public/images/change.png')}
           ></PressImage>}
           {isEditingPos && <PressImage pressStyle={gs.baseBiggerImageContainer} style={[s.image, s.redImageColor]} onPress={cancelEditingPos} source={require('../../public/images/cancel.png')}></PressImage>}
-          {isEditingPos && <PressImage pressStyle={gs.baseBiggerImageContainer} hide={objectivesSelected.length=== 0 || isEndingPos} style={[s.image, s.greenImageColor]} onPress={onEditingPosTo} source={require('../../public/images/next.png')}></PressImage>}
-          <PressImage style={[s.image, isEditingPos&&s.imageFade]} pressStyle={gs.baseBiggerImageContainer} onPress={onAddNewObjective} disable={isEditingPos} source={require('../../public/images/plus-one.png')}></PressImage>
+          {isEditingPos && <PressImage pressStyle={gs.baseBiggerImageContainer} style={[s.image, s.greenImageColor]} hide={objectivesSelected.length=== 0 || isEndingPos} onPress={onEditingPosTo} source={require('../../public/images/next.png')}></PressImage>}
+          <PressImage pressStyle={gs.baseBiggerImageContainer} style={[s.imageNewFile, isEditingPos&&s.imageFade]}  onPress={onAddNewObjective} disable={isEditingPos} source={require('../../public/images/newfile.png')}></PressImage>
         </View>
       </View>
     </View>

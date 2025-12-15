@@ -51,38 +51,27 @@ const Main = (props: MainProps) => {
       const compatible:boolean = await LocalAuthentication.hasHardwareAsync();
       const enrolled:boolean = await LocalAuthentication.isEnrolledAsync();
       const currentUserPrefs = await storage.readUserPrefs();
-      console.log(1)
       if (!currentUserPrefs || !enrolled || !compatible) {
-        console.log(2)
         setShowMainView(true);
         return;
       }
-      console.log(3)
       if(!currentUserPrefs.shouldLockOnOpen && !currentUserPrefs.shouldLockOnReopen){
-        console.log(4)
         await noFingerprintUnlockNeeded();
         return;
       }
 
-      console.log(5, appJustLaunched)
       if(appJustLaunched){
-        console.log(6)
         await onFirstOpenLock();
       }
 
-      console.log(7)
       subscription = AppState.addEventListener('change', async (nextState) => {
-        console.log(8)
         if (appState.current.match(/active/) && nextState.match(/inactive|background/)) {
-          console.log(9)
           await onGoingToBackground();
         }
 
         if(appState.current.match(/inactive|background/) && nextState === 'active') {
-          console.log(10)
           await onReopenLock();
         }
-        console.log(11)
         appState.current = nextState;
       });
 
@@ -101,32 +90,25 @@ const Main = (props: MainProps) => {
   }, [objectives, currentObjective, currentObjectiveId, currentView, messageList]);
 
   const noFingerprintUnlockNeeded = async () => {
-    console.log('dont need to test')
     setShowMainView(true);
     return;
   }
 
   const onGoingToBackground = async () => {
     const listeningUserPrefs = await storage.readUserPrefs();
-    console.log('Indo pro background');
     
     if(listeningUserPrefs && listeningUserPrefs.shouldLockOnReopen){
-      console.log('Esconde tela no app background');
       setShowMainView(false);
     }
   }
 
   const onFirstOpenLock = async () => {
     const listeningUserPrefs = await storage.readUserPrefs();
-    console.log('Primeiro load');
     if(listeningUserPrefs && listeningUserPrefs.shouldLockOnOpen){
-      console.log('Primeiro load - test auth first open');
       if(await requestBiometricAuth()){
-        console.log('Primeiro load - auth');
         setShowMainView(true);
       }
       else{
-        console.log('Primeiro load - no auth');
       }
     }
     appJustLaunched = false;
@@ -134,12 +116,8 @@ const Main = (props: MainProps) => {
 
   const onReopenLock = async () => {
     const listeningUserPrefs = await storage.readUserPrefs();
-    console.log('Voltou do background (sem reiniciar)');
     if(listeningUserPrefs && listeningUserPrefs.shouldLockOnReopen){
-      console.log('listeningUserPrefs.shouldLockOnReopen');
-      log.r('test auth reopen');
       if(await requestBiometricAuth()){
-        log.g('auth reopen');
         setShowMainView(true);
       }
     }
@@ -180,6 +158,10 @@ const Main = (props: MainProps) => {
   }
 
   const s = StyleSheet.create({
+    safeAreaContainer:{
+      flex: 1,
+      backgroundColor: t.backgroundcolor,
+    },
     container: {
       flex: 1,
       backgroundColor: t.backgroundcolor,
@@ -195,11 +177,6 @@ const Main = (props: MainProps) => {
       alignItems: "center",
       backgroundColor: 'black',
       padding: 100,
-
-      borderColor: 'red',
-      borderWidth: 3,
-      borderRadius: 5,
-      borderStyle: 'solid',
     },
     lockImage:{
       width: 40,
@@ -209,7 +186,7 @@ const Main = (props: MainProps) => {
 
   return (
     showMainView?
-      <SafeAreaView style={{ flex: 1, backgroundColor: t.backgroundcolor }}>
+      <SafeAreaView style={s.safeAreaContainer}>
         <View style={s.container}>
           <PopMessageContainer></PopMessageContainer>
             <View style={s.mainContent}>
@@ -221,7 +198,7 @@ const Main = (props: MainProps) => {
       </SafeAreaView>
       :
       <View style={s.lockedContainer}>
-        <PressImage source={require('../public/images/lock.png')} style={s.lockImage}></PressImage>
+        <PressImage source={require('../public/images/add-lock.png')} style={s.lockImage}></PressImage>
       </View>
   );
 };
