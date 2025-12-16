@@ -142,6 +142,10 @@ const GroceryView = (props: GroceryViewProps) => {
       borderStyle: 'dashed',
       borderColor: o.bordercolorselected,
     },
+    containerWasJustAdded:{
+      borderStyle: 'solid',
+      borderColor: o.bordercolorwasjustadded,
+    },
     titleContainer:{
       flex: 1,
       justifyContent: 'center',
@@ -216,7 +220,7 @@ const GroceryView = (props: GroceryViewProps) => {
 
   return (
     <View style={[s.container]}>
-      <View style={[s.groceryContainer, isSelecting && s.containerSelecting, isSelected && s.containerSelected]}>
+      <View style={[s.groceryContainer, isSelecting && s.containerSelecting, isSelected && s.containerSelected, wasJustAdded && s.containerWasJustAdded]}>
         {!isDisabled && isEditingGrocery?
           <View style={s.inputsContainer}>
             <View style={s.inputsLeft}>

@@ -327,15 +327,14 @@ const ExerciseView = (props: ExerciseViewProps) => {
       borderStyle: 'dashed',
       borderColor: o.bordercolorselected,
     },
+    containerWasJustAdded:{
+      borderStyle: 'solid',
+      borderColor: o.bordercolorwasjustadded,
+    },
     exerciseMainRow:{
       flex: 1,
       minHeight: 40,
       flexDirection: 'column',
-
-      // borderWidth: 1,
-      // borderStyle: 'solid',
-      // borderColor: 'red',
-      // borderRadius: 5,
     },
     exerciseTitleRow: {
       width: '100%',
@@ -343,21 +342,11 @@ const ExerciseView = (props: ExerciseViewProps) => {
       minHeight: 40,
       flexDirection: 'row',
       paddingLeft: 5,
-
-      // borderWidth: 2,
-      // borderStyle: 'solid',
-      // borderColor: 'green',
-      // borderRadius: 5,
     },
     exerciseSecondaryRow:{
       minHeight: 20,
       flexDirection: 'row',
       paddingLeft: 10,
-
-      // borderWidth: 1,
-      // borderStyle: 'solid',
-      // borderColor: 'yellow',
-      // borderRadius: 5,
     },
     descriptionContainer:{
       paddingLeft: 10,
@@ -370,27 +359,13 @@ const ExerciseView = (props: ExerciseViewProps) => {
     titleContainer:{
       width: '100%',
       paddingLeft: 5,
-
-      // borderWidth: 1,
-      // borderStyle: 'solid',
-      // borderColor: 'white',
-      // borderRadius: 5,
     },
     titleText:{
       flex: 1,
       verticalAlign: 'middle',
       color: o.itemtext,
-
-      // borderWidth: 1,
-      // borderStyle: 'solid',
-      // borderColor: 'purple',
-      // borderRadius: 5,
     },
     daysContainer: {
-      // borderWidth: 1,
-      // borderStyle: 'solid',
-      // borderColor: 'cyan',
-      // borderRadius: 5,
     },
     daysText:{
       textAlign: "right",
@@ -399,10 +374,6 @@ const ExerciseView = (props: ExerciseViewProps) => {
       fontSize: 12,
     },
     maxContainer:{
-      // borderWidth: 1,
-      // borderStyle: 'solid',
-      // borderColor: 'fuchsia',
-      // borderRadius: 5,
     },
     maxText:{
       textAlign: "left",
@@ -414,11 +385,6 @@ const ExerciseView = (props: ExerciseViewProps) => {
       minWidth: '20%',
       justifyContent: "center",
       alignItems:"flex-end",
-
-      // borderWidth: 1,
-      // borderStyle: 'solid',
-      // borderColor: 'cyan',
-      // borderRadius: 5,
     },
     seriesRepsText:{
       textAlign: "right",
@@ -434,11 +400,6 @@ const ExerciseView = (props: ExerciseViewProps) => {
 
       padding: 10,
       margin: 5,
-
-      // borderColor: 'green',
-      // borderWidth: 1,
-      // borderRadius: 5,
-      // borderStyle: 'solid',
     },
     bodyImage:{
       ...gs.baseBiggerImage,
@@ -533,7 +494,7 @@ const ExerciseView = (props: ExerciseViewProps) => {
 
   return (
     <View style={[s.container]}>
-      <View style={[s.exerciseContainer, isSelecting && s.containerSelecting, isSelected && s.containerSelected]}>
+      <View style={[s.exerciseContainer, isSelecting && s.containerSelecting, isSelected && s.containerSelected, wasJustAdded && s.containerWasJustAdded]}>
         {!isDisabled && isEditingExercise?
           <View style={s.inputsContainer}>
             <View style={s.inputsLeft}>

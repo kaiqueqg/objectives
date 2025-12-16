@@ -218,6 +218,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     })
 
     setJustAddedItemId(justAdded);
+    // log.arrg('justAdded', justAdded)
     setTimeout(() => {
       setJustAddedItemId([]);
     }, 3000);
@@ -351,6 +352,14 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     }
   }
 
+  const resetMultiSelectStates = () => {
+    setMultiSelectAction(null);
+    setIsSelectingPastePos(false);
+    setIsMultiSelectOpen(false);
+    setSelectingItems([]);
+    setIsSelectingAll(false);
+  }
+
   const pasteItems = async (itemTo: Item) => {
     if(!multiSelectAction){
       return;
@@ -365,7 +374,6 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
 
     ///inserting items in the position
     const index = itemsFiltered.indexOf(itemTo);
-    log.w('index ', index);
     const before = itemsFiltered.slice(0, index+1);
     const after = itemsFiltered.slice(index+1);
 
@@ -390,11 +398,6 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     let finalList:Item[] = fullList.map((item: Item, i: number) => {
       return {...item, Pos: i, LastModified: (new Date()).toISOString()}
     });
-    // for(let i = 0; i < fullList.length; i++){
-    //   finalList.push({...fullList[i], Pos: i, LastModified: (new Date()).toISOString()});
-    // }
-
-    log.arry('finalList', finalList)
 
     ///Replace items
     await putItems(obj.ObjectiveId, finalList);
@@ -404,19 +407,14 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     }
     
     await loadItems();
-    setMultiSelectAction(null);
-    setIsSelectingPastePos(false);
-    setIsMultiSelectOpen(false);
-    setSelectingItems([]);
+    resetMultiSelectStates();
   }
 
   const multiSelectDeleteItems = async () => {
     await deleteItems(obj.ObjectiveId, selectingItems);
-    await loadItems();
 
-    setIsSelectingPastePos(false);
-    setIsMultiSelectOpen(false);
-    setSelectingItems([]);
+    await loadItems();
+    resetMultiSelectStates();
   }
 
   const onChangeShowingItems = async () => {

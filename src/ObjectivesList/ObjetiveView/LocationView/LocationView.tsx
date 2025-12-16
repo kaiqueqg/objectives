@@ -220,6 +220,10 @@ const LocationView = (props: LocationViewProps) => {
       borderStyle: 'dashed',
       borderColor: o.bordercolorselected,
     },
+    containerWasJustAdded:{
+      borderStyle: 'solid',
+      borderColor: o.bordercolorwasjustadded,
+    },
     titleContainer:{
       flex: 1,
       justifyContent: 'center',
@@ -316,7 +320,7 @@ const LocationView = (props: LocationViewProps) => {
 
   return(
     <View style={[s.container]}>
-      <View style={[s.locationContainer, isSelecting && s.containerSelecting, isSelected && s.containerSelected]}>
+      <View style={[s.locationContainer, isSelecting && s.containerSelecting, isSelected && s.containerSelected, wasJustAdded && s.containerWasJustAdded]}>
         {!isDisabled && isEditingLocation?
           <View style={s.inputsContainer}>
             <View style={s.inputsLeft}>

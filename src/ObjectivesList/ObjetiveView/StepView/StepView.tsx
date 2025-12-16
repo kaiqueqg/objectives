@@ -24,7 +24,7 @@ export interface StepViewProps extends ItemViewProps {
 const StepView = (props: StepViewProps) => {
   const { userPrefs, theme: t, fontTheme: f, putItem } = useUserContext();
   const { log } = useLogContext();
-  const { objTheme: o, isSelected, isSelecting, isDisabled, onDeleteItem: onDelete, loadMyItems, step, isLocked, itemsListScrollTo} = props;
+  const { objTheme: o, isSelected, isSelecting, isDisabled, onDeleteItem: onDelete, loadMyItems, step, isLocked, itemsListScrollTo, wasJustAdded} = props;
 
   const [isEditingStep, setIsEditingStep] = useState<boolean>(false);
   const [tempStep, setTempStep] = useState<Step>(step);
@@ -32,8 +32,7 @@ const StepView = (props: StepViewProps) => {
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   
   useEffect(() => {
-    
-  }, [isDisabled])
+  }, [isDisabled, wasJustAdded])
 
   useEffect(() => {
     setTempStep(step);
@@ -154,7 +153,7 @@ const StepView = (props: StepViewProps) => {
 
   const getNormalView = () => {
     return(
-      <View style={[s.stepContainer, isSelecting && s.containerSelecting, isSelected && s.containerSelected]}>
+      <View style={[s.stepContainer, isSelecting && s.containerSelecting, isSelected && s.containerSelected, wasJustAdded && s.containerWasJustAdded]}>
         {getImportanceImage()}
         <PressText
           style={s.titleContainer}
@@ -185,7 +184,7 @@ const StepView = (props: StepViewProps) => {
 
   const getEditingView = () => {
     return(
-      <View style={[s.stepContainer, props.isSelecting && s.containerSelecting, props.isSelected && s.containerSelected]}>
+      <View style={[s.stepContainer, props.isSelecting && s.containerSelecting, props.isSelected && s.containerSelected, wasJustAdded && s.containerWasJustAdded]}>
         <View style={s.inputContainer}>
           <View style={s.inputsLeft}>
             <PressImage pressStyle={s.stepTrash} style={[s.image, s.imageDelete]} confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDeleteItem}></PressImage>
@@ -299,6 +298,10 @@ const StepView = (props: StepViewProps) => {
     containerSelected:{
       borderStyle: 'dashed',
       borderColor: o.bordercolorselected,
+    },
+    containerWasJustAdded:{
+      borderStyle: 'solid',
+      borderColor: o.bordercolorwasjustadded,
     },
     title:{
       color: o.itemtext,

@@ -176,6 +176,10 @@ export const HouseView = (props: HouseViewProps) => {
       borderStyle: 'dashed',
       borderColor: o.bordercolorselected,
     },
+    containerWasJustAdded:{
+      borderStyle: 'solid',
+      borderColor: o.bordercolorwasjustadded,
+    },
     displayContainer:{
       flex: 1,
       flexDirection: 'column',
@@ -278,7 +282,7 @@ export const HouseView = (props: HouseViewProps) => {
 
   return (
     <View style={[s.container]}>
-      <View style={[s.houseContainer, isSelecting && s.containerSelecting, isSelected && s.containerSelected]}>
+      <View style={[s.houseContainer, isSelecting && s.containerSelecting, isSelected && s.containerSelected, wasJustAdded && s.containerWasJustAdded]}>
         {!isDisabled && isEditingHouse ?
           <View style={s.inputsContainer}>
             <View style={s.inputsLeft}>

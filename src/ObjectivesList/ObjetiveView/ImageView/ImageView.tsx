@@ -270,6 +270,10 @@ const ImageView = (props: ImageViewProps) => {
       borderStyle: 'dashed',
       borderColor: o.bordercolorselected,
     },
+    containerWasJustAdded:{
+      borderStyle: 'solid',
+      borderColor: o.bordercolorwasjustadded,
+    },
     displayContainer:{
       flex: 1,
       flexDirection: 'column',
@@ -379,7 +383,7 @@ const ImageView = (props: ImageViewProps) => {
 
   return (
     <View style={[s.container]}>
-      <View style={[s.imageViewContainer, isSelecting && s.containerSelecting, isSelected && s.containerSelected]}>
+      <View style={[s.imageViewContainer, isSelecting && s.containerSelecting, isSelected && s.containerSelected, wasJustAdded && s.containerWasJustAdded]}>
         {!isDisabled && isEditingImage?
           <View style={s.inputsContainer}>
             <View style={s.inputsLeft}>

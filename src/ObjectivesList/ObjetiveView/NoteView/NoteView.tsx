@@ -133,7 +133,6 @@ const NoteView = (props: NoteViewProps) => {
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      // paddingBottom: 10,
       minHeight: 40,
       backgroundColor: (note.Text.trim() !== '' && !isEditingNote)?colorPalette.transparent:o.itembk,
       
@@ -156,11 +155,6 @@ const NoteView = (props: NoteViewProps) => {
       flex: 1,
       flexDirection: 'row',
       paddingBottom: 10,
-
-      borderColor: 'yellow',
-      borderWidth: 1,
-      borderRadius: 5,
-      borderStyle: 'solid',
     },
     inputsLeft:{
       width: '15%',
@@ -237,7 +231,7 @@ const NoteView = (props: NoteViewProps) => {
   return (
     <View style={s.container}>
       <View style={[s.noteContainer, isSelecting && s.containerSelecting, isSelected && s.containerSelected, wasJustAdded && s.containerWasJustAdded]}>
-        {(isDisabled || isEditingNote)?
+        {!isDisabled && isEditingNote?
           <View style={s.inputsContainer}>
             <View style={s.inputsLeft}>
               <PressImage pressStyle={[gs.baseImageContainer]} style={[s.image, s.imageDelete]} confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete}></PressImage>

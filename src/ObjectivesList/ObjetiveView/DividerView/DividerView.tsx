@@ -151,6 +151,10 @@ const DividerView = (props: DividerViewProps) => {
       borderStyle: 'dashed',
       borderColor: o.bordercolorselected,
     },
+    containerWasJustAdded:{
+      borderStyle: 'solid',
+      borderColor: o.bordercolorwasjustadded,
+    },
     inputTextStyle:{
       textAlign: 'center',
       fontWeight: 'bold',
@@ -175,7 +179,7 @@ const DividerView = (props: DividerViewProps) => {
 
   return (
     <View style={[s.dividerContainer, isItemsOpen && s.dividerContainerOpen]} >
-      <View style={[s.titleContainer, isSelecting && s.containerSelecting, isSelected && s.containerSelected]}>
+      <View style={[s.titleContainer, isSelecting && s.containerSelecting, isSelected && s.containerSelected, wasJustAdded && s.containerWasJustAdded]}>
         {!isEditingTitle &&
           <>
             {divider.IsOpen?

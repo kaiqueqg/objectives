@@ -134,6 +134,10 @@ const MedicineView = (props: MedicineViewProps) => {
       borderStyle: 'dashed',
       borderColor: o.bordercolorselected,
     },
+    containerWasJustAdded:{
+      borderStyle: 'solid',
+      borderColor: o.bordercolorwasjustadded,
+    },
     medicineContainer:{
       flex: 1,
       flexDirection: 'row',
@@ -224,8 +228,7 @@ const MedicineView = (props: MedicineViewProps) => {
 
   return (
     <View style={[s.container]}>
-      <View style={
-        [s.medicineContainer, isSelecting && s.containerSelecting, isSelected && s.containerSelected]}>
+      <View style={[s.medicineContainer, isSelecting && s.containerSelecting, isSelected && s.containerSelected, wasJustAdded && s.containerWasJustAdded]}>
         {!isDisabled && isEditingMedicine?
           <View style={s.inputsContainer}>
             <View style={s.inputsLeft}>

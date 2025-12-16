@@ -119,9 +119,9 @@ const QuestionView = (props: QuestionViewProps) => {
       borderStyle: 'dashed',
       borderColor: o.bordercolorselected,
     },
-    questionContainerEnding:{
+    containerWasJustAdded:{
       borderStyle: 'solid',
-      borderColor: o.bordercolorselected,
+      borderColor: o.bordercolorwasjustadded,
     },
     textContainer:{
       flex: 1,
@@ -215,7 +215,7 @@ const QuestionView = (props: QuestionViewProps) => {
 
   return (
     <View style={s.container}>
-      <View style={[s.questionContainer, props.isSelecting && s.containerSelecting, props.isSelected && s.containerSelected]}>
+      <View style={[s.questionContainer, props.isSelecting && s.containerSelecting, props.isSelected && s.containerSelected, wasJustAdded && s.containerWasJustAdded]}>
         {!isDisabled && isEditingQuestion?
           <View style={s.inputsContainer}>
             <View style={s.inputsLeft}>
