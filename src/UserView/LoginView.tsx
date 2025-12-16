@@ -253,6 +253,7 @@ const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
         else{
           /// Normal login, without 2FA
           if(data.User && data.Token){
+            log.r(data)
             writeUser(data.User);
             writeJwtToken(data.Token);
             setIsLogged(true);
@@ -273,7 +274,6 @@ const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
   }
 
   const sendVerificationTwoFA = async () => {
-    log.w('sendVerificationTwoFA')
     setIsRequiringTwoFA(true);
 
     if(!(/^[0-9]{6}$/.test(verificationCode))){
@@ -287,7 +287,8 @@ const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
       const data = await identityApi.validateTwoFA(sendRequest);
 
       if(data && data.User && data.Token){
-        writeUser(data.User);
+        log.r(data)
+        await writeUser(data.User);
         writeJwtToken(data.Token);
         setIsLogged(true);
         setRequiringTwoFA(false);

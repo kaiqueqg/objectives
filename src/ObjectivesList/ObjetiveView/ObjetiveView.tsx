@@ -223,15 +223,8 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     }, 3000);
 
     await putItems(obj.ObjectiveId, sending);
-    loadItems();
-
-    itemsListScrollTo(sending[0].ItemId)
-    // if(pos !== null && pos !== undefined){
-    //   itemsListScrollTo(pos);
-    // }
-    // else{
-    //   itemsListScrollTo(items.length-1);
-    // }
+    await loadItems();
+    itemsListScrollTo(items[items.length-2].ItemId);
 
     if(!isItemOpenLocked) setIsItemsOpen(false);
   }

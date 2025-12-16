@@ -7,6 +7,7 @@ import PressInput from "../../../PressInput/PressInput";
 import { useEffect, useState } from "react";
 import { useLogContext } from "../../../Contexts/LogContext";
 import PressText from "../../../PressText/PressText";
+import PopMessageContainer from "../../../Log/PopMessageContainer";
 
 export const New = () => {
   return(
@@ -22,8 +23,8 @@ export interface NoteViewProps extends ItemViewProps {
 
 const NoteView = (props: NoteViewProps) => {
   const { userPrefs, theme: t, fontTheme: f, putItem } = useUserContext();
-  const { log } = useLogContext();
-  const { objTheme: o, wasJustAdded, isSelected, isSelecting, isDisabled, onDeleteItem, loadMyItems, note } = props;
+  const { log, popMessage } = useLogContext();
+  const { objTheme: o, itemsListScrollTo, isLocked, wasJustAdded, isSelected, isSelecting, isDisabled, onDeleteItem, loadMyItems, note } = props;
 
   const [newNote, setNewNote] = useState<Note>(note);
   const [isEditingNote, setIsEditingNote] = useState<boolean>(false);
@@ -40,7 +41,7 @@ const NoteView = (props: NoteViewProps) => {
         return true;
       }
       
-      onEditingTitle(false);
+      onCancelNote();
       return true;
     };
 
@@ -75,13 +76,35 @@ const NoteView = (props: NoteViewProps) => {
     }
   }
 
+  const onEditingNote = () => {
+    log.r('qsd')
+    if(isLocked) {
+      Vibration.vibrate(Pattern.Wrong);
+      return;
+    }
+
+    if(!isDisabled){
+      itemsListScrollTo(note.ItemId);
+      setIsEditingNote(!isEditingNote);
+    }
+    else{
+      popMessage('qsds')
+    }
+  }
+
   const onCancelNote = async () => {
     setIsEditingNote(false);
   }
 
-  const onEditingTitle = async (editingState: boolean) => {
-    if(editingState) props.itemsListScrollTo(note.ItemId)
-    setIsEditingNote(editingState);
+  const getDisplayView = () => {
+    const displayText:boolean = (note.Text || !note.Title) ?true : false;
+
+    return(
+      <View style={s.displayContainer}>
+        {note.Title && <PressText style={s.titleContainerStyle} textStyle={s.titleStyle} onPress={onEditingNote} text={newNote.Title}></PressText>}
+        {displayText && <PressText style={s.textContainerStyle} textStyle={s.textStyle} onPress={onEditingNote} text={newNote.Text}></PressText>}
+      </View>
+    )
   }
 
   const s = StyleSheet.create({
@@ -92,7 +115,6 @@ const NoteView = (props: NoteViewProps) => {
       alignItems: 'center',
       marginHorizontal: o.marginHorizontal,
       marginVertical: o.marginVertical,
-      minHeight: 45,
     },
     containerSelecting:{
       borderStyle: 'solid',
@@ -102,12 +124,17 @@ const NoteView = (props: NoteViewProps) => {
       borderStyle: 'dashed',
       borderColor: o.bordercolorselected,
     },
+    containerWasJustAdded:{
+      borderStyle: 'solid',
+      borderColor: o.bordercolorwasjustadded,
+    },
     noteContainer:{
       flex: 1,
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      paddingLeft: 10,
+      // paddingBottom: 10,
+      minHeight: 40,
       backgroundColor: (note.Text.trim() !== '' && !isEditingNote)?colorPalette.transparent:o.itembk,
       
       borderColor: (note.Text.trim() !== '' && !isEditingNote)?colorPalette.transparent:o.bordercolor,
@@ -121,18 +148,19 @@ const NoteView = (props: NoteViewProps) => {
       alignItems: 'center',
       verticalAlign: 'middle',
       flexDirection: 'column',
-
-      // paddingVertical: 5,
-      // paddingHorizontal: 2,
-
-      // borderColor: 'red',
-      // borderWidth: 1,
-      // borderRadius: 5,
-      // borderStyle: 'solid',
+      paddingHorizontal: 10,
+      paddingBottom: 5,
+      minHeight: 40,
     },
     inputsContainer:{
       flex: 1,
       flexDirection: 'row',
+      paddingBottom: 10,
+
+      borderColor: 'yellow',
+      borderWidth: 1,
+      borderRadius: 5,
+      borderStyle: 'solid',
     },
     inputsLeft:{
       width: '15%',
@@ -164,6 +192,7 @@ const NoteView = (props: NoteViewProps) => {
       flexDirection: 'row',
       fontSize: 20,
       paddingVertical: 5,
+      color: o.itemtext,
 
       fontWeight: 'bold',
     },
@@ -171,6 +200,7 @@ const NoteView = (props: NoteViewProps) => {
       width: '100%',
     },
     textStyle:{
+      color: o.itemtext,
     },
     inputStyle:{
       flex: 1,
@@ -206,7 +236,7 @@ const NoteView = (props: NoteViewProps) => {
 
   return (
     <View style={s.container}>
-      <View style={[s.noteContainer, isSelecting && s.containerSelecting, isSelected && s.containerSelected]}>
+      <View style={[s.noteContainer, isSelecting && s.containerSelecting, isSelected && s.containerSelected, wasJustAdded && s.containerWasJustAdded]}>
         {(isDisabled || isEditingNote)?
           <View style={s.inputsContainer}>
             <View style={s.inputsLeft}>
@@ -233,21 +263,11 @@ const NoteView = (props: NoteViewProps) => {
             </View>
             <View style={s.inputsRight}>
               <PressImage pressStyle={[gs.baseImageContainer]} style={[s.image, s.imageDone]} source={require('../../../../public/images/done.png')} onPress={doneEdit}></PressImage>
-              <View style={gs.baseImageContainer}></View>
               <PressImage pressStyle={[gs.baseImageContainer]} style={[s.image, s.imageCancel]} source={require('../../../../public/images/cancel.png')} onPress={onCancelNote}></PressImage>
             </View>    
           </View>
           :
-          <View style={s.displayContainer}>
-            {note.Title && <PressText style={s.titleContainerStyle} textStyle={s.titleStyle} onPress={()=>{setIsEditingNote(true)}} text={newNote.Title}></PressText>}
-            <PressText style={s.textContainerStyle} textStyle={s.textStyle} onPress={()=>{setIsEditingNote(true)}} text={newNote.Text}></PressText>
-            {/* <PressImage
-              style={s.image}
-              pressStyle={gs.baseImageContainer}
-              onPress={()=>{setIsEditingNote(true)}}
-              source={require('../../../../public/images/note.png')}
-            ></PressImage> */}
-          </View>
+          getDisplayView()
         }    
       </View>
     </View>

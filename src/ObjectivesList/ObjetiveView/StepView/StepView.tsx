@@ -160,7 +160,7 @@ const StepView = (props: StepViewProps) => {
           style={s.titleContainer}
           textStyle={step.Done? s.titleFade:s.title}
           text={step.Title}
-          onPress={()=>{onEditingStep()}}
+          onPress={()=>{if(!isDisabled)onEditingStep()}}
           defaultStyle={o}
           ellipsizeMode='middle'
         ></PressText>
@@ -263,7 +263,7 @@ const StepView = (props: StepViewProps) => {
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      paddingBottom: 5,
+      // paddingBottom: 5,
     },
     importanceIconContainer:{
       flex: 1,
