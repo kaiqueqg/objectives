@@ -246,6 +246,7 @@ export type GlobalStyle = {
   baseImage: ViewStyle,
   baseBiggerImage: ViewStyle,
   baseSmallImage: ViewStyle,
+  baseSmallerImage: ViewStyle,
   baseVerySmallImage: ViewStyle,
   baseItemCheckImage: ViewStyle,
 }
@@ -266,44 +267,26 @@ export const globalStyle:GlobalStyle = {
     width: 44,
     alignItems: 'center',
     justifyContent: 'center',
-
-    // borderColor: colorPalette.reddarker,
-    // borderWidth: 1,
-    // borderStyle: 'dashed',
   },
   baseImage: {
     height: 25,
     width: 25,
-
-    // borderColor: 'green',
-    // borderWidth: 1,
-    // borderStyle: 'dashed',
   },
   baseBiggerImage:{
     height: 30,
     width: 30,
-
-    // borderColor: 'purple',
-    // borderWidth: 1,
-    // borderStyle: 'dashed',
   },
   baseSmallImage: {
-    minHeight: 17,
-    minWidth: 17,
-    maxHeight: 22,
-    maxWidth: 22,
-
-    // borderColor: 'yellow',
-    // borderWidth: 1,
-    // borderStyle: 'dashed',
+    height: 22,
+    width: 22,
+  },
+  baseSmallerImage: {
+    height: 18,
+    width: 18,
   },
   baseVerySmallImage: {
     height: 15,
     width: 15,
-
-    // borderColor: 'blue',
-    // borderWidth: 1,
-    // borderStyle: 'dashed',
   },
   baseItemCheckImage:{
     flex:1,
@@ -340,6 +323,7 @@ export type AppPalette = {
   icontintfade: string,
 
   doneicontint: string,
+  trashicontint: string,
   cancelicontint: string,
 
   actionicontint: string,
@@ -369,7 +353,8 @@ export const light: AppPalette = {
   icontint: colorPalette.black,
   icontintfade: colorPalette.grey,
 
-  cancelicontint: colorPalette.reddark,
+  cancelicontint: colorPalette.yellowdark,
+  trashicontint: colorPalette.reddark,
   doneicontint: colorPalette.greendarker,
 
   actionicontint: colorPalette.bluedark,
@@ -399,7 +384,8 @@ export const dark: AppPalette = {
   icontint: colorPalette.beige,
   icontintfade: colorPalette.beigedark,
 
-  cancelicontint: colorPalette.redlight,
+  cancelicontint: colorPalette.yellow,
+  trashicontint: colorPalette.redlight,
   doneicontint: colorPalette.green,
 
   actionicontint: colorPalette.bluedark,

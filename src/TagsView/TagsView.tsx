@@ -5,6 +5,7 @@ import { useUserContext } from "../Contexts/UserContext";
 import React, { JSX, useEffect, useState } from "react";
 import { useLogContext } from "../Contexts/LogContext";
 import { useStorageContext } from "../Contexts/StorageContext";
+import { Pattern } from "../Types";
 
 export interface TagsViewProps {
 }
@@ -40,6 +41,8 @@ const TagsView = (props: TagsViewProps) => {
   }, [objectives]);
 
   const selectUnselectedTag = (tag: string) => {
+    if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
+
     const isSelected = selectedTags.some(obj => obj === tag);
     if(isSelected){
       removeSelectedTags([tag]);

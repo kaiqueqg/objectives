@@ -75,6 +75,9 @@ const BottomBar = (props: BottomBarProps) => {
     cancelImage:{
       tintColor: t.cancelicontint,
     },
+    trashImage:{
+      tintColor: t.trashicontint,
+    },
     bottomImageSelected:{
       ...gs.baseBiggerImage,
       tintColor: t.bottombariconselected,
@@ -101,7 +104,7 @@ const BottomBar = (props: BottomBarProps) => {
             <PressImage pressStyle={gs.baseBiggerImageContainer} style={[s.bottomImage, currentView === Views.UserView&&s.bottomImageSelected]} onPress={() => changeToView(Views.UserView)} source={require('../../public/images/user.png')}></PressImage>
           )
           :
-          <PressImage pressStyle={gs.baseBiggerImageContainer} style={[s.bottomImage, s.cancelImage]} onPress={() => changeToView(Views.UserView)} source={require('../../public/images/user.png')}></PressImage>
+          <PressImage pressStyle={gs.baseBiggerImageContainer} style={[s.bottomImage, s.trashImage]} onPress={() => changeToView(Views.UserView)} source={require('../../public/images/user.png')}></PressImage>
         }
         <PressImage pressStyle={gs.baseBiggerImageContainer} style={[s.bottomImage]} onPress={changeTheme} source={require('../../public/images/theme.png')}></PressImage>
         {showLoginStuff && <PressImage pressStyle={currentView === Views.DevView? s.bottomImageSelected:gs.baseImageContainer} style={[s.bottomImage, currentView === Views.DevView&&s.bottomImageSelected]} onPress={() => changeToView(Views.DevView)} source={require('../../public/images/dev.png')}></PressImage>}

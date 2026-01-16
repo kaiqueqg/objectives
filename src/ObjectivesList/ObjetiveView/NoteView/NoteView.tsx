@@ -77,7 +77,6 @@ const NoteView = (props: NoteViewProps) => {
   }
 
   const onEditingNote = () => {
-    log.r('qsd')
     if(isLocked) {
       Vibration.vibrate(Pattern.Wrong);
       return;

@@ -203,7 +203,7 @@ export interface ImageInfo {
 }
 
 export const DefaultUserPrefs: UserPrefs = {
-  theme: 'light',
+  theme: 'dark',
   allowLocation: false,
   vibrate: true,
   autoSync: false,
@@ -267,12 +267,6 @@ export interface ObjectivesPrefs{
   iconsToDisplay: string[],
 }
 
-// export interface LoginModel{
-//   User?: User,
-//   Token: string,
-//   ErrorMessage: string
-// }
-
 export interface LoginRequest {
   Password: string;
   Email: string;
@@ -311,37 +305,21 @@ export const Codes = {
   Unauthorized: 401,
   Forbidden: 403,
   NotFound: 404,
+  Conflict: 409,
+  PayloadTooLarge: 413,
   InternalServerError: 500,
+  NotImplemented: 501,
+  ServiceUnavailable: 503,
 }
 
 export const Pattern = {
-  Ok: 7,
-  //Wrong: [0, 20, 100, 20],
+  Ok: [0, 30],
   Wrong: [0, 100],
   Short: [0, 100],
   Alert: [0, 20, 100, 200],
 };
 
-export enum Views { UserView, ListView, AllView, IndividualView, DevView, TagsView, ArchivedView }
-
-export const GetViewsText = (view: Views): string => {
-  switch (view) {
-    case Views.UserView:
-      return 'UserView'
-    case Views.ListView:
-      return 'ListView'
-    case Views.AllView:
-      return 'AllView'
-    case Views.IndividualView:
-      return 'IndividualView'
-    case Views.DevView:
-      return 'DevView'
-    case Views.TagsView:
-      return 'TagsView'
-    default:
-      return ''
-  }
-}
+export enum Views { UserView = 'UserView', ListView = 'ListView', AllView = 'AllView', IndividualView = 'IndividualView', DevView = 'DevView', ArchivedView = 'ArchivedView' }
 
 export enum MultiSelectType { MOVE = 'Move', COPY = 'Copy' }
 export interface MultiSelectAction { type: MultiSelectType, originObjectiveId: string, items: Item[] }

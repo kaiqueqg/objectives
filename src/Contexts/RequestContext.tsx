@@ -242,8 +242,6 @@ export const RequestProvider: React.FC<RequestProviderProps> = ({ children }) =>
             method: 'DELETE',
           });
     
-          log.b('uploadResponse', uploadResponse);
-    
           if(uploadResponse.ok){
             return true;
           }

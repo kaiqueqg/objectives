@@ -77,7 +77,12 @@ const PressImage = (props: PressImageProps) => {
         onPressIn={props.onPressIn}
         onLongPress={handleLongPress}
         delayLongPress={props.delayLongPress??800}>
-        <Image style={[props.style as ImageStyle, props.disable? (props.disableStyle as ImageStyle):{}]} source={props.source}></Image>
+        {/* <View style={[s.border3]}/> */}
+        {/* <View style={[s.border1]}> */}
+          {/* <View style={[s.border2]}> */}
+              <Image style={[props.style as ImageStyle, props.disable? (props.disableStyle as ImageStyle):{}, s.image]} source={props.source}></Image>
+          {/* </View> */}
+        {/* </View> */}
         {props.text && <Text style={[s.text, props.textStyle]}>{props.text}</Text>}
       </Pressable>
     )
@@ -116,6 +121,39 @@ const PressImage = (props: PressImageProps) => {
       fontSize: 16,
       fontWeight: 'bold',
     },
+
+    border1: {
+      borderColor: 'black',
+      borderWidth: 1,
+      borderRadius: 5,
+      borderStyle: 'solid',
+    },
+    border2:{
+      borderColor: 'yellow',
+      borderWidth: 1,
+      borderRadius: 5,
+      borderStyle: 'solid',
+    },
+    border3: {
+      right: 0,
+      top: 0,
+      height: 40,
+      width: 40,
+      zIndex: 0,
+      position: "absolute",
+      backgroundColor: 'black',
+      borderColor: 'gree',
+      borderWidth: 1,
+      borderRadius: 5,
+      borderStyle: 'solid',
+      transform: [
+        { translateX: 2 },
+        { translateY: 2 },
+      ],
+    },
+    image:{
+      margin: 5,
+    }
   });
 
   return(

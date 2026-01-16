@@ -19,18 +19,21 @@ export const New = () => {
 
 export interface DividerViewProps extends ItemViewProps{
   divider: Divider,
-  orderDividerItems: (divider: Item)=>void,
-  choseNewItemToAdd: (type: ItemType, pos?:number)=>void,
+  orderDividerItems: (divider: Item) => void,
+  choseNewItemToAdd: (type: ItemType, pos?:number) => void,
+  checkUncheckedDividerItems: (value: boolean, divider: Item )=> void,
 }
 
 const DividerView = (props: DividerViewProps) => {
   const { theme: t, fontTheme: f, putItem } = useUserContext();
   const { log, popMessage } = useLogContext();
-  const { objTheme: o, wasJustAdded, isDisabled, isSelecting, isSelected, onDeleteItem, loadMyItems, divider, orderDividerItems, choseNewItemToAdd, } = props;
+  const { objTheme: o, wasJustAdded, isDisabled, isSelecting, isSelected, onDeleteItem, loadMyItems, divider, orderDividerItems, choseNewItemToAdd, checkUncheckedDividerItems} = props;
 
   const [isEditingTitle, setIsEditingTitle] = useState<boolean>(false);
   const [isItemsOpen, setIsItemsOpen] = useState<boolean>(false);
   const [isItemOpenLocked, setIsItemOpenLocked] = useState<boolean>(false);
+
+  const [checkAll, setCheckAll] = useState<boolean>(false);
 
   const [keyboardVisible, setKeyboardVisible] = useState(false);
     
@@ -104,6 +107,13 @@ const DividerView = (props: DividerViewProps) => {
 
   const addNewItem = (type: ItemType) => {
     if(!isItemOpenLocked)setIsItemsOpen(false); choseNewItemToAdd(type, divider.Pos);
+  }
+
+  const onChangeAllCheckedUnchecked = () => {
+    log.w('qsdsd')
+    const newValue = !checkAll;
+    checkUncheckedDividerItems(newValue, divider);
+    setCheckAll(newValue);
   }
 
   const s = StyleSheet.create({
@@ -187,7 +197,7 @@ const DividerView = (props: DividerViewProps) => {
               :
               <PressImage pressStyle={gs.baseImageContainer} style={[s.image, isItemsOpen&&s.imageFade]} disable={isItemsOpen} onPress={() => {if(!isDisabled)onChangeIsOpen();}} source={require('../../../../public/images/up-chevron.png')}></PressImage>
             }
-            <View style={gs.baseImageContainer}></View>
+            <PressImage pressStyle={gs.baseImageContainer} style={[s.image, isItemsOpen&&s.imageFade]} disable={isItemsOpen || props.isLocked || isDisabled} confirm onPress={() => {if(!isDisabled)orderDividerItems(divider);}} source={require('../../../../public/images/atoz.png')}></PressImage>
           </>
         }
         <PressInput 
@@ -206,7 +216,11 @@ const DividerView = (props: DividerViewProps) => {
         </PressInput>
         {!isEditingTitle &&
           <>
-            <PressImage pressStyle={gs.baseImageContainer} style={[s.image, isItemsOpen&&s.imageFade]} disable={isItemsOpen || props.isLocked || isDisabled} confirm onPress={() => {if(!isDisabled)orderDividerItems(divider);}} source={require('../../../../public/images/atoz.png')}></PressImage>
+            {checkAll?
+              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, isItemsOpen&&s.imageFade]} disable={isItemsOpen || props.isLocked || isDisabled} confirm onPress={onChangeAllCheckedUnchecked} source={require('../../../../public/images/unchecked.png')}></PressImage>
+              :
+              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, isItemsOpen&&s.imageFade]} disable={isItemsOpen || props.isLocked || isDisabled} confirm onPress={onChangeAllCheckedUnchecked} source={require('../../../../public/images/checked.png')}></PressImage>
+            }
             {isItemOpenLocked?
               <PressImage
                 pressStyle={gs.baseImageContainer}

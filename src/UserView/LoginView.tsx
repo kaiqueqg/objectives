@@ -253,7 +253,6 @@ const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
         else{
           /// Normal login, without 2FA
           if(data.User && data.Token){
-            log.r(data)
             writeUser(data.User);
             writeJwtToken(data.Token);
             setIsLogged(true);
@@ -287,7 +286,6 @@ const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
       const data = await identityApi.validateTwoFA(sendRequest);
 
       if(data && data.User && data.Token){
-        log.r(data)
         await writeUser(data.User);
         writeJwtToken(data.Token);
         setIsLogged(true);
@@ -392,10 +390,10 @@ const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
           :
           <>
             <View style={s.emailContainer}>
-              <TextInput autoCapitalize="none" placeholder="6 digit number" placeholderTextColor={t.textcolorfade} style={s.emailInput} onChangeText={onChangeVerificationCode} onSubmitEditing={()=>{sendVerificationTwoFA()}}></TextInput>
+              <TextInput autoCapitalize="none" placeholder="6 digit number" placeholderTextColor={t.textcolorfade} style={s.emailInput} onChangeText={onChangeVerificationCode} onSubmitEditing={sendVerificationTwoFA}></TextInput>
             </View>
             <View style={s.logoutView}>
-              <PressText text={'Send'} textStyle={s.loginButtonText} style={s.loginButton} onPress={()=>{}}></PressText>
+              <PressText text={'Send'} textStyle={s.loginButtonText} style={s.loginButton} onPress={sendVerificationTwoFA}></PressText>
             </View>
           </>
         }
@@ -472,7 +470,7 @@ const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
               }
             </View>
             <View style={s.passwordContainer}>
-              <TextInput ref={passRef} autoCapitalize="none" placeholder="Password" placeholderTextColor={t.textcolorfade} style={s.passwordInput} secureTextEntry={!isShowingPassword} onChangeText={onChangePassword} onSubmitEditing={onPasswordEnter}></TextInput>
+              <TextInput ref={passRef} autoCapitalize="none" placeholder="Password" placeholderTextColor={t.textcolorfade} style={s.passwordInput} secureTextEntry={!isShowingPassword} onChangeText={onChangePassword} onSubmitEditing={login}></TextInput>
               {!isShowingPassword && <PressImage onPress={()=>{setIsShowingPassword(!isShowingPassword)}} style={s.image} pressStyle={s.imageContainer} source={require('../../public/images/show.png')}></PressImage>}
               {isShowingPassword && <PressImage onPress={()=>{setIsShowingPassword(!isShowingPassword)}} style={s.image} pressStyle={s.imageContainer} source={require('../../public/images/hide.png')}></PressImage>}
             </View>

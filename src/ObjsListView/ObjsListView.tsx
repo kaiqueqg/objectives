@@ -1,4 +1,4 @@
-import { View, StyleSheet, FlatList, Text, Vibration, BackHandler, Pressable } from "react-native";
+import { View, StyleSheet, FlatList, Text, Vibration, BackHandler, Pressable, TextInput } from "react-native";
 import { AppPalette, colorPalette, getObjTheme, globalStyle as gs } from "../Colors";
 import { FontPalette } from "../../fonts/Font";
 import { useUserContext } from "../Contexts/UserContext";
@@ -35,6 +35,13 @@ const ObjsListView = (props: ObjsListViewProps) => {
 
   const [isTagsListFolded, setIsTagsListFolded] = useState<boolean>(false);
   const [isObjectiveListFolded, setIsObjectiveListFolded] = useState<boolean>(false);
+
+  const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
+  const [objsSearchToShow, setObjsSearchToShow] = useState<string[]>([]);
+  const [searchText, setSearchText] = useState<string>('');
+  const [searchNoItemFound, setSearchNoItemFound] = useState<boolean>(false);
+
+  const [isSortMenuOpen, setIsSortMenuOpen] = useState<boolean>(false);
 
   useEffect(()=>{
     const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -171,6 +178,8 @@ const ObjsListView = (props: ObjsListViewProps) => {
   }
 
   const selectUnselectedTag = (tag: string) => {
+    if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
+
     if(tag.trim() !== 'Pin') {
       if(userPrefs.singleTagSelected) {
         writeSelectedTags([tag]);
@@ -192,10 +201,14 @@ const ObjsListView = (props: ObjsListViewProps) => {
   }
 
   const selectAllTags = () => {
+    if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
+
     writeSelectedTags(availableTags);
   }
 
   const unselectAllTags = () => {
+    if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
+    
     writeSelectedTags(['Pin']);
   }
 
@@ -259,24 +272,36 @@ const ObjsListView = (props: ObjsListViewProps) => {
     // popMessage('qsdqsds')
     return (
       <View style={s.containerListTagsTitle}>
-        <View style={gs.baseBiggerImageContainer}></View>
+        <View style={gs.baseImageContainer}></View>
         <Text style={s.containerObjectiveTitleText}>{'OBJECTIVES'}</Text>
         {isObjectiveListFolded?
-          <PressImage style={[s.image]} pressStyle={gs.baseBiggerImageContainer} onPress={()=>{setIsObjectiveListFolded(false)}} disable={isEditingPos} source={require('../../public/images/up-chevron.png')}></PressImage>
+          <PressImage style={[s.image]} pressStyle={gs.baseImageContainer} onPress={()=>{setIsObjectiveListFolded(false)}} disable={isEditingPos} source={require('../../public/images/up-chevron.png')}></PressImage>
           :
-          <PressImage style={[s.image]} pressStyle={gs.baseBiggerImageContainer} onPress={()=>{setIsObjectiveListFolded(true)}} disable={isEditingPos} source={require('../../public/images/down-chevron.png')}></PressImage>
+          <PressImage style={[s.image]} pressStyle={gs.baseImageContainer} onPress={()=>{setIsObjectiveListFolded(true)}} disable={isEditingPos} source={require('../../public/images/down-chevron.png')}></PressImage>
         }
       </View>
     )
   }
 
   const getObjectivesList = () => {
+    if(isObjectiveListFolded) return <></>;
+
+    let displayList: Objective[] = [];
+    unarchivedObjectives.forEach((o:Objective) => {
+      let shouldAddIsInSearch = true
+      if(objsSearchToShow.length && !objsSearchToShow.includes(o.ObjectiveId)) shouldAddIsInSearch = false;
+      
+      if(shouldAddIsInSearch) displayList.push(o);
+    });
+
     return (
-      <FlatList style={s.objectivesList} data={unarchivedObjectives} keyExtractor={objKeyExtractor} renderItem={getObjectiveButton}  ListFooterComponent={<View style={{ height: 300 }}/>}/>
+      <FlatList style={s.objectivesList} data={displayList} keyExtractor={objKeyExtractor} renderItem={getObjectiveButton} ListFooterComponent={<View style={{ height: 300 }}/>}/>
     )
   }
 
   const getTagsList = () => {
+    if(isTagsListFolded) return <></>;
+
     let listOfTags: JSX.Element[] = [
       <Text key={storage.randomId()} style={[s.tag, s.tagSpecial]} onPress={() => {selectAllTags()}}>{'All'}</Text>,
       <Text key={storage.randomId()} style={[s.tag, s.tagSpecial]} onPress={() => {unselectAllTags()}}>{'None'}</Text>,
@@ -307,13 +332,158 @@ const ObjsListView = (props: ObjsListViewProps) => {
   const getTagsTitle = () => {
     return (
       <View style={s.containerListTagsTitle}>
-        <View style={gs.baseBiggerImageContainer}></View>
+        <View style={gs.baseImageContainer}></View>
         <Text style={[s.containerTagTitleText]}>{'TAGS'}</Text>
         {isTagsListFolded?
-          <PressImage style={[s.image]} pressStyle={gs.baseBiggerImageContainer} onPress={()=>{setIsTagsListFolded(false)}} disable={isEditingPos} source={require('../../public/images/up-chevron.png')}></PressImage>
+          <PressImage style={[s.image]} pressStyle={gs.baseImageContainer} onPress={()=>{setIsTagsListFolded(false)}} disable={isEditingPos} source={require('../../public/images/up-chevron.png')}></PressImage>
           :
-          <PressImage style={[s.image]} pressStyle={gs.baseBiggerImageContainer} onPress={()=>{setIsTagsListFolded(true)}} disable={isEditingPos} source={require('../../public/images/down-chevron.png')}></PressImage>
+          <PressImage style={[s.image]} pressStyle={gs.baseImageContainer} onPress={()=>{setIsTagsListFolded(true)}} disable={isEditingPos} source={require('../../public/images/down-chevron.png')}></PressImage>
         }
+      </View>
+    )
+  }
+
+  const getMoveIcons = () => {
+    return(
+      <>
+        {!isEditingPos && 
+        <PressImage
+          style={s.imageUpDown}
+          onPress={startEditingPos}
+          disableStyle={s.imageFade}
+          pressStyle={gs.baseImageContainer}
+          disable={objectives.length < 2}
+          source={require('../../public/images/change.png')}
+        ></PressImage>}
+        {isEditingPos && <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.redImageColor]} onPress={cancelEditingPos} source={require('../../public/images/cancel.png')}></PressImage>}
+        {isEditingPos && <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.greenImageColor]} hide={objectivesSelected.length=== 0 || isEndingPos} onPress={onEditingPosTo} source={require('../../public/images/next.png')}></PressImage>}
+      </>
+    )
+  }
+
+  const onSearchTextChange = (value: string) => {
+    setSearchText(value);
+    doSearchText(value.trim());
+  }
+  
+  const onEraseSearch = () => {
+    if(searchText.trim() === '' && userPrefs.vibrate) {
+      Vibration.vibrate(Pattern.Wrong);
+    } 
+    else{
+      if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
+      setSearchText('');
+      setObjsSearchToShow([]);
+    }
+  }
+
+  const doSearchText = (search: string) => {
+    let newList: string[] = [];
+    objectives.forEach((o: Objective)=>{
+      if(searchTextIgnoreCase(o.Title, search)) newList.push(o.ObjectiveId);
+    });
+
+    setSearchNoItemFound(newList.length === 0);
+
+    setObjsSearchToShow(newList);
+  }
+
+  const searchTextIgnoreCase = (text: string, search: string):boolean => {
+    return text.trim().toLowerCase().includes(search.trim().toLowerCase());
+  }
+
+  const getSearchBarView = () => {
+    if(!isSearchOpen) return<></>;
+
+    return(
+      <View style={s.searchContainer}>
+        <Text style={s.searchTitle}>Search</Text>
+        <View  style={s.searchBottomRow}>
+          <TextInput 
+            defaultValue={searchText}
+            style={s.inputStyle}
+            placeholderTextColor={t.textcolorfade}
+            placeholder="Title that includes..."
+            onChangeText={onSearchTextChange}
+            submitBehavior="submit"
+            onSubmitEditing={()=>{popMessage('on')}}
+            autoFocus>
+          </TextInput>
+          <PressImage pressStyle={[gs.baseImageContainer]} style={[s.imageCancel]} onPress={onEraseSearch} source={require('../../public/images/eraser.png')}></PressImage>
+        </View>
+      </View>
+    )
+  }
+
+  const orderByTitle = async () => {
+    setIsSortMenuOpen(false);
+
+    let objsOrdered: Objective[] = objectives.sort((a, b) => {
+      return a.Title.localeCompare(b.Title)
+    });
+
+    let sorted:Objective[] = [];
+
+    for(let i = 0; i < objsOrdered.length; i++){
+      sorted.push({...objsOrdered[i], Pos: i, LastModified: (new Date()).toISOString()});
+    }
+
+    await putObjectives(sorted);
+  }
+
+  const orderByColor = async () => {
+    setIsSortMenuOpen(false);
+    const ORDER: Record<string, number> = {
+      noTheme: 0,
+      blue: 1,
+      red: 2,
+      green: 3,
+      white: 4,
+      pink: 5,
+      cyan: 6,
+    };
+
+    let objsOrdered: Objective[] = objectives.sort(
+      (a, b) => (ORDER[a.Theme] ?? Number.MAX_SAFE_INTEGER)
+              - (ORDER[b.Theme] ?? Number.MAX_SAFE_INTEGER)
+    );
+
+    let sorted:Objective[] = [];
+
+    for(let i = 0; i < objsOrdered.length; i++){
+      sorted.push({...objsOrdered[i], Pos: i, LastModified: (new Date()).toISOString()});
+    }
+
+    await putObjectives(sorted);
+  }
+
+  const getSortMenuView = () => {
+    if(!isSortMenuOpen) return;
+
+    return(
+      <View style={s.sortMenu}>
+        <PressImage pressStyle={gs.baseImageContainer} style={[s.image, isEditingPos&&s.imageFade]}  onPress={orderByTitle} disable={isEditingPos} source={require('../../public/images/atoz.png')}></PressImage>
+        <PressImage pressStyle={gs.baseImageContainer} style={[s.image, isEditingPos&&s.imageFade]}  onPress={orderByColor} disable={isEditingPos} source={require('../../public/images/theme.png')}></PressImage>
+      </View>
+    )
+  }
+
+  const getBottomMenuView = () => {
+    return(
+      <View style={s.bottomMenu}>
+        <View style={s.leftBottomMenu}>
+          {userPrefs.singleTagSelected?
+            <PressImage style={[s.image]} pressStyle={gs.baseImageContainer} onPress={changeSingleTag} disable={isEditingPos} source={require('../../public/images/tagsingle.png')}></PressImage>
+            :
+            <PressImage style={[s.image]} pressStyle={gs.baseImageContainer} onPress={changeSingleTag} disable={isEditingPos} source={require('../../public/images/tag.png')} ></PressImage>
+          }
+        </View>
+        <View style={s.rightBottomMenu}>
+          <PressImage pressStyle={gs.baseImageContainer} style={[s.image, isEditingPos&&s.imageFade]}  onPress={()=>{setIsSortMenuOpen(!isSortMenuOpen)}} disable={isEditingPos} source={require('../../public/images/sort.png')}  selected={isSortMenuOpen} selectedStyle={s.imageContainerSelected}></PressImage>
+          {getMoveIcons()}
+          <PressImage pressStyle={gs.baseImageContainer} style={[s.image, isEditingPos&&s.imageFade]}  onPress={()=>{setIsSearchOpen(!isSearchOpen)}} disable={isEditingPos} source={require('../../public/images/search.png')}></PressImage>
+          <PressImage pressStyle={gs.baseImageContainer} style={[s.imageNewFile, isEditingPos&&s.imageFade]}  onPress={onAddNewObjective} disable={isEditingPos} source={require('../../public/images/newfile.png')}></PressImage>
+        </View>
       </View>
     )
   }
@@ -430,10 +600,6 @@ const ObjsListView = (props: ObjsListViewProps) => {
       justifyContent: 'flex-end',
       alignItems: 'center',
       backgroundColor: t.backgroundcolordark,
-
-      // borderColor: 'black',
-      // borderTopWidth: 1,
-      // borderStyle: 'solid',
     },
     leftBottomMenu:{
       flex: 1,
@@ -446,6 +612,50 @@ const ObjsListView = (props: ObjsListViewProps) => {
       flexDirection: 'row',
       justifyContent: 'flex-end',
       alignItems: 'center',
+    },
+    sortMenu: {
+      width: '100%',
+      flexDirection: 'row',
+      justifyContent: 'flex-end',
+      alignItems: 'center',
+      backgroundColor: '#00000018',
+    },
+    searchContainer:{
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: t.backgroundcolordarker,
+      margin: 5,
+      minHeight: 60,
+      paddingHorizontal: 10,
+      paddingVertical: 5,
+      
+      borderColor: t.bordercolorfade,
+      borderWidth: 1,
+      borderRadius: 5,
+      borderStyle: 'solid',
+    },
+    searchTitle:{
+      verticalAlign: 'middle',
+      textAlign: 'center',
+      width: '100%',
+      color: t.textcolor,
+      fontWeight: 'bold',
+      fontSize: 25,
+    },
+    searchBottomRow:{
+      flexDirection: "row",
+    },
+    inputStyle: {
+      flex: 1,
+      width: '100%',
+      justifyContent: 'center',
+      alignItems: 'center',
+
+      color: searchNoItemFound?t.trashicontint:t.textcolor,
+      
+      borderColor: t.bordercolorfade,
+      borderBottomWidth: 1,
+      borderStyle: 'solid',
     },
     allTextContainer:{
       width: 100,
@@ -463,6 +673,10 @@ const ObjsListView = (props: ObjsListViewProps) => {
     allText:{
       color: t.textcolor,
     },
+    imageContainerSelected:{
+      ...gs.baseImageContainer,
+      backgroundColor: t.backgroundcolordarker,
+    },
     imageNoTint:{
       ...gs.baseSmallImage,
     },
@@ -470,17 +684,20 @@ const ObjsListView = (props: ObjsListViewProps) => {
       ...gs.baseSmallImage,
       tintColor: t.icontint,
     },
+    imageCancel:{
+      ...gs.baseSmallImage,
+      tintColor: t.cancelicontint,
+    },
     imageNewFile:{
+      ...gs.baseImage,
       tintColor: t.icontint,
-      height: 27,
-      width: 27,
     },
     imageUpDown:{
       ...gs.baseSmallImage,
       tintColor: t.icontint,
     },
     redImageColor:{
-      tintColor: t.cancelicontint,
+      tintColor: t.trashicontint,
     },
     greenImageColor:{
       tintColor: t.doneicontint,
@@ -609,39 +826,19 @@ const ObjsListView = (props: ObjsListViewProps) => {
 
   return (
     <View style={s.container}>
+      {getSearchBarView()}
       <View style={s.containerList}>
         <View style={s.containerListTag}>
           {getTagsTitle()}
-          {!isTagsListFolded && getTagsList()}
+          {getTagsList()}
         </View>
         <View style={s.containerListObjs}>
           {getObjectivesTitle()}
-          {!isObjectiveListFolded &&  getObjectivesList()}
+          {getObjectivesList()}
         </View>
       </View>
-      <View style={s.bottomMenu}>
-        <View style={s.leftBottomMenu}>
-          {userPrefs.singleTagSelected?
-            <PressImage style={[s.image]} pressStyle={gs.baseBiggerImageContainer} onPress={changeSingleTag} disable={isEditingPos} source={require('../../public/images/tagsingle.png')}></PressImage>
-            :
-            <PressImage style={[s.image]} pressStyle={gs.baseBiggerImageContainer} onPress={changeSingleTag} disable={isEditingPos} source={require('../../public/images/tag.png')}></PressImage>
-          }
-        </View>
-        <View style={s.rightBottomMenu}>
-          {!isEditingPos && 
-          <PressImage
-            style={s.imageUpDown}
-            onPress={startEditingPos}
-            disableStyle={s.imageFade}
-            pressStyle={gs.baseBiggerImageContainer}
-            disable={objectives.length < 2}
-            source={require('../../public/images/change.png')}
-          ></PressImage>}
-          {isEditingPos && <PressImage pressStyle={gs.baseBiggerImageContainer} style={[s.image, s.redImageColor]} onPress={cancelEditingPos} source={require('../../public/images/cancel.png')}></PressImage>}
-          {isEditingPos && <PressImage pressStyle={gs.baseBiggerImageContainer} style={[s.image, s.greenImageColor]} hide={objectivesSelected.length=== 0 || isEndingPos} onPress={onEditingPosTo} source={require('../../public/images/next.png')}></PressImage>}
-          <PressImage pressStyle={gs.baseBiggerImageContainer} style={[s.imageNewFile, isEditingPos&&s.imageFade]}  onPress={onAddNewObjective} disable={isEditingPos} source={require('../../public/images/newfile.png')}></PressImage>
-        </View>
-      </View>
+      {getSortMenuView()}
+      {getBottomMenuView()}
     </View>
   );
 };

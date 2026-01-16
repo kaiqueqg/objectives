@@ -558,6 +558,42 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     setOpenAll(!v);
   }
 
+  const checkUncheckedDividerItems = async (value: boolean, divider: Item) => {
+    let start = false;
+    let itemsToChange:Item[] = [];
+    for(let i = 0; i < items.length; i++){
+      const item = items[i];
+      if(start && item.Type === ItemType.Divider) break;
+
+      if(start) {
+        switch(item.Type){
+          case ItemType.Exercise:
+            itemsToChange.push({...item, IsDone: value} as Exercise);
+            break;
+          case ItemType.Medicine:
+            itemsToChange.push({...item, IsChecked: value} as Medicine);
+            break;
+          case ItemType.Step:
+            itemsToChange.push({...item, Done: value} as Step);
+            break;
+          case ItemType.Grocery:
+            itemsToChange.push({...item, IsChecked: value} as Grocery);
+            break;
+          case ItemType.House:
+            itemsToChange.push({...item, WasContacted: value} as House);
+            break;
+        }
+      }
+
+      if(items[i] === divider){ 
+        start = true; 
+      }
+    }
+
+    await putItems(obj.ObjectiveId, itemsToChange);
+    await loadItems();
+  }
+
   const orderDividerItems = async (divider: Item) => {
     if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
 
@@ -847,8 +883,6 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
           <PressImage
             pressStyle={gs.baseBiggerImageContainer}
             style={s.image}
-            disable={shouldDisable(ObjBottomIcons.Unarchive)}
-            disableStyle={s.imageFade}
             confirm
             onPress={() => showButtomItem(ObjBottomIcons.Unarchive)}
             source={require("../../../public/images/unarchive.png")}
@@ -860,8 +894,6 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
           <PressImage
             pressStyle={gs.baseBiggerImageContainer}
             style={s.image}
-            disable={shouldDisable(ObjBottomIcons.Archive)}
-            disableStyle={s.imageFade}
             confirm
             onPress={() => showButtomItem(ObjBottomIcons.Archive)}
             source={require("../../../public/images/archive.png")}
@@ -873,8 +905,6 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
           <PressImage
             pressStyle={[gs.baseBiggerImageContainer]}
             style={s.image}
-            disable={shouldDisable(ObjBottomIcons.Palette)}
-            disableStyle={s.imageFade}
             selected={isPaletteOpen}
             selectedStyle={s.bottomContainerSelected}
             onPress={() => showButtomItem(ObjBottomIcons.Palette)}
@@ -886,8 +916,6 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
         return (
           <PressImage
             style={s.image}
-            disable={shouldDisable(ObjBottomIcons.Tags)}
-            disableStyle={s.imageFade}
             selected={isTagOpen}
             selectedStyle={s.bottomContainerSelected}
             pressStyle={gs.baseBiggerImageContainer}
@@ -900,8 +928,6 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
         return(
           <PressImage 
           style={s.image}
-          disable={shouldDisable(ObjBottomIcons.Search)}
-          disableStyle={s.imageFade}
           selected={isSearchOpen}
           selectedStyle={s.bottomContainerSelected}
           pressStyle={[gs.baseBiggerImageContainer]}
@@ -913,8 +939,6 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
         return (
           <PressImage
             style={s.image}
-            disable={shouldDisable(ObjBottomIcons.Sorted)}
-            disableStyle={s.imageFade}
             pressStyle={gs.baseBiggerImageContainer}
             confirm
             confirmStyle={[s.image, s.greenImageColor]}
@@ -927,8 +951,6 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
         return (
           <PressImage
             style={s.image}
-            disable={shouldDisable(ObjBottomIcons.Pos)}
-            disableStyle={s.imageFade}
             selected={isMultiSelectOpen}
             selectedStyle={s.bottomContainerSelected}
             pressStyle={[gs.baseBiggerImageContainer]}
@@ -941,8 +963,6 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
         return (
           <PressImage
             pressStyle={gs.baseBiggerImageContainer}
-            disable={shouldDisable(ObjBottomIcons.IsLocked)}
-            disableStyle={s.imageFade}
             style={[s.image, obj.IsLocked ? s.imageLock : s.imageFade]}
             onPress={onLock}
             confirm={obj.IsLocked}
@@ -955,8 +975,6 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
         return (
           <PressImage
             style={s.image}
-            disable={shouldDisable(ObjBottomIcons.Checked)}
-            disableStyle={s.imageFade}
             pressStyle={gs.baseBiggerImageContainer}
             onPress={onChangeShowingItems}
             onLongPress={() => showButtomItem(ObjBottomIcons.Checked)}
@@ -972,8 +990,6 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
         return isItemOpenLocked ? (
           <PressImage
             style={[s.image, s.redImageColor]}
-            disable={shouldDisable(ObjBottomIcons.Add)}
-            disableStyle={s.imageFade}
             selected={isItemsOpen}
             selectedStyle={s.bottomContainerSelected}
             pressStyle={gs.baseBiggerImageContainer}
@@ -984,8 +1000,6 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
           <PressImage
             pressStyle={gs.baseBiggerImageContainer}
             style={s.image}
-            disable={shouldDisable(ObjBottomIcons.Add)}
-            disableStyle={s.imageFade}
             selected={isItemsOpen}
             selectedStyle={s.bottomContainerSelected}
             onPress={() => showButtomItem(ObjBottomIcons.Add)}
@@ -1045,6 +1059,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
         onDeleteItem={onDeleteItem}
         choseNewItemToAdd={(type: ItemType, pos?:number) => {choseNewItemToAdd(type, pos)}}
         itemsListScrollTo={itemsListScrollTo}
+        checkUncheckedDividerItems={checkUncheckedDividerItems}
         ></DividerView>  
     }
     else  if(item.Type === ItemType.Step){
@@ -1170,40 +1185,6 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     }
   }
 
-  //! bad solution
-  const shouldDisable = (icon: ObjBottomIcons) => {
-    return false;
-
-    const hasCheckItem = items.find((item) => item.Type === ItemType.Grocery || item.Type === ItemType.Medicine || item.Type === ItemType.Exercise || item.Type === ItemType.Step || item.Type === ItemType.House);
-
-    switch (icon) {
-      case ObjBottomIcons.Archive:
-        return isPaletteOpen || isTagOpen || isMultiSelectOpen || isSelectingPastePos || isItemsOpen || isItemOpenLocked || isCheckedOpen || isSearchOpen;
-      case ObjBottomIcons.Unarchive:
-        return isPaletteOpen || isTagOpen || isMultiSelectOpen || isSelectingPastePos || isItemsOpen || isItemOpenLocked || isCheckedOpen || isSearchOpen;
-      case ObjBottomIcons.Palette:
-        return isTagOpen || isMultiSelectOpen || isSelectingPastePos || isItemsOpen || isItemOpenLocked || isCheckedOpen || isSearchOpen;
-      case ObjBottomIcons.Checked:
-        return isPaletteOpen || isTagOpen || isMultiSelectOpen || isSelectingPastePos || isItemsOpen || isItemOpenLocked || isSearchOpen || !hasCheckItem;
-      case ObjBottomIcons.Tags:
-        return isPaletteOpen || isMultiSelectOpen || isSelectingPastePos || isItemsOpen || isItemOpenLocked || isCheckedOpen || isSearchOpen;
-      case ObjBottomIcons.Sorted:
-        return isPaletteOpen || isTagOpen || isMultiSelectOpen || isSelectingPastePos || isItemsOpen || isItemOpenLocked || isCheckedOpen || isSearchOpen || items.length < 2;
-      case ObjBottomIcons.Pos:
-        return isPaletteOpen || isTagOpen || isItemsOpen || isItemOpenLocked || isCheckedOpen || isSearchOpen;
-      case ObjBottomIcons.Add:
-        return isPaletteOpen || isTagOpen || isMultiSelectOpen || isSelectingPastePos || isCheckedOpen || isSearchOpen;
-      case ObjBottomIcons.Search:
-        return isPaletteOpen || isTagOpen || isMultiSelectOpen || isSelectingPastePos || isCheckedOpen || isItemsOpen || isItemOpenLocked || items.length < 2;
-      case ObjBottomIcons.IsLocked:
-        return isPaletteOpen || isTagOpen || isMultiSelectOpen || isSelectingPastePos || isCheckedOpen || isSearchOpen;
-      case ObjBottomIcons.Menu:
-        return isPaletteOpen || isTagOpen || isMultiSelectOpen || isSelectingPastePos || isCheckedOpen || isSearchOpen;
-      default:
-        return false;
-    }
-  }
-
   //Test if should be showed in the side hidden menu or in the main bottom bar
   const shouldShowBottomIcon = (icon: ObjBottomIcons, invert: boolean = false) => {
     if(invert) return !userPrefs.ObjectivesPrefs.iconsToDisplay.includes(ObjBottomIcons[icon]);
@@ -1219,8 +1200,6 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
           <PressImage 
             pressStyle={gs.baseBiggerImageContainer}
             style={s.image}
-            disable={shouldDisable(ObjBottomIcons.Menu)}
-            disableStyle={s.imageFade}
             selected={isMenuIconOpen}
             selectedStyle={s.bottomContainerSelected}
             onPress={()=>showButtomItem(ObjBottomIcons.Menu)}

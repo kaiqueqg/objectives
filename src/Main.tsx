@@ -149,9 +149,6 @@ const Main = (props: MainProps) => {
     else if(currentView === Views.DevView){
       return <DevView></DevView>
     }
-    else if(currentView === Views.TagsView){
-      return <TagsView></TagsView>
-    }
     else if(currentObjective){
       return <ObjectiveView obj={currentObjective}></ObjectiveView>
     }
