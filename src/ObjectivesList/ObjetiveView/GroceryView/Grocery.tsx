@@ -224,7 +224,7 @@ const GroceryView = (props: GroceryViewProps) => {
         {!isDisabled && isEditingGrocery?
           <View style={s.inputsContainer}>
             <View style={s.inputsLeft}>
-              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageDelete]} confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete}></PressImage>
+              <PressImage confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete} color={o.trashicontint}></PressImage>
             </View>
             <View style={s.inputsCenter}>
               <TextInput 
@@ -262,8 +262,8 @@ const GroceryView = (props: GroceryViewProps) => {
                 onSubmitEditing={onDoneGrocery}></TextInput>
             </View>
             <View style={s.inputsRight}>
-              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageDone]} source={require('../../../../public/images/done.png')} onPress={onDoneGrocery}></PressImage>
-              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageCancel]} source={require('../../../../public/images/cancel.png')} onPress={onCancelGrocery}></PressImage>
+              <PressImage source={require('../../../../public/images/done.png')} onPress={onDoneGrocery} color={o.doneicontint}></PressImage>
+              <PressImage source={require('../../../../public/images/cancel.png')} onPress={onCancelGrocery} color={o.cancelicontint}></PressImage>
             </View>
           </View>
           :
@@ -275,8 +275,8 @@ const GroceryView = (props: GroceryViewProps) => {
             defaultStyle={o}
             ></PressText>
         }
-        {!isEditingGrocery && !grocery.IsChecked && <PressImage pressStyle={gs.baseImageContainer} style={s.image} source={require('../../../../public/images/grocery.png')} onPress={() => {if(!isDisabled)onChangeIsChecked();}}></PressImage>}
-        {!isEditingGrocery && grocery.IsChecked && <PressImage pressStyle={gs.baseImageContainer} style={s.imageFade} source={require('../../../../public/images/grocery-filled.png')} onPress={() => {if(!isDisabled)onChangeIsChecked();}}></PressImage>}
+        {!isEditingGrocery && !grocery.IsChecked && <PressImage source={require('../../../../public/images/grocery.png')} onPress={() => {if(!isDisabled)onChangeIsChecked();}}></PressImage>}
+        {!isEditingGrocery && grocery.IsChecked && <PressImage source={require('../../../../public/images/grocery-filled.png')} onPress={() => {if(!isDisabled)onChangeIsChecked();}}></PressImage>}
       </View>
     </View>
   );

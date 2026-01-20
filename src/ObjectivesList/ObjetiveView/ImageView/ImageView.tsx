@@ -387,7 +387,7 @@ const ImageView = (props: ImageViewProps) => {
         {!isDisabled && isEditingImage?
           <View style={s.inputsContainer}>
             <View style={s.inputsLeft}>
-              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageDelete]} confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete}></PressImage>
+              <PressImage confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete}></PressImage>
             </View>
             <View style={s.inputsCenter}>
               <TextInput 
@@ -399,16 +399,16 @@ const ImageView = (props: ImageViewProps) => {
                 onSubmitEditing={onDoneImage}
                 autoFocus={image.Title.trim() === ''}></TextInput>
               <View style={s.buttonsRowContainer}>
-                <PressImage pressStyle={gs.baseImageContainer} style={[s.image]} source={require('../../../../public/images/camera.png')} onPress={openCamera}></PressImage>
-                <PressImage pressStyle={gs.baseImageContainer} style={[s.image]} source={require('../../../../public/images/image.png')} onPress={pickImage}></PressImage>
-                <PressImage pressStyle={gs.baseImageContainer} style={[s.image]} confirm={true} source={require('../../../../public/images/trash.png')} onPress={deleteImage}></PressImage>
+                <PressImage source={require('../../../../public/images/camera.png')} onPress={openCamera}></PressImage>
+                <PressImage source={require('../../../../public/images/image.png')} onPress={pickImage}></PressImage>
+                <PressImage confirm={true} source={require('../../../../public/images/trash.png')} onPress={deleteImage}></PressImage>
               </View>
               {storedImage && <ReactImage style={s.imagePreview} source={{ uri: storedImage.ImageFile }}></ReactImage>}
-              {!storedImage && image.Name && <PressImage pressStyle={gs.baseImageContainer} style={[s.image]} source={require('../../../../public/images/download.png')} onPress={downloadImage}></PressImage>}
+              {!storedImage && image.Name && <PressImage source={require('../../../../public/images/download.png')} onPress={downloadImage}></PressImage>}
             </View>
             <View style={s.inputsRight}>
-              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageDone]} source={require('../../../../public/images/done.png')} onPress={onDoneImage}></PressImage>
-              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageCancel]} source={require('../../../../public/images/cancel.png')} onPress={onCancelImage}></PressImage>
+              <PressImage source={require('../../../../public/images/done.png')} onPress={onDoneImage} color={o.doneicontint}></PressImage>
+              <PressImage source={require('../../../../public/images/cancel.png')} onPress={onCancelImage} color={o.cancelicontint}></PressImage>
             </View>
           </View>
           :
@@ -422,9 +422,9 @@ const ImageView = (props: ImageViewProps) => {
                 defaultStyle={o}
               ></PressText>
               {storedImage?
-                <PressImage pressStyle={[gs.baseImageContainer]} style={[s.image, image.IsDisplaying? null:s.imageFade]} source={require('../../../../public/images/image-filled.png')} onPress={() => {if(!isDisabled)onChangeIsDisplaying();}}></PressImage>
+                <PressImage source={require('../../../../public/images/image-filled.png')} onPress={() => {if(!isDisabled)onChangeIsDisplaying();}}></PressImage>
                 :
-                <PressImage pressStyle={[gs.baseImageContainer]} style={[s.image, image.IsDisplaying? null:s.imageFade]} source={require('../../../../public/images/image.png')} onPress={() => {if(!isDisabled)onChangeIsDisplaying();}}></PressImage>
+                <PressImage source={require('../../../../public/images/image.png')} onPress={() => {if(!isDisabled)onChangeIsDisplaying();}}></PressImage>
               }
             </View>
           {image.IsDisplaying && storedImage?.ImageFile && 

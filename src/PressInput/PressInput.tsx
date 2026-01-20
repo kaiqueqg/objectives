@@ -157,14 +157,12 @@ const PressInput = (props: PressInputProps) => {
         <View style={[s.inputContainer, props.inputContainerStyle]}>
           {isDeleting && props.onDelete && 
             <PressImage
-              pressStyle={[s.imagePress, props.containerStyle]} 
-              style={[s.trashImage, props.trashImageStyle]}
               onPress={props.onDelete}
-              source={require('../../public/images/done.png')}>
+              source={require('../../public/images/done.png')} color={o.doneicontint}>
             </PressImage>
           }
-          {!isDeleting && props.onDelete && <PressImage pressStyle={[s.imagePress, props.containerStyle]} style={[s.trashImage, props.trashImageStyle]} onPress={onDelete} source={require('../../public/images/trash.png')}></PressImage>}
-          {!props.onDelete && <PressImage pressStyle={[s.imagePress, props.containerStyle]} style={[s.cancelImage, props.cancelImageStyle]} onPress={onCancel} source={require('../../public/images/cancel.png')}></PressImage>}
+          {!isDeleting && props.onDelete && <PressImage onPress={onDelete} source={require('../../public/images/trash.png')} color={o.trashicontint}></PressImage>}
+          {!props.onDelete && <PressImage onPress={onCancel} source={require('../../public/images/cancel.png')} color={o.cancelicontint}></PressImage>}
           <TextInput 
             style={[s.input, props.inputStyle, {height: inputHeight}]} 
             multiline={props.multiline?? false} 
@@ -176,8 +174,8 @@ const PressInput = (props: PressInputProps) => {
             selectionColor={o.itemtextcontrast}
             >
           </TextInput>
-          {props.onDelete && <PressImage pressStyle={[s.imagePress, props.containerStyle]} style={[s.cancelImage, props.cancelImageStyle]} onPress={onCancel} source={require('../../public/images/cancel.png')}></PressImage>}
-          <PressImage pressStyle={[s.imagePress, props.containerStyle]} style={[s.doneImage, props.doneImageStyle]} onPress={onDone} source={require('../../public/images/done.png')}></PressImage>
+          {props.onDelete && <PressImage onPress={onCancel} source={require('../../public/images/cancel.png')} color={o.cancelicontint}></PressImage>}
+          <PressImage onPress={onDone} source={require('../../public/images/done.png')} color={o.doneicontint}></PressImage>
         </View>
         :
         <>

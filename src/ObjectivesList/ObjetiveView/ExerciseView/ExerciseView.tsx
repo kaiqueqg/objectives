@@ -226,10 +226,9 @@ const ExerciseView = (props: ExerciseViewProps) => {
     return (
       <PressImage
         key={bodyImage}
-        pressStyle={[view?gs.baseImageContainer:s.bodyImageContainer, (newExercise.BodyImages !== undefined && newExercise.BodyImages.includes(bodyImage)) && isEditingExercise && s.imageBodySelected]}
-        style={[s.bodyImage]}
         source={bodyImages[bodyImage]}
         onPress={() => {if(view) onEditingExercise(); else onChangeBodyImage(bodyImage);}}
+        raw
       />
     );
   };  
@@ -498,7 +497,7 @@ const ExerciseView = (props: ExerciseViewProps) => {
         {!isDisabled && isEditingExercise?
           <View style={s.inputsContainer}>
             <View style={s.inputsLeft}>
-              <PressImage pressStyle={[gs.baseImageContainer]} style={[s.image, s.imageDelete]} confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete}></PressImage>
+              <PressImage confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete} color={o.trashicontint}></PressImage>
             </View>
             <View style={s.inputsCenter}>
               <TextInput 
@@ -587,16 +586,16 @@ const ExerciseView = (props: ExerciseViewProps) => {
               </View>
             </View>  
             <View style={s.inputsRight}>
-              <PressImage pressStyle={[gs.baseImageContainer]} style={[s.image, s.imageDone]} source={require('../../../../public/images/done.png')} onPress={doneEdit}></PressImage>
+              <PressImage source={require('../../../../public/images/done.png')} onPress={doneEdit} color={o.doneicontint}></PressImage>
               <View style={gs.baseImageContainer}></View>
-              <PressImage pressStyle={[gs.baseImageContainer]} style={[s.image, s.imageCancel]} source={require('../../../../public/images/cancel.png')} onPress={onCancelExercise}></PressImage>
+              <PressImage source={require('../../../../public/images/cancel.png')} onPress={onCancelExercise} color={o.cancelicontint}></PressImage>
             </View>
           </View>
           :
           getTitleDisplay()
         }
-        {!isEditingExercise && !exercise.IsDone && <PressImage pressStyle={gs.baseImageContainer} style={s.image} source={require('../../../../public/images/exercise.png')} onPress={() => {if(!isDisabled)onChangeIsDone();}}></PressImage>}
-        {!isEditingExercise && exercise.IsDone && <PressImage pressStyle={gs.baseImageContainer} style={s.imageFade} source={require('../../../../public/images/exercise-filled.png')} onPress={() => {if(!isDisabled)onChangeIsDone();}}></PressImage>}
+        {!isEditingExercise && !exercise.IsDone && <PressImage source={require('../../../../public/images/exercise.png')} onPress={() => {if(!isDisabled)onChangeIsDone();}}></PressImage>}
+        {!isEditingExercise && exercise.IsDone && <PressImage source={require('../../../../public/images/exercise-filled.png')} onPress={() => {if(!isDisabled)onChangeIsDone();}}></PressImage>}
       </View>
     </View>
   );

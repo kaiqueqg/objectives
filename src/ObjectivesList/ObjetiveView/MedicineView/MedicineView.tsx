@@ -232,7 +232,7 @@ const MedicineView = (props: MedicineViewProps) => {
         {!isDisabled && isEditingMedicine?
           <View style={s.inputsContainer}>
             <View style={s.inputsLeft}>
-              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageDelete]} confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete}></PressImage>
+              <PressImage confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete} color={o.trashicontint}></PressImage>
             </View>
             <View style={s.inputsCenter}>
               <TextInput 
@@ -269,8 +269,8 @@ const MedicineView = (props: MedicineViewProps) => {
                 onSubmitEditing={onDoneMedicine}></TextInput>
             </View>
             <View style={s.inputsRight}>
-              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageDone]} source={require('../../../../public/images/done.png')} onPress={onDoneMedicine}></PressImage>
-              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageCancel]} source={require('../../../../public/images/cancel.png')} onPress={onCancelMedicine}></PressImage>
+              <PressImage source={require('../../../../public/images/done.png')} onPress={onDoneMedicine} color={o.doneicontint}></PressImage>
+              <PressImage source={require('../../../../public/images/cancel.png')} onPress={onCancelMedicine} color={o.cancelicontint}></PressImage>
             </View>
           </View>
           :
@@ -282,8 +282,8 @@ const MedicineView = (props: MedicineViewProps) => {
             defaultStyle={o}
             ></PressText>
         }
-        {!isEditingMedicine && !medicine.IsChecked && <PressImage pressStyle={gs.baseImageContainer} style={s.image} source={require('../../../../public/images/medicine.png')} onPress={() => {if(!isDisabled)onChangeIsChecked();}}></PressImage>}
-        {!isEditingMedicine && medicine.IsChecked && <PressImage pressStyle={gs.baseImageContainer} style={s.imageFade} source={require('../../../../public/images/medicine-filled.png')} onPress={() => {if(!isDisabled)onChangeIsChecked();}}></PressImage>}
+        {!isEditingMedicine && !medicine.IsChecked && <PressImage source={require('../../../../public/images/medicine.png')} onPress={() => {if(!isDisabled)onChangeIsChecked();}}></PressImage>}
+        {!isEditingMedicine && medicine.IsChecked && <PressImage source={require('../../../../public/images/medicine-filled.png')} onPress={() => {if(!isDisabled)onChangeIsChecked();}}></PressImage>}
       </View>
     </View>
   );

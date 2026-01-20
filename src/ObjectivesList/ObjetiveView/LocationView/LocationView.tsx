@@ -324,7 +324,7 @@ const LocationView = (props: LocationViewProps) => {
         {!isDisabled && isEditingLocation?
           <View style={s.inputsContainer}>
             <View style={s.inputsLeft}>
-              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageDelete]} confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete}></PressImage>
+              <PressImage confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete} color={o.trashicontint}></PressImage>
             </View>
             <View style={s.inputsCenter}>
               <TextInput 
@@ -346,13 +346,13 @@ const LocationView = (props: LocationViewProps) => {
                 {isGettingCurrentLocation?
                   <Loading></Loading>
                   :
-                  <PressImage pressStyle={gs.baseImageContainer} style={[s.image]} source={require('../../../../public/images/location-filled.png')} onPress={addCurrentLocation}></PressImage>
+                  <PressImage source={require('../../../../public/images/location-filled.png')} onPress={addCurrentLocation}></PressImage>
                 }
               </View>
             </View>
             <View style={s.inputsRight}>
-              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageDone]} source={require('../../../../public/images/done.png')} onPress={onDoneLocation}></PressImage>
-              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageCancel]} source={require('../../../../public/images/cancel.png')} onPress={onCancelLocation}></PressImage>
+              <PressImage source={require('../../../../public/images/done.png')} onPress={onDoneLocation} color={o.doneicontint}></PressImage>
+              <PressImage source={require('../../../../public/images/cancel.png')} onPress={onCancelLocation} color={o.cancelicontint}></PressImage>
             </View>
           </View>
           :

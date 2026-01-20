@@ -252,7 +252,7 @@ const LinkView = (props: LinkViewProps) => {
         {!isDisabled && isEditingLinks?
           <View style={s.inputsContainer}>
             <View style={s.inputsLeft}>
-              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageDelete]} confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete}></PressImage>
+              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageDelete]} confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete} color={o.trashicontint}></PressImage>
             </View>
             <View style={s.inputsCenter}>
               <TextInput 
@@ -272,14 +272,14 @@ const LinkView = (props: LinkViewProps) => {
                 onChangeText={(value: string)=>{setNewLink(value)}}></TextInput>
             </View>
             <View style={s.inputsRight}>
-              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageDone]} source={require('../../../../public/images/done.png')} onPress={onDoneLink}></PressImage>
-              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageCancel]} source={require('../../../../public/images/cancel.png')} onPress={onCancelLink}></PressImage>
+              <PressImage source={require('../../../../public/images/done.png')} onPress={onDoneLink} color={o.doneicontint}></PressImage>
+              <PressImage source={require('../../../../public/images/cancel.png')} onPress={onCancelLink} color={o.cancelicontint}></PressImage>
             </View>
           </View>
           :
           <PressText style={s.titleContainer} textStyle={s.title} text={link.Title} onPress={()=>{onEditingLink()}} defaultStyle={o}></PressText>
         }
-        {!isEditingLinks && <PressImage pressStyle={gs.baseImageContainer} style={[s.image, link.Link.trim() !== ''?{}:s.imageFade]} source={require('../../../../public/images/link.png')} onPress={() => { if(!isDisabled)openLink();}}></PressImage>}
+        {!isEditingLinks && <PressImage source={require('../../../../public/images/link.png')} onPress={() => { if(!isDisabled)openLink();}}></PressImage>}
       </View>
     </View>
   );

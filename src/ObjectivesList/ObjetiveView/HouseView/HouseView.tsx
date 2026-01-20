@@ -286,7 +286,7 @@ export const HouseView = (props: HouseViewProps) => {
         {!isDisabled && isEditingHouse ?
           <View style={s.inputsContainer}>
             <View style={s.inputsLeft}>
-              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageDelete]} confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete}></PressImage>
+              <PressImage confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete} color={o.trashicontint}></PressImage>
             </View>
             <View style={s.inputsCenter}>
               <TextInput 
@@ -352,9 +352,9 @@ export const HouseView = (props: HouseViewProps) => {
                 onSubmitEditing={onDoneHouse}></TextInput>
             </View>
             <View style={s.inputsRight}>
-              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageDone]} source={require('../../../../public/images/done.png')} onPress={onDoneHouse}></PressImage>
+              <PressImage source={require('../../../../public/images/done.png')} onPress={onDoneHouse} color={o.doneicontint}></PressImage>
               <View style={gs.baseImageContainer}></View>
-              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageCancel]} source={require('../../../../public/images/cancel.png')} onPress={onCancelHouse}></PressImage>
+              <PressImage source={require('../../../../public/images/cancel.png')} onPress={onCancelHouse} color={o.cancelicontint}></PressImage>
             </View>
           </View>
           :
@@ -370,10 +370,10 @@ export const HouseView = (props: HouseViewProps) => {
                 ellipsizeMode='middle'
               ></PressText>
               <PressText style={s.attentionContainer} textStyle={{color: o.itemtext}} onPress={() => {onChangeIsEditing()}} text={getText()} defaultStyle={o} hideDefaultTextBorder={true}></PressText>
-              {!isEditingHouse && house.Listing.trim() !== '' && <PressImage pressStyle={gs.baseImageContainer} style={s.image} source={require('../../../../public/images/link.png')} onPress={openLink}></PressImage>}
-              {!isEditingHouse && house.MapLink.trim() !== '' && <PressImage pressStyle={gs.baseImageContainer} style={s.image} source={require('../../../../public/images/location-filled.png')} onPress={openUrl}></PressImage>}
-              {!isEditingHouse && !house.WasContacted && <PressImage pressStyle={gs.baseImageContainer} style={s.image} source={require('../../../../public/images/home.png')} onPress={() => {if(!isDisabled)onChangeWasContacted();}}></PressImage>}
-              {!isEditingHouse && house.WasContacted && <PressImage pressStyle={gs.baseImageContainer} style={s.imageFade} source={require('../../../../public/images/done.png')} onPress={() => {if(!isDisabled)onChangeWasContacted();}}></PressImage>}
+              {!isEditingHouse && house.Listing.trim() !== '' && <PressImage source={require('../../../../public/images/link.png')} onPress={openLink}></PressImage>}
+              {!isEditingHouse && house.MapLink.trim() !== '' && <PressImage source={require('../../../../public/images/location-filled.png')} onPress={openUrl}></PressImage>}
+              {!isEditingHouse && !house.WasContacted && <PressImage source={require('../../../../public/images/home.png')} onPress={() => {if(!isDisabled)onChangeWasContacted();}}></PressImage>}
+              {!isEditingHouse && house.WasContacted && <PressImage source={require('../../../../public/images/done.png')} onPress={() => {if(!isDisabled)onChangeWasContacted();}}></PressImage>}
             </View>
             {!isEditingHouse && house.Details.trim() !== '' && <View style={s.detailsContainer}><Text style={s.detaisText}>{house.Details}</Text></View>}
             {!isEditingHouse && house.Attention.trim() !== '' && <View style={s.attentionContainer}><Text style={s.attentionText}>{house.Attention}</Text></View>}

@@ -3,11 +3,9 @@ import { colorPalette, globalStyle as gs } from "../../../Colors";
 import { useUserContext } from "../../../Contexts/UserContext";
 import { Note, ItemViewProps, Pattern } from "../../../Types";
 import PressImage from "../../../PressImage/PressImage";
-import PressInput from "../../../PressInput/PressInput";
 import { useEffect, useState } from "react";
 import { useLogContext } from "../../../Contexts/LogContext";
 import PressText from "../../../PressText/PressText";
-import PopMessageContainer from "../../../Log/PopMessageContainer";
 
 export const New = () => {
   return(
@@ -233,7 +231,7 @@ const NoteView = (props: NoteViewProps) => {
         {!isDisabled && isEditingNote?
           <View style={s.inputsContainer}>
             <View style={s.inputsLeft}>
-              <PressImage pressStyle={[gs.baseImageContainer]} style={[s.image, s.imageDelete]} confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete}></PressImage>
+              <PressImage confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete} color={o.trashicontint}></PressImage>
             </View>
             <View style={s.inputsCenter}>
               <TextInput 
@@ -255,8 +253,8 @@ const NoteView = (props: NoteViewProps) => {
               </TextInput>
             </View>
             <View style={s.inputsRight}>
-              <PressImage pressStyle={[gs.baseImageContainer]} style={[s.image, s.imageDone]} source={require('../../../../public/images/done.png')} onPress={doneEdit}></PressImage>
-              <PressImage pressStyle={[gs.baseImageContainer]} style={[s.image, s.imageCancel]} source={require('../../../../public/images/cancel.png')} onPress={onCancelNote}></PressImage>
+              <PressImage source={require('../../../../public/images/done.png')} onPress={doneEdit} color={o.doneicontint}></PressImage>
+              <PressImage source={require('../../../../public/images/cancel.png')} onPress={onCancelNote} color={o.cancelicontint}></PressImage>
             </View>    
           </View>
           :

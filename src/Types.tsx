@@ -27,7 +27,6 @@ export interface Objective {
 
 export enum ItemType {
   Step = 'Step',
-  Wait = 'Wait',
   Question = 'Question',
   Note = 'Note',
   Location = 'Location',

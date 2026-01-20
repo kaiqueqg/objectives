@@ -144,63 +144,39 @@ const UserView = (props: UserViewProps) => {
     return(
       <>
         <PressImage 
-          pressStyle={gs.baseBiggerImageContainer}
-          style={[s.image, shouldFadeIcon(ObjBottomIcons.Unarchive) && s.imageFade]}
           onPress={()=>onAddIconToDisplay(ObjBottomIcons[ObjBottomIcons.Unarchive])}
           source={require('../../public/images/unarchive.png')}></PressImage>
         <PressImage 
-          pressStyle={gs.baseBiggerImageContainer}
-          style={[s.image, shouldFadeIcon(ObjBottomIcons.Archive) && s.imageFade]}
           onPress={()=>onAddIconToDisplay(ObjBottomIcons[ObjBottomIcons.Archive])}
           source={require('../../public/images/archive.png')}></PressImage>
         <PressImage 
-          pressStyle={gs.baseBiggerImageContainer}
-          style={[s.image, shouldFadeIcon(ObjBottomIcons.Palette) && s.imageFade]}
           onPress={()=>onAddIconToDisplay(ObjBottomIcons[ObjBottomIcons.Palette])}
           source={require('../../public/images/palette.png')}></PressImage>
         <PressImage 
-          pressStyle={gs.baseBiggerImageContainer}
-          style={[s.image, shouldFadeIcon(ObjBottomIcons.Tags) && s.imageFade]}
           onPress={()=>onAddIconToDisplay(ObjBottomIcons[ObjBottomIcons.Tags])}
           source={require('../../public/images/tag.png')}></PressImage>
         <PressImage 
-          pressStyle={gs.baseBiggerImageContainer}
-          style={[s.image, shouldFadeIcon(ObjBottomIcons.Sorted) && s.imageFade]}
           onPress={()=>onAddIconToDisplay(ObjBottomIcons[ObjBottomIcons.Sorted])}
           source={require('../../public/images/atoz.png')}></PressImage>
         <PressImage 
-          pressStyle={gs.baseBiggerImageContainer}
-          style={[s.image, shouldFadeIcon(ObjBottomIcons.Search) && s.imageFade]}
           onPress={()=>onAddIconToDisplay(ObjBottomIcons[ObjBottomIcons.Search])}
           source={require('../../public/images/search.png')}></PressImage>
         <PressImage 
-          pressStyle={gs.baseBiggerImageContainer}
-          style={[s.image, shouldFadeIcon(ObjBottomIcons.Pos) && s.imageFade]}
           onPress={()=>onAddIconToDisplay(ObjBottomIcons[ObjBottomIcons.Pos])}
           source={require('../../public/images/change.png')}></PressImage>
         <PressImage 
-          pressStyle={gs.baseBiggerImageContainer}
-          style={[s.image, shouldFadeIcon(ObjBottomIcons.IsLocked) && s.imageFade]}
           onPress={()=>onAddIconToDisplay(ObjBottomIcons[ObjBottomIcons.IsLocked])}
           source={require('../../public/images/add-lock.png')}></PressImage>
         <PressImage 
-          pressStyle={gs.baseBiggerImageContainer}
-          style={[s.image, shouldFadeIcon(ObjBottomIcons.Checked) && s.imageFade]}
           onPress={()=>onAddIconToDisplay(ObjBottomIcons[ObjBottomIcons.Checked])}
           source={require('../../public/images/checked.png')}></PressImage>
         <PressImage 
-          pressStyle={gs.baseBiggerImageContainer}
-          style={[s.image, shouldFadeIcon(ObjBottomIcons.Add) && s.imageFade]}
           onPress={()=>onAddIconToDisplay(ObjBottomIcons[ObjBottomIcons.Add])}
           source={require('../../public/images/add.png')}></PressImage>
         <PressImage 
-          pressStyle={gs.baseBiggerImageContainer}
-          style={[s.image, shouldFadeIcon(ObjBottomIcons.FoldUnfoldAll) && s.imageFade]}
           onPress={()=>onAddIconToDisplay(ObjBottomIcons[ObjBottomIcons.FoldUnfoldAll])}
           source={require('../../public/images/doubledown-chevron.png')}></PressImage>
         <PressImage 
-          pressStyle={gs.baseBiggerImageContainer}
-          style={[s.image, shouldFadeIcon(ObjBottomIcons.GoingTopDown) && s.imageFade]}
           onPress={()=>onAddIconToDisplay(ObjBottomIcons[ObjBottomIcons.GoingTopDown])}
           source={require('../../public/images/to-bottom.png')}></PressImage>
       </>

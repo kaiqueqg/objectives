@@ -219,7 +219,7 @@ const QuestionView = (props: QuestionViewProps) => {
         {!isDisabled && isEditingQuestion?
           <View style={s.inputsContainer}>
             <View style={s.inputsLeft}>
-              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageDelete]} confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete}></PressImage>
+              <PressImage confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete} color={o.trashicontint}></PressImage>
             </View>
             <View style={s.inputsCenter}>
               <TextInput 
@@ -238,8 +238,8 @@ const QuestionView = (props: QuestionViewProps) => {
                 onSubmitEditing={onDoneQuestion}></TextInput>
             </View>
             <View style={s.inputsRight}>
-              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageDone]} source={require('../../../../public/images/done.png')} onPress={onDoneQuestion}></PressImage>
-              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageCancel]} source={require('../../../../public/images/cancel.png')} onPress={onCancelQuestion}></PressImage>
+              <PressImage source={require('../../../../public/images/done.png')} onPress={onDoneQuestion} color={o.doneicontint}></PressImage>
+              <PressImage source={require('../../../../public/images/cancel.png')} onPress={onCancelQuestion} color={o.cancelicontint}></PressImage>
             </View>
           </View>
           :
@@ -254,7 +254,7 @@ const QuestionView = (props: QuestionViewProps) => {
                 ></PressText>
             </View>
             <View style={s.answerContainer}>
-              <PressImage pressStyle={gs.baseImageContainer} style={[s.imageSmall, question.Answer.trim() === ''? s.imageAnswerFade:s.imageAnswerNormal]} source={require('../../../../public/images/arow-down-right-thicker.png')} onPress={()=>{}}></PressImage>
+              <PressImage source={require('../../../../public/images/arow-down-right-thicker.png')} onPress={()=>{}}></PressImage>
               <PressText
                 style={s.textContainer}
                 textStyle={s.text}

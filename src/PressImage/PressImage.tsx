@@ -3,12 +3,11 @@ import { Image, ImageStyle, ImageSourcePropType, View, Vibration, StyleSheet, Te
 import { useUserContext } from "../Contexts/UserContext";
 import { Pattern } from "../Types";
 import { useLogContext } from "../Contexts/LogContext";
-import { colorPalette } from "../Colors";
+import { colorPalette, globalStyle as gs, ObjectivePallete } from "../Colors";
 
 export interface PressImageProps{
-  style: any,
   source: ImageSourcePropType,
-  pressStyle?: any,
+
   onPress?: () => void,
   onPressIn?: () => void,
   onPressOut?: () => void,
@@ -17,14 +16,18 @@ export interface PressImageProps{
 
   hide?: boolean,
   disable?: boolean,
-  disableStyle?: any,
   confirm?: boolean,
-  confirmStyle?: any,
   text?: string,
-  textStyle?: any,
 
   selected?: boolean,
-  selectedStyle?: any,
+
+  color?: string;
+  colorDisabled?: string,
+  colorSelected?: string,
+
+  o?: ObjectivePallete,
+
+  raw?: boolean,
 }
 
 const PressImage = (props: PressImageProps) => {
@@ -42,8 +45,8 @@ const PressImage = (props: PressImageProps) => {
 
   const getHideImage = () => {
     return(
-      <Pressable style={props.pressStyle} onPressOut={()=>{}} onPressIn={()=>{}} onLongPress={()=>{}}>
-        <View style={(props.confirmStyle?props.confirmStyle:props.style) as ImageStyle}></View>
+      <Pressable style={s.container} onPressOut={()=>{}} onPressIn={()=>{}} onLongPress={()=>{}}>
+        <View style={s.image}></View>
       </Pressable>
     )
   }
@@ -72,18 +75,17 @@ const PressImage = (props: PressImageProps) => {
   const getNormalImage = () => {
     return(
       <Pressable 
-        style={[props.pressStyle, props.selected? props.selectedStyle:{}]}
+        // style={[s.container, props.pressStyle, props.selected? props.selectedStyle:{}]}
+        style={[s.container]}
         onPressOut={normalTouchEnd}
         onPressIn={props.onPressIn}
         onLongPress={handleLongPress}
         delayLongPress={props.delayLongPress??800}>
-        {/* <View style={[s.border3]}/> */}
-        {/* <View style={[s.border1]}> */}
-          {/* <View style={[s.border2]}> */}
-              <Image style={[props.style as ImageStyle, props.disable? (props.disableStyle as ImageStyle):{}, s.image]} source={props.source}></Image>
-          {/* </View> */}
-        {/* </View> */}
-        {props.text && <Text style={[s.text, props.textStyle]}>{props.text}</Text>}
+        {/* <View style={[s.shadow]}/> */}
+        {/* <View style={[s.border2]}/> */}
+        <Image style={[s.image as ImageStyle, !props.raw && s.imageColor, props.selected?s.imageSelected:undefined, props.disable?s.imageDisabled:undefined]} source={props.source}></Image>
+        {/* <Image style={[props.style as ImageStyle, props.disable? (props.disableStyle as ImageStyle):{}, s.image]} source={props.source}></Image> */}
+        {props.text && <Text style={[s.text]}>{props.text}</Text>}
       </Pressable>
     )
   }
@@ -97,9 +99,10 @@ const PressImage = (props: PressImageProps) => {
   }
 
   const getConfirmingImage = () => {
+    
     return(
-      <Pressable style={props.pressStyle} onPressOut={onPressAfterConfirmed} onPressIn={props.onPressIn} onLongPress={handleLongPress} delayLongPress={props.delayLongPress??800}>
-        <Image style={[(props.confirmStyle??props.style as ImageStyle)]} source={require('../../public/images/done.png')}></Image>
+      <Pressable style={s.container} onPressOut={onPressAfterConfirmed} onPressIn={props.onPressIn} onLongPress={handleLongPress} delayLongPress={props.delayLongPress??800}>
+        <Image style={[s.image as ImageStyle, !props.raw && s.imageColor]} source={require('../../public/images/done.png')}></Image>
       </Pressable>
     )
   }
@@ -112,48 +115,57 @@ const PressImage = (props: PressImageProps) => {
       setIsConfirming(false);
     }, 2000);
   }
-
   
   const s = StyleSheet.create({
+    container:{
+      ...gs.baseImageContainer,
+    },
     text: {
       position: 'absolute',
-      color: t.textcolor,
+      zIndex: 1,
+      color: colorPalette.red,
       fontSize: 16,
       fontWeight: 'bold',
     },
 
-    border1: {
+    shadow: {
+      position: "absolute",
+      left: 4,
+      top: 4,
+
+      width: 40,
+      height: 40,
+      backgroundColor: 'black',
+
+      borderColor: '#00000000',
+      borderWidth: 1,
+      borderRadius: 25,
+      borderStyle: 'solid',
+    },
+    border2: {
+      position: "absolute",
+
+      width: 40,
+      height: 40,
+      backgroundColor: t.backgroundcolor,
+
       borderColor: 'black',
       borderWidth: 1,
-      borderRadius: 5,
+      borderRadius: 25,
       borderStyle: 'solid',
-    },
-    border2:{
-      borderColor: 'yellow',
-      borderWidth: 1,
-      borderRadius: 5,
-      borderStyle: 'solid',
-    },
-    border3: {
-      right: 0,
-      top: 0,
-      height: 40,
-      width: 40,
-      zIndex: 0,
-      position: "absolute",
-      backgroundColor: 'black',
-      borderColor: 'gree',
-      borderWidth: 1,
-      borderRadius: 5,
-      borderStyle: 'solid',
-      transform: [
-        { translateX: 2 },
-        { translateY: 2 },
-      ],
     },
     image:{
-      margin: 5,
-    }
+      ...gs.baseSmallImage,
+    },
+    imageColor:{
+      tintColor: props.color?? t.icontint,
+    },
+    imageDisabled:{
+      tintColor: props.colorDisabled??t.icontintfade,
+    },
+    imageSelected:{
+      tintColor: props.colorSelected??t.icontintselected,
+    },
   });
 
   return(

@@ -39,10 +39,6 @@ const DevView = (props: MainProps) => {
       paddingVertical: 20,
       paddingHorizontal: 10,
     },
-    image:{
-      ...gs.baseImage,
-      tintColor: t.icontint,
-    },
     devButtonRow:{
       flexDirection: 'row',
       justifyContent: 'center',
@@ -63,10 +59,6 @@ const DevView = (props: MainProps) => {
       borderWidth: 1,
       borderStyle: 'solid',
       borderRadius: 5,
-    },
-    devButtonText:{
-      color: t.textcolor,
-      flexWrap: 'wrap',
     },
     devScrollMessages:{
       width: '100%',
@@ -90,7 +82,7 @@ const DevView = (props: MainProps) => {
         <Text style={s.devMessages}>{consoleLogs}</Text>
       </ScrollView>
       <View style={s.devButtonRow}>
-        <PressImage style={s.image} pressStyle={gs.baseImageContainer} source={require('../../public/images/trash.png')} onPress={clear}></PressImage>
+        <PressImage source={require('../../public/images/trash.png')} onPress={clear}></PressImage>
       </View>
     </View>
   )

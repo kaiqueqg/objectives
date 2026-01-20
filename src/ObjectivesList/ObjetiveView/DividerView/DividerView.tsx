@@ -177,14 +177,6 @@ const DividerView = (props: DividerViewProps) => {
       color: t.textcolor,
       borderColor: o.icontintcolor,
     },
-    image:{
-      ...gs.baseSmallImage,
-      tintColor: o.icontintcolor,
-    },
-    imageFade: {
-      ...gs.baseImage,
-      tintColor: o.icontintcolorfade
-    },
   });
 
   return (
@@ -193,11 +185,11 @@ const DividerView = (props: DividerViewProps) => {
         {!isEditingTitle &&
           <>
             {divider.IsOpen?
-              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, isItemsOpen&&s.imageFade]} disable={isItemsOpen} onPress={() => {if(!isDisabled)onChangeIsOpen();}} source={require('../../../../public/images/down-chevron.png')}></PressImage>
+              <PressImage disable={isItemsOpen} onPress={() => {if(!isDisabled)onChangeIsOpen();}} source={require('../../../../public/images/down-chevron.png')}></PressImage>
               :
-              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, isItemsOpen&&s.imageFade]} disable={isItemsOpen} onPress={() => {if(!isDisabled)onChangeIsOpen();}} source={require('../../../../public/images/up-chevron.png')}></PressImage>
+              <PressImage disable={isItemsOpen} onPress={() => {if(!isDisabled)onChangeIsOpen();}} source={require('../../../../public/images/up-chevron.png')}></PressImage>
             }
-            <PressImage pressStyle={gs.baseImageContainer} style={[s.image, isItemsOpen&&s.imageFade]} disable={isItemsOpen || props.isLocked || isDisabled} confirm onPress={() => {if(!isDisabled)orderDividerItems(divider);}} source={require('../../../../public/images/atoz.png')}></PressImage>
+            <PressImage disable={isItemsOpen || props.isLocked || isDisabled} confirm onPress={() => {if(!isDisabled)orderDividerItems(divider);}} source={require('../../../../public/images/atoz.png')}></PressImage>
           </>
         }
         <PressInput 
@@ -217,21 +209,17 @@ const DividerView = (props: DividerViewProps) => {
         {!isEditingTitle &&
           <>
             {checkAll?
-              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, isItemsOpen&&s.imageFade]} disable={isItemsOpen || props.isLocked || isDisabled} confirm onPress={onChangeAllCheckedUnchecked} source={require('../../../../public/images/unchecked.png')}></PressImage>
+              <PressImage disable={isItemsOpen || props.isLocked || isDisabled} confirm onPress={onChangeAllCheckedUnchecked} source={require('../../../../public/images/unchecked.png')}></PressImage>
               :
-              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, isItemsOpen&&s.imageFade]} disable={isItemsOpen || props.isLocked || isDisabled} confirm onPress={onChangeAllCheckedUnchecked} source={require('../../../../public/images/checked.png')}></PressImage>
+              <PressImage disable={isItemsOpen || props.isLocked || isDisabled} confirm onPress={onChangeAllCheckedUnchecked} source={require('../../../../public/images/checked.png')}></PressImage>
             }
             {isItemOpenLocked?
               <PressImage
-                pressStyle={gs.baseImageContainer}
-                style={[s.image, {tintColor: 'red'}]}
                 onPress={addingNewItem}
                 source={require('../../../../public/images/add-lock.png')}>
               </PressImage>
               :
               <PressImage 
-                pressStyle={gs.baseImageContainer}
-                style={[s.image]}
                 onPress={addingNewItem}
                 source={require('../../../../public/images/add.png')}>
               </PressImage>
@@ -241,17 +229,16 @@ const DividerView = (props: DividerViewProps) => {
       </View>
       {isItemsOpen && 
         <View style={[s.dividerNewItemContainer]}>
-          {/* <PressImage pressStyle={gs.baseImageContainer} style={s.image} onPress={()=>{addNewItem(ItemType.Wait);}} source={require('../../../../public/images/wait.png')}></PressImage> */}
-          <PressImage pressStyle={gs.baseImageContainer} style={s.image} onPress={()=>{addNewItem(ItemType.Link);}} source={require('../../../../public/images/link.png')}></PressImage>
-          <PressImage pressStyle={gs.baseImageContainer} style={s.image} onPress={()=>{addNewItem(ItemType.Exercise);}} source={require('../../../../public/images/exercise-filled.png')}></PressImage>
-          <PressImage pressStyle={gs.baseImageContainer} style={s.image} onPress={()=>{addNewItem(ItemType.Divider);}} source={require('../../../../public/images/minus.png')}></PressImage>
-          <PressImage pressStyle={gs.baseImageContainer} style={s.image} onPress={()=>{addNewItem(ItemType.Grocery);}} source={require('../../../../public/images/grocery-filled.png')}></PressImage>
-          <PressImage pressStyle={gs.baseImageContainer} style={s.image} onPress={()=>{addNewItem(ItemType.Medicine);}} source={require('../../../../public/images/medicine-filled.png')}></PressImage>
-          <PressImage pressStyle={gs.baseImageContainer} style={s.image} onPress={()=>{addNewItem(ItemType.Location);}} source={require('../../../../public/images/location-filled.png')}></PressImage>
-          <PressImage pressStyle={gs.baseImageContainer} style={s.image} onPress={()=>{addNewItem(ItemType.Question);}} source={require('../../../../public/images/questionfilled.png')}></PressImage>
-          <PressImage pressStyle={gs.baseImageContainer} style={s.image} onPress={()=>{addNewItem(ItemType.Note);}} source={require('../../../../public/images/note.png')}></PressImage>
-          <PressImage pressStyle={gs.baseImageContainer} style={s.image} onPress={()=>{addNewItem(ItemType.Step);}} source={require('../../../../public/images/step-filled.png')}></PressImage>
-          <PressImage pressStyle={gs.baseImageContainer} style={s.image} onPress={()=>{popMessage('Image: Under construction...', MessageType.Error)}} source={require('../../../../public/images/image-filled.png')}></PressImage>
+          <PressImage onPress={()=>{addNewItem(ItemType.Link);}} source={require('../../../../public/images/link.png')}></PressImage>
+          <PressImage onPress={()=>{addNewItem(ItemType.Exercise);}} source={require('../../../../public/images/exercise-filled.png')}></PressImage>
+          <PressImage onPress={()=>{addNewItem(ItemType.Divider);}} source={require('../../../../public/images/minus.png')}></PressImage>
+          <PressImage onPress={()=>{addNewItem(ItemType.Grocery);}} source={require('../../../../public/images/grocery-filled.png')}></PressImage>
+          <PressImage onPress={()=>{addNewItem(ItemType.Medicine);}} source={require('../../../../public/images/medicine-filled.png')}></PressImage>
+          <PressImage onPress={()=>{addNewItem(ItemType.Location);}} source={require('../../../../public/images/location-filled.png')}></PressImage>
+          <PressImage onPress={()=>{addNewItem(ItemType.Question);}} source={require('../../../../public/images/questionfilled.png')}></PressImage>
+          <PressImage onPress={()=>{addNewItem(ItemType.Note);}} source={require('../../../../public/images/note.png')}></PressImage>
+          <PressImage onPress={()=>{addNewItem(ItemType.Step);}} source={require('../../../../public/images/step-filled.png')}></PressImage>
+          <PressImage onPress={()=>{popMessage('Image: Under construction...', MessageType.Error)}} source={require('../../../../public/images/image-filled.png')}></PressImage>
         </View>}
     </View>
   );

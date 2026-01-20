@@ -331,7 +331,7 @@ const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
     return(
       <>
         {isSyncing &&  !isLambdaCold && <Loading></Loading>}
-        {!isSyncing && !isLambdaCold && <PressImage pressStyle={gs.baseBiggerImageContainer} style={[s.bottomImage, failedSync&&s.cancelImage, doneSync&&s.doneImage]} onPress={syncObjectivesList} source={require('../../public/images/sync.png')}></PressImage>}
+        {!isSyncing && !isLambdaCold && <PressImage onPress={syncObjectivesList} source={require('../../public/images/sync.png')}></PressImage>}
       </>
     )
   }
@@ -471,8 +471,8 @@ const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
             </View>
             <View style={s.passwordContainer}>
               <TextInput ref={passRef} autoCapitalize="none" placeholder="Password" placeholderTextColor={t.textcolorfade} style={s.passwordInput} secureTextEntry={!isShowingPassword} onChangeText={onChangePassword} onSubmitEditing={login}></TextInput>
-              {!isShowingPassword && <PressImage onPress={()=>{setIsShowingPassword(!isShowingPassword)}} style={s.image} pressStyle={s.imageContainer} source={require('../../public/images/show.png')}></PressImage>}
-              {isShowingPassword && <PressImage onPress={()=>{setIsShowingPassword(!isShowingPassword)}} style={s.image} pressStyle={s.imageContainer} source={require('../../public/images/hide.png')}></PressImage>}
+              {!isShowingPassword && <PressImage onPress={()=>{setIsShowingPassword(!isShowingPassword)}} source={require('../../public/images/show.png')}></PressImage>}
+              {isShowingPassword && <PressImage onPress={()=>{setIsShowingPassword(!isShowingPassword)}} source={require('../../public/images/hide.png')}></PressImage>}
             </View>
             <View style={s.logoutView}>
               <PressText text={isShowingRefreshTokenView?'Refresh':'Login'} textStyle={s.loginButtonText} style={isShowingRefreshTokenView?s.refreshTokenButton:s.loginButton} onPress={login}></PressText>
@@ -633,11 +633,6 @@ const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
       alignItems: 'center',
       flexDirection: 'row',
       marginBottom: 10,
-
-      // borderColor: 'green',
-      // borderWidth: 1,
-      // borderRadius: 5,
-      // borderStyle: 'solid',
     },
     passwordInput: {
       height: 50,

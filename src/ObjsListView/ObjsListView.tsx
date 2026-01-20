@@ -247,7 +247,7 @@ const ObjsListView = (props: ObjsListViewProps) => {
       </>
       :
       <View style={[s.objectiveContainer]} onTouchEnd={() => {isEditingPos && (isEndingPos? endChangingPos(item) : addRemoveToSelected(item))}}>
-        {shouldShowTag && <PressImage style={s.objectivePinImage} pressStyle={s.objectivePin} source={require('../../public/images/pin.png')}/>}
+        {shouldShowTag && <PressImage source={require('../../public/images/pin.png')}/>}
         <PressText 
           style={[s.objectiveButtonContainer, 
             isEditingPos && isSelected? s.objectiveButtonContainerSelected:undefined, 
@@ -269,15 +269,14 @@ const ObjsListView = (props: ObjsListViewProps) => {
   }
 
   const getObjectivesTitle = () => {
-    // popMessage('qsdqsds')
     return (
       <View style={s.containerListTagsTitle}>
         <View style={gs.baseImageContainer}></View>
         <Text style={s.containerObjectiveTitleText}>{'OBJECTIVES'}</Text>
         {isObjectiveListFolded?
-          <PressImage style={[s.image]} pressStyle={gs.baseImageContainer} onPress={()=>{setIsObjectiveListFolded(false)}} disable={isEditingPos} source={require('../../public/images/up-chevron.png')}></PressImage>
+          <PressImage onPress={()=>{setIsObjectiveListFolded(false)}} disable={isEditingPos} source={require('../../public/images/up-chevron.png')}></PressImage>
           :
-          <PressImage style={[s.image]} pressStyle={gs.baseImageContainer} onPress={()=>{setIsObjectiveListFolded(true)}} disable={isEditingPos} source={require('../../public/images/down-chevron.png')}></PressImage>
+          <PressImage onPress={()=>{setIsObjectiveListFolded(true)}} disable={isEditingPos} source={require('../../public/images/down-chevron.png')}></PressImage>
         }
       </View>
     )
@@ -335,9 +334,9 @@ const ObjsListView = (props: ObjsListViewProps) => {
         <View style={gs.baseImageContainer}></View>
         <Text style={[s.containerTagTitleText]}>{'TAGS'}</Text>
         {isTagsListFolded?
-          <PressImage style={[s.image]} pressStyle={gs.baseImageContainer} onPress={()=>{setIsTagsListFolded(false)}} disable={isEditingPos} source={require('../../public/images/up-chevron.png')}></PressImage>
+          <PressImage disable={isEditingPos} source={require('../../public/images/up-chevron.png')}></PressImage>
           :
-          <PressImage style={[s.image]} pressStyle={gs.baseImageContainer} onPress={()=>{setIsTagsListFolded(true)}} disable={isEditingPos} source={require('../../public/images/down-chevron.png')}></PressImage>
+          <PressImage disable={isEditingPos} source={require('../../public/images/down-chevron.png')}></PressImage>
         }
       </View>
     )
@@ -348,15 +347,12 @@ const ObjsListView = (props: ObjsListViewProps) => {
       <>
         {!isEditingPos && 
         <PressImage
-          style={s.imageUpDown}
           onPress={startEditingPos}
-          disableStyle={s.imageFade}
-          pressStyle={gs.baseImageContainer}
           disable={objectives.length < 2}
           source={require('../../public/images/change.png')}
         ></PressImage>}
-        {isEditingPos && <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.redImageColor]} onPress={cancelEditingPos} source={require('../../public/images/cancel.png')}></PressImage>}
-        {isEditingPos && <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.greenImageColor]} hide={objectivesSelected.length=== 0 || isEndingPos} onPress={onEditingPosTo} source={require('../../public/images/next.png')}></PressImage>}
+        {isEditingPos && <PressImage onPress={cancelEditingPos} source={require('../../public/images/cancel.png')} color={t.cancelicontint}></PressImage>}
+        {isEditingPos && <PressImage hide={objectivesSelected.length=== 0 || isEndingPos} onPress={onEditingPosTo} source={require('../../public/images/next.png')}></PressImage>}
       </>
     )
   }
@@ -409,7 +405,7 @@ const ObjsListView = (props: ObjsListViewProps) => {
             onSubmitEditing={()=>{popMessage('on')}}
             autoFocus>
           </TextInput>
-          <PressImage pressStyle={[gs.baseImageContainer]} style={[s.imageCancel]} onPress={onEraseSearch} source={require('../../public/images/eraser.png')}></PressImage>
+          <PressImage onPress={onEraseSearch} source={require('../../public/images/eraser.png')}></PressImage>
         </View>
       </View>
     )
@@ -462,8 +458,8 @@ const ObjsListView = (props: ObjsListViewProps) => {
 
     return(
       <View style={s.sortMenu}>
-        <PressImage pressStyle={gs.baseImageContainer} style={[s.image, isEditingPos&&s.imageFade]}  onPress={orderByTitle} disable={isEditingPos} source={require('../../public/images/atoz.png')}></PressImage>
-        <PressImage pressStyle={gs.baseImageContainer} style={[s.image, isEditingPos&&s.imageFade]}  onPress={orderByColor} disable={isEditingPos} source={require('../../public/images/theme.png')}></PressImage>
+        <PressImage onPress={orderByTitle} disable={isEditingPos} source={require('../../public/images/atoz.png')}></PressImage>
+        <PressImage onPress={orderByColor} disable={isEditingPos} source={require('../../public/images/theme.png')}></PressImage>
       </View>
     )
   }
@@ -473,16 +469,16 @@ const ObjsListView = (props: ObjsListViewProps) => {
       <View style={s.bottomMenu}>
         <View style={s.leftBottomMenu}>
           {userPrefs.singleTagSelected?
-            <PressImage style={[s.image]} pressStyle={gs.baseImageContainer} onPress={changeSingleTag} disable={isEditingPos} source={require('../../public/images/tagsingle.png')}></PressImage>
+            <PressImage onPress={changeSingleTag} disable={isEditingPos} source={require('../../public/images/tagsingle.png')}></PressImage>
             :
-            <PressImage style={[s.image]} pressStyle={gs.baseImageContainer} onPress={changeSingleTag} disable={isEditingPos} source={require('../../public/images/tag.png')} ></PressImage>
+            <PressImage onPress={changeSingleTag} disable={isEditingPos} source={require('../../public/images/tag.png')} ></PressImage>
           }
         </View>
         <View style={s.rightBottomMenu}>
-          <PressImage pressStyle={gs.baseImageContainer} style={[s.image, isEditingPos&&s.imageFade]}  onPress={()=>{setIsSortMenuOpen(!isSortMenuOpen)}} disable={isEditingPos} source={require('../../public/images/sort.png')}  selected={isSortMenuOpen} selectedStyle={s.imageContainerSelected}></PressImage>
+          <PressImage onPress={()=>{setIsSortMenuOpen(!isSortMenuOpen)}} disable={isEditingPos} source={require('../../public/images/sort.png')}  selected={isSortMenuOpen}></PressImage>
           {getMoveIcons()}
-          <PressImage pressStyle={gs.baseImageContainer} style={[s.image, isEditingPos&&s.imageFade]}  onPress={()=>{setIsSearchOpen(!isSearchOpen)}} disable={isEditingPos} source={require('../../public/images/search.png')}></PressImage>
-          <PressImage pressStyle={gs.baseImageContainer} style={[s.imageNewFile, isEditingPos&&s.imageFade]}  onPress={onAddNewObjective} disable={isEditingPos} source={require('../../public/images/newfile.png')}></PressImage>
+          <PressImage onPress={()=>{setIsSearchOpen(!isSearchOpen)}} disable={isEditingPos} source={require('../../public/images/search.png')} selected={isSearchOpen}></PressImage>
+          <PressImage onPress={onAddNewObjective} disable={isEditingPos} source={require('../../public/images/newfile.png')}></PressImage>
         </View>
       </View>
     )
@@ -513,12 +509,11 @@ const ObjsListView = (props: ObjsListViewProps) => {
       justifyContent: 'center',
       alignItems: 'center',
       width: '100%',
-      height: 40,
+      minHeight: 40,
 
       color: t.textcolor,
-      backgroundColor: t.backgroundcolordarker,
+      backgroundColor: t.backgroundcolordark,
       textAlign: 'center',
-      padding: 10,
     },
     containerTagTitleText:{
       flex: 1,

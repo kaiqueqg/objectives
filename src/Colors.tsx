@@ -33,6 +33,7 @@ export type ColorPalette = {
   greylight: string,
   greylighter: string,
 
+  reddarkerdarker: string,
   reddarker: string,
   reddark: string,
   red: string,
@@ -40,6 +41,7 @@ export type ColorPalette = {
   redlighty: string,
   redlightlight: string,
 
+  greendarkerdarker: string,
   greendarker: string,
   greendark: string,
   green: string,
@@ -149,6 +151,7 @@ export const colorPalette: ColorPalette = {
   greylight: 'rgb(204, 204, 204)',
   greylighter: 'rgb(230, 230, 230)',
 
+  reddarkerdarker: 'rgb(103, 37, 37)',
   reddarker: 'rgb(166, 33, 33)',
   reddark: 'rgb(255, 0, 0)',
   red: 'rgb(254, 58, 59)',
@@ -156,6 +159,7 @@ export const colorPalette: ColorPalette = {
   redlighty: '#FF7575',
   redlightlight: 'rgb(254, 185, 184)',
 
+  greendarkerdarker: 'rgb(26, 76, 28)',
   greendarker: 'rgb(64, 130, 68)',
   greendark: 'rgb(82, 168, 88)',
   green: 'rgb(153, 206, 153)',
@@ -321,6 +325,7 @@ export type AppPalette = {
 
   icontint: string,
   icontintfade: string,
+  icontintselected: string,
 
   doneicontint: string,
   trashicontint: string,
@@ -336,7 +341,7 @@ export const light: AppPalette = {
   backgroundcolordarker: "#E0E0E0",
   backgroundcolordark: colorPalette.greylighter,
   backgroundcolor: colorPalette.white,
-  backgroundcolorcontrast: colorPalette.black,
+  backgroundcolorcontrast: colorPalette.bluedarkerdarker,
 
   textcolor: colorPalette.black,
   textcolorfade: colorPalette.grey,
@@ -352,6 +357,7 @@ export const light: AppPalette = {
 
   icontint: colorPalette.black,
   icontintfade: colorPalette.grey,
+  icontintselected: colorPalette.blue,
 
   cancelicontint: colorPalette.yellowdark,
   trashicontint: colorPalette.reddark,
@@ -383,6 +389,7 @@ export const dark: AppPalette = {
 
   icontint: colorPalette.beige,
   icontintfade: colorPalette.beigedark,
+  icontintselected: colorPalette.bluelight,
 
   cancelicontint: colorPalette.yellow,
   trashicontint: colorPalette.redlight,
@@ -494,6 +501,8 @@ export const darkBlue: ObjectivePallete = {
   itembk:  colorPalette.itemBlue,
   itembkdark: colorPalette.itemBlueDark,
 
+  itemtextfade: colorPalette.bluedarkerdarker,
+
   bordercolorselecting: 'rgb(40, 200, 240)',
   bordercolorselected: 'rgb(40, 200, 240)',
   bordercolorwasjustadded: 'rgb(40, 200, 240)',
@@ -525,7 +534,7 @@ export const darkRed: ObjectivePallete = {
   doneicontint: colorPalette.greenlight,
   trashicontint: colorPalette.redlightlight,
   
-  itemtextfade: colorPalette.redlightlight,
+  itemtextfade: colorPalette.reddarker,
 
   bordercolorselecting: colorPalette.red,
   bordercolorselected: colorPalette.red,
@@ -560,6 +569,8 @@ export const darkGreen: ObjectivePallete = {
   itembk:  colorPalette.itemGreen,
   itembkdark: colorPalette.itemGreenDark,
   
+  itemtextfade: colorPalette.greendarkerdarker,
+  
   bordercolorselecting: 'yellowgreen',
   bordercolorselected: 'yellowgreen',
   bordercolorwasjustadded: 'yellowgreen',
@@ -574,7 +585,7 @@ export const lightGreen: ObjectivePallete = {
 
   objbk: colorPalette.objGreenLight,
   itembk:  colorPalette.itemGreenLight,
-  itembkdark: colorPalette.itemGreenLightDark,
+  itembkdark: colorPalette.itemGreenLight,
   
   bordercolorselecting: colorPalette.red,
   bordercolorselected: colorPalette.red,

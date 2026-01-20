@@ -82,16 +82,6 @@ const BottomBar = (props: BottomBarProps) => {
       ...gs.baseBiggerImage,
       tintColor: t.bottombariconselected,
     },
-    textImage:{
-      position: 'absolute',
-      bottom: 5,
-      left: 5,
-      color: colorPalette.beige,
-      fontSize: 5,
-      fontWeight: 'bold',
-    },
-    loadingImage:{
-    },
   });
 
   return (
@@ -99,20 +89,20 @@ const BottomBar = (props: BottomBarProps) => {
       <View style={s.leftContainer}>
         {user?
           (Constants.executionEnvironment === ExecutionEnvironment.StoreClient?
-            <PressImage text="dev" textStyle={{color: colorPalette.red}} pressStyle={gs.baseBiggerImageContainer} style={[s.bottomImage, currentView === Views.UserView&&s.bottomImageSelected]} onPress={() => changeToView(Views.UserView)} source={require('../../public/images/user.png')}></PressImage>
+            <PressImage text="dev" onPress={() => changeToView(Views.UserView)} source={require('../../public/images/user.png')}></PressImage>
             :
-            <PressImage pressStyle={gs.baseBiggerImageContainer} style={[s.bottomImage, currentView === Views.UserView&&s.bottomImageSelected]} onPress={() => changeToView(Views.UserView)} source={require('../../public/images/user.png')}></PressImage>
+            <PressImage onPress={() => changeToView(Views.UserView)} source={require('../../public/images/user.png')}></PressImage>
           )
           :
-          <PressImage pressStyle={gs.baseBiggerImageContainer} style={[s.bottomImage, s.trashImage]} onPress={() => changeToView(Views.UserView)} source={require('../../public/images/user.png')}></PressImage>
+          <PressImage onPress={() => changeToView(Views.UserView)} source={require('../../public/images/user.png')}></PressImage>
         }
-        <PressImage pressStyle={gs.baseBiggerImageContainer} style={[s.bottomImage]} onPress={changeTheme} source={require('../../public/images/theme.png')}></PressImage>
-        {showLoginStuff && <PressImage pressStyle={currentView === Views.DevView? s.bottomImageSelected:gs.baseImageContainer} style={[s.bottomImage, currentView === Views.DevView&&s.bottomImageSelected]} onPress={() => changeToView(Views.DevView)} source={require('../../public/images/dev.png')}></PressImage>}
+        <PressImage onPress={changeTheme} source={require('../../public/images/theme.png')}></PressImage>
+        {showLoginStuff && <PressImage onPress={() => changeToView(Views.DevView)} source={require('../../public/images/dev.png')}></PressImage>}
         {showLoginStuff && <LoginView viewType="Image"></LoginView>}
       </View>
       <View style={s.rightContainer}>
-        <PressImage pressStyle={gs.baseBiggerImageContainer} style={[s.bottomImage, currentView === Views.ArchivedView && s.bottomImageSelected]} textStyle={s.textImage} onPress={()=>{changeToView(Views.ArchivedView)}} source={require('../../public/images/archived.png')} ></PressImage>
-        <PressImage pressStyle={gs.baseBiggerImageContainer} style={[s.bottomImage, currentView === Views.ListView&&s.bottomImageSelected]} onPress={()=>{changeToView(Views.ListView)}} source={require('../../public/images/list.png')}></PressImage>
+        <PressImage onPress={()=>{changeToView(Views.ArchivedView)}} source={require('../../public/images/archived.png')} ></PressImage>
+        <PressImage onPress={()=>{changeToView(Views.ListView)}} source={require('../../public/images/list.png')} selected={currentView === Views.ListView} colorSelected={t.icontintselected}></PressImage>
       </View>
     </View>
   );
