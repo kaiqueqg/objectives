@@ -276,7 +276,7 @@ const GroceryView = (props: GroceryViewProps) => {
             ></PressText>
         }
         {!isEditingGrocery && !grocery.IsChecked && <PressImage source={require('../../../../public/images/grocery.png')} onPress={() => {if(!isDisabled)onChangeIsChecked();}}></PressImage>}
-        {!isEditingGrocery && grocery.IsChecked && <PressImage source={require('../../../../public/images/grocery-filled.png')} onPress={() => {if(!isDisabled)onChangeIsChecked();}}></PressImage>}
+        {!isEditingGrocery && grocery.IsChecked && <PressImage source={require('../../../../public/images/grocery-filled.png')} onPress={() => {if(!isDisabled)onChangeIsChecked();}} selected={grocery.IsChecked}  colorSelected={t.icontintfade}/>}
       </View>
     </View>
   );

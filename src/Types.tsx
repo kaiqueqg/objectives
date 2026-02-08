@@ -5,6 +5,7 @@ export interface ObjectiveList{
   Items?: Item[],
   DeleteObjectives?: Objective[],
   DeleteItems?: Item[],
+  LastModified?: string,
 }
 
 export interface Objective {
@@ -17,6 +18,7 @@ export interface Objective {
   IsShowing: boolean,
   IsLocked: boolean,
   LastModified: string,
+  CreatedAt: string,
   Pos: number,
   IsShowingCheckedGrocery?: boolean,
   IsShowingCheckedStep?: boolean,
@@ -37,6 +39,7 @@ export enum ItemType {
   Link = 'Link',
   Image = 'Image',
   House = 'House',
+  Review = 'Review',
 
   //Helpers to display
   Separator = 'Separator',
@@ -80,6 +83,7 @@ export const ItemNew = (userId: string, objectiveId: string, itemId: string, typ
     Type: type,
     Title: title,
     LastModified: (new Date()).toISOString(),
+    CreatedAt: (new Date()).toISOString(),
   });
 }
 
@@ -90,6 +94,7 @@ export interface Item {
   Pos: number,
   Title: string,
   LastModified: string,
+  CreatedAt: string,
 }
 
 export enum StepImportance {
@@ -182,6 +187,12 @@ export interface House extends Item{
   WasContacted: boolean,
   Details: string,
   Attention: string,
+}
+
+export interface Review extends Item{
+  Rating: string,
+  Description: string,
+  IsCurrentChoise: boolean,
 }
 
 export interface GenericItem extends Item{

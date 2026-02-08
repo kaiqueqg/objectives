@@ -282,8 +282,8 @@ const MedicineView = (props: MedicineViewProps) => {
             defaultStyle={o}
             ></PressText>
         }
-        {!isEditingMedicine && !medicine.IsChecked && <PressImage source={require('../../../../public/images/medicine.png')} onPress={() => {if(!isDisabled)onChangeIsChecked();}}></PressImage>}
-        {!isEditingMedicine && medicine.IsChecked && <PressImage source={require('../../../../public/images/medicine-filled.png')} onPress={() => {if(!isDisabled)onChangeIsChecked();}}></PressImage>}
+        {!isEditingMedicine && !medicine.IsChecked && <PressImage source={require('../../../../public/images/medicine.png')} onPress={() => {if(!isDisabled)onChangeIsChecked();}}/>}
+        {!isEditingMedicine && medicine.IsChecked && <PressImage source={require('../../../../public/images/medicine-filled.png')} onPress={() => {if(!isDisabled)onChangeIsChecked();}} selected={medicine.IsChecked} colorSelected={t.icontintfade}/>}
       </View>
     </View>
   );

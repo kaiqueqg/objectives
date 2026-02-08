@@ -12,7 +12,7 @@ import PressText from "../../PressText/PressText";
 import PressImage from "../../PressImage/PressImage";
 import PressInput from "../../PressInput/PressInput";
 
-import { Item, ItemType, Note, Objective, Question, Step, Views, Wait, Location, Divider, Grocery, Pattern, MessageType, Medicine, Exercise, Weekdays, StepImportance, ItemNew, Link, Image, House, GenericItem, ObjBottomIcons, MultiSelectAction, MultiSelectType } from "../../Types";
+import { Item, ItemType, Note, Objective, Question, Step, Views, Wait, Location, Divider, Grocery, Pattern, MessageType, Medicine, Exercise, Weekdays, StepImportance, ItemNew, Link, Image, House, GenericItem, ObjBottomIcons, MultiSelectAction, MultiSelectType, Review } from "../../Types";
 import { useEffect, useState } from "react";
 
 import QuestionView, {New as QuestionNew} from "./QuestionView/QuestionView";
@@ -25,7 +25,8 @@ import MedicineView, {New as MedicineNew} from "./MedicineView/MedicineView";
 import ExerciseView, {New as ExerciseNew} from "./ExerciseView/ExerciseView";
 import LinkView, {New as LinkNew} from "./LinkView/LinkView";
 import ImageView, {New as ImageNew} from "./ImageView/ImageView";
-import { HouseView, New as HouseNew } from "./HouseView/HouseView";
+import {HouseView, New as HouseNew } from "./HouseView/HouseView";
+import {ReviewView, New as ReviewNew } from "./ReviewView/ReviewView";
 
 export interface ObjectiveViewProps {
   obj: Objective,
@@ -101,7 +102,6 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
 
   useEffect(() => {
     load();
-    
   }, [objectives, currentView]);
 
   const load = async () => {
@@ -133,7 +133,8 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
   }
 
   const choseNewItemToAdd = async (type: ItemType, pos?:number) => {
-    const baseItem = {...ItemNew(user?user.UserId:'fakeuseridfakeuseridfakeuseridfakeuserid', obj.ObjectiveId, await storage.randomId(), type, pos?pos:items.length, '')}
+    const baseItem = {...ItemNew(user?user.UserId:'fakeuseridfakeuseridfakeuseridfakeuserid', obj.ObjectiveId, await storage.randomId(), type, pos??items.length, '')}
+    log.w('adding to ' + pos);
 
     let typeItem:any = {};
     switch (type) {
@@ -145,9 +146,6 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
         break;
       case ItemType.Question:
         typeItem = {...baseItem, ...QuestionNew()};
-        break;
-      case ItemType.Wait:
-        typeItem = {...baseItem, ...WaitNew()};
         break;
       case ItemType.Note:
         typeItem = {...baseItem, ...NoteNew()};
@@ -175,6 +173,9 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
         break;
       case ItemType.House:
         typeItem = {...baseItem, ...HouseNew()};
+        break;
+      case ItemType.Review:
+        typeItem = {...baseItem, ...ReviewNew()};
         break;
       default:
         break;
@@ -867,6 +868,10 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     )
   }
 
+  const getButtonIconView = () => {
+    
+  }
+
   const getButtonIconViews = (icon: ObjBottomIcons, invert: boolean = false) => {
     switch (icon) {
       case ObjBottomIcons.Unarchive:
@@ -892,6 +897,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
         return (
           <PressImage
             selected={isPaletteOpen}
+            colorSelected={o.icontintcolorcontrast}
             onPress={() => showButtomItem(ObjBottomIcons.Palette)}
             source={require("../../../public/images/palette.png")}
           />
@@ -902,6 +908,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
           <PressImage
             selected={isTagOpen}
             onPress={() => showButtomItem(ObjBottomIcons.Tags)}
+            colorSelected={o.icontintcolorcontrast}
             source={require("../../../public/images/tag.png")}
           />
         );
@@ -911,6 +918,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
           <PressImage 
           selected={isSearchOpen}
           onPress={()=>showButtomItem(ObjBottomIcons.Search)}
+          colorSelected={o.icontintcolorcontrast}
           source={require('../../../public/images/search.png')}></PressImage>
         );
       case ObjBottomIcons.Sorted:
@@ -928,6 +936,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
           <PressImage
             selected={isMultiSelectOpen}
             onPress={() => showButtomItem(ObjBottomIcons.Pos)}
+            colorSelected={o.icontintcolorcontrast}
             source={require("../../../public/images/change.png")}
           />
         );
@@ -937,6 +946,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
           <PressImage
             onPress={onLock}
             confirm={obj.IsLocked}
+            fade={!obj.IsLocked}
             raw
             source={require("../../../public/images/add-lock.png")}
           />
@@ -960,11 +970,13 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
           <PressImage
             selected={isItemsOpen}
             onPress={addingNewItem}
+            raw
             source={require("../../../public/images/add-lock.png")}
           />
         ) : (
           <PressImage
             selected={isItemsOpen}
+            colorSelected={o.icontintcolorcontrast}
             onPress={() => showButtomItem(ObjBottomIcons.Add)}
             source={require("../../../public/images/add.png")}
           />
@@ -983,8 +995,10 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
           :
           <PressImage onPress={()=>{setIsListGoingUp(true); itemsListScrollTo(tempFilteredItems[tempFilteredItems.length-1].ItemId)}} source={require('../../../public/images/to-bottom.png')}></PressImage>
         );
+      case ObjBottomIcons.Menu:
+        break;
       default:
-        return null;
+      return null;
     }
   }
 
@@ -1065,6 +1079,9 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     }
     else if(item.Type === ItemType.House){
       rtnItem = <HouseView key={item.ItemId} isSelecting={isSelectingItem} isSelected={itemIsSelected} wasJustAdded={wasJustAdded} isDisabled={isMultiSelectOpen} isLocked={obj.IsLocked} loadMyItems={loadItems} objTheme={o} house={item as House} onDeleteItem={onDeleteItem} itemsListScrollTo={itemsListScrollTo}></HouseView>
+    }
+    else if(item.Type === ItemType.Review){
+      rtnItem = <ReviewView key={item.ItemId} isSelecting={isSelectingItem} isSelected={itemIsSelected} wasJustAdded={wasJustAdded} isDisabled={isMultiSelectOpen} isLocked={obj.IsLocked} loadMyItems={loadItems} objTheme={o} review={item as Review} onDeleteItem={onDeleteItem} itemsListScrollTo={itemsListScrollTo}></ReviewView>
     }
     else if(item.Type === ItemType.StartPlaceholder){
       rtnItem = (
@@ -1151,17 +1168,25 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     return userPrefs.ObjectivesPrefs.iconsToDisplay.includes(ObjBottomIcons[icon]);
   }
 
+  const getIconView = () => {
+    let iconsList: JSX.Element[] = [];
+
+    
+  }
+
   const getBottomMenuView = () => {
     const showMenu: boolean = userPrefs.ObjectivesPrefs.iconsToDisplay.length < 12;
 
     return(
       <View style={s.bottomContainer}>
-        {showMenu && 
+        {showMenu && userPrefs.isRightHand && 
           <PressImage 
             selected={isMenuIconOpen}
+            colorSelected={o.icontintcolorcontrast}
             onPress={()=>showButtomItem(ObjBottomIcons.Menu)}
             source={require('../../../public/images/menu.png')}></PressImage>
         }
+        {getButtonIconViews(ObjBottomIcons.Menu, false)}
         {getButtonIconViews(ObjBottomIcons.Unarchive, false)}
         {getButtonIconViews(ObjBottomIcons.Archive, false)}
         {getButtonIconViews(ObjBottomIcons.Palette, false)}
@@ -1174,6 +1199,13 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
         {getButtonIconViews(ObjBottomIcons.IsLocked, false)}
         {getButtonIconViews(ObjBottomIcons.Checked, false)}
         {getButtonIconViews(ObjBottomIcons.Add, false)}
+        {showMenu && !userPrefs.isRightHand && 
+          <PressImage 
+            selected={isMenuIconOpen}
+            colorSelected={o.icontintcolorcontrast}
+            onPress={()=>showButtomItem(ObjBottomIcons.Menu)}
+            source={require('../../../public/images/menu.png')}></PressImage>
+        }
       </View>
     )
   }
@@ -1229,7 +1261,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
 
     ///Item in the beggining to put moving items from the start "click to be the first"
     if(isSelectingPastePos){ 
-      const itemFake: GenericItem = {ItemId: '-', LastModified: '', Pos: -1, Title: 'click to be the first',Type: ItemType.StartPlaceholder, UserIdObjectiveId: '-'}
+      const itemFake: GenericItem = {ItemId: '-', LastModified: '', Pos: -1, Title: 'click to be the first',Type: ItemType.StartPlaceholder, UserIdObjectiveId: '-', CreatedAt: ''}
       filteredItems.push(itemFake)
     }
 
@@ -1242,6 +1274,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       let shouldAddExercise = true;
       let shouldAddMedicine = true;
       let shouldAddHouse = true;
+      let shouldAddReview = true;
       let shouldAddIsInSearch = true;
 
       if(itemSearchToShow.length && !itemSearchToShow.includes(current.ItemId)) shouldAddIsInSearch = false;
@@ -1265,6 +1298,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
         if(current.Type === ItemType.Exercise && !obj.IsShowingCheckedExercise) shouldAddExercise = !(current as Exercise).IsDone;
         if(current.Type === ItemType.Medicine && !obj.IsShowingCheckedMedicine) shouldAddMedicine = !(current as Medicine).IsChecked;
         if(current.Type === ItemType.House && !obj.IsShowingCheckedStep) shouldAddHouse = !(current as House).WasContacted;
+        if(current.Type === ItemType.Review && !obj.IsShowingCheckedStep) shouldAddHouse = (current as Review).IsCurrentChoise;
         if(isDividerOpen && shouldAddStep && shouldAddGrocery && shouldAddExercise && shouldAddMedicine && shouldAddHouse && shouldAddIsInSearch){
           if(isAfterDivider && !obj.IsShowingCheckedStep)
             partialItems.push(current);
@@ -1283,12 +1317,12 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     /// Hidden items text
     hiddenItems = (items.length - filteredItems.length);
     const hiddenItemsText = hiddenItems.toString() + ' hidden item' + (hiddenItems > 1?'s.':'.');
-    if(hiddenItems > 0) filteredItems.push({ItemId:'', LastModified: '', Pos:-1, UserIdObjectiveId: '',  Type: ItemType.HiddenItemText, Title: hiddenItemsText, Fade: true } as GenericItem);
+    if(hiddenItems > 0) filteredItems.push({ItemId:'', LastModified: '', Pos:-1, UserIdObjectiveId: '',  Type: ItemType.HiddenItemText, Title: hiddenItemsText, Fade: true, CreatedAt: '' } as GenericItem);
 
     tempFilteredItems = filteredItems;
 
     /// End of list separator
-    filteredItems.push({ItemId:'', LastModified: '', Pos:-1, UserIdObjectiveId: '',  Type: ItemType.Separator, Title: '', Fade: false} as GenericItem)
+    filteredItems.push({ItemId:'', LastModified: '', Pos:-1, UserIdObjectiveId: '',  Type: ItemType.Separator, Title: '', Fade: false, CreatedAt: ''} as GenericItem)
     return <FlatList ref={listRef} data={filteredItems} renderItem={getItemView}></FlatList>
   }
 
@@ -1363,6 +1397,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     return(
       <View style={s.itemsContainer}>
         {/* <PressImage onPress={() => {choseNewItemToAdd(ItemType.Wait)}} source={require('../../../public/images/wait.png')}></PressImage> */}
+        <PressImage onPress={() => {choseNewItemToAdd(ItemType.Review)}} source={require('../../../public/images/review.png')}></PressImage>
         <PressImage onPress={() => {choseNewItemToAdd(ItemType.House)}} source={require('../../../public/images/home.png')}></PressImage>
         <PressImage onPress={() => {choseNewItemToAdd(ItemType.Link)}} source={require('../../../public/images/link.png')}></PressImage>
         <PressImage onPress={() => {choseNewItemToAdd(ItemType.Exercise)}} source={require('../../../public/images/exercise-filled.png')}></PressImage>
@@ -1408,6 +1443,8 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       </>
     )
   }
+
+  const side = (userPrefs && userPrefs.isRightHand)? 'flex-end':'flex-start';
 
   const s = StyleSheet.create(
   {
@@ -1490,7 +1527,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       flexDirection: 'row',
       flexWrap: 'wrap',
       alignItems: 'center',
-      justifyContent: 'space-between',
+      justifyContent: side,
       backgroundColor: o.itembk,
     },
     tagEditingContainer:{

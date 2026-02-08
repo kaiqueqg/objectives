@@ -595,7 +595,7 @@ const ExerciseView = (props: ExerciseViewProps) => {
           getTitleDisplay()
         }
         {!isEditingExercise && !exercise.IsDone && <PressImage source={require('../../../../public/images/exercise.png')} onPress={() => {if(!isDisabled)onChangeIsDone();}}></PressImage>}
-        {!isEditingExercise && exercise.IsDone && <PressImage source={require('../../../../public/images/exercise-filled.png')} onPress={() => {if(!isDisabled)onChangeIsDone();}}></PressImage>}
+        {!isEditingExercise && exercise.IsDone && <PressImage source={require('../../../../public/images/exercise-filled.png')} onPress={() => {if(!isDisabled)onChangeIsDone();}} selected={exercise.IsDone} colorSelected={t.icontintfade}></PressImage>}
       </View>
     </View>
   );

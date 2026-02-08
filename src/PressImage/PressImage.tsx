@@ -17,6 +17,7 @@ export interface PressImageProps{
   hide?: boolean,
   disable?: boolean,
   confirm?: boolean,
+  fade?: boolean,
   text?: string,
 
   selected?: boolean,
@@ -25,9 +26,9 @@ export interface PressImageProps{
   colorDisabled?: string,
   colorSelected?: string,
 
-  o?: ObjectivePallete,
-
   raw?: boolean,
+
+  size?: number,
 }
 
 const PressImage = (props: PressImageProps) => {
@@ -37,6 +38,30 @@ const PressImage = (props: PressImageProps) => {
   const [wasLongPressed, setWasLongPressed] = useState(false);
 
   const [text, setText] = useState<number>(2000);
+
+  const finalTintColor = (() => {
+    if(props.disable) {
+      return props.colorDisabled;
+    }
+    if(props.fade) {
+      return t.icontintfade;
+    }
+    if(props.selected){ 
+      return props.colorSelected?? t.icontintselected; 
+    }
+    if(props.color){
+      return props.color;
+    }
+
+    return props.raw?undefined:t.icontint;
+  })();
+
+  const finalSize = (() => {
+    if(props.size && typeof gs.baseSmallImage.width === 'number'){
+      return {...gs.baseSmallImage, width: gs.baseSmallImage.width + props.size, height: gs.baseSmallImage.width + props.size} as ImageStyle;
+    }
+    else return gs.baseSmallImage;
+  })();
 
   const handleLongPress = () => {
     setWasLongPressed(true);
@@ -83,7 +108,7 @@ const PressImage = (props: PressImageProps) => {
         delayLongPress={props.delayLongPress??800}>
         {/* <View style={[s.shadow]}/> */}
         {/* <View style={[s.border2]}/> */}
-        <Image style={[s.image as ImageStyle, !props.raw && s.imageColor, props.selected?s.imageSelected:undefined, props.disable?s.imageDisabled:undefined]} source={props.source}></Image>
+        <Image style={[s.image, {tintColor: finalTintColor} as ImageStyle, finalSize]} source={props.source}></Image>
         {/* <Image style={[props.style as ImageStyle, props.disable? (props.disableStyle as ImageStyle):{}, s.image]} source={props.source}></Image> */}
         {props.text && <Text style={[s.text]}>{props.text}</Text>}
       </Pressable>
@@ -102,7 +127,7 @@ const PressImage = (props: PressImageProps) => {
     
     return(
       <Pressable style={s.container} onPressOut={onPressAfterConfirmed} onPressIn={props.onPressIn} onLongPress={handleLongPress} delayLongPress={props.delayLongPress??800}>
-        <Image style={[s.image as ImageStyle, !props.raw && s.imageColor]} source={require('../../public/images/done.png')}></Image>
+        <Image style={[s.image as ImageStyle]} source={require('../../public/images/done.png')}></Image>
       </Pressable>
     )
   }
@@ -156,15 +181,6 @@ const PressImage = (props: PressImageProps) => {
     },
     image:{
       ...gs.baseSmallImage,
-    },
-    imageColor:{
-      tintColor: props.color?? t.icontint,
-    },
-    imageDisabled:{
-      tintColor: props.colorDisabled??t.icontintfade,
-    },
-    imageSelected:{
-      tintColor: props.colorSelected??t.icontintselected,
     },
   });
 

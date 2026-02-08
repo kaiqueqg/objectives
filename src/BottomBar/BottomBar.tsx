@@ -41,6 +41,44 @@ const BottomBar = (props: BottomBarProps) => {
     writeUserPrefs({...userPrefs, theme: userPrefs.theme === 'dark'?'light':'dark'});
   }
 
+  const getLeftBottomView = () => {
+    return(
+      <View style={s.leftContainer}>
+        <PressImage 
+          text={Constants.executionEnvironment === ExecutionEnvironment.StoreClient?"dev":undefined}
+          onPress={() => changeToView(Views.UserView)}
+          source={require('../../public/images/user.png')}
+          selected={currentView === Views.UserView}
+          colorSelected={user.Email===''?t.trashicontint:t.icontintselected}
+          color={user.Email===''?t.trashicontint:t.icontint}/>
+        <PressImage
+          onPress={changeTheme}
+          source={require('../../public/images/theme.png')}/>
+        {showLoginStuff && <PressImage onPress={() => changeToView(Views.DevView)} source={require('../../public/images/dev.png')} selected={currentView === Views.DevView}/>}
+        {showLoginStuff && <LoginView viewType="Image"/>}
+      </View>
+    )
+  }
+
+  const getRightBottomView = () => {
+    return(
+      <View style={s.rightContainer}>
+        <PressImage 
+          onPress={()=>{changeToView(Views.ArchivedView)}}
+          source={require('../../public/images/archive.png')}
+          fade={currentView === Views.ListView}
+          selected={currentView === Views.ArchivedView}
+          size={currentView === Views.ListView?-4:(currentView === Views.ArchivedView?6:0)}/>
+        <PressImage 
+          onPress={()=>{changeToView(Views.ListView)}}
+          source={require('../../public/images/file.png')}
+          fade={currentView === Views.ArchivedView}
+          selected={currentView === Views.ListView}
+          size={currentView === Views.ArchivedView?-4:-1}/>
+      </View>
+    )
+  }
+
   const s = StyleSheet.create({
     container: {
       flexDirection: 'row',
@@ -86,24 +124,8 @@ const BottomBar = (props: BottomBarProps) => {
 
   return (
     <View style={s.container}>
-      <View style={s.leftContainer}>
-        {user?
-          (Constants.executionEnvironment === ExecutionEnvironment.StoreClient?
-            <PressImage text="dev" onPress={() => changeToView(Views.UserView)} source={require('../../public/images/user.png')}></PressImage>
-            :
-            <PressImage onPress={() => changeToView(Views.UserView)} source={require('../../public/images/user.png')}></PressImage>
-          )
-          :
-          <PressImage onPress={() => changeToView(Views.UserView)} source={require('../../public/images/user.png')}></PressImage>
-        }
-        <PressImage onPress={changeTheme} source={require('../../public/images/theme.png')}></PressImage>
-        {showLoginStuff && <PressImage onPress={() => changeToView(Views.DevView)} source={require('../../public/images/dev.png')}></PressImage>}
-        {showLoginStuff && <LoginView viewType="Image"></LoginView>}
-      </View>
-      <View style={s.rightContainer}>
-        <PressImage onPress={()=>{changeToView(Views.ArchivedView)}} source={require('../../public/images/archived.png')} ></PressImage>
-        <PressImage onPress={()=>{changeToView(Views.ListView)}} source={require('../../public/images/list.png')} selected={currentView === Views.ListView} colorSelected={t.icontintselected}></PressImage>
-      </View>
+      {getLeftBottomView()}
+      {getRightBottomView()}
     </View>
   );
 };

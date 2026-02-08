@@ -268,13 +268,13 @@ export const StorageProvider: React.FC<StorageProviderProps> = ({ children }) =>
       }
     },
     //^-------------------- SYNC
-    async readLastSync(): Promise<Date|null> {
+    async readLastSync(): Promise<string|null> {
       try {
         const data = await AsyncStorage.getItem(keys.LastSync);
         if(data !== null){
           try {
             const parsedData: string = JSON.parse(data);
-            return new Date(parsedData);
+            return parsedData
           } catch (err) {
             log.err('readLastSync', 'Error parsing json');
           }
@@ -286,7 +286,7 @@ export const StorageProvider: React.FC<StorageProviderProps> = ({ children }) =>
         return null;
       }
     },
-    async writeLastSync(now: Date): Promise<void> {
+    async writeLastSync(now: string): Promise<void> {
       try {
         await AsyncStorage.setItem(keys.LastSync, JSON.stringify(now));
       } catch (err) {
@@ -563,8 +563,8 @@ export interface StorageService {
   readSelectedTags(): Promise<string[] | null>;
 
   // SYNC
-  readLastSync(): Promise<Date | null>;
-  writeLastSync(now: Date): Promise<void>;
+  readLastSync(): Promise<string|null>;
+  writeLastSync(now: string): Promise<void>;
 
   // OBJECTIVES
   readObjectives(): Promise<Objective[] | null>;

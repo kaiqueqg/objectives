@@ -103,35 +103,35 @@ const StepView = (props: StepViewProps) => {
 
   const getImportanceImage = () => {
     if(step.Importance === StepImportance.Low){
-      return <PressImage o={o} source={require('../../../../public/images/low.png')}></PressImage>;
+      return <PressImage source={require('../../../../public/images/low.png')}></PressImage>;
     }
     else if(step.Importance === StepImportance.Medium){
-      return <PressImage o={o} source={require('../../../../public/images/med.png')}></PressImage>;
+      return <PressImage source={require('../../../../public/images/med.png')}></PressImage>;
     }
     else if(step.Importance === StepImportance.High){
-      return <PressImage o={o} source={require('../../../../public/images/high.png')}></PressImage>;
+      return <PressImage source={require('../../../../public/images/high.png')}></PressImage>;
     }
     else if(step.Importance === StepImportance.Ladybug){
-      return <PressImage o={o} source={require('../../../../public/images/ladybug.png')}></PressImage>;
+      return <PressImage source={require('../../../../public/images/ladybug.png')}></PressImage>;
     }
     else if(step.Importance === StepImportance.LadybugYellow){
-      return <PressImage o={o} source={require('../../../../public/images/ladybugyellow.png')}></PressImage>;
+      return <PressImage source={require('../../../../public/images/ladybugyellow.png')}></PressImage>;
     }
     else if(step.Importance === StepImportance.LadybugGreen){
-      return <PressImage o={o} source={require('../../../../public/images/ladybuggreen.png')}></PressImage>;
+      return <PressImage source={require('../../../../public/images/ladybuggreen.png')}></PressImage>;
     }
     else if(step.Importance === StepImportance.Question){
-      return <PressImage o={o} source={require('../../../../public/images/questionmark.png')}></PressImage>;
+      return <PressImage source={require('../../../../public/images/questionmark.png')}></PressImage>;
     }
     else if(step.Importance === StepImportance.Waiting){
-      return <PressImage o={o} source={require('../../../../public/images/wait.png')}></PressImage>;
+      return <PressImage source={require('../../../../public/images/wait.png')}></PressImage>;
     }
     else if(step.Importance === StepImportance.InProgress){
-      return <PressImage o={o} source={require('../../../../public/images/inprogress.png')}></PressImage>;
+      return <PressImage source={require('../../../../public/images/inprogress.png')}></PressImage>;
     }
     else{
       if(isEditingStep && !isDisabled){
-        return <PressImage o={o} source={require('../../../../public/images/cancel.png')} color={o.cancelicontint}></PressImage>;
+        return <PressImage source={require('../../../../public/images/cancel.png')} color={o.cancelicontint}></PressImage>;
       }
       else{
         return <></>;
@@ -165,17 +165,15 @@ const StepView = (props: StepViewProps) => {
         ></PressText>
         {!step.Done && 
           <PressImage 
-            o={o}
             source={require('../../../../public/images/step.png')}
             onPress={() => {if(!isDisabled)onChangeIsDone();}}
             confirm={step.AutoDestroy}>
           </PressImage>}
         {step.Done && 
           <PressImage 
-            o={o}
             source={require('../../../../public/images/step-filled.png')}
             onPress={() => {if(!isDisabled)onChangeIsDone();}}
-            selected={step.Done}>
+            selected={step.Done} colorSelected={t.icontintfade}>
           </PressImage>}
       </View>
     )
@@ -186,7 +184,7 @@ const StepView = (props: StepViewProps) => {
       <View style={[s.stepContainer, props.isSelecting && s.containerSelecting, props.isSelected && s.containerSelected, wasJustAdded && s.containerWasJustAdded]}>
         <View style={s.inputContainer}>
           <View style={s.inputsLeft}>
-            <PressImage o={o} source={require('../../../../public/images/trash.png')} onPress={onDeleteItem} color={o.trashicontint}></PressImage>
+            <PressImage source={require('../../../../public/images/trash.png')} onPress={onDeleteItem} color={o.trashicontint}></PressImage>
           </View>
           <View style={s.inputsCenter}>
             <View style={[s.titleRowContainer]}>
@@ -200,26 +198,26 @@ const StepView = (props: StepViewProps) => {
               {/* <PressImage pressStyle={[gs.baseImageContainer]} style={[s.image, tempStep.AutoDestroy?s.imageDelete:s.imageFade]} source={require('../../../../public/images/explode.png')} onPress={onChangeAutoDestroy}></PressImage> */}
             </View>
             <View style={[s.importanceIconContainer]}>
-              <PressImage o={o} source={require('../../../../public/images/null.png')} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.None);}}></PressImage>
-              <PressImage o={o} source={require('../../../../public/images/low.png')} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.Low);}} raw></PressImage>
-              <PressImage o={o} source={require('../../../../public/images/med.png')} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.Medium);}} raw></PressImage>
-              <PressImage o={o} source={require('../../../../public/images/high.png')} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.High);}} raw></PressImage>
-              <PressImage o={o} source={require('../../../../public/images/ladybuggreen.png')} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.LadybugGreen);}} raw></PressImage>
-              <PressImage o={o} source={require('../../../../public/images/ladybugyellow.png')} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.LadybugYellow);}} raw></PressImage>
-              <PressImage o={o} source={require('../../../../public/images/ladybug.png')} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.Ladybug);}} raw></PressImage>
-              <PressImage o={o} source={require('../../../../public/images/questionmark.png')} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.Question);}}></PressImage>
-              <PressImage o={o} source={require('../../../../public/images/wait.png')} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.Waiting);}}></PressImage>
-              <PressImage o={o} source={require('../../../../public/images/inprogress.png')} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.InProgress);}}></PressImage>
+              <PressImage source={require('../../../../public/images/null.png')} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.None);}}></PressImage>
+              <PressImage source={require('../../../../public/images/low.png')} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.Low);}} raw></PressImage>
+              <PressImage source={require('../../../../public/images/med.png')} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.Medium);}} raw></PressImage>
+              <PressImage source={require('../../../../public/images/high.png')} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.High);}} raw></PressImage>
+              <PressImage source={require('../../../../public/images/ladybuggreen.png')} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.LadybugGreen);}} raw></PressImage>
+              <PressImage source={require('../../../../public/images/ladybugyellow.png')} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.LadybugYellow);}} raw></PressImage>
+              <PressImage source={require('../../../../public/images/ladybug.png')} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.Ladybug);}} raw></PressImage>
+              <PressImage source={require('../../../../public/images/questionmark.png')} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.Question);}}></PressImage>
+              <PressImage source={require('../../../../public/images/wait.png')} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.Waiting);}}></PressImage>
+              <PressImage source={require('../../../../public/images/inprogress.png')} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.InProgress);}}></PressImage>
             </View>
             <Pressable style={[s.autoDestroyContainer]} onPress={onChangeAutoDestroy}>
               <Text style={s.autoDestroyText}>Autodestroy when you click on</Text>
-              <PressImage o={o} source={require('../../../../public/images/step.png')} selected={step.Done}></PressImage>
+              <PressImage source={require('../../../../public/images/step.png')} selected={step.Done}></PressImage>
               {/* <Text style={s.autoDestroyText}>should self delete? {tempStep.AutoDestroy?'Yes.': 'No.'}</Text> */}
             </Pressable>
           </View>
           <View style={s.inputsRight}>
-            <PressImage o={o} source={require('../../../../public/images/done.png')} onPress={onDoneStep} color={o.doneicontint}></PressImage>
-            <PressImage o={o} source={require('../../../../public/images/cancel.png')} onPress={onCancelStep} color={o.cancelicontint}></PressImage>
+            <PressImage source={require('../../../../public/images/done.png')} onPress={onDoneStep} color={o.doneicontint}></PressImage>
+            <PressImage source={require('../../../../public/images/cancel.png')} onPress={onCancelStep} color={o.cancelicontint}></PressImage>
           </View> 
         </View>
       </View>

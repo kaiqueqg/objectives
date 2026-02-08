@@ -1,4 +1,4 @@
-import { View, StyleSheet, FlatList, Text, Vibration, BackHandler, Pressable, TextInput } from "react-native";
+import { View, StyleSheet, FlatList, Text, Vibration, BackHandler, Pressable, TextInput, Image } from "react-native";
 import { AppPalette, colorPalette, getObjTheme, globalStyle as gs } from "../Colors";
 import { FontPalette } from "../../fonts/Font";
 import { useUserContext } from "../Contexts/UserContext";
@@ -72,7 +72,9 @@ const ObjsListView = (props: ObjsListViewProps) => {
     setUnarchivedTags(uniqueUnarchivedTags);
   }, [objectives, availableTags, selectedTags]);
 
-  const onSelectCurrentObj = async (id: string) => {
+  const onSelectCurrentObj = async (id: string) => { 
+    if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
+
     if(!isEditingPos) {
       await writeCurrentObjectiveId(id);
       await writeCurrentView(Views.IndividualView);
@@ -93,6 +95,7 @@ const ObjsListView = (props: ObjsListViewProps) => {
       IsLocked: false,
       Pos: objectives.length,
       LastModified: (new Date()).toISOString(),
+      CreatedAt: (new Date()).toISOString(),
       IsShowingCheckedGrocery: true,
       IsShowingCheckedStep: true,
       IsShowingCheckedExercise: true,
@@ -170,6 +173,7 @@ const ObjsListView = (props: ObjsListViewProps) => {
       IsLocked: false,
       Pos: -1,
       LastModified: (new Date()).toISOString(),
+      CreatedAt: (new Date()).toISOString(),
       IsShowingCheckedGrocery: true,
       IsShowingCheckedStep: true,
       Tags: [],
@@ -247,7 +251,7 @@ const ObjsListView = (props: ObjsListViewProps) => {
       </>
       :
       <View style={[s.objectiveContainer]} onTouchEnd={() => {isEditingPos && (isEndingPos? endChangingPos(item) : addRemoveToSelected(item))}}>
-        {shouldShowTag && <PressImage source={require('../../public/images/pin.png')}/>}
+        {shouldShowTag && <Image style={[s.objectivePin]} source={require('../../public/images/pin.png')} />}
         <PressText 
           style={[s.objectiveButtonContainer, 
             isEditingPos && isSelected? s.objectiveButtonContainerSelected:undefined, 
@@ -334,9 +338,9 @@ const ObjsListView = (props: ObjsListViewProps) => {
         <View style={gs.baseImageContainer}></View>
         <Text style={[s.containerTagTitleText]}>{'TAGS'}</Text>
         {isTagsListFolded?
-          <PressImage disable={isEditingPos} source={require('../../public/images/up-chevron.png')}></PressImage>
+          <PressImage disable={isEditingPos} source={require('../../public/images/up-chevron.png')} onPress={()=>{setIsTagsListFolded(false)}}/>
           :
-          <PressImage disable={isEditingPos} source={require('../../public/images/down-chevron.png')}></PressImage>
+          <PressImage disable={isEditingPos} source={require('../../public/images/down-chevron.png')} onPress={()=>{setIsTagsListFolded(false)}}/>
         }
       </View>
     )
@@ -349,6 +353,7 @@ const ObjsListView = (props: ObjsListViewProps) => {
         <PressImage
           onPress={startEditingPos}
           disable={objectives.length < 2}
+          colorDisabled={t.icontintfade}
           source={require('../../public/images/change.png')}
         ></PressImage>}
         {isEditingPos && <PressImage onPress={cancelEditingPos} source={require('../../public/images/cancel.png')} color={t.cancelicontint}></PressImage>}
@@ -553,13 +558,16 @@ const ObjsListView = (props: ObjsListViewProps) => {
     tag: {
       textAlign: 'center',
       verticalAlign: 'middle',
-      color: t.textcolor,
+      color: t.textTag,
       fontWeight: 'bold',
-      margin: 5,
-      paddingVertical: 5,
+      fontSize: 14,
+      margin: 2,
+      paddingVertical: 3,
       paddingHorizontal: 10,
-      minWidth: 50,
+      // minWidth: 50,
       maxHeight: 30,
+
+      backgroundColor: t.backgroundTag,
 
       borderColor: t.backgroundcolor,
       borderWidth: 1,
@@ -567,8 +575,8 @@ const ObjsListView = (props: ObjsListViewProps) => {
       borderRadius: 15,
     },
     tagSelected:{
-      backgroundColor: t.backgroundcolordark,
-      color: t.textcolor,
+      backgroundColor: t.backgroundTagSelected,
+      color: t.textTagSelected,
       
       borderColor: t.textcolorcontrast,
       borderWidth: 1,
@@ -709,14 +717,10 @@ const ObjsListView = (props: ObjsListViewProps) => {
       position: 'absolute',
       top: 0,
       left: 0,
-      width: 25,
-      height: 25,
+      width: 17,
+      height: 17,
       zIndex: 9999,
       transform: [{ translateX: -5 }, { translateY: -5 }],
-    },
-    objectivePinImage:{
-      height: 17,
-      width: 17,
     },
     objectiveButtonContainerFake:{
       flex: 1,

@@ -373,7 +373,7 @@ export const HouseView = (props: HouseViewProps) => {
               {!isEditingHouse && house.Listing.trim() !== '' && <PressImage source={require('../../../../public/images/link.png')} onPress={openLink}></PressImage>}
               {!isEditingHouse && house.MapLink.trim() !== '' && <PressImage source={require('../../../../public/images/location-filled.png')} onPress={openUrl}></PressImage>}
               {!isEditingHouse && !house.WasContacted && <PressImage source={require('../../../../public/images/home.png')} onPress={() => {if(!isDisabled)onChangeWasContacted();}}></PressImage>}
-              {!isEditingHouse && house.WasContacted && <PressImage source={require('../../../../public/images/done.png')} onPress={() => {if(!isDisabled)onChangeWasContacted();}}></PressImage>}
+              {!isEditingHouse && house.WasContacted && <PressImage source={require('../../../../public/images/done.png')} onPress={() => {if(!isDisabled)onChangeWasContacted();}} selected={house.WasContacted} colorSelected={t.icontintfade}></PressImage>}
             </View>
             {!isEditingHouse && house.Details.trim() !== '' && <View style={s.detailsContainer}><Text style={s.detaisText}>{house.Details}</Text></View>}
             {!isEditingHouse && house.Attention.trim() !== '' && <View style={s.attentionContainer}><Text style={s.attentionText}>{house.Attention}</Text></View>}

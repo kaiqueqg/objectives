@@ -110,7 +110,6 @@ const DividerView = (props: DividerViewProps) => {
   }
 
   const onChangeAllCheckedUnchecked = () => {
-    log.w('qsdsd')
     const newValue = !checkAll;
     checkUncheckedDividerItems(newValue, divider);
     setCheckAll(newValue);
@@ -229,6 +228,8 @@ const DividerView = (props: DividerViewProps) => {
       </View>
       {isItemsOpen && 
         <View style={[s.dividerNewItemContainer]}>
+          <PressImage onPress={()=>{addNewItem(ItemType.Review);}} source={require('../../../../public/images/review.png')}></PressImage>
+          <PressImage onPress={()=>{addNewItem(ItemType.House);}} source={require('../../../../public/images/home.png')}></PressImage>
           <PressImage onPress={()=>{addNewItem(ItemType.Link);}} source={require('../../../../public/images/link.png')}></PressImage>
           <PressImage onPress={()=>{addNewItem(ItemType.Exercise);}} source={require('../../../../public/images/exercise-filled.png')}></PressImage>
           <PressImage onPress={()=>{addNewItem(ItemType.Divider);}} source={require('../../../../public/images/minus.png')}></PressImage>

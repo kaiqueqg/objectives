@@ -117,17 +117,16 @@ const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
   const syncObjectivesList = async () => {
     try {
       if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
+
       setFailedSync(false);
       setDoneSync(false);
-      
+
       let syncObjectives: Objective[] = [];
       let syncItems: Item[] = [];
       if(lastSync){ //^ If there is a last sync date, sync only the new objectives and items
         for(let i = 0; i < objectives.length; i++){
           const current = objectives[i];
-          let objectiveLastModified = new Date(current.LastModified);
-  
-          if(objectiveLastModified > lastSync){
+          if(current.LastModified > lastSync){
             syncObjectives.push(current);
           }
           else{
@@ -136,8 +135,7 @@ const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
     
           for(let j = 0; j < objItems.length; j++) {
             const currentItem = objItems[j];
-            let itemLastModified = new Date(currentItem.LastModified);
-            if(itemLastModified > lastSync){
+            if(currentItem.LastModified > lastSync){
               syncItems.push(currentItem);
             }
             else{
@@ -158,10 +156,10 @@ const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
         Items: syncItems,
         DeleteObjectives: deletedObjectives,
         DeleteItems: deletedItems,
+        LastModified: lastSync? lastSync: undefined,
       }
   
       setIsSyncing(true);
-      //^ Sync all
       const data = await objectivesApi.syncObjectivesList(objectiveList);
       
       if(data !== null && data !==undefined && data.Objectives){
@@ -183,7 +181,7 @@ const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
         setIsSyncing(false);
         setDoneSync(true);
         setTimeout(() => {
-          writeLastSync(new Date());
+          writeLastSync((new Date()).toISOString());
           setDoneSync(false);
         }, 10000);
   
@@ -331,7 +329,7 @@ const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
     return(
       <>
         {isSyncing &&  !isLambdaCold && <Loading></Loading>}
-        {!isSyncing && !isLambdaCold && <PressImage onPress={syncObjectivesList} source={require('../../public/images/sync.png')}></PressImage>}
+        {!isSyncing && !isLambdaCold && <PressImage onPress={syncObjectivesList} source={require('../../public/images/sync.png')} hide={user.Email === ''?true:false}/>}
       </>
     )
   }
@@ -532,12 +530,12 @@ const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
     userInformationCard:{
       paddingVertical: 10,
       paddingHorizontal: 10,
-      backgroundColor: t.backgroundcolordark,
+      // backgroundColor: t.backgroundcolordark,
 
-      borderColor: t.bordercolorfade,
-      borderWidth: 1,
-      borderRadius: 2,
-      borderStyle: 'solid',
+      // borderColor: t.bordercolorfade,
+      // borderWidth: 1,
+      // borderRadius: 2,
+      // borderStyle: 'solid',
     },
     userView: {
       flex: 1,

@@ -137,6 +137,10 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     }
   };
 
+  const isLogged = () => {
+    return user.Email !== '';
+  }
+
   const [theme, setTheme] = useState<AppPalette>(dark);
   const [fontTheme, setFontTheme] = useState<FontPalette>(fontDark);
 
@@ -253,8 +257,8 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     }
   };
   ///-------------------- SYNC
-  const [lastSync, setLastSync] = useState<Date|null>(new Date());
-  const writeLastSync = async (value: Date) => {
+  const [lastSync, setLastSync] = useState<string|null>(null);
+  const writeLastSync = async (value: string) => {
     try {
       await storage.writeLastSync(value);
       setLastSync(value);
@@ -558,6 +562,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         user, writeUser,
         userPrefs, writeUserPrefs,
         theme, fontTheme,
+        isLogged,
         ///JWT TOKEN
         jwtToken, writeJwtToken,
         ///VIEW
@@ -594,6 +599,7 @@ interface UserContextType {
   user: User, writeUser: (user: User) => void,
   userPrefs: UserPrefs,  writeUserPrefs: (userPrefs: UserPrefs) => void,
   theme: AppPalette, fontTheme: FontPalette,
+  isLogged: () => void,
   ///JWT TOKEN
   jwtToken: string|null, writeJwtToken: (token: string) => void, 
   ///VIEW
@@ -603,7 +609,7 @@ interface UserContextType {
   availableTags: string[], writeAvailableTags: (availableTags: string[]) => void, putAvailableTags: (tag: string[]) => void, removeAvailableTags: (tag: string[]) => void,
   selectedTags: string[], writeSelectedTags: (selectedTags: string[]) => void, putSelectedTags: (tags: string[]) => void, removeSelectedTags: (tags: string[]) => void, removeAvailableTagsIfUnique: (tags: string[]) => void
   ///SYNC
-  lastSync: Date|null, writeLastSync: (date: Date) => void,
+  lastSync: string|null, writeLastSync: (date: string) => void,
   ///OBJECTIVE LIST
   objectives: Objective[],
   writeObjectives: (objective: Objective[]) => void, putObjective: (objective: Objective) => void, putObjectives: (objectives: Objective[]) => void,

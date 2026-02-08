@@ -13,6 +13,7 @@ import Constants, { ExecutionEnvironment } from 'expo-constants';
 import LoginView from "./LoginView";
 
 import * as FileSystem from 'expo-file-system';
+import { Archived, Images } from "../Images";
 interface StorageAccessFrameworkType {
   requestDirectoryPermissionsAsync: () => Promise<{ granted: boolean; directoryUri: string }>;
   createFileAsync: (dirUri: string, fileName: string, mimeType: string) => Promise<string>;
@@ -116,7 +117,6 @@ const UserView = (props: UserViewProps) => {
 
   const onAddIconToDisplay = (icon: string) => {
     if (userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
-
     let newIcons: string[];
 
     if (userPrefs.ObjectivesPrefs.iconsToDisplay.includes(icon)) {
@@ -140,45 +140,39 @@ const UserView = (props: UserViewProps) => {
     return (!userPrefs.ObjectivesPrefs.iconsToDisplay.includes(ObjBottomIcons[icon]))
   }
 
+  const getPosText = (icon: ObjBottomIcons) => {
+    const icons = userPrefs.ObjectivesPrefs.iconsToDisplay;
+    const iconPos = (icons.findIndex((s)=> {return s===ObjBottomIcons[icon]})+1);
+
+    return iconPos === 0? '':iconPos.toString()+'º';
+  }
+
+  const getIconImage = (icon: ObjBottomIcons, source:any) => {
+    return(
+      <PressImage 
+        onPress={()=>onAddIconToDisplay(ObjBottomIcons[icon])}
+        source={source}
+        fade={!userPrefs.ObjectivesPrefs.iconsToDisplay.includes(icon)}
+        text={getPosText(icon)}
+        />
+    )
+  }
+
   const getObjectiveIconsView = () => {
     return(
       <>
-        <PressImage 
-          onPress={()=>onAddIconToDisplay(ObjBottomIcons[ObjBottomIcons.Unarchive])}
-          source={require('../../public/images/unarchive.png')}></PressImage>
-        <PressImage 
-          onPress={()=>onAddIconToDisplay(ObjBottomIcons[ObjBottomIcons.Archive])}
-          source={require('../../public/images/archive.png')}></PressImage>
-        <PressImage 
-          onPress={()=>onAddIconToDisplay(ObjBottomIcons[ObjBottomIcons.Palette])}
-          source={require('../../public/images/palette.png')}></PressImage>
-        <PressImage 
-          onPress={()=>onAddIconToDisplay(ObjBottomIcons[ObjBottomIcons.Tags])}
-          source={require('../../public/images/tag.png')}></PressImage>
-        <PressImage 
-          onPress={()=>onAddIconToDisplay(ObjBottomIcons[ObjBottomIcons.Sorted])}
-          source={require('../../public/images/atoz.png')}></PressImage>
-        <PressImage 
-          onPress={()=>onAddIconToDisplay(ObjBottomIcons[ObjBottomIcons.Search])}
-          source={require('../../public/images/search.png')}></PressImage>
-        <PressImage 
-          onPress={()=>onAddIconToDisplay(ObjBottomIcons[ObjBottomIcons.Pos])}
-          source={require('../../public/images/change.png')}></PressImage>
-        <PressImage 
-          onPress={()=>onAddIconToDisplay(ObjBottomIcons[ObjBottomIcons.IsLocked])}
-          source={require('../../public/images/add-lock.png')}></PressImage>
-        <PressImage 
-          onPress={()=>onAddIconToDisplay(ObjBottomIcons[ObjBottomIcons.Checked])}
-          source={require('../../public/images/checked.png')}></PressImage>
-        <PressImage 
-          onPress={()=>onAddIconToDisplay(ObjBottomIcons[ObjBottomIcons.Add])}
-          source={require('../../public/images/add.png')}></PressImage>
-        <PressImage 
-          onPress={()=>onAddIconToDisplay(ObjBottomIcons[ObjBottomIcons.FoldUnfoldAll])}
-          source={require('../../public/images/doubledown-chevron.png')}></PressImage>
-        <PressImage 
-          onPress={()=>onAddIconToDisplay(ObjBottomIcons[ObjBottomIcons.GoingTopDown])}
-          source={require('../../public/images/to-bottom.png')}></PressImage>
+        {getIconImage(ObjBottomIcons.Unarchive, Images.Unarchive)}
+        {getIconImage(ObjBottomIcons.Archive, Images.Archive)}
+        {getIconImage(ObjBottomIcons.Palette, Images.Palette)}
+        {getIconImage(ObjBottomIcons.Tags, Images.Tag)}
+        {getIconImage(ObjBottomIcons.Sorted, Images.AtoZ)}
+        {getIconImage(ObjBottomIcons.Search, Images.Search)}
+        {getIconImage(ObjBottomIcons.Pos, Images.Change)}
+        {getIconImage(ObjBottomIcons.IsLocked, Images.AddLock)}
+        {getIconImage(ObjBottomIcons.Checked, Images.Checked)}
+        {getIconImage(ObjBottomIcons.Add, Images.Add)}
+        {getIconImage(ObjBottomIcons.FoldUnfoldAll, Images.DoubleDownChevron)}
+        {getIconImage(ObjBottomIcons.GoingTopDown, Images.ToBottom)}
       </>
     );
   }
