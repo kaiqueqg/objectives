@@ -300,26 +300,19 @@ export const globalStyle:GlobalStyle = {
     flex:1,
     maxHeight: 50,
     marginVertical: 2,
-
-    // borderColor: 'red',
-    // borderWidth: 1,
-    // borderRadius: 5,
-    // borderStyle: 'solid',
   },
 }
 
-/// Theme for the hole APP
-export type AppPalette = {
+export type GeneralPalette = {
   backgroundcolordarker: string,
   backgroundcolordark: string,
   backgroundcolor: string,
   backgroundcolorlight: string,
   backgroundcolorcontrast: string,
 
-  backgroundTag: string,
-  backgroundTagSelected: string,
-  textTag: string,
-  textTagSelected: string,
+  icontint: string,
+  icontintfade: string,
+  icontintselected: string,
 
   textcolor: string,
   textcolorfade: string,
@@ -328,18 +321,45 @@ export type AppPalette = {
   bordercolor: string,
   bordercolorfade: string,
 
+  doneicontint: string,
+  trashicontint: string,
+  cancelicontint: string,
+}
+
+/// Theme for the hole APP
+export type AppPalette = GeneralPalette & {
+  // backgroundcolordarker: string,
+  // backgroundcolordark: string,
+  // backgroundcolor: string,
+  // backgroundcolorlight: string,
+  // backgroundcolorcontrast: string,
+
+  backgroundTag: string,
+  backgroundTagSelected: string,
+  backgroundTagSpecial: string,
+  textTag: string,
+  textTagSelected: string,
+  textTagSpecial: string,
+
+  // textcolor: string,
+  // textcolorfade: string,
+  // textcolorcontrast: string,
+
+  // bordercolor: string,
+  // bordercolorfade: string,
+
   loginbuttonbk: string,
   logoutbuttonbk: string,
   refreshtokenbuttonbk: string,
   bottombariconselected: string,
 
-  icontint: string,
-  icontintfade: string,
-  icontintselected: string,
+  // icontint: string,
+  // icontintfade: string,
+  // icontintselected: string,
 
-  doneicontint: string,
-  trashicontint: string,
-  cancelicontint: string,
+  // doneicontint: string,
+  // trashicontint: string,
+  // cancelicontint: string,
 
   actionicontint: string,
   onlineicontint: string,
@@ -354,10 +374,15 @@ export const light: AppPalette = {
   backgroundcolorlight: colorPalette.greylight,
   backgroundcolorcontrast: colorPalette.bluedarkerdarker,
 
+  // Tag
   backgroundTag: colorPalette.transparent,
-  backgroundTagSelected: colorPalette.blue,
   textTag: colorPalette.black,
+  
+  backgroundTagSelected: colorPalette.bluelight,
   textTagSelected: colorPalette.black,
+
+  backgroundTagSpecial: colorPalette.greydark,
+  textTagSpecial: colorPalette.beige,
 
   textcolor: colorPalette.black,
   textcolorfade: colorPalette.grey,
@@ -393,9 +418,13 @@ export const dark: AppPalette = {
   backgroundcolorcontrast: colorPalette.beige,
 
   backgroundTag: '#00000026',
-  backgroundTagSelected: colorPalette.bluelight,
   textTag: colorPalette.beige,
-  textTagSelected: '#000000',
+
+  backgroundTagSelected: colorPalette.bluelight,
+  textTagSelected: colorPalette.black,
+
+  backgroundTagSpecial: colorPalette.bluedarkerdarker,
+  textTagSpecial: colorPalette.beige,
 
   textcolor: colorPalette.beige,
   textcolorfade: colorPalette.beigedark,
@@ -426,6 +455,15 @@ export const dark: AppPalette = {
 
 /// Theme for the OBJECTIVES
 export type ObjectivePallete = {
+  itembk?: string,
+  itembkdark?: string,
+
+  itemtext?: string,
+  itemtextcontrast?: string,
+  itemtextfade?: string,
+  itemtextfadedark?: string,
+  itemtextplaceholder?: string,
+
   icontintcolor?: string,
   icontintcolorcontrast?: string, 
   icontintcolorfade?: string,
@@ -443,14 +481,6 @@ export type ObjectivePallete = {
   
   objbk?: string,
   objtitle?: string,
-
-  itembk?: string,
-  itembkdark?: string,
-  itemtext?: string,
-  itemtextcontrast?: string,
-  itemtextfade?: string,
-  itemtextfadedark?: string,
-  itemtextplaceholder?: string,
 
   borderRadius: number,
   marginHorizontal: number,
@@ -711,7 +741,7 @@ export const lightCyan: ObjectivePallete = {
 
 export const darkPink: ObjectivePallete = {
   ...noTheme,
-  icontintcolor: colorPalette.black,
+  icontintcolor: colorPalette.green,
   icontintcolorfade: colorPalette.pinkdarkerdarker,
   icontintcolorcontrast: colorPalette.red,
   
@@ -725,15 +755,14 @@ export const darkPink: ObjectivePallete = {
 
   itembk:  colorPalette.itemPink,
   itembkdark: colorPalette.itemPinkDark,
-  itemtext: colorPalette.black,
+  itemtext: colorPalette.red,
   itemtextcontrast: colorPalette.beige,
-  itemtextfade: colorPalette.beige,
+  itemtextfade: colorPalette.grey,
   
   bordercolorselecting: colorPalette.reddark,
   bordercolorselected: colorPalette.reddark,
   bordercolorwasjustadded: colorPalette.reddark,
 }
-
 
 export const lightPink: ObjectivePallete = {
   ...lightNoTheme,

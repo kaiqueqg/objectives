@@ -567,7 +567,7 @@ const ObjsListView = (props: ObjsListViewProps) => {
       // minWidth: 50,
       maxHeight: 30,
 
-      backgroundColor: t.backgroundTag,
+      // backgroundColor: t.backgroundTag,
 
       borderColor: t.backgroundcolor,
       borderWidth: 1,
@@ -583,8 +583,12 @@ const ObjsListView = (props: ObjsListViewProps) => {
       borderStyle: 'solid',
     },
     tagSpecial:{
-      backgroundColor: t.textcolor,
-      color: t.textcolorcontrast,
+      backgroundColor: t.backgroundTagSpecial,
+      color: t.textTagSpecial,
+
+      borderColor: t.textcolorcontrast,
+      borderWidth: 1,
+      borderStyle: 'solid',
     },
     tagsList:{
       paddingTop: 10,

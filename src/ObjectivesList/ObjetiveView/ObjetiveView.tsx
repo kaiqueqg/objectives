@@ -868,34 +868,30 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     )
   }
 
-  const getButtonIconView = () => {
-    
-  }
-
-  const getButtonIconViews = (icon: ObjBottomIcons, invert: boolean = false) => {
+  const getButtonIconViews = (key: string, icon: ObjBottomIcons) => {
     switch (icon) {
       case ObjBottomIcons.Unarchive:
-        if (!obj.IsArchived || !shouldShowBottomIcon(ObjBottomIcons.Unarchive, invert)) return null;
         return (
           <PressImage
+            key={key}
             confirm
             onPress={() => showButtomItem(ObjBottomIcons.Unarchive)}
             source={require("../../../public/images/unarchive.png")}
           />
         );
       case ObjBottomIcons.Archive:
-        if (obj.IsArchived || !shouldShowBottomIcon(ObjBottomIcons.Archive, invert)) return null;
         return (
           <PressImage
+            key={key}
             confirm
             onPress={() => showButtomItem(ObjBottomIcons.Archive)}
             source={require("../../../public/images/archive.png")}
           />
         );
       case ObjBottomIcons.Palette:
-        if (!shouldShowBottomIcon(ObjBottomIcons.Palette, invert)) return null;
         return (
           <PressImage
+            key={key}
             selected={isPaletteOpen}
             colorSelected={o.icontintcolorcontrast}
             onPress={() => showButtomItem(ObjBottomIcons.Palette)}
@@ -903,9 +899,9 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
           />
         );
       case ObjBottomIcons.Tags:
-        if (!shouldShowBottomIcon(ObjBottomIcons.Tags, invert)) return null;
         return (
           <PressImage
+            key={key}
             selected={isTagOpen}
             onPress={() => showButtomItem(ObjBottomIcons.Tags)}
             colorSelected={o.icontintcolorcontrast}
@@ -913,27 +909,27 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
           />
         );
       case ObjBottomIcons.Search:
-        if(!shouldShowBottomIcon(ObjBottomIcons.Search, invert)) return null;
         return(
           <PressImage 
+          key={key}
           selected={isSearchOpen}
           onPress={()=>showButtomItem(ObjBottomIcons.Search)}
           colorSelected={o.icontintcolorcontrast}
           source={require('../../../public/images/search.png')}></PressImage>
         );
       case ObjBottomIcons.Sorted:
-        if (!shouldShowBottomIcon(ObjBottomIcons.Sorted, invert)) return null;
         return (
           <PressImage
+            key={key}
             confirm
             onPress={() => showButtomItem(ObjBottomIcons.Sorted)}
             source={require("../../../public/images/atoz.png")}
           />
         );
       case ObjBottomIcons.Pos:
-        if (!shouldShowBottomIcon(ObjBottomIcons.Pos, invert)) return null;
         return (
           <PressImage
+            key={key}
             selected={isMultiSelectOpen}
             onPress={() => showButtomItem(ObjBottomIcons.Pos)}
             colorSelected={o.icontintcolorcontrast}
@@ -941,9 +937,9 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
           />
         );
       case ObjBottomIcons.IsLocked:
-        if (!shouldShowBottomIcon(ObjBottomIcons.IsLocked, invert)) return null;
         return (
           <PressImage
+            key={key}
             onPress={onLock}
             confirm={obj.IsLocked}
             fade={!obj.IsLocked}
@@ -952,9 +948,9 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
           />
         );
       case ObjBottomIcons.Checked:
-        if (!shouldShowBottomIcon(ObjBottomIcons.Checked, invert)) return null;
         return (
           <PressImage
+            key={key}
             onPress={onChangeShowingItems}
             onLongPress={() => showButtomItem(ObjBottomIcons.Checked)}
             source={
@@ -965,9 +961,9 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
           />
         );
       case ObjBottomIcons.Add:
-        if (!shouldShowBottomIcon(ObjBottomIcons.Add, invert)) return null;
         return isItemOpenLocked ? (
           <PressImage
+            key={key}
             selected={isItemsOpen}
             onPress={addingNewItem}
             raw
@@ -975,6 +971,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
           />
         ) : (
           <PressImage
+            key={key}
             selected={isItemsOpen}
             colorSelected={o.icontintcolorcontrast}
             onPress={() => showButtomItem(ObjBottomIcons.Add)}
@@ -982,21 +979,24 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
           />
         );
       case ObjBottomIcons.FoldUnfoldAll:
-        if (!shouldShowBottomIcon(ObjBottomIcons.FoldUnfoldAll, invert)) return null;
         return(openAll?
-          <PressImage onPress={() => {foldUnfoldAllDividers(true)}} source={require('../../../public/images/doubleup-chevron.png')}></PressImage>
+          <PressImage key={key} onPress={() => {foldUnfoldAllDividers(true)}} source={require('../../../public/images/doubleup-chevron.png')}></PressImage>
           :
-          <PressImage onPress={() => {foldUnfoldAllDividers(false)}} source={require('../../../public/images/doubledown-chevron.png')}></PressImage>
+          <PressImage key={key} onPress={() => {foldUnfoldAllDividers(false)}} source={require('../../../public/images/doubledown-chevron.png')}></PressImage>
         );
       case ObjBottomIcons.GoingTopDown:
-        if (!shouldShowBottomIcon(ObjBottomIcons.GoingTopDown, invert)) return null;
         return(isListGoingUp?
-          <PressImage onPress={()=>{setIsListGoingUp(false); itemsListScrollTo()}} source={require('../../../public/images/to-top.png')}></PressImage>
+          <PressImage key={key} onPress={()=>{setIsListGoingUp(false); itemsListScrollTo()}} source={require('../../../public/images/to-top.png')}></PressImage>
           :
-          <PressImage onPress={()=>{setIsListGoingUp(true); itemsListScrollTo(tempFilteredItems[tempFilteredItems.length-1].ItemId)}} source={require('../../../public/images/to-bottom.png')}></PressImage>
+          <PressImage key={key} onPress={()=>{setIsListGoingUp(true); itemsListScrollTo(tempFilteredItems[tempFilteredItems.length-1].ItemId)}} source={require('../../../public/images/to-bottom.png')}></PressImage>
         );
       case ObjBottomIcons.Menu:
-        break;
+        return (<PressImage 
+            key={key}
+            selected={isMenuIconOpen}
+            colorSelected={o.icontintcolorcontrast}
+            onPress={()=>showButtomItem(ObjBottomIcons.Menu)}
+            source={require('../../../public/images/menu.png')}></PressImage>)
       default:
       return null;
     }
@@ -1162,50 +1162,15 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     }
   }
 
-  //Test if should be showed in the side hidden menu or in the main bottom bar
-  const shouldShowBottomIcon = (icon: ObjBottomIcons, invert: boolean = false) => {
-    if(invert) return !userPrefs.ObjectivesPrefs.iconsToDisplay.includes(ObjBottomIcons[icon]);
-    return userPrefs.ObjectivesPrefs.iconsToDisplay.includes(ObjBottomIcons[icon]);
-  }
-
-  const getIconView = () => {
-    let iconsList: JSX.Element[] = [];
-
-    
-  }
-
   const getBottomMenuView = () => {
     const showMenu: boolean = userPrefs.ObjectivesPrefs.iconsToDisplay.length < 12;
+    const l = [...userPrefs.ObjectivesPrefs.iconsToDisplay].reverse();
 
     return(
       <View style={s.bottomContainer}>
-        {showMenu && userPrefs.isRightHand && 
-          <PressImage 
-            selected={isMenuIconOpen}
-            colorSelected={o.icontintcolorcontrast}
-            onPress={()=>showButtomItem(ObjBottomIcons.Menu)}
-            source={require('../../../public/images/menu.png')}></PressImage>
-        }
-        {getButtonIconViews(ObjBottomIcons.Menu, false)}
-        {getButtonIconViews(ObjBottomIcons.Unarchive, false)}
-        {getButtonIconViews(ObjBottomIcons.Archive, false)}
-        {getButtonIconViews(ObjBottomIcons.Palette, false)}
-        {getButtonIconViews(ObjBottomIcons.Tags, false)}
-        {getButtonIconViews(ObjBottomIcons.Sorted, false)}
-        {getButtonIconViews(ObjBottomIcons.Search, false)}
-        {getButtonIconViews(ObjBottomIcons.Pos, false)}
-        {getButtonIconViews(ObjBottomIcons.FoldUnfoldAll, false)}
-        {getButtonIconViews(ObjBottomIcons.GoingTopDown, false)}
-        {getButtonIconViews(ObjBottomIcons.IsLocked, false)}
-        {getButtonIconViews(ObjBottomIcons.Checked, false)}
-        {getButtonIconViews(ObjBottomIcons.Add, false)}
-        {showMenu && !userPrefs.isRightHand && 
-          <PressImage 
-            selected={isMenuIconOpen}
-            colorSelected={o.icontintcolorcontrast}
-            onPress={()=>showButtomItem(ObjBottomIcons.Menu)}
-            source={require('../../../public/images/menu.png')}></PressImage>
-        }
+        {showMenu && !userPrefs.isRightHand && getButtonIconViews('-1', ObjBottomIcons.Menu)}
+        {l.map((i, index) => getButtonIconViews(index.toString(), i as ObjBottomIcons))}
+        {showMenu && userPrefs.isRightHand && getButtonIconViews(l.length.toString(), ObjBottomIcons.Menu)}
       </View>
     )
   }
@@ -1326,23 +1291,12 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     return <FlatList ref={listRef} data={filteredItems} renderItem={getItemView}></FlatList>
   }
 
-  const getMenuIconView = () => {
+  const getMenuListView = () => {
     if(!isMenuIconOpen) return;
 
     return(
       <View style={s.itemsContainer}>
-        {getButtonIconViews(ObjBottomIcons.Unarchive, true)}
-        {getButtonIconViews(ObjBottomIcons.Archive, true)}
-        {getButtonIconViews(ObjBottomIcons.Palette, true)}
-        {getButtonIconViews(ObjBottomIcons.Tags, true)}
-        {getButtonIconViews(ObjBottomIcons.Sorted, true)}
-        {getButtonIconViews(ObjBottomIcons.Search, true)}
-        {getButtonIconViews(ObjBottomIcons.Pos, true)}
-        {getButtonIconViews(ObjBottomIcons.IsLocked, true)}
-        {getButtonIconViews(ObjBottomIcons.Checked, true)}
-        {getButtonIconViews(ObjBottomIcons.Add, true)}
-        {getButtonIconViews(ObjBottomIcons.FoldUnfoldAll, true)}
-        {getButtonIconViews(ObjBottomIcons.GoingTopDown, true)}
+        {Object.values(ObjBottomIcons ).filter(i => !userPrefs.ObjectivesPrefs.iconsToDisplay.includes(i) && i !== ObjBottomIcons.Menu).map((i, index) => getButtonIconViews(index.toString(), i as ObjBottomIcons))}
       </View>
     )
   }
@@ -1437,7 +1391,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       <>
         {getItemsView()}
         {getPaletteView()}
-        {getMenuIconView()}
+        {getMenuListView()}
         {getMultiSelectView()}
         {getUncheckedCheckedView()}
       </>
