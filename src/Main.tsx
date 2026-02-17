@@ -12,13 +12,13 @@ import ObjsListView from "./ObjsListView/ObjsListView";
 import DevView from "./DevView/DevView";
 import { useLogContext } from "./Contexts/LogContext";
 import { useStorageContext } from "./Contexts/StorageContext";
-import TagsView from "./TagsView/TagsView";
 import ArchivedView from "./ArchivedView/ArchivedView";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Alert } from 'react-native';
 import Constants, { ExecutionEnvironment } from "expo-constants";
 import PressImage from "./PressImage/PressImage";
 import * as LocalAuthentication from 'expo-local-authentication';
+import { Images } from "./Images";
 
 export interface MainProps{
 }
@@ -195,7 +195,7 @@ const Main = (props: MainProps) => {
       </SafeAreaView>
       :
       <View style={s.lockedContainer}>
-        <PressImage source={require('../public/images/add-lock.png')} style={s.lockImage}></PressImage>
+        <PressImage source={Images.Lock}/>
       </View>
   );
 };

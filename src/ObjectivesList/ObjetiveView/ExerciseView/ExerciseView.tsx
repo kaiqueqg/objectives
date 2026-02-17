@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import PressText from "../../../PressText/PressText";
 import React from "react";
 import { useLogContext } from "../../../Contexts/LogContext";
+import { Images } from "../../../Images";
 
 export const New = () => {
   return(
@@ -30,7 +31,7 @@ export interface ExerciseViewProps extends ItemViewProps {
 }
 
 export const bodyImages: Record<string, any> = {
-  cancel: require('../../../../public/images/cancel.png'),
+  cancel: Images.Cancel,
   abs: require('../../../../public/images/128px/abs.png'),
   anteriorforearm: require('../../../../public/images/128px/anteriorforearm.png'),
   backoutside: require('../../../../public/images/128px/backoutside.png'),
@@ -192,7 +193,7 @@ const ExerciseView = (props: ExerciseViewProps) => {
     const isSelected = newExercise.Weekdays.includes(weekday);
 
     return(
-      <View style={[s.exerciseWeekdaysButton]} onTouchEnd={()=>weekdayChange(weekday)}>
+      <View style={[isSelected?s.exerciseWeekdaysButtonSelected:s.exerciseWeekdaysButton]} onTouchEnd={()=>weekdayChange(weekday)}>
         <Text style={[s.exerciseWeekdaysButtonText, isSelected?s.exerciseWeekdaysButtonTextSelected:'']}>{t}</Text>
       </View>
     );
@@ -224,12 +225,14 @@ const ExerciseView = (props: ExerciseViewProps) => {
     if (!bodyImage || !bodyImages[bodyImage]) return <></>;
 
     return (
-      <PressImage
-        key={bodyImage}
-        source={bodyImages[bodyImage]}
-        onPress={() => {if(view) onEditingExercise(); else onChangeBodyImage(bodyImage);}}
-        raw
-      />
+      <View key={bodyImage} style={[view?undefined:s.bodyImageContainer, newExercise.BodyImages.includes(bodyImage)&&!view?s.imageBodySelected:undefined]}>
+        <PressImage
+          key={bodyImage}
+          source={bodyImages[bodyImage]}
+          onPress={() => {if(view) onEditingExercise(); else onChangeBodyImage(bodyImage);}}
+          raw
+        />
+      </View>
     );
   };  
 
@@ -282,17 +285,16 @@ const ExerciseView = (props: ExerciseViewProps) => {
             onPress={()=>{onEditingExercise()}}
             defaultStyle={o}
             hideDefaultTextBorder={true}
-            ellipsizeMode='middle'
-          ></PressText>
-          {exerciseRepSerie && <PressText style={s.seriesRepsContainer} textStyle={[s.seriesRepsText, exercise.IsDone && s.titleFade]} defaultStyle={o} text={exerciseRepSerie} onPress={onEditingExercise} hideDefaultTextBorder={true}></PressText>}
+            ellipsizeMode='middle'/>
+          {exerciseRepSerie && <PressText style={s.seriesRepsContainer} textStyle={[s.seriesRepsText, exercise.IsDone && s.titleFade]} defaultStyle={o} text={exerciseRepSerie} onPress={onEditingExercise} hideDefaultTextBorder={true}/>}
         </View>
         {(exercise.MaxWeight || daysOfWeek) && 
         <View style={s.exerciseSecondaryRow}>
-          <PressText style={s.maxContainer} textStyle={s.maxText} defaultStyle={o} text={exercise.MaxWeight} onPress={onEditingExercise} hideDefaultTextBorder={true}></PressText>
-          <PressText style={s.daysContainer} textStyle={s.daysText} defaultStyle={o} text={daysOfWeek} onPress={onEditingExercise} hideDefaultTextBorder={true}></PressText>
+          <PressText style={s.maxContainer} textStyle={s.maxText} defaultStyle={o} text={exercise.MaxWeight} onPress={onEditingExercise} hideDefaultTextBorder={true}/>
+          <PressText style={s.daysContainer} textStyle={s.daysText} defaultStyle={o} text={daysOfWeek} onPress={onEditingExercise} hideDefaultTextBorder={true}/>
         </View>}
         {exercise.Description && 
-          <PressText style={s.descriptionContainer} textStyle={[s.descriptionText, exercise.IsDone? {color: o.itemtextfadedark}:undefined]} text={exercise.Description} onPress={()=>{if(!isDisabled && !props.isLocked)setIsEditingExercise(!isEditingExercise)}} defaultStyle={o} hideDefaultTextBorder={true} ellipsizeMode="tail"></PressText>
+          <PressText style={s.descriptionContainer} textStyle={[s.descriptionText, exercise.IsDone? {color: o.innertextfadedark}:undefined]} text={exercise.Description} onPress={()=>{if(!isDisabled && !props.isLocked)setIsEditingExercise(!isEditingExercise)}} defaultStyle={o} hideDefaultTextBorder={true} ellipsizeMode="tail"/>
         }
       </View>
     )
@@ -311,9 +313,9 @@ const ExerciseView = (props: ExerciseViewProps) => {
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      backgroundColor: exercise.IsDone? o.objbk:o.itembk,
+      backgroundColor: (exercise.IsDone && !exercise.IsDone)? o.backgroundcolor:o.innerbackgroundcolor,
       
-      borderColor: exercise.IsDone?colorPalette.transparent:o.bordercolor,
+      borderColor: (exercise.IsDone && !exercise.IsDone)?colorPalette.transparent:o.bordercolor,
       borderWidth: 1,
       borderStyle: 'solid',
       borderRadius: o.borderRadius,
@@ -351,7 +353,7 @@ const ExerciseView = (props: ExerciseViewProps) => {
       paddingLeft: 10,
     },
     descriptionText:{
-      color: o.itemtextfade,
+      color: o.innertextcolorfade,
       fontSize: 12,
       marginBottom: 6,
     },
@@ -362,14 +364,14 @@ const ExerciseView = (props: ExerciseViewProps) => {
     titleText:{
       flex: 1,
       verticalAlign: 'middle',
-      color: o.itemtext,
+      color: o.innertextcolor,
     },
     daysContainer: {
     },
     daysText:{
       textAlign: "right",
       verticalAlign: 'middle',
-      color: o.itemtextfade,
+      color: o.innertextcolorfade,
       fontSize: 12,
     },
     maxContainer:{
@@ -377,7 +379,7 @@ const ExerciseView = (props: ExerciseViewProps) => {
     maxText:{
       textAlign: "left",
       verticalAlign: 'middle',
-      color: o.itemtextfade,
+      color: o.innertextcolorfade,
       fontSize: 12,
     },
     seriesRepsContainer:{
@@ -388,46 +390,25 @@ const ExerciseView = (props: ExerciseViewProps) => {
     seriesRepsText:{
       textAlign: "right",
       verticalAlign: 'middle',
-      color: o.itemtext,
+      color: o.innertextcolor,
       paddingLeft: 5,
     },
     titleFade:{
-      color: o.itemtextfade,
+      color: o.innertextcolorfade,
     },
     bodyImageContainer:{
       ...gs.baseImageContainer,
-
-      padding: 10,
-      margin: 5,
+      margin: 2,
     },
     bodyImage:{
       ...gs.baseBiggerImage,
     },
     imageBodySelected:{
-      borderColor: o.bordercolorlight,
-      borderWidth: 2,
+      backgroundColor: o.backgroundcolordark,
+      borderColor: o.bordercolor,
+      borderWidth: 1,
       borderRadius: 5,
       borderStyle: 'solid',
-    },
-    image:{
-      ...gs.baseImage,
-      tintColor: o.icontintcolor,
-    },
-    imageDone:{
-      tintColor: o.doneicontint,
-    },
-    imageCancel:{
-      tintColor: o.cancelicontint,
-    },
-    imageDelete:{
-      tintColor: o.trashicontint,
-    },
-    imageFade:{
-      ...gs.baseImage,
-      tintColor: o.icontintcolorfade,
-    },
-    exerciseDoneImage:{
-      tintColor: o.doneicontint,
     },
     inputsContainer:{
       flex: 1,
@@ -457,10 +438,10 @@ const ExerciseView = (props: ExerciseViewProps) => {
       minHeight: 40,
       margin: 2,
       paddingLeft: 10,
-      color: o.itemtext,
+      color: o.innertextcolor,
 
       borderRadius: 5,
-      borderColor: o.icontintcolor,
+      borderColor: o.icontint,
       borderBottomWidth: 1,
       borderStyle: 'solid',
     },
@@ -476,12 +457,26 @@ const ExerciseView = (props: ExerciseViewProps) => {
       justifyContent: 'center',
       alignItems: 'center',
     },
+    exerciseWeekdaysButtonSelected:{
+      flex: 1,
+      minHeight: 40,
+      margin: 2,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: o.backgroundcolordark,
+
+      borderColor: o.bordercolor,
+      borderWidth: 1,
+      borderRadius: 5,
+      borderStyle: 'solid',
+    },
     exerciseWeekdaysButtonText:{
       textAlign: "center",
-      color: o.itemtextfade,
+      color: o.innertextcolorfade,
     },
     exerciseWeekdaysButtonTextSelected:{
-      color: o.itemtext,
+      color: o.innertextcolorcontrast,
+      fontWeight: 'bold',
     },
     exerciseImageContainer:{
       flexWrap: "wrap",
@@ -497,20 +492,18 @@ const ExerciseView = (props: ExerciseViewProps) => {
         {!isDisabled && isEditingExercise?
           <View style={s.inputsContainer}>
             <View style={s.inputsLeft}>
-              <PressImage confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete} color={o.trashicontint}></PressImage>
+              <PressImage color={o.trashicontint} confirm={true} source={Images.Trash} onPress={onDelete}/>
             </View>
             <View style={s.inputsCenter}>
               <TextInput 
                 style={s.inputStyle}
-                placeholderTextColor={o.itemtextfade}
+                placeholderTextColor={o.innertextcolorfade}
                 placeholder="Title"
                 defaultValue={exercise.Title}
-                onChangeText={(value: string)=>{setNewExercise({...newExercise, Title: value})}} autoFocus={exercise.Title.trim() === ''}
-                onSubmitEditing={doneEdit}>
-              </TextInput>
+                onChangeText={(value: string)=>{setNewExercise({...newExercise, Title: value})}} autoFocus={exercise.Title.trim() === ''}/>
               <TextInput 
                 style={s.inputStyle}
-                placeholderTextColor={o.itemtextfade}
+                placeholderTextColor={o.innertextcolorfade}
                 placeholder="Series"
                 defaultValue={exercise.Series.toString()}
                 keyboardType="numeric" 
@@ -518,10 +511,10 @@ const ExerciseView = (props: ExerciseViewProps) => {
                   const numericValue = value.replace(/[^0-9]/g, '');
                   const quantity = numericValue !== '' ? parseInt(numericValue, 10) : 1;
                   setNewExercise({...newExercise, Series: quantity})}}
-                onSubmitEditing={doneEdit}></TextInput>
+                onSubmitEditing={doneEdit}/>
               <TextInput 
                 style={s.inputStyle}
-                placeholderTextColor={o.itemtextfade}
+                placeholderTextColor={o.innertextcolorfade}
                 placeholder="Reps"
                 defaultValue={exercise.Reps.toString()}
                 keyboardType="numeric" 
@@ -532,14 +525,14 @@ const ExerciseView = (props: ExerciseViewProps) => {
                 onSubmitEditing={doneEdit}></TextInput>
               <TextInput 
                 style={s.inputStyle}
-                placeholderTextColor={o.itemtextfade}
+                placeholderTextColor={o.innertextcolorfade}
                 placeholder="Max"
                 defaultValue={exercise.MaxWeight}
                 onChangeText={(value: string)=>{setNewExercise({...newExercise, MaxWeight: value})}}
                 onSubmitEditing={doneEdit}></TextInput>
               <TextInput 
                 style={s.inputStyle}
-                placeholderTextColor={o.itemtextfade}
+                placeholderTextColor={o.innertextcolorfade}
                 placeholder="Description"
                 defaultValue={exercise.Description}
                 onChangeText={(value: string)=>{setNewExercise({...newExercise, Description: value})}}
@@ -586,16 +579,16 @@ const ExerciseView = (props: ExerciseViewProps) => {
               </View>
             </View>  
             <View style={s.inputsRight}>
-              <PressImage source={require('../../../../public/images/done.png')} onPress={doneEdit} color={o.doneicontint}></PressImage>
+              <PressImage color={o.doneicontint} source={Images.Done} onPress={doneEdit}/>
               <View style={gs.baseImageContainer}></View>
-              <PressImage source={require('../../../../public/images/cancel.png')} onPress={onCancelExercise} color={o.cancelicontint}></PressImage>
+              <PressImage color={o.cancelicontint} source={Images.Cancel} onPress={onCancelExercise}/>
             </View>
           </View>
           :
           getTitleDisplay()
         }
-        {!isEditingExercise && !exercise.IsDone && <PressImage source={require('../../../../public/images/exercise.png')} onPress={() => {if(!isDisabled)onChangeIsDone();}}></PressImage>}
-        {!isEditingExercise && exercise.IsDone && <PressImage source={require('../../../../public/images/exercise-filled.png')} onPress={() => {if(!isDisabled)onChangeIsDone();}} selected={exercise.IsDone} colorSelected={t.icontintfade}></PressImage>}
+        {!isEditingExercise && !exercise.IsDone && <PressImage cT={o} source={Images.Exercise} onPress={() => {if(!isDisabled)onChangeIsDone();}}/>}
+        {!isEditingExercise && exercise.IsDone && <PressImage cT={o} source={Images.ExerciseFilled} onPress={() => {if(!isDisabled)onChangeIsDone();}} fade={exercise.IsDone}/>}
       </View>
     </View>
   );

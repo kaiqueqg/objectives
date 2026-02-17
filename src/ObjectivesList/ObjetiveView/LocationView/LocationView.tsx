@@ -11,6 +11,7 @@ import { getDistance } from "geolib";
 import { useLogContext } from "../../../Contexts/LogContext";
 import PressText from "../../../PressText/PressText";
 import Loading from "../../../Loading/Loading";
+import { Images } from "../../../Images";
 
 export const New = () => {
   return(
@@ -205,7 +206,7 @@ const LocationView = (props: LocationViewProps) => {
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      backgroundColor: (location.Url.trim() !== '' && !isEditingLocation)?colorPalette.transparent:o.itembk,
+      backgroundColor: (location.Url.trim() !== '' && !isEditingLocation)?colorPalette.transparent:o.innerbackgroundcolor,
       
       borderColor: (location.Url.trim() !== '' && !isEditingLocation)?colorPalette.transparent:o.bordercolor,
       borderWidth: 1,
@@ -234,10 +235,10 @@ const LocationView = (props: LocationViewProps) => {
       color: 'beige',
     },
     title:{
-      color: o.itemtext,
+      color: o.innertextcolor,
     },
     titleFade:{
-      color: o.itemtextfade,
+      color: o.innertextcolorfade,
     },
     displayContainer:{
       flex: 1,
@@ -258,12 +259,12 @@ const LocationView = (props: LocationViewProps) => {
     displayDistance:{
       verticalAlign: 'middle',
       height: '100%',
-      color: o.itemtext,
+      color: o.innertextcolor,
       paddingHorizontal: 5,
     },
     image:{
       ...gs.baseImage,
-      tintColor: o.icontintcolor,
+      tintColor: o.icontint,
     },
     imageDone:{
       tintColor: o.doneicontint,
@@ -276,7 +277,7 @@ const LocationView = (props: LocationViewProps) => {
     },
     imageFade:{
       ...gs.baseImage,
-      tintColor: o.itemtextfade,
+      tintColor: o.innertextcolorfade,
     },
     groceryDoneImage:{
       tintColor: o.doneicontint,
@@ -309,10 +310,10 @@ const LocationView = (props: LocationViewProps) => {
       minHeight: 40,
       margin: 2,
       paddingLeft: 10,
-      color: o.itemtext,
+      color: o.innertextcolor,
 
       borderRadius: 5,
-      borderColor: o.icontintcolor,
+      borderColor: o.icontint,
       borderBottomWidth: 1,
       borderStyle: 'solid',
     },
@@ -324,12 +325,12 @@ const LocationView = (props: LocationViewProps) => {
         {!isDisabled && isEditingLocation?
           <View style={s.inputsContainer}>
             <View style={s.inputsLeft}>
-              <PressImage confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete} color={o.trashicontint}></PressImage>
+              <PressImage confirm={true} source={Images.Trash} onPress={onDelete} color={o.trashicontint}/>
             </View>
             <View style={s.inputsCenter}>
               <TextInput 
                 style={s.inputStyle}
-                placeholderTextColor={o.itemtextfade}
+                placeholderTextColor={o.innertextcolorfade}
                 placeholder="Title"
                 defaultValue={location.Title}
                 onChangeText={(value: string)=>{setTempLocation({...tempLocation, Title: value})}} autoFocus
@@ -338,7 +339,7 @@ const LocationView = (props: LocationViewProps) => {
                 <TextInput
                   ref={inputRef}
                   style={s.inputStyle}
-                  placeholderTextColor={o.itemtextfade}
+                  placeholderTextColor={o.innertextcolorfade}
                   placeholder="Url"
                   defaultValue={location.Url}
                   onChangeText={(value: string)=>{setTempLocation({...tempLocation, Url: value})}}
@@ -346,13 +347,13 @@ const LocationView = (props: LocationViewProps) => {
                 {isGettingCurrentLocation?
                   <Loading></Loading>
                   :
-                  <PressImage source={require('../../../../public/images/location-filled.png')} onPress={addCurrentLocation}></PressImage>
+                  <PressImage cT={o} source={Images.LocationFilled} onPress={addCurrentLocation}/>
                 }
               </View>
             </View>
             <View style={s.inputsRight}>
-              <PressImage source={require('../../../../public/images/done.png')} onPress={onDoneLocation} color={o.doneicontint}></PressImage>
-              <PressImage source={require('../../../../public/images/cancel.png')} onPress={onCancelLocation} color={o.cancelicontint}></PressImage>
+              <PressImage source={Images.Done} onPress={onDoneLocation} color={o.doneicontint}/>
+              <PressImage source={Images.Cancel} onPress={onCancelLocation} color={o.cancelicontint}/>
             </View>
           </View>
           :
@@ -369,9 +370,9 @@ const LocationView = (props: LocationViewProps) => {
             <View style={s.displayRight}>
               <Text style={s.displayDistance}>{currentDistance}</Text>
               {location.Url.trim() === ''?
-                <PressImage pressStyle={gs.baseImageContainer} style={s.image} source={require('../../../../public/images/location.png')}></PressImage>
+                <PressImage cT={o} source={Images.Location}/>
                 :
-                <PressImage pressStyle={gs.baseImageContainer} style={s.image} source={require('../../../../public/images/location-filled.png')} onPress={() => {if(!isDisabled)openUrl();}}></PressImage>
+                <PressImage cT={o} source={Images.LocationFilled} onPress={() => {if(!isDisabled)openUrl();}}/>
               }
             </View>
           </View>

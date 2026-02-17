@@ -7,6 +7,7 @@ import { FontPalette } from "../../fonts/Font";
 import React from "react";
 import { useLogContext } from "../Contexts/LogContext";
 import { Pattern } from "../Types";
+import { Images } from "../Images";
 
 export interface PressInputProps {
   onLongPress?: () => void,
@@ -103,7 +104,7 @@ const PressInput = (props: PressInputProps) => {
     containerWithoutText:{
       borderBottomWidth: 1,
       borderStyle: 'solid',
-      borderColor: o.itemtextfade,
+      borderColor: o.innertextcolorfade,
     },
     inputContainer:{
       flexDirection: 'row',
@@ -136,12 +137,12 @@ const PressInput = (props: PressInputProps) => {
       marginHorizontal: 5,
       padding: 5,
       
-      borderColor: o.itemtextfade,
+      borderColor: o.innertextcolorfade,
       borderBottomWidth: 1,
       borderStyle: 'solid',
     },
     text:{
-      color: o.objtitle,
+      color: o.textColor,
       marginLeft: 5,
     },
     defaultText:{
@@ -155,14 +156,9 @@ const PressInput = (props: PressInputProps) => {
       style={[s.container, (props.text.trim()===''&&!isEditing?s.containerWithoutText:undefined), props.containerStyle??undefined]}>
       {isEditing?
         <View style={[s.inputContainer, props.inputContainerStyle]}>
-          {isDeleting && props.onDelete && 
-            <PressImage
-              onPress={props.onDelete}
-              source={require('../../public/images/done.png')} color={o.doneicontint}>
-            </PressImage>
-          }
-          {!isDeleting && props.onDelete && <PressImage onPress={onDelete} source={require('../../public/images/trash.png')} color={o.trashicontint}></PressImage>}
-          {!props.onDelete && <PressImage onPress={onCancel} source={require('../../public/images/cancel.png')} color={o.cancelicontint}></PressImage>}
+          {isDeleting && props.onDelete && <PressImage cT={o} onPress={props.onDelete} source={Images.Done} color={o.doneicontint}/>}
+          {!isDeleting && props.onDelete && <PressImage cT={o} onPress={onDelete} source={Images.Trash} color={o.trashicontint}/>}
+          {!props.onDelete && <PressImage cT={o} onPress={onCancel} source={Images.Cancel} color={o.cancelicontint}/>}
           <TextInput 
             style={[s.input, props.inputStyle, {height: inputHeight}]} 
             multiline={props.multiline?? false} 
@@ -171,11 +167,11 @@ const PressInput = (props: PressInputProps) => {
             onSubmitEditing={onDone}
             onChangeText={handleChangeText}
             onContentSizeChange={onChange}
-            selectionColor={o.itemtextcontrast}
+            selectionColor={o.innertextcolor}
             >
           </TextInput>
-          {props.onDelete && <PressImage onPress={onCancel} source={require('../../public/images/cancel.png')} color={o.cancelicontint}></PressImage>}
-          <PressImage onPress={onDone} source={require('../../public/images/done.png')} color={o.doneicontint}></PressImage>
+          {props.onDelete && <PressImage cT={o} onPress={onCancel} source={Images.Cancel} color={o.cancelicontint}/>}
+          <PressImage cT={o} onPress={onDone} source={Images.Done} color={o.doneicontint}/>
         </View>
         :
         <>

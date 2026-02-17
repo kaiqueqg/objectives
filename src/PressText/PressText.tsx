@@ -2,14 +2,14 @@ import React from "react";
 import { Pressable, Text, Image, ImageSourcePropType, StyleSheet, View } from "react-native";
 import { useUserContext } from "../Contexts/UserContext";
 import Loading from "../Loading/Loading";
-import { ObjectivePallete, globalStyle as gs } from "../Colors";
+import { GeneralPalette, ObjectivePallete, globalStyle as gs } from "../Colors";
 
 interface PressTextProps{
   style: any,
   textStyle: any,
   text: string,
   defaultText?: string,
-  defaultStyle?: {itemtextfade?: any},
+  defaultStyle?: GeneralPalette,
   hideDefaultTextBorder?: boolean,
   onPress: () => void,
   imageSource?: ImageSourcePropType,
@@ -50,7 +50,7 @@ const PressText = (props: PressTextProps) => {
       ...props.defaultStyle,
       borderBottomWidth: 1,
       borderStyle: 'solid',
-      borderColor: o?.itemtextfade?? t.textcolorfade,
+      borderColor: o?.innertextcolorfade?? t.textcolorfade,
       borderRadius: 5,
     },
     baseImage:{

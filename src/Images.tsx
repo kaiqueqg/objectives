@@ -57,6 +57,7 @@ export type ImageName =
   | 'List'
   | 'LocationFilled'
   | 'Location'
+  | 'Lock'
   | 'Log'
   | 'Low'
   | 'Med'
@@ -168,6 +169,7 @@ export const Images: Record<ImageName, any> = {
   List: require('../public/images/list.png'),
   LocationFilled: require('../public/images/location-filled.png'),
   Location: require('../public/images/location.png'),
+  Lock: require('../public/images/lock.png'),
   Log: require('../public/images/log.png'),
   Low: require('../public/images/low.png'),
   Med: require('../public/images/med.png'),

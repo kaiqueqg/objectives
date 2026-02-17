@@ -11,6 +11,7 @@ import { colorPalette, dark, globalStyle as gs } from "../Colors";
 import { Item, MessageType, Objective, ObjectiveList, Pattern, TwoFactorAuthRequest } from "../Types";
 import PressImage from "../PressImage/PressImage";
 import ButtonView from "../BView/ButtonView";
+import { Images } from "../Images";
 
 export interface LoginViewProps {
   viewType: 'Full'|'Image'
@@ -329,7 +330,7 @@ const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
     return(
       <>
         {isSyncing &&  !isLambdaCold && <Loading></Loading>}
-        {!isSyncing && !isLambdaCold && <PressImage onPress={syncObjectivesList} source={require('../../public/images/sync.png')} hide={user.Email === ''?true:false}/>}
+        {!isSyncing && !isLambdaCold && <PressImage onPress={syncObjectivesList} source={Images.Sync} hide={user.Email === ''?true:false}/>}
       </>
     )
   }
@@ -434,7 +435,7 @@ const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
             onPress={() => {syncObjectivesList()}}
             isLoading={isSyncing}
             imageStyle={s.smallImage}
-            imageSource={require('../../public/images/sync.png')}
+            imageSource={Images.Sync}
             text={"Sync data."}>  
           </PressText>
           <PressText 
@@ -443,7 +444,7 @@ const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
             onPress={() => {backupData()}}
             isLoading={isBackingUpData}
             imageStyle={s.smallImage}
-            imageSource={require('../../public/images/backup.png')}
+            imageSource={Images.Backup}
             text={"Save full data on AWS S3."}>  
           </PressText>
           {getLogoutView()}
@@ -469,8 +470,8 @@ const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
             </View>
             <View style={s.passwordContainer}>
               <TextInput ref={passRef} autoCapitalize="none" placeholder="Password" placeholderTextColor={t.textcolorfade} style={s.passwordInput} secureTextEntry={!isShowingPassword} onChangeText={onChangePassword} onSubmitEditing={login}></TextInput>
-              {!isShowingPassword && <PressImage onPress={()=>{setIsShowingPassword(!isShowingPassword)}} source={require('../../public/images/show.png')}></PressImage>}
-              {isShowingPassword && <PressImage onPress={()=>{setIsShowingPassword(!isShowingPassword)}} source={require('../../public/images/hide.png')}></PressImage>}
+              {!isShowingPassword && <PressImage onPress={()=>{setIsShowingPassword(!isShowingPassword)}} source={Images.Show}/>}
+              {isShowingPassword && <PressImage onPress={()=>{setIsShowingPassword(!isShowingPassword)}} source={Images.Hide}/>}
             </View>
             <View style={s.logoutView}>
               <PressText text={isShowingRefreshTokenView?'Refresh':'Login'} textStyle={s.loginButtonText} style={isShowingRefreshTokenView?s.refreshTokenButton:s.loginButton} onPress={login}></PressText>

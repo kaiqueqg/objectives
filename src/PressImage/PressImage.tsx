@@ -3,10 +3,14 @@ import { Image, ImageStyle, ImageSourcePropType, View, Vibration, StyleSheet, Te
 import { useUserContext } from "../Contexts/UserContext";
 import { Pattern } from "../Types";
 import { useLogContext } from "../Contexts/LogContext";
-import { colorPalette, globalStyle as gs, ObjectivePallete } from "../Colors";
+import { colorPalette, GeneralPalette, globalStyle as gs, ObjectivePallete } from "../Colors";
+import { Images } from "../Images";
 
 export interface PressImageProps{
   source: ImageSourcePropType,
+  cT?: GeneralPalette,
+  raw?: boolean,
+  color?: string,
 
   onPress?: () => void,
   onPressIn?: () => void,
@@ -17,16 +21,10 @@ export interface PressImageProps{
   hide?: boolean,
   disable?: boolean,
   confirm?: boolean,
-  fade?: boolean,
-  text?: string,
-
   selected?: boolean,
-
-  color?: string;
-  colorDisabled?: string,
-  colorSelected?: string,
-
-  raw?: boolean,
+  fade?: boolean,
+  
+  text?: string,
 
   size?: number,
 }
@@ -40,20 +38,27 @@ const PressImage = (props: PressImageProps) => {
   const [text, setText] = useState<number>(2000);
 
   const finalTintColor = (() => {
-    if(props.disable) {
-      return props.colorDisabled;
-    }
-    if(props.fade) {
-      return t.icontintfade;
-    }
-    if(props.selected){ 
-      return props.colorSelected?? t.icontintselected; 
-    }
-    if(props.color){
-      return props.color;
-    }
+    if(props.raw) return undefined;
 
-    return props.raw?undefined:t.icontint;
+    if(props.cT){
+      if(props.disable) return props.cT.icontintfade;
+
+      if(props.fade) return props.cT.icontintfade;
+
+      if(props.selected) return props.cT.icontintselected;
+      
+      if(props.color) return props.color;
+      return props.cT.icontint;
+    }
+    
+    if(props.disable) return t.icontintfade;
+    
+    if(props.fade) return t.icontintfade;
+    
+    if(props.selected) return t.icontintselected;
+    
+    if(props.color) return props.color;
+    return t.icontint;
   })();
 
   const finalSize = (() => {
@@ -124,10 +129,9 @@ const PressImage = (props: PressImageProps) => {
   }
 
   const getConfirmingImage = () => {
-    
     return(
       <Pressable style={s.container} onPressOut={onPressAfterConfirmed} onPressIn={props.onPressIn} onLongPress={handleLongPress} delayLongPress={props.delayLongPress??800}>
-        <Image style={[s.image as ImageStyle]} source={require('../../public/images/done.png')}></Image>
+        <Image style={[s.image as ImageStyle, {tintColor: props.cT?props.cT.doneicontint:t.doneicontint}]} source={Images.Done}></Image>
       </Pressable>
     )
   }
@@ -148,7 +152,7 @@ const PressImage = (props: PressImageProps) => {
     text: {
       position: 'absolute',
       zIndex: 1,
-      color: colorPalette.red,
+      color: props.cT?.textColor?props.cT.textColor:colorPalette.red,
       fontSize: 16,
       fontWeight: 'bold',
     },

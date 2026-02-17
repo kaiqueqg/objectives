@@ -9,6 +9,7 @@ import DragList, { DragListRenderItemInfo } from "react-native-draglist";
 import React, { DO_NOT_USE_OR_YOU_WILL_BE_FIRED_CALLBACK_REF_RETURN_VALUES, JSX, useEffect, useState } from "react";
 import { useLogContext } from "../Contexts/LogContext";
 import { useStorageContext } from "../Contexts/StorageContext";
+import { Images } from "../Images";
 
 export interface ArchivedViewProps {
 }
@@ -26,6 +27,7 @@ const ArchivedView = (props: ArchivedViewProps) => {
     selectedTags, writeSelectedTags, putSelectedTags, removeSelectedTags,
     userPrefs,
   } = useUserContext();
+  const { popMessage } = useLogContext();
 
   const [archivedObjectives, setArchivedObjectives] = useState<Objective[]>([]);
   const [archivedTags, setArchivedTags] = useState<string[]>([]);
@@ -37,6 +39,7 @@ const ArchivedView = (props: ArchivedViewProps) => {
       }
       else{
         if(userPrefs.vibrate) Vibration.vibrate(Pattern.Wrong);
+        popMessage('No objective selected.')
       }
       return true;
     });
@@ -95,14 +98,12 @@ const ArchivedView = (props: ArchivedViewProps) => {
       <View style={[s.objectiveContainer]} onTouchEnd={() => {}}>
         <PressImage
           onPress={()=>unarchiveObjective(item)}
-          style={s.image}
-          pressStyle={gs.baseImageContainer}
-          source={require('../../public/images/unarchive.png')}
+          source={Images.Unarchive}
           confirm={true}
-        ></PressImage>
+        />
         <PressText 
-          style={[s.objectiveButtonContainer, {backgroundColor: getObjTheme(userPrefs.theme ,item.Theme).objbk}]}
-          textStyle={[s.text, {color: getObjTheme(userPrefs.theme ,item.Theme).objtitle}]}
+          style={[s.objectiveButtonContainer, {backgroundColor: getObjTheme(userPrefs.theme ,item.Theme).backgroundcolor}]}
+          textStyle={[s.text, {color: getObjTheme(userPrefs.theme ,item.Theme).textColor}]}
           onPress={() => onSelectCurrentObj(item.ObjectiveId)}
           text={item.Title}>
         </PressText>

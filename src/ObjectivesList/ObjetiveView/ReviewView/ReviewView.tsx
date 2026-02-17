@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import PressText from "../../../PressText/PressText";
 import React from "react";
 import { useLogContext } from "../../../Contexts/LogContext";
+import { Images } from "../../../Images";
 
 export const New = () => {
   return(
@@ -152,7 +153,7 @@ export const ReviewView = (props: ReviewViewProps) => {
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      backgroundColor: (!review.IsCurrentChoise && !isEditingReview)? colorPalette.transparent:o.itembk,
+      backgroundColor: (!review.IsCurrentChoise && !isEditingReview)? colorPalette.transparent:o.innerbackgroundcolor,
       
       borderColor: (!review.IsCurrentChoise && !isEditingReview)?colorPalette.transparent:o.bordercolor,
       borderWidth: 1,
@@ -170,26 +171,26 @@ export const ReviewView = (props: ReviewViewProps) => {
       minHeight: 40,
       margin: 2,
       paddingLeft: 10,
-      color: review.IsCurrentChoise?o.itemtext:o.itemtextfade,
+      color: review.IsCurrentChoise?o.innertextcolor:o.innertextcolorfade,
     },
     title:{
-      color: o.itemtext,
+      color: o.innertextcolor,
     },
     titleFade:{
-      color: o.itemtextfade,
+      color: o.innertextcolorfade,
     },
     reviewRatingText:{
       verticalAlign: 'middle',
       textAlign: "center",
 
       fontSize: 10,
-      color: review.IsCurrentChoise?o.itemtext:o.itemtextfade,
+      color: review.IsCurrentChoise?o.innertextcolor:o.innertextcolorfade,
       flexDirection: 'row',
       paddingHorizontal: 5,
       marginVertical: 10,
       marginHorizontal: 5,
 
-      backgroundColor: o.itembkdark,
+      backgroundColor: o.backgroundcolordark,
 
       borderColor: o.bordercolor,
       borderWidth: 1,
@@ -203,7 +204,7 @@ export const ReviewView = (props: ReviewViewProps) => {
     reviewDescriptionText:{
       flex: 1,
       width: '100%',
-      color: o.itemtext,
+      color: o.innertextcolor,
       paddingBottom: 5,
       paddingHorizontal: 10,
     },
@@ -238,10 +239,10 @@ export const ReviewView = (props: ReviewViewProps) => {
       minHeight: 40,
       margin: 2,
       paddingLeft: 10,
-      color: o.itemtext,
+      color: o.innertextcolor,
 
       borderRadius: 5,
-      borderColor: o.icontintcolor,
+      borderColor: o.icontint,
       borderBottomWidth: 1,
       borderStyle: 'solid',
     },
@@ -253,40 +254,40 @@ export const ReviewView = (props: ReviewViewProps) => {
         {!isDisabled && isEditingReview?
           <View style={s.inputsContainer}>
             <View style={s.inputsLeft}>
-              <PressImage confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete} color={o.trashicontint}></PressImage>
+              <PressImage confirm={true} source={Images.Trash} onPress={onDelete} color={o.trashicontint}/>
             </View>
             <View style={s.inputsCenter}>
               <TextInput 
                 style={s.inputStyle}
-                placeholderTextColor={o.itemtextfade}
+                placeholderTextColor={o.innertextcolorfade}
                 placeholder="Title"
                 defaultValue={review.Title}
                 onChangeText={(value: string)=>{setTempReview({...tempReview, Title: value})}} autoFocus
                 onSubmitEditing={onDoneReview}></TextInput>
               <TextInput 
                 style={s.inputStyle}
-                placeholderTextColor={o.itemtextfade}
+                placeholderTextColor={o.innertextcolorfade}
                 placeholder="Rating"
                 defaultValue={review.Rating}
                 onChangeText={(value: string)=>{setTempReview({...tempReview, Rating: value})}}
                 onSubmitEditing={onDoneReview}></TextInput>
               <TextInput 
                 style={s.inputStyle}
-                placeholderTextColor={o.itemtextfade}
+                placeholderTextColor={o.innertextcolorfade}
                 placeholder="Description"
                 defaultValue={review.Description}
                 onChangeText={(value: string)=>{setTempReview({...tempReview, Description: value})}}
                 onSubmitEditing={onDoneReview}></TextInput>
             </View>
             <View style={s.inputsRight}>
-              <PressImage source={require('../../../../public/images/done.png')} onPress={onDoneReview} color={o.doneicontint}></PressImage>
-              <PressImage source={require('../../../../public/images/cancel.png')} onPress={onCancelReview} color={o.cancelicontint}></PressImage>
+              <PressImage source={Images.Done} onPress={onDoneReview} color={o.doneicontint}/>
+              <PressImage source={Images.Cancel} onPress={onCancelReview} color={o.cancelicontint}/>
             </View>
           </View>
           :
           getDisplayView()
         }
-        {!isEditingReview  && <PressImage source={require('../../../../public/images/review.png')} onPress={() => {if(!isDisabled)onChangeIsChecked();}} selected={!review.IsCurrentChoise} colorSelected={t.icontintfade}/>}
+        {!isEditingReview  && <PressImage cT={o} source={Images.Review} onPress={() => {if(!isDisabled)onChangeIsChecked();}} fade={!review.IsCurrentChoise}/>}
       </View>
     </View>
   );

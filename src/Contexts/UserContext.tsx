@@ -18,9 +18,11 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const { log } = useLogContext();
 
   useEffect(() => {
+
     storage.readUser().then((user: any) => {
       setUser(user);
     });
+
     storage.readUserPrefs().then((userPrefs: any) => {
       if(userPrefs) setUserPrefs(userPrefs);
       if(userPrefs.theme === 'dark'){
@@ -35,10 +37,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     loadObjectives();
     loadLastSync();
   }, []);
-
-  const checkUserInteg = () => {
-    
-  }
 
   const loadObjectives = async () => {
     const storageList = await storage.readObjectives();

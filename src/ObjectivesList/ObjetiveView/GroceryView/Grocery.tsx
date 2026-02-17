@@ -6,6 +6,7 @@ import { useUserContext } from "../../../Contexts/UserContext";
 import PressImage from "../../../PressImage/PressImage";
 import { useEffect, useState } from "react";
 import PressText from "../../../PressText/PressText";
+import { Images } from "../../../Images";
 
 export const New = () => {
   return(
@@ -127,7 +128,7 @@ const GroceryView = (props: GroceryViewProps) => {
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      backgroundColor: (grocery.IsChecked && !isEditingGrocery)? o.objbk:o.itembk,
+      backgroundColor: (grocery.IsChecked && !isEditingGrocery)? o.backgroundcolor:o.innerbackgroundcolor,
       
       borderColor: (grocery.IsChecked && !isEditingGrocery)?colorPalette.transparent:o.bordercolor,
       borderWidth: 1,
@@ -156,14 +157,14 @@ const GroceryView = (props: GroceryViewProps) => {
       color: 'beige',
     },
     title:{
-      color: o.itemtext,
+      color: o.innertextcolor,
     },
     titleFade:{
-      color: o.itemtextfade,
+      color: o.innertextcolorfade,
     },
     image:{
       ...gs.baseImage,
-      tintColor: o.icontintcolor,
+      tintColor: o.icontint,
     },
     imageDone:{
       tintColor: o.doneicontint,
@@ -176,7 +177,7 @@ const GroceryView = (props: GroceryViewProps) => {
     },
     imageFade:{
       ...gs.baseImage,
-      tintColor: o.icontintcolorfade,
+      tintColor: o.icontintfade,
     },
     groceryDoneImage:{
       tintColor: o.doneicontint,
@@ -209,10 +210,10 @@ const GroceryView = (props: GroceryViewProps) => {
       minHeight: 40,
       margin: 2,
       paddingLeft: 10,
-      color: o.itemtext,
+      color: o.innertextcolor,
 
       borderRadius: 5,
-      borderColor: o.icontintcolor,
+      borderColor: o.icontint,
       borderBottomWidth: 1,
       borderStyle: 'solid',
     },
@@ -224,12 +225,12 @@ const GroceryView = (props: GroceryViewProps) => {
         {!isDisabled && isEditingGrocery?
           <View style={s.inputsContainer}>
             <View style={s.inputsLeft}>
-              <PressImage confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete} color={o.trashicontint}></PressImage>
+              <PressImage confirm={true} source={Images.Trash} onPress={onDelete} color={o.trashicontint}/>
             </View>
             <View style={s.inputsCenter}>
               <TextInput 
                 style={s.inputStyle}
-                placeholderTextColor={o.itemtextfade}
+                placeholderTextColor={o.innertextcolorfade}
                 placeholder="Title"
                 defaultValue={grocery.Title}
                 onChangeText={(value: string)=>{setTempGrocery({...tempGrocery, Title: value})}} 
@@ -238,7 +239,7 @@ const GroceryView = (props: GroceryViewProps) => {
               <TextInput 
                 style={s.inputStyle}
                 placeholder="Quantity"
-                placeholderTextColor={o.itemtextfade}
+                placeholderTextColor={o.innertextcolorfade}
                 defaultValue={grocery.Quantity?.toString()}
                 keyboardType="numeric" 
                 onChangeText={(value: string)=>{
@@ -248,22 +249,22 @@ const GroceryView = (props: GroceryViewProps) => {
                   onSubmitEditing={onDoneGrocery}></TextInput>
               <TextInput 
                 style={s.inputStyle}
-                placeholderTextColor={o.itemtextfade}
+                placeholderTextColor={o.innertextcolorfade}
                 placeholder="Good price"
                 defaultValue={grocery.GoodPrice}
                 onChangeText={(value: string)=>{setTempGrocery({...tempGrocery, GoodPrice: value})}}
                 onSubmitEditing={onDoneGrocery}></TextInput>
               <TextInput
                 style={s.inputStyle}
-                placeholderTextColor={o.itemtextfade}
+                placeholderTextColor={o.innertextcolorfade}
                 placeholder="Unit"
                 defaultValue={grocery.Unit}
                 onChangeText={(value: string)=>{setTempGrocery({...tempGrocery, Unit: value})}}
                 onSubmitEditing={onDoneGrocery}></TextInput>
             </View>
             <View style={s.inputsRight}>
-              <PressImage source={require('../../../../public/images/done.png')} onPress={onDoneGrocery} color={o.doneicontint}></PressImage>
-              <PressImage source={require('../../../../public/images/cancel.png')} onPress={onCancelGrocery} color={o.cancelicontint}></PressImage>
+              <PressImage source={Images.Done} onPress={onDoneGrocery} color={o.doneicontint}/>
+              <PressImage source={Images.Cancel} onPress={onCancelGrocery} color={o.cancelicontint}/>
             </View>
           </View>
           :
@@ -275,8 +276,8 @@ const GroceryView = (props: GroceryViewProps) => {
             defaultStyle={o}
             ></PressText>
         }
-        {!isEditingGrocery && !grocery.IsChecked && <PressImage source={require('../../../../public/images/grocery.png')} onPress={() => {if(!isDisabled)onChangeIsChecked();}}></PressImage>}
-        {!isEditingGrocery && grocery.IsChecked && <PressImage source={require('../../../../public/images/grocery-filled.png')} onPress={() => {if(!isDisabled)onChangeIsChecked();}} selected={grocery.IsChecked}  colorSelected={t.icontintfade}/>}
+        {!isEditingGrocery && !grocery.IsChecked && <PressImage cT={o} source={Images.Grocery} onPress={() => {if(!isDisabled)onChangeIsChecked();}}/>}
+        {!isEditingGrocery && grocery.IsChecked && <PressImage cT={o} source={Images.GroceryFilled} onPress={() => {if(!isDisabled)onChangeIsChecked();}} fade={grocery.IsChecked}/>}
       </View>
     </View>
   );

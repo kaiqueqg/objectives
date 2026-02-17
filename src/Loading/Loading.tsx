@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { StyleSheet, ImageStyle, Animated, Easing, View, Image } from 'react-native';
 import { AppPalette, globalStyle as gs } from '../Colors';
 import { useUserContext } from '../Contexts/UserContext';
+import { Images } from '../Images';
 
 interface LoadingProps {
 }
@@ -61,7 +62,7 @@ const Loading = (props: LoadingProps) => {
           s.image,
           { transform: [{ rotate }] },
         ]}
-        source={require('../../public/images/refresh.png')}
+        source={Images.Refresh}
       />
     </View>
   );

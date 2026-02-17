@@ -134,11 +134,11 @@ const TagsView = (props: TagsViewProps) => {
 
   return (
     <View style={s.container}>
-      <View
+      {/* <View
         style={s.containerBottom}
         pointerEvents="box-none">
         {getTagsListView()}
-      </View>
+      </View> */}
     </View>
   );
 };

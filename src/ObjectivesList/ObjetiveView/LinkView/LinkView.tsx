@@ -7,6 +7,7 @@ import PressImage from "../../../PressImage/PressImage";
 import { useEffect, useRef, useState } from "react";
 import PressText from "../../../PressText/PressText";
 import { useLogContext } from "../../../Contexts/LogContext";
+import { Images } from "../../../Images";
 
 export const New = () => {
   return(
@@ -122,7 +123,7 @@ const LinkView = (props: LinkViewProps) => {
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      backgroundColor: (link.Title.trim() !=='' && !isEditingLinks)?colorPalette.transparent:o.itembk,
+      backgroundColor: (link.Title.trim() !=='' && !isEditingLinks)?colorPalette.transparent:o.innerbackgroundcolor,
       
       borderColor: (link.Title.trim() !=='' && !isEditingLinks)?colorPalette.transparent:o.bordercolor,
       borderWidth: 1,
@@ -151,14 +152,14 @@ const LinkView = (props: LinkViewProps) => {
       color: 'beige',
     },
     title:{
-      color: o.itemtext,
+      color: o.innertextcolor,
     },
     titleFade:{
-      color: o.itemtextfade,
+      color: o.innertextcolorfade,
     },
     image:{
       ...gs.baseImage,
-      tintColor: o.icontintcolor,
+      tintColor: o.icontint,
     },
     imageDone:{
       tintColor: o.doneicontint,
@@ -171,7 +172,7 @@ const LinkView = (props: LinkViewProps) => {
     },
     imageFade:{
       ...gs.baseImage,
-      tintColor: o.icontintcolorfade,
+      tintColor: o.icontintfade,
     },
     linksDoneImage:{
       tintColor: o.doneicontint,
@@ -203,10 +204,10 @@ const LinkView = (props: LinkViewProps) => {
       minHeight: 40,
       margin: 2,
       paddingLeft: 10,
-      color: o.itemtext,
+      color: o.innertextcolor,
 
       borderRadius: 5,
-      borderColor: o.icontintcolor,
+      borderColor: o.icontint,
       borderBottomWidth: 1,
       borderStyle: 'solid',
     },
@@ -236,13 +237,13 @@ const LinkView = (props: LinkViewProps) => {
       flex: 1,
       justifyContent: 'center',
       alignItems: 'center',
-      color: o.itemtext,
+      color: o.innertextcolor,
       marginLeft: 10,
     },
     linkRowImage:{
       height: 15,
       width: 15,
-      tintColor: o.icontintcolor,
+      tintColor: o.icontint,
     },
   });
 
@@ -252,12 +253,12 @@ const LinkView = (props: LinkViewProps) => {
         {!isDisabled && isEditingLinks?
           <View style={s.inputsContainer}>
             <View style={s.inputsLeft}>
-              <PressImage pressStyle={gs.baseImageContainer} style={[s.image, s.imageDelete]} confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete} color={o.trashicontint}></PressImage>
+              <PressImage confirm={true} source={Images.Trash} onPress={onDelete} color={o.trashicontint}/>
             </View>
             <View style={s.inputsCenter}>
               <TextInput 
                 style={s.inputStyle}
-                placeholderTextColor={o.itemtextfade}
+                placeholderTextColor={o.innertextcolorfade}
                 placeholder="Title"
                 defaultValue={link.Title}
                 onSubmitEditing={onDoneLink}
@@ -265,21 +266,21 @@ const LinkView = (props: LinkViewProps) => {
                 ></TextInput>
               <TextInput 
                 style={s.inputStyle}
-                placeholderTextColor={o.itemtextfade}
+                placeholderTextColor={o.innertextcolorfade}
                 placeholder="Link url"
                 defaultValue={link.Link}
                 onSubmitEditing={onDoneLink}
                 onChangeText={(value: string)=>{setNewLink(value)}}></TextInput>
             </View>
             <View style={s.inputsRight}>
-              <PressImage source={require('../../../../public/images/done.png')} onPress={onDoneLink} color={o.doneicontint}></PressImage>
-              <PressImage source={require('../../../../public/images/cancel.png')} onPress={onCancelLink} color={o.cancelicontint}></PressImage>
+              <PressImage source={Images.Done} onPress={onDoneLink} color={o.doneicontint}/>
+              <PressImage source={Images.Cancel} onPress={onCancelLink} color={o.cancelicontint}/>
             </View>
           </View>
           :
           <PressText style={s.titleContainer} textStyle={s.title} text={link.Title} onPress={()=>{onEditingLink()}} defaultStyle={o}></PressText>
         }
-        {!isEditingLinks && <PressImage source={require('../../../../public/images/link.png')} onPress={() => { if(!isDisabled)openLink();}}></PressImage>}
+        {!isEditingLinks && <PressImage cT={o} source={Images.Link} onPress={() => { if(!isDisabled)openLink();}}/>}
       </View>
     </View>
   );

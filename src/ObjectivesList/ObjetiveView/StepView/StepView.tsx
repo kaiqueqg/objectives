@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { useLogContext } from "../../../Contexts/LogContext";
 import React from "react";
 import PressText from "../../../PressText/PressText";
+import { Images } from "../../../Images";
 
 export const New = () => {
   return(
@@ -103,35 +104,35 @@ const StepView = (props: StepViewProps) => {
 
   const getImportanceImage = () => {
     if(step.Importance === StepImportance.Low){
-      return <PressImage source={require('../../../../public/images/low.png')}></PressImage>;
+      return <PressImage raw source={Images.Low}/>;
     }
     else if(step.Importance === StepImportance.Medium){
-      return <PressImage source={require('../../../../public/images/med.png')}></PressImage>;
+      return <PressImage raw source={Images.Med}/>;
     }
     else if(step.Importance === StepImportance.High){
-      return <PressImage source={require('../../../../public/images/high.png')}></PressImage>;
+      return <PressImage raw source={Images.High}/>;
     }
     else if(step.Importance === StepImportance.Ladybug){
-      return <PressImage source={require('../../../../public/images/ladybug.png')}></PressImage>;
+      return <PressImage raw source={Images.Ladybug}/>;
     }
     else if(step.Importance === StepImportance.LadybugYellow){
-      return <PressImage source={require('../../../../public/images/ladybugyellow.png')}></PressImage>;
+      return <PressImage raw source={Images.LadybugYellow}/>;
     }
     else if(step.Importance === StepImportance.LadybugGreen){
-      return <PressImage source={require('../../../../public/images/ladybuggreen.png')}></PressImage>;
+      return <PressImage raw source={Images.LadybugGreen}/>;
     }
     else if(step.Importance === StepImportance.Question){
-      return <PressImage source={require('../../../../public/images/questionmark.png')}></PressImage>;
+      return <PressImage cT={o} source={Images.QuestionMark}/>;
     }
     else if(step.Importance === StepImportance.Waiting){
-      return <PressImage source={require('../../../../public/images/wait.png')}></PressImage>;
+      return <PressImage cT={o} source={Images.Wait}/>;
     }
     else if(step.Importance === StepImportance.InProgress){
-      return <PressImage source={require('../../../../public/images/inprogress.png')}></PressImage>;
+      return <PressImage cT={o} source={Images.InProgress}/>;
     }
     else{
       if(isEditingStep && !isDisabled){
-        return <PressImage source={require('../../../../public/images/cancel.png')} color={o.cancelicontint}></PressImage>;
+        return <PressImage cT={o} source={Images.Cancel}/>;
       }
       else{
         return <></>;
@@ -161,20 +162,8 @@ const StepView = (props: StepViewProps) => {
           text={step.Title}
           onPress={()=>{if(!isDisabled)onEditingStep()}}
           defaultStyle={o}
-          ellipsizeMode='middle'
-        ></PressText>
-        {!step.Done && 
-          <PressImage 
-            source={require('../../../../public/images/step.png')}
-            onPress={() => {if(!isDisabled)onChangeIsDone();}}
-            confirm={step.AutoDestroy}>
-          </PressImage>}
-        {step.Done && 
-          <PressImage 
-            source={require('../../../../public/images/step-filled.png')}
-            onPress={() => {if(!isDisabled)onChangeIsDone();}}
-            selected={step.Done} colorSelected={t.icontintfade}>
-          </PressImage>}
+          ellipsizeMode='middle'/>
+        <PressImage cT={o} source={step.Done? Images.StepFilled:Images.Step} onPress={() => {if(!isDisabled)onChangeIsDone();}} confirm={step.AutoDestroy && !step.Done} fade={step.Done}/>
       </View>
     )
   }
@@ -184,40 +173,39 @@ const StepView = (props: StepViewProps) => {
       <View style={[s.stepContainer, props.isSelecting && s.containerSelecting, props.isSelected && s.containerSelected, wasJustAdded && s.containerWasJustAdded]}>
         <View style={s.inputContainer}>
           <View style={s.inputsLeft}>
-            <PressImage source={require('../../../../public/images/trash.png')} onPress={onDeleteItem} color={o.trashicontint}></PressImage>
+            <PressImage source={Images.Trash} onPress={onDeleteItem} color={o.trashicontint}/>
           </View>
           <View style={s.inputsCenter}>
             <View style={[s.titleRowContainer]}>
               <TextInput 
                 style={s.inputStyle}
-                placeholderTextColor={o.itemtextfade}
+                placeholderTextColor={o.innertextcolorfade}
                 placeholder="Title"
                 defaultValue={tempStep.Title}
                 onSubmitEditing={()=>{onDoneStep()}}
                 onChangeText={(value: string)=>{setTempStep({...tempStep, Title: value})}} autoFocus={step.Title.trim() === ''}></TextInput>
-              {/* <PressImage pressStyle={[gs.baseImageContainer]} style={[s.image, tempStep.AutoDestroy?s.imageDelete:s.imageFade]} source={require('../../../../public/images/explode.png')} onPress={onChangeAutoDestroy}></PressImage> */}
             </View>
             <View style={[s.importanceIconContainer]}>
-              <PressImage source={require('../../../../public/images/null.png')} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.None);}}></PressImage>
-              <PressImage source={require('../../../../public/images/low.png')} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.Low);}} raw></PressImage>
-              <PressImage source={require('../../../../public/images/med.png')} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.Medium);}} raw></PressImage>
-              <PressImage source={require('../../../../public/images/high.png')} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.High);}} raw></PressImage>
-              <PressImage source={require('../../../../public/images/ladybuggreen.png')} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.LadybugGreen);}} raw></PressImage>
-              <PressImage source={require('../../../../public/images/ladybugyellow.png')} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.LadybugYellow);}} raw></PressImage>
-              <PressImage source={require('../../../../public/images/ladybug.png')} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.Ladybug);}} raw></PressImage>
-              <PressImage source={require('../../../../public/images/questionmark.png')} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.Question);}}></PressImage>
-              <PressImage source={require('../../../../public/images/wait.png')} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.Waiting);}}></PressImage>
-              <PressImage source={require('../../../../public/images/inprogress.png')} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.InProgress);}}></PressImage>
+              
+              <PressImage cT={o} source={Images.Null} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.None);}}/>
+              <PressImage source={Images.Low} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.Low);}} raw/>
+              <PressImage source={Images.Med} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.Medium);}} raw/>
+              <PressImage source={Images.High} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.High);}} raw/>
+              <PressImage source={Images.LadybugGreen} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.LadybugGreen);}} raw/>
+              <PressImage source={Images.LadybugYellow} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.LadybugYellow);}} raw/>
+              <PressImage source={Images.Ladybug} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.Ladybug);}} raw/>
+              <PressImage cT={o} source={Images.QuestionMark} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.Question);}}/>
+              <PressImage cT={o} source={Images.Wait} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.Waiting);}}/>
+              <PressImage cT={o} source={Images.InProgress} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.InProgress);}}/>
             </View>
             <Pressable style={[s.autoDestroyContainer]} onPress={onChangeAutoDestroy}>
               <Text style={s.autoDestroyText}>Autodestroy when you click on</Text>
-              <PressImage source={require('../../../../public/images/step.png')} selected={step.Done}></PressImage>
-              {/* <Text style={s.autoDestroyText}>should self delete? {tempStep.AutoDestroy?'Yes.': 'No.'}</Text> */}
+              <PressImage cT={o} source={Images.Step} selected={step.Done}/>
             </Pressable>
           </View>
           <View style={s.inputsRight}>
-            <PressImage source={require('../../../../public/images/done.png')} onPress={onDoneStep} color={o.doneicontint}></PressImage>
-            <PressImage source={require('../../../../public/images/cancel.png')} onPress={onCancelStep} color={o.cancelicontint}></PressImage>
+            <PressImage cT={o} source={Images.Done} onPress={onDoneStep} color={o.doneicontint}/>
+            <PressImage cT={o} source={Images.Cancel} onPress={onCancelStep} color={o.cancelicontint}/>
           </View> 
         </View>
       </View>
@@ -238,7 +226,7 @@ const StepView = (props: StepViewProps) => {
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      backgroundColor: (step.Done && !isEditingStep)? o.objbk:o.itembk,
+      backgroundColor: (step.Done && !isEditingStep)? o.backgroundcolor:o.innerbackgroundcolor,
       
       borderColor: (step.Done && !isEditingStep)?colorPalette.transparent:o.bordercolor,
       borderWidth: 1,
@@ -278,7 +266,7 @@ const StepView = (props: StepViewProps) => {
       textAlign: 'center',
       paddingHorizontal: 10,
       marginBottom: 5,
-      backgroundColor: tempStep.AutoDestroy?o.itembkdark:'#00000000',
+      backgroundColor: tempStep.AutoDestroy?o.backgroundcolordark:'#00000000',
 
       borderColor: tempStep.AutoDestroy?o.bordercolor:'#00000000',
       borderWidth: 1,
@@ -286,7 +274,7 @@ const StepView = (props: StepViewProps) => {
       borderStyle: 'solid',
     },
     autoDestroyText:{
-      color: 'beige',
+      color: o.innertextcolor,
     },
     containerSelecting:{
       borderStyle: 'solid',
@@ -301,10 +289,10 @@ const StepView = (props: StepViewProps) => {
       borderColor: o.bordercolorwasjustadded,
     },
     title:{
-      color: o.itemtext,
+      color: o.innertextcolor,
     },
     titleFade:{
-      color: o.itemtextfade,
+      color: o.innertextcolorfade,
     },
     inputContainer:{
       flex: 1,
@@ -319,10 +307,10 @@ const StepView = (props: StepViewProps) => {
       minHeight: 40,
       margin: 5,
       paddingLeft: 10,
-      color: o.itemtext,
+      color: o.innertextcolor,
 
       borderRadius: 5,
-      borderColor: o.icontintcolor,
+      borderColor: o.icontint,
       borderBottomWidth: 1,
       borderStyle: 'solid',
     },

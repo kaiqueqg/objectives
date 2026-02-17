@@ -133,7 +133,6 @@ export const LogProvider: React.FC<LogProviderProps> = ({ children }) => {
           if(text.Type===ItemType.Note) return (text as Note).Text;
           if(text.Type===ItemType.Question) return (text as Question).Statement;
           if(text.Type===ItemType.Step) return (text as Step).Title;
-          if(text.Type===ItemType.Wait) return (text as Wait).Title;
         });
         console.log(`\x1b[38;2;255;255;80m[DEV]`, ...formattedTexts);
         // putLog(...formattedTexts);
@@ -255,9 +254,12 @@ export const LogProvider: React.FC<LogProviderProps> = ({ children }) => {
     //   return item.text.trim() !== text;
     // });
 
-    let timeout = 3000;
-    if(timeoutInSeconds && timeoutInSeconds > 30) timeout = 30000;
-    if(timeoutInSeconds && timeoutInSeconds < 1) timeout = 1000;
+    const words = text.split(/\s+/).length;
+    const displayTime = Math.max(5, words * 0.8);
+
+    let timeout = timeoutInSeconds?timeoutInSeconds:displayTime;
+    timeout = Math.min(Math.max(timeout, 1), 30);
+    timeout *= 1000;
 
     const msg: PopMessage = {
       id: randomId(),

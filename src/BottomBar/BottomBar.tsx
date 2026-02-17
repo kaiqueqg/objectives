@@ -1,6 +1,6 @@
 import { View, StyleSheet, Vibration } from "react-native";
 import { AppPalette, colorPalette, dark, globalStyle as gs } from "../Colors";
-import { Pattern, Views } from "../Types";
+import { MessageType, Pattern, Views } from "../Types";
 import PressImage from "../PressImage/PressImage";
 import { useUserContext } from "../Contexts/UserContext";
 import Loading from "../Loading/Loading";
@@ -8,13 +8,14 @@ import { useLogContext } from "../Contexts/LogContext";
 import React, { useEffect, useState } from "react";
 import Constants, { ExecutionEnvironment } from 'expo-constants';
 import LoginView from "../UserView/LoginView";
+import { Images } from "../Images";
 
 export interface BottomBarProps {
 }
 
 const BottomBar = (props: BottomBarProps) => {
   const { user, userPrefs, theme: t, fontTheme: f, currentView, writeCurrentView, availableTags, selectedTags, currentObjectiveId, writeUserPrefs } = useUserContext();
-  const { log } = useLogContext();
+  const { log, popMessage } = useLogContext();
 
   const showLoginStuff: boolean = true;//Constants.executionEnvironment === ExecutionEnvironment.StoreClient || process.env.LOGIN_VIEW === 'true';
 
@@ -24,6 +25,7 @@ const BottomBar = (props: BottomBarProps) => {
     if(currentView === newView){
       if(currentObjectiveId === ''){
         if(userPrefs.vibrate) Vibration.vibrate(Pattern.Wrong);
+        popMessage('No objective selected.', MessageType.Alert);
       }
       else{
         if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
@@ -47,14 +49,13 @@ const BottomBar = (props: BottomBarProps) => {
         <PressImage 
           text={Constants.executionEnvironment === ExecutionEnvironment.StoreClient?"dev":undefined}
           onPress={() => changeToView(Views.UserView)}
-          source={require('../../public/images/user.png')}
+          source={Images.User}
           selected={currentView === Views.UserView}
-          colorSelected={user.Email===''?t.trashicontint:t.icontintselected}
           color={user.Email===''?t.trashicontint:t.icontint}/>
-        <PressImage
+        {/* <PressImage
           onPress={changeTheme}
-          source={require('../../public/images/theme.png')}/>
-        {showLoginStuff && <PressImage onPress={() => changeToView(Views.DevView)} source={require('../../public/images/dev.png')} selected={currentView === Views.DevView}/>}
+          source={Images.Theme}/> */}
+        {/* {showLoginStuff && <PressImage onPress={() => changeToView(Views.DevView)} source={Images.Dev} selected={currentView === Views.DevView}/>} */}
         {showLoginStuff && <LoginView viewType="Image"/>}
       </View>
     )
@@ -65,13 +66,13 @@ const BottomBar = (props: BottomBarProps) => {
       <View style={s.rightContainer}>
         <PressImage 
           onPress={()=>{changeToView(Views.ArchivedView)}}
-          source={require('../../public/images/archive.png')}
+          source={Images.Archive}
           fade={currentView === Views.ListView}
           selected={currentView === Views.ArchivedView}
           size={currentView === Views.ListView?-4:(currentView === Views.ArchivedView?6:0)}/>
         <PressImage 
           onPress={()=>{changeToView(Views.ListView)}}
-          source={require('../../public/images/file.png')}
+          source={Images.File}
           fade={currentView === Views.ArchivedView}
           selected={currentView === Views.ListView}
           size={currentView === Views.ArchivedView?-4:-1}/>

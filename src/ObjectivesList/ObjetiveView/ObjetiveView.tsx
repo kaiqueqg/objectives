@@ -1,5 +1,5 @@
 import React, { JSX, useRef } from "react";
-import { View, StyleSheet, Pressable, Vibration, Alert, FlatList, Text, BackHandler, KeyboardAvoidingView, Platform, TextInput, ScrollView } from "react-native";
+import { View, StyleSheet, Pressable, Vibration, Alert, FlatList, Text, BackHandler, KeyboardAvoidingView, Platform, TextInput, ScrollView, Dimensions } from "react-native";
 import * as ExpoLocation from 'expo-location';
 
 import { colorPalette, getObjTheme, globalStyle as gs, lightBlue, noTheme, lightNoTheme, darkBlue } from "../../Colors";
@@ -7,6 +7,7 @@ import { colorPalette, getObjTheme, globalStyle as gs, lightBlue, noTheme, light
 import { useUserContext } from "../../Contexts/UserContext";
 import { useLogContext } from "../../Contexts/LogContext";
 import { useStorageContext } from "../../Contexts/StorageContext";
+import { LinearGradient } from 'expo-linear-gradient';
 
 import PressText from "../../PressText/PressText";
 import PressImage from "../../PressImage/PressImage";
@@ -27,6 +28,9 @@ import LinkView, {New as LinkNew} from "./LinkView/LinkView";
 import ImageView, {New as ImageNew} from "./ImageView/ImageView";
 import {HouseView, New as HouseNew } from "./HouseView/HouseView";
 import {ReviewView, New as ReviewNew } from "./ReviewView/ReviewView";
+import { Images } from "../../Images";
+
+
 
 export interface ObjectiveViewProps {
   obj: Objective,
@@ -50,6 +54,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
 
   const [items, setItems] = useState<Item[]>([]);
   const [isEditingTitle, setIsEditingTitle] = useState<boolean>(false);
+
 
   ///Temp
   let tempFilteredItems:Item[] = [];
@@ -312,6 +317,8 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     setMultiSelectAction(null);
     setIsSelectingPastePos(false);
     setIsSelectingAll(false);
+
+    popMessage('All unselected')
   }
 
   const moveItems = () => {
@@ -321,7 +328,6 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       items: selectingItems
     });
 
-    setIsSelectingPastePos(true); 
     setSelectingItems([]);
 
     popMessage('Items selected to move.');
@@ -334,10 +340,10 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       items: selectingItems
     });
 
-    setIsSelectingPastePos(true);
+    // setIsSelectingPastePos(true);
     setSelectingItems([]);
 
-    popMessage('Item copied.');
+    popMessage('Copied');
   }
 
   const addRemoveToSelected = (item: Item) => {
@@ -642,8 +648,8 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
         setNewTag('');
       }
       else{
-        popMessage('Type something for the tag...', MessageType.Alert);
         if(userPrefs.vibrate) Vibration.vibrate(Pattern.Wrong);
+        popMessage('Type something for the tag...', MessageType.Alert);
       }
 
       return;
@@ -832,8 +838,8 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
 
     return(
       <View style={s.itemsContainer}>
-        <PressImage onPress={() => {selectUnselectAllItems(true)}} source={require('../../../public/images/checkedunchecked.png')}></PressImage>
-        <PressImage onPress={() => {selectUnselectAllItems(false)}} source={require('../../../public/images/checkedunchecked.png')}></PressImage>
+        <PressImage cT={o} onPress={() => {selectUnselectAllItems(true)}} source={Images.CheckedUnchecked}/>
+        <PressImage cT={o} onPress={() => {selectUnselectAllItems(false)}} source={Images.CheckedUnchecked}/>
       </View>
     )
   }
@@ -856,13 +862,13 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
           <TextInput 
             defaultValue={searchText}
             style={s.inputStyle}
-            placeholderTextColor={o.itemtextfade}
+            placeholderTextColor={o.innertextcolorfade}
             placeholder="item that includes..."
             onChangeText={onSearchTextChange}
             submitBehavior="submit"
             autoFocus>
           </TextInput>
-          <PressImage onPress={onEraseSearch} source={require('../../../public/images/eraser.png')}></PressImage>
+          <PressImage cT={o} onPress={onEraseSearch} source={Images.Eraser}/>
         </View>
       </View>
     )
@@ -874,129 +880,127 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
         return (
           <PressImage
             key={key}
+            cT={o}
             confirm
             onPress={() => showButtomItem(ObjBottomIcons.Unarchive)}
-            source={require("../../../public/images/unarchive.png")}
+            source={Images.Unarchive}
           />
         );
       case ObjBottomIcons.Archive:
         return (
           <PressImage
             key={key}
+            cT={o}
             confirm
             onPress={() => showButtomItem(ObjBottomIcons.Archive)}
-            source={require("../../../public/images/archive.png")}
+            source={Images.Archive}
           />
         );
       case ObjBottomIcons.Palette:
         return (
           <PressImage
             key={key}
+            cT={o}
             selected={isPaletteOpen}
-            colorSelected={o.icontintcolorcontrast}
             onPress={() => showButtomItem(ObjBottomIcons.Palette)}
-            source={require("../../../public/images/palette.png")}
+            source={Images.Palette}
           />
         );
       case ObjBottomIcons.Tags:
         return (
           <PressImage
             key={key}
+            cT={o}
             selected={isTagOpen}
             onPress={() => showButtomItem(ObjBottomIcons.Tags)}
-            colorSelected={o.icontintcolorcontrast}
-            source={require("../../../public/images/tag.png")}
+            source={Images.Tag}
           />
         );
       case ObjBottomIcons.Search:
         return(
           <PressImage 
           key={key}
+          cT={o}
           selected={isSearchOpen}
           onPress={()=>showButtomItem(ObjBottomIcons.Search)}
-          colorSelected={o.icontintcolorcontrast}
-          source={require('../../../public/images/search.png')}></PressImage>
+          source={Images.Search}/>
         );
       case ObjBottomIcons.Sorted:
         return (
           <PressImage
             key={key}
+            cT={o}
             confirm
             onPress={() => showButtomItem(ObjBottomIcons.Sorted)}
-            source={require("../../../public/images/atoz.png")}
+            source={Images.AtoZ}
           />
         );
       case ObjBottomIcons.Pos:
         return (
           <PressImage
             key={key}
+            cT={o}
             selected={isMultiSelectOpen}
             onPress={() => showButtomItem(ObjBottomIcons.Pos)}
-            colorSelected={o.icontintcolorcontrast}
-            source={require("../../../public/images/change.png")}
+            source={Images.Change}
           />
         );
       case ObjBottomIcons.IsLocked:
         return (
           <PressImage
             key={key}
+            cT={o}
             onPress={onLock}
             confirm={obj.IsLocked}
             fade={!obj.IsLocked}
-            raw
-            source={require("../../../public/images/add-lock.png")}
+            source={Images.Lock}
+            color={o.trashicontint}
           />
         );
       case ObjBottomIcons.Checked:
         return (
           <PressImage
             key={key}
+            cT={o}
             onPress={onChangeShowingItems}
             onLongPress={() => showButtomItem(ObjBottomIcons.Checked)}
             source={
               obj.IsShowingCheckedGrocery
-                ? require("../../../public/images/checked.png")
-                : require("../../../public/images/checked-off.png")
+                ? Images.Checked
+                : Images.CheckedOff
             }
           />
         );
       case ObjBottomIcons.Add:
-        return isItemOpenLocked ? (
+        return (
           <PressImage
             key={key}
-            selected={isItemsOpen}
+            cT={o}
+            // selected={isItemsOpen}
             onPress={addingNewItem}
-            raw
-            source={require("../../../public/images/add-lock.png")}
-          />
-        ) : (
-          <PressImage
-            key={key}
-            selected={isItemsOpen}
-            colorSelected={o.icontintcolorcontrast}
-            onPress={() => showButtomItem(ObjBottomIcons.Add)}
-            source={require("../../../public/images/add.png")}
+            source={isItemOpenLocked?Images.AddLock:Images.Add}
+            color={isItemOpenLocked?o.trashicontint:undefined}
+            raw={isItemOpenLocked}
           />
         );
       case ObjBottomIcons.FoldUnfoldAll:
-        return(openAll?
-          <PressImage key={key} onPress={() => {foldUnfoldAllDividers(true)}} source={require('../../../public/images/doubleup-chevron.png')}></PressImage>
-          :
-          <PressImage key={key} onPress={() => {foldUnfoldAllDividers(false)}} source={require('../../../public/images/doubledown-chevron.png')}></PressImage>
+        return(
+          <PressImage cT={o} key={key} onPress={() => {foldUnfoldAllDividers(openAll)}} source={openAll?Images.DoubleUpChevron:Images.DoubleDownChevron}/>
         );
       case ObjBottomIcons.GoingTopDown:
         return(isListGoingUp?
-          <PressImage key={key} onPress={()=>{setIsListGoingUp(false); itemsListScrollTo()}} source={require('../../../public/images/to-top.png')}></PressImage>
+          <PressImage cT={o} key={key} onPress={()=>{setIsListGoingUp(false); itemsListScrollTo()}} source={Images.ToTop}/>
           :
-          <PressImage key={key} onPress={()=>{setIsListGoingUp(true); itemsListScrollTo(tempFilteredItems[tempFilteredItems.length-1].ItemId)}} source={require('../../../public/images/to-bottom.png')}></PressImage>
+          <PressImage cT={o} key={key} onPress={()=>{setIsListGoingUp(true); itemsListScrollTo(tempFilteredItems[tempFilteredItems.length-1].ItemId)}} source={Images.ToBottom}/>
         );
       case ObjBottomIcons.Menu:
         return (<PressImage 
             key={key}
+            cT={o}
             selected={isMenuIconOpen}
-            colorSelected={o.icontintcolorcontrast}
             onPress={()=>showButtomItem(ObjBottomIcons.Menu)}
-            source={require('../../../public/images/menu.png')}></PressImage>)
+            source={Images.Menu}/>
+        );
       default:
       return null;
     }
@@ -1100,15 +1104,18 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       )
     }
     else if(item.Type === ItemType.Separator){
-      return <View style={s.bodyListSpacer}></View>
+      return <LinearGradient colors={['#00000000', o.innerbackgroundcolor??'#0000006f']} locations={[0, 0.99]} style={{ flex: 1 }}><View style={s.bodyListSpacer}></View></LinearGradient>
+    }
+    else if(item.Type === ItemType.BottomToUp){
+      return <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', height: 100, backgroundColor:o.innerbackgroundcolor}}><PressImage onPress={()=>{setIsListGoingUp(false); itemsListScrollTo()}} source={Images.ToTop} cT={o}/></View>
     }
     return (
       <View style={[s.itemRow]}
         onTouchEnd={() => {if(isMultiSelectOpen) itemTouchEndFunc(item)}}>
         {isMultiSelectOpen && !isSelectingPastePos && (isSelectingItem?
-          <PressImage onPress={()=>{if(isMultiSelectOpen) addRemoveToSelected(item)}} source={require('../../../public/images/checked.png')}></PressImage>
+          <PressImage onPress={()=>{if(isMultiSelectOpen) addRemoveToSelected(item)}} source={Images.Checked}/>
           :
-          <PressImage onPress={()=>{if(isMultiSelectOpen) addRemoveToSelected(item)}} source={require('../../../public/images/unchecked.png')}></PressImage>)
+          <PressImage onPress={()=>{if(isMultiSelectOpen) addRemoveToSelected(item)}} source={Images.Unchecked}/>)
         }
         {devItemNumber && <Text style={s.devItemRowNumber}>{item.Pos}</Text>}
         {rtnItem}
@@ -1288,6 +1295,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
 
     /// End of list separator
     filteredItems.push({ItemId:'', LastModified: '', Pos:-1, UserIdObjectiveId: '',  Type: ItemType.Separator, Title: '', Fade: false, CreatedAt: ''} as GenericItem)
+    filteredItems.push({ItemId:'', LastModified: '', Pos:-1, UserIdObjectiveId: '',  Type: ItemType.BottomToUp, Title: '', Fade: false, CreatedAt: ''} as GenericItem)
     return <FlatList ref={listRef} data={filteredItems} renderItem={getItemView}></FlatList>
   }
 
@@ -1306,13 +1314,13 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
 
     return(
       <View style={s.itemsContainer}>
-        <Pressable style={[s.colorPalette, s.colorPaletteNoTheme]} onPress={() => onSelectColor('noTheme')}></Pressable>
-        <Pressable style={[s.colorPalette, s.colorPaletteBlue]} onPress={() => onSelectColor('blue')}></Pressable>
-        <Pressable style={[s.colorPalette, s.colorPaletteRed]} onPress={() => onSelectColor('red')}></Pressable>
-        <Pressable style={[s.colorPalette, s.colorPaletteGreen]} onPress={() => onSelectColor('green')}></Pressable>
-        <Pressable style={[s.colorPalette, s.colorPaletteWhite]} onPress={() => onSelectColor('white')}></Pressable>
-        <Pressable style={[s.colorPalette, s.colorPaletteCyan]} onPress={() => onSelectColor('cyan')}></Pressable>
-        <Pressable style={[s.colorPalette, s.colorPalettePink]} onPress={() => onSelectColor('pink')}></Pressable>
+        <Pressable style={[s.colorPalette, s.colorPaletteNoTheme]} onPress={() => onSelectColor('noTheme')}/>
+        <Pressable style={[s.colorPalette, s.colorPaletteBlue]} onPress={() => onSelectColor('blue')}/>
+        <Pressable style={[s.colorPalette, s.colorPaletteRed]} onPress={() => onSelectColor('red')}/>
+        <Pressable style={[s.colorPalette, s.colorPaletteGreen]} onPress={() => onSelectColor('green')}/>
+        <Pressable style={[s.colorPalette, s.colorPaletteWhite]} onPress={() => onSelectColor('white')}/>
+        <Pressable style={[s.colorPalette, s.colorPaletteCyan]} onPress={() => onSelectColor('cyan')}/>
+        <Pressable style={[s.colorPalette, s.colorPalettePink]} onPress={() => onSelectColor('pink')}/>
       </View>
     )
   }
@@ -1328,18 +1336,18 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
         {getTagList()}
         <Text style={s.tagEditTagTitle}>NEW</Text>
         <View style={s.tagListContainer}>
-          <PressImage onPress={onEraseNewTag} source={require('../../../public/images/eraser.png')}></PressImage>
+          <PressImage onPress={onEraseNewTag} source={Images.Eraser}/>
           <TextInput
             style={s.inputStyle}
             value={newTag}
             onChangeText={setNewTag}
-            placeholderTextColor={o.itemtextfade}
+            placeholderTextColor={o.innertextcolorfade}
             placeholder="press enter to insert tag"
             submitBehavior="submit"
             onSubmitEditing={onHandleSubmit}
             autoFocus>
           </TextInput>
-          <PressImage onPress={() => {setIsTagOpen(false)}} source={require('../../../public/images/done.png')}></PressImage>
+          <PressImage onPress={() => {setIsTagOpen(false)}} source={Images.Done}/>
         </View>
       </View>
     )
@@ -1350,20 +1358,19 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
 
     return(
       <View style={s.itemsContainer}>
-        {/* <PressImage onPress={() => {choseNewItemToAdd(ItemType.Wait)}} source={require('../../../public/images/wait.png')}></PressImage> */}
-        <PressImage onPress={() => {choseNewItemToAdd(ItemType.Review)}} source={require('../../../public/images/review.png')}></PressImage>
-        <PressImage onPress={() => {choseNewItemToAdd(ItemType.House)}} source={require('../../../public/images/home.png')}></PressImage>
-        <PressImage onPress={() => {choseNewItemToAdd(ItemType.Link)}} source={require('../../../public/images/link.png')}></PressImage>
-        <PressImage onPress={() => {choseNewItemToAdd(ItemType.Exercise)}} source={require('../../../public/images/exercise-filled.png')}></PressImage>
-        <PressImage onPress={() => {choseNewItemToAdd(ItemType.Divider)}} source={require('../../../public/images/minus.png')}></PressImage>
-        <PressImage onPress={() => {choseNewItemToAdd(ItemType.Grocery)}} source={require('../../../public/images/grocery-filled.png')}></PressImage>
-        <PressImage onPress={() => {choseNewItemToAdd(ItemType.Medicine)}} source={require('../../../public/images/medicine-filled.png')}></PressImage>
-        <PressImage onPress={() => {choseNewItemToAdd(ItemType.Location)}} source={require('../../../public/images/location-filled.png')}></PressImage>
-        <PressImage onPress={() => {choseNewItemToAdd(ItemType.Question)}} source={require('../../../public/images/questionfilled.png')}></PressImage>
-        <PressImage onPress={() => {choseNewItemToAdd(ItemType.Note)}} source={require('../../../public/images/note.png')}></PressImage>
-        <PressImage onPress={() => {choseNewItemToAdd(ItemType.Step)}} source={require('../../../public/images/step-filled.png')}></PressImage>
-        <PressImage onPress={()=>{popMessage('Image: Under construction...', MessageType.Error)}} source={require('../../../public/images/image-filled.png')}></PressImage>
-        <PressText style={gs.baseBiggerImageContainer} text={newItemsMultiplier.toString() + 'x'} onPress={increaseNewItemMultiplier} textStyle={{fontWeight: 'bold', color: o.itemtext}}></PressText>
+        <PressImage cT={o} onPress={() => {choseNewItemToAdd(ItemType.Review)}} source={Images.Review}/>
+        <PressImage cT={o} onPress={() => {choseNewItemToAdd(ItemType.House)}} source={Images.Home}/>
+        <PressImage cT={o} onPress={() => {choseNewItemToAdd(ItemType.Link)}} source={Images.Link}/>
+        <PressImage cT={o} onPress={() => {choseNewItemToAdd(ItemType.Exercise)}} source={Images.ExerciseFilled}/>
+        <PressImage cT={o} onPress={() => {choseNewItemToAdd(ItemType.Divider)}} source={Images.Minus}/>
+        <PressImage cT={o} onPress={() => {choseNewItemToAdd(ItemType.Grocery)}} source={Images.GroceryFilled}/>
+        <PressImage cT={o} onPress={() => {choseNewItemToAdd(ItemType.Medicine)}} source={Images.MedicineFilled}/>
+        <PressImage cT={o} onPress={() => {choseNewItemToAdd(ItemType.Location)}} source={Images.LocationFilled}/>
+        <PressImage cT={o} onPress={() => {choseNewItemToAdd(ItemType.Question)}} source={Images.QuestionFilled}/>
+        <PressImage cT={o} onPress={() => {choseNewItemToAdd(ItemType.Note)}} source={Images.Note}/>
+        <PressImage cT={o} onPress={() => {choseNewItemToAdd(ItemType.Step)}} source={Images.StepFilled}/>
+        <PressImage cT={o} onPress={()=>{popMessage('Image: Under construction...', MessageType.Error)}} source={Images.ImageFilled}/>
+        <PressText style={gs.baseBiggerImageContainer} text={newItemsMultiplier.toString() + 'x'} onPress={increaseNewItemMultiplier} textStyle={{fontWeight: 'bold', color: o.innertextcolor}}></PressText>
       </View>
     )
   }
@@ -1373,15 +1380,15 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     return(
       <View style={s.multiSelectContainer}>
         {!isSelectingPastePos && isSelectingAll?
-          <PressImage onPress={() => {multiSelectSelectAll(false)}} source={require('../../../public/images/checked.png')}></PressImage>
+          <PressImage cT={o} onPress={() => {multiSelectSelectAll(false)}} source={Images.Checked}/>
           :
-          <PressImage onPress={() => {multiSelectSelectAll(true)}} source={require('../../../public/images/unchecked.png')}></PressImage>
+          <PressImage cT={o} onPress={() => {multiSelectSelectAll(true)}} source={Images.Unchecked}/>
         }
-        <PressImage onPress={() => {eraseItems()}} source={require('../../../public/images/eraser.png')} disable={multiSelectAction===null} confirm></PressImage>
-        {!isSelectingPastePos && <PressImage onPress={() => {moveItems()}} source={require('../../../public/images/next.png')} disable={selectingItems.length===0} ></PressImage>}
-        {!isSelectingPastePos && <PressImage onPress={() => {copyItems()}} source={require('../../../public/images/copy.png')} disable={selectingItems.length===0} ></PressImage>}
-        <PressImage onPress={() => {setIsSelectingPastePos(true); popMessage('Select place to move after.')}} source={require('../../../public/images/insert.png')} disable={multiSelectAction===null} ></PressImage>
-        {!isSelectingPastePos && <PressImage onPress={multiSelectDeleteItems} source={require('../../../public/images/trash.png')} disable={selectingItems.length===0} confirm color={o.trashicontint}></PressImage>}
+        <PressImage cT={o} onPress={() => {eraseItems()}} source={Images.Eraser} disable={multiSelectAction===null} confirm/>
+        {!isSelectingPastePos && <PressImage cT={o} onPress={() => {moveItems()}} source={Images.Next} disable={selectingItems.length===0} />}
+        {!isSelectingPastePos && <PressImage cT={o} onPress={() => {copyItems()}} source={Images.Copy} disable={selectingItems.length===0} />}
+        <PressImage cT={o} onPress={() => {setIsSelectingPastePos(true); popMessage('Select place to move after.')}} source={Images.Insert} disable={multiSelectAction===null} />
+        {!isSelectingPastePos && <PressImage cT={o} onPress={multiSelectDeleteItems} source={Images.Trash} disable={selectingItems.length===0} color={o.trashicontint} confirm/>}
       </View>
     )
   }
@@ -1415,14 +1422,14 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     },
     container: {
       flex: 1,
-      backgroundColor: o.objbk,
+      backgroundColor: o.backgroundcolor,
     },
     titleContainer:{
       flexDirection: 'row',
       minHeight: 45,
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: o.itembkdark,
+      backgroundColor: o.backgroundcolordark,
       marginBottom: 2,
     },
     titleContainerStyle: {
@@ -1433,7 +1440,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       textAlign: 'center',
       fontWeight: 'bold',
       fontSize: 20,
-      color: o.objtitle,
+      color: o.textColor,
       width: '100%',
     },
     bodyListSpacer:{
@@ -1448,13 +1455,13 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       marginVertical: o.marginVertical,
 
       minHeight: 45,
-      borderColor: o.itemtext,
+      borderColor: o.innertextcolor,
       borderWidth: 1,
       borderStyle: 'dashed',
       borderRadius: 5,
     },
     startplaceholderText:{
-      color: o.itemtext,
+      color: o.innertextcolor,
       fontWeight: 'bold',
     },
     hiddenTextContainer: {
@@ -1467,7 +1474,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       minHeight: 45,
     },
     hiddenTextText:{
-      color: o.itemtextfade,
+      color: o.innertextcolorfade,
       fontWeight: 'bold',
     },
     bodyContainer:{
@@ -1482,12 +1489,12 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       flexWrap: 'wrap',
       alignItems: 'center',
       justifyContent: side,
-      backgroundColor: o.itembk,
+      backgroundColor: o.innerbackgroundcolor,
     },
     tagEditingContainer:{
       justifyContent: 'center',
       flexWrap: 'wrap',
-      backgroundColor: o.itembkdark,
+      backgroundColor: o.backgroundcolordark,
       marginBottom: 10,
       
       borderColor: o.bordercolor,
@@ -1512,15 +1519,15 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       alignItems: 'center',
     },
     tagInputContainer:{
-      color: o.objtitle,
+      color: o.textColor,
       fontWeight: 'bold',
-      borderColor: o.objtitle,
+      borderColor: o.textColor,
     },
     tagInputText:{
       textAlign: 'center',
       fontWeight: 'bold',
       fontSize: 20,
-      color: o.objtitle,
+      color: o.textColor,
     },
     tagEditTagTitle:{
       width: '100%',
@@ -1530,7 +1537,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
 
       fontSize: 15,
       fontWeight: 'bold',
-      color: o.objtitle,
+      color: o.textColor,
     },
     tagContainer:{
       display: 'flex',
@@ -1539,7 +1546,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       minWidth: 50,
       margin: 2,
       padding: 5,
-      backgroundColor: o.objbk,
+      backgroundColor: o.backgroundcolor,
       
       borderColor: o.bordercolor,
       borderWidth: 1,
@@ -1547,13 +1554,13 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       borderStyle: 'solid',
     },
     tagText:{
-      color: o.objtitle,
+      color: o.textColor,
     },
     tagContainerPin:{
-      backgroundColor: o.objtitle,
+      backgroundColor: o.textColor,
     },
     tagTextPin:{
-      color: o.objbk,
+      color: o.backgroundcolor,
     },
     noObjectiveTag:{
       width: '100%',
@@ -1563,12 +1570,12 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       lineHeight: 37,
 
       fontSize: 10,
-      color: o.itemtextfade,
+      color: o.innertextcolorfade,
     },
     searchContainer:{
       justifyContent: 'center',
       alignItems: 'center',
-      backgroundColor: o.itembkdark,
+      backgroundColor: o.backgroundcolordark,
       marginBottom: 5,
       minHeight: 60,
       paddingHorizontal: 10,
@@ -1583,7 +1590,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       verticalAlign: 'middle',
       textAlign: 'center',
       width: '100%',
-      color: o.itemtext,
+      color: o.innertextcolor,
       fontWeight: 'bold',
       fontSize: 25,
     },
@@ -1596,9 +1603,9 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       justifyContent: 'center',
       alignItems: 'center',
 
-      color: theme.textcolor,
+      color: o.innertextcolor,
       
-      borderColor: o.itemtextfade,
+      borderColor: o.innertextcolor,
       borderBottomWidth: 1,
       borderStyle: 'solid',
     },
@@ -1626,7 +1633,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       borderWidth: 1,
       borderRadius: 5,
       borderStyle: 'solid',
-      backgroundColor: o.itembk,
+      backgroundColor: o.innerbackgroundcolor,
       margin: 5,
     },
     list:{
@@ -1645,7 +1652,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     devItemRowNumber:{
       verticalAlign: 'middle',
       textAlign: 'center',
-      color: o.itemtext,
+      color: o.innertextcolor,
       marginLeft: 5,
       minWidth: 20,
     },
@@ -1699,7 +1706,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       borderWidth: 1,
       borderRadius: 5,
       borderStyle: 'solid',
-      backgroundColor: o.itembk,
+      backgroundColor: o.innerbackgroundcolor,
       margin: 5,
     },
   });

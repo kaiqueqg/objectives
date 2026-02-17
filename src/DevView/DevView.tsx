@@ -10,6 +10,7 @@ import Loading from "../Loading/Loading";
 import { useLogContext } from "../Contexts/LogContext";
 import PressImage from "../PressImage/PressImage";
 import PressText from "../PressText/PressText";
+import { Images } from "../Images";
 export interface MainProps{
 }
 
@@ -82,7 +83,7 @@ const DevView = (props: MainProps) => {
         <Text style={s.devMessages}>{consoleLogs}</Text>
       </ScrollView>
       <View style={s.devButtonRow}>
-        <PressImage source={require('../../public/images/trash.png')} onPress={clear}></PressImage>
+        <PressImage source={Images.Trash} onPress={clear}/>
       </View>
     </View>
   )

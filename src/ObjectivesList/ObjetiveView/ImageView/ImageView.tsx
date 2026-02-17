@@ -14,6 +14,7 @@ import * as FileSystem from 'expo-file-system';
 import { useStorageContext } from "../../../Contexts/StorageContext";
 import { useRequestContext } from "../../../Contexts/RequestContext";
 import Loading from "../../../Loading/Loading";
+import { Images } from "../../../Images";
 
 export const New = () => {
   return(
@@ -255,7 +256,7 @@ const ImageView = (props: ImageViewProps) => {
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      backgroundColor: o.itembk,
+      backgroundColor: o.innerbackgroundcolor,
       
       borderColor: o.bordercolor,
       borderWidth: 1,
@@ -295,10 +296,10 @@ const ImageView = (props: ImageViewProps) => {
       color: 'beige',
     },
     title:{
-      color: o.itemtext,
+      color: o.innertextcolor,
     },
     titleFade:{
-      color: o.itemtextfade,
+      color: o.innertextcolorfade,
     },
     buttonsRowContainer:{
       flex: 1,
@@ -309,7 +310,7 @@ const ImageView = (props: ImageViewProps) => {
     },
     image:{
       ...gs.baseImage,
-      tintColor: o.icontintcolor,
+      tintColor: o.icontint,
     },
     imageDone:{
       tintColor: o.doneicontint,
@@ -322,7 +323,7 @@ const ImageView = (props: ImageViewProps) => {
     },
     imageFade:{
       ...gs.baseImage,
-      tintColor: o.itemtextfade,
+      tintColor: o.innertextcolorfade,
     },
     imageMoveContainer:{
       justifyContent: 'center',
@@ -333,7 +334,7 @@ const ImageView = (props: ImageViewProps) => {
     },
     imageMove:{
       ...gs.baseImage,
-      tintColor: o.icontintcolor,
+      tintColor: o.icontint,
     },
     imageDoneImage:{
       tintColor: o.doneicontint,
@@ -366,10 +367,10 @@ const ImageView = (props: ImageViewProps) => {
       minHeight: 40,
       margin: 2,
       paddingLeft: 10,
-      color: o.itemtext,
+      color: o.innertextcolor,
 
       borderRadius: 5,
-      borderColor: o.icontintcolor,
+      borderColor: o.icontint,
       borderBottomWidth: 1,
       borderStyle: 'solid',
     },
@@ -387,28 +388,28 @@ const ImageView = (props: ImageViewProps) => {
         {!isDisabled && isEditingImage?
           <View style={s.inputsContainer}>
             <View style={s.inputsLeft}>
-              <PressImage confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete}></PressImage>
+              <PressImage confirm={true} source={Images.Trash} onPress={onDelete}/>
             </View>
             <View style={s.inputsCenter}>
               <TextInput 
                 style={s.inputStyle}
-                placeholderTextColor={o.itemtextfade}
+                placeholderTextColor={o.innertextcolorfade}
                 placeholder="Title"
                 defaultValue={getTitle()}
                 onChangeText={(value: string)=>{setTempImage({...tempImage, Title: value})}}
                 onSubmitEditing={onDoneImage}
                 autoFocus={image.Title.trim() === ''}></TextInput>
               <View style={s.buttonsRowContainer}>
-                <PressImage source={require('../../../../public/images/camera.png')} onPress={openCamera}></PressImage>
-                <PressImage source={require('../../../../public/images/image.png')} onPress={pickImage}></PressImage>
-                <PressImage confirm={true} source={require('../../../../public/images/trash.png')} onPress={deleteImage}></PressImage>
+                <PressImage source={Images.Camera} onPress={openCamera}/>
+                <PressImage source={Images.Image} onPress={pickImage}/>
+                <PressImage confirm={true} source={Images.Trash} onPress={deleteImage}/>
               </View>
               {storedImage && <ReactImage style={s.imagePreview} source={{ uri: storedImage.ImageFile }}></ReactImage>}
-              {!storedImage && image.Name && <PressImage source={require('../../../../public/images/download.png')} onPress={downloadImage}></PressImage>}
+              {!storedImage && image.Name && <PressImage source={Images.Download} onPress={downloadImage}/>}
             </View>
             <View style={s.inputsRight}>
-              <PressImage source={require('../../../../public/images/done.png')} onPress={onDoneImage} color={o.doneicontint}></PressImage>
-              <PressImage source={require('../../../../public/images/cancel.png')} onPress={onCancelImage} color={o.cancelicontint}></PressImage>
+              <PressImage source={Images.Done} onPress={onDoneImage} color={o.doneicontint}/>
+              <PressImage source={Images.Cancel} onPress={onCancelImage} color={o.cancelicontint}/>
             </View>
           </View>
           :
@@ -422,9 +423,9 @@ const ImageView = (props: ImageViewProps) => {
                 defaultStyle={o}
               ></PressText>
               {storedImage?
-                <PressImage source={require('../../../../public/images/image-filled.png')} onPress={() => {if(!isDisabled)onChangeIsDisplaying();}}></PressImage>
+                <PressImage source={Images.ImageFilled} onPress={() => {if(!isDisabled)onChangeIsDisplaying();}}/>
                 :
-                <PressImage source={require('../../../../public/images/image.png')} onPress={() => {if(!isDisabled)onChangeIsDisplaying();}}></PressImage>
+                <PressImage source={Images.Image} onPress={() => {if(!isDisabled)onChangeIsDisplaying();}}/>
               }
             </View>
           {image.IsDisplaying && storedImage?.ImageFile && 

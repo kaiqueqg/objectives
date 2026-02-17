@@ -43,6 +43,7 @@ export enum ItemType {
 
   //Helpers to display
   Separator = 'Separator',
+  BottomToUp = 'BottomToUp',
   HiddenItemText = 'HiddenItemText',
   StartPlaceholder = 'StartPlaceholder',
   Unknown = 'Unknown',

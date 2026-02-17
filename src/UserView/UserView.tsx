@@ -13,7 +13,7 @@ import Constants, { ExecutionEnvironment } from 'expo-constants';
 import LoginView from "./LoginView";
 
 import * as FileSystem from 'expo-file-system';
-import { Archived, Images } from "../Images";
+import { Images } from "../Images";
 interface StorageAccessFrameworkType {
   requestDirectoryPermissionsAsync: () => Promise<{ granted: boolean; directoryUri: string }>;
   createFileAsync: (dirUri: string, fileName: string, mimeType: string) => Promise<string>;
@@ -107,9 +107,9 @@ const UserView = (props: UserViewProps) => {
           textStyle={s.prefsToolsText}
           onPress={() => {saveToJSON()}}
           imageStyle={s.backupImage}
-          imageSource={require('../../public/images/download-files.png')}
+          imageSource={Images.DownloadFiles}
           text={"Download a JSON file of your data."}
-          defaultStyle={{itemtextfade: colorPalette.green}}
+          // defaultStyle={{itemtextfade: colorPalette.green}}
           ></PressText>}
       </>
     )
@@ -153,7 +153,7 @@ const UserView = (props: UserViewProps) => {
         onPress={()=>onAddIconToDisplay(ObjBottomIcons[icon])}
         source={source}
         fade={!userPrefs.ObjectivesPrefs.iconsToDisplay.includes(icon)}
-        text={getPosText(icon)}
+        // text={getPosText(icon)}
         />
     )
   }
@@ -201,7 +201,7 @@ const UserView = (props: UserViewProps) => {
           textStyle={s.userPrefsTextOn}
           onPress={() => {onChangePrefs({...userPrefs, theme: userPrefs.theme === 'dark'?'light':'dark'})}}
           imageStyle={s.image}
-          imageSource={require('../../public/images/theme.png')}
+          imageSource={Images.Theme}
           text={"Which theme? - " + (userPrefs.theme==='dark'? 'Dark.':'White.')}>
         </PressText>
         {userPrefs.isRightHand?
@@ -210,7 +210,7 @@ const UserView = (props: UserViewProps) => {
             textStyle={s.userPrefsTextOn}
             onPress={() => {onChangePrefs({...userPrefs, isRightHand: !userPrefs.isRightHand})}}
             imageStyle={s.image}
-            imageSource={require('../../public/images/righthand.png')}
+            imageSource={Images.RightHand}
             text={"Which hand? - " + (userPrefs.isRightHand? 'Right hand.':'Left Hand.')}>
           </PressText>
             :
@@ -219,7 +219,7 @@ const UserView = (props: UserViewProps) => {
             textStyle={s.userPrefsTextOn}
             onPress={() => {onChangePrefs({...userPrefs, isRightHand: !userPrefs.isRightHand})}}
             imageStyle={s.image}
-            imageSource={require('../../public/images/lefthand.png')}
+            imageSource={Images.LeftHand}
             text={"Which hand? - " + (userPrefs.isRightHand? 'Right hand.':'Left Hand.')}>
           </PressText>
         }
@@ -229,7 +229,7 @@ const UserView = (props: UserViewProps) => {
           textStyle={userPrefs.shouldLockOnOpen? s.userPrefsTextOn:s.userPrefsTextOff}
           onPress={inChangeLockOpen}
           imageStyle={s.image}
-          imageSource={require('../../public/images/fingerprint.png')}
+          imageSource={Images.Fingerprint}
           text={"Should lock app on first open? - " + (userPrefs.shouldLockOnOpen? 'Yes.':'No.')}>
         </PressText>
         <PressText 
@@ -237,7 +237,7 @@ const UserView = (props: UserViewProps) => {
           textStyle={userPrefs.shouldLockOnReopen? s.userPrefsTextOn:s.userPrefsTextOff}
           onPress={onChangeLockReopen}
           imageStyle={s.image}
-          imageSource={require('../../public/images/fingerprint.png')}
+          imageSource={Images.Fingerprint}
           text={"Should lock app every times it's open? - " + (userPrefs.shouldLockOnReopen? 'Yes.':'No.')}>
         </PressText>
         <PressText 
@@ -245,7 +245,7 @@ const UserView = (props: UserViewProps) => {
           textStyle={userPrefs.vibrate? s.userPrefsTextOn:s.userPrefsTextOff}
           onPress={() => {onChangePrefs({...userPrefs, vibrate: !userPrefs.vibrate})}}
           imageStyle={s.image}
-          imageSource={require('../../public/images/vibrate.png')}
+          imageSource={Images.Vibrate}
           text={"Should button vibrate? - " + (userPrefs.vibrate? 'Yes.':'No.')}>
         </PressText>
         <PressText 
@@ -253,7 +253,7 @@ const UserView = (props: UserViewProps) => {
           textStyle={userPrefs.autoSync? s.userPrefsTextOn:s.userPrefsTextOff}
           onPress={() => {onChangePrefs({...userPrefs, autoSync: !userPrefs.autoSync})}}
           imageStyle={s.imageSmall}
-          imageSource={require('../../public/images/sync.png')}
+          imageSource={Images.Sync}
           text={"Should automatically sync? - " + (userPrefs.autoSync? 'Yes.':'No.')}>
         </PressText>
         <View style={s.contentDivider}></View>
@@ -268,7 +268,7 @@ const UserView = (props: UserViewProps) => {
           textStyle={userPrefs.allowLocation? s.userPrefsTextOn:s.userPrefsTextOff}
           onPress={()=>{onChangePrefs({...userPrefs, allowLocation: !userPrefs.allowLocation})}}
           imageStyle={s.imageSmall}
-          imageSource={require('../../public/images/location-filled.png')}
+          imageSource={Images.LocationFilled}
           text={"Use location? - " + (userPrefs.allowLocation? 'Yes.':'No.')}>
         </PressText>
         <PressText 
@@ -276,7 +276,7 @@ const UserView = (props: UserViewProps) => {
           textStyle={userPrefs.warmLocationOff? s.userPrefsTextOn:s.userPrefsTextOff}
           onPress={()=>{onChangePrefs({...userPrefs, warmLocationOff: !userPrefs.warmLocationOff})}}
           imageStyle={s.imageSmall}
-          imageSource={require('../../public/images/location.png')}
+          imageSource={Images.Location}
           ellipsizeMode="head"
           numberOfLines={3}
           text={"Warm about necessity of location of proximity of location? - " + (userPrefs.warmLocationOff? 'Yes.':'No.')}>

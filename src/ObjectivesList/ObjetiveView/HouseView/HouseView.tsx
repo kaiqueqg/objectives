@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import PressText from "../../../PressText/PressText";
 import React from "react";
 import { useLogContext } from "../../../Contexts/LogContext";
+import { Images } from "../../../Images";
 
 export const New = () => {
   return(
@@ -161,7 +162,7 @@ export const HouseView = (props: HouseViewProps) => {
       flexDirection: 'column',
       justifyContent: 'center',
       alignItems: 'center',
-      backgroundColor: (house.WasContacted && !isEditingHouse)? colorPalette.transparent:o.itembk,
+      backgroundColor: (house.WasContacted && !isEditingHouse)? colorPalette.transparent:o.innerbackgroundcolor,
       
       borderColor: (house.WasContacted && !isEditingHouse)?colorPalette.transparent:o.bordercolor,
       borderWidth: 1,
@@ -201,10 +202,10 @@ export const HouseView = (props: HouseViewProps) => {
       paddingLeft: 10,
     },
     title:{
-      color: o.itemtext,
+      color: o.innertextcolor,
     },
     titleFade:{
-      color: o.itemtextfade,
+      color: o.innertextcolorfade,
     },
     detailsContainer:{
       padding: 10,
@@ -213,32 +214,11 @@ export const HouseView = (props: HouseViewProps) => {
       padding: 10,
     },
     detaisText:{
-      color: o.itemtext,
+      color: o.innertextcolor,
     },
     attentionText:{
       color: colorPalette.red,
       fontWeight: 'bold',
-    },
-    image:{
-      ...gs.baseImage,
-      tintColor: o.icontintcolor,
-    },
-    imageDone:{
-      tintColor: o.doneicontint,
-    },
-    imageCancel:{
-      tintColor: o.cancelicontint,
-    },
-    imageDelete:{
-      tintColor: o.trashicontint,
-    },
-    imageFade:{
-      ...gs.baseImage,
-      tintColor: o.itemtextfade,
-    },
-    imageMove:{
-      ...gs.baseImage,
-      tintColor: o.icontintcolor,
     },
     houseDoneImage:{
       tintColor: o.doneicontint,
@@ -271,10 +251,10 @@ export const HouseView = (props: HouseViewProps) => {
       minHeight: 40,
       margin: 2,
       paddingLeft: 10,
-      color: o.itemtext,
+      color: o.innertextcolor,
 
       borderRadius: 5,
-      borderColor: o.icontintcolor,
+      borderColor: o.icontint,
       borderBottomWidth: 1,
       borderStyle: 'solid',
     },
@@ -286,12 +266,12 @@ export const HouseView = (props: HouseViewProps) => {
         {!isDisabled && isEditingHouse ?
           <View style={s.inputsContainer}>
             <View style={s.inputsLeft}>
-              <PressImage confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete} color={o.trashicontint}></PressImage>
+              <PressImage confirm={true} source={Images.Trash} onPress={onDelete} color={o.trashicontint}/>
             </View>
             <View style={s.inputsCenter}>
               <TextInput 
                 style={s.inputStyle}
-                placeholderTextColor={o.itemtextfade}
+                placeholderTextColor={o.innertextcolorfade}
                 placeholder="Title"
                 defaultValue={house.Title}
                 onChangeText={(value: string)=>{setTempHouse({...tempHouse, Title: value})}}
@@ -299,28 +279,28 @@ export const HouseView = (props: HouseViewProps) => {
                 onSubmitEditing={onDoneHouse}></TextInput>
               <TextInput 
                 style={s.inputStyle}
-                placeholderTextColor={o.itemtextfade}
+                placeholderTextColor={o.innertextcolorfade}
                 placeholder="Listing"
                 defaultValue={house.Listing}
                 onChangeText={(value: string)=>{setTempHouse({...tempHouse, Listing: value})}}
                 onSubmitEditing={onDoneHouse}></TextInput>
               <TextInput 
                 style={s.inputStyle}
-                placeholderTextColor={o.itemtextfade}
+                placeholderTextColor={o.innertextcolorfade}
                 placeholder="MapLink"
                 defaultValue={house.MapLink}
                 onChangeText={(value: string)=>{setTempHouse({...tempHouse, MapLink: value})}}
                 onSubmitEditing={onDoneHouse}></TextInput>
               <TextInput 
                 style={s.inputStyle}
-                placeholderTextColor={o.itemtextfade}
+                placeholderTextColor={o.innertextcolorfade}
                 placeholder="m²"
                 defaultValue={house.MeterSquare}
                 onChangeText={(value: string)=>{setTempHouse({...tempHouse, MeterSquare: value})}}
                 onSubmitEditing={onDoneHouse}></TextInput>
               <TextInput 
                 style={s.inputStyle}
-                placeholderTextColor={o.itemtextfade}
+                placeholderTextColor={o.innertextcolorfade}
                 placeholder="Rating"
                 defaultValue={house.Rating?.toString()}
                 keyboardType="numeric" 
@@ -331,30 +311,30 @@ export const HouseView = (props: HouseViewProps) => {
                 onSubmitEditing={onDoneHouse}></TextInput>
               <TextInput
                 style={s.inputStyle}
-                placeholderTextColor={o.itemtextfade}
+                placeholderTextColor={o.innertextcolorfade}
                 placeholder="Address"
                 defaultValue={house.Address}
                 onChangeText={(value: string)=>{setTempHouse({...tempHouse, Address: value})}}
                 onSubmitEditing={onDoneHouse}></TextInput>
               <TextInput 
                 style={s.inputStyle}
-                placeholderTextColor={o.itemtextfade}
+                placeholderTextColor={o.innertextcolorfade}
                 placeholder="Details"
                 defaultValue={house.Details}
                 onChangeText={(value: string)=>{setTempHouse({...tempHouse, Details: value})}}
                 onSubmitEditing={onDoneHouse}></TextInput>
               <TextInput 
                 style={s.inputStyle}
-                placeholderTextColor={o.itemtextfade}
+                placeholderTextColor={o.innertextcolorfade}
                 placeholder="Attention"
                 defaultValue={house.Attention}
                 onChangeText={(value: string)=>{setTempHouse({...tempHouse, Attention: value})}}
                 onSubmitEditing={onDoneHouse}></TextInput>
             </View>
             <View style={s.inputsRight}>
-              <PressImage source={require('../../../../public/images/done.png')} onPress={onDoneHouse} color={o.doneicontint}></PressImage>
+              <PressImage source={Images.Done} onPress={onDoneHouse} color={o.doneicontint}/>
               <View style={gs.baseImageContainer}></View>
-              <PressImage source={require('../../../../public/images/cancel.png')} onPress={onCancelHouse} color={o.cancelicontint}></PressImage>
+              <PressImage source={Images.Cancel} onPress={onCancelHouse} color={o.cancelicontint}/>
             </View>
           </View>
           :
@@ -369,11 +349,11 @@ export const HouseView = (props: HouseViewProps) => {
                 hideDefaultTextBorder={true}
                 ellipsizeMode='middle'
               ></PressText>
-              <PressText style={s.attentionContainer} textStyle={{color: o.itemtext}} onPress={() => {onChangeIsEditing()}} text={getText()} defaultStyle={o} hideDefaultTextBorder={true}></PressText>
-              {!isEditingHouse && house.Listing.trim() !== '' && <PressImage source={require('../../../../public/images/link.png')} onPress={openLink}></PressImage>}
-              {!isEditingHouse && house.MapLink.trim() !== '' && <PressImage source={require('../../../../public/images/location-filled.png')} onPress={openUrl}></PressImage>}
-              {!isEditingHouse && !house.WasContacted && <PressImage source={require('../../../../public/images/home.png')} onPress={() => {if(!isDisabled)onChangeWasContacted();}}></PressImage>}
-              {!isEditingHouse && house.WasContacted && <PressImage source={require('../../../../public/images/done.png')} onPress={() => {if(!isDisabled)onChangeWasContacted();}} selected={house.WasContacted} colorSelected={t.icontintfade}></PressImage>}
+              <PressText style={s.attentionContainer} textStyle={{color: o.innertextcolor}} onPress={() => {onChangeIsEditing()}} text={getText()} defaultStyle={o} hideDefaultTextBorder={true}></PressText>
+              {!isEditingHouse && house.Listing.trim() !== '' && <PressImage cT={o} source={Images.Link} onPress={openLink}/>}
+              {!isEditingHouse && house.MapLink.trim() !== '' && <PressImage cT={o} source={Images.LocationFilled} onPress={openUrl}/>}
+              {!isEditingHouse && !house.WasContacted && <PressImage cT={o} source={Images.Home} onPress={() => {if(!isDisabled)onChangeWasContacted();}}/>}
+              {!isEditingHouse && house.WasContacted && <PressImage cT={o} source={Images.Done} onPress={() => {if(!isDisabled)onChangeWasContacted();}} fade={house.WasContacted}/>}
             </View>
             {!isEditingHouse && house.Details.trim() !== '' && <View style={s.detailsContainer}><Text style={s.detaisText}>{house.Details}</Text></View>}
             {!isEditingHouse && house.Attention.trim() !== '' && <View style={s.attentionContainer}><Text style={s.attentionText}>{house.Attention}</Text></View>}

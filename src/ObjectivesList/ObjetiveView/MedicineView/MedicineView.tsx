@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import PressText from "../../../PressText/PressText";
 import React from "react";
 import { useLogContext } from "../../../Contexts/LogContext";
+import { Images } from "../../../Images";
 
 export const New = () => {
   return(
@@ -143,7 +144,7 @@ const MedicineView = (props: MedicineViewProps) => {
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      backgroundColor: (medicine.IsChecked && !isEditingMedicine)? colorPalette.transparent:o.itembk,
+      backgroundColor: (medicine.IsChecked && !isEditingMedicine)? colorPalette.transparent:o.innerbackgroundcolor,
       
       borderColor: (medicine.IsChecked && !isEditingMedicine)?colorPalette.transparent:o.bordercolor,
       borderWidth: 1,
@@ -160,14 +161,14 @@ const MedicineView = (props: MedicineViewProps) => {
       color: 'beige',
     },
     title:{
-      color: o.itemtext,
+      color: o.innertextcolor,
     },
     titleFade:{
-      color: o.itemtextfade,
+      color: o.innertextcolorfade,
     },
     image:{
       ...gs.baseImage,
-      tintColor: o.icontintcolor,
+      tintColor: o.icontint,
     },
     imageDone:{
       tintColor: o.doneicontint,
@@ -180,11 +181,11 @@ const MedicineView = (props: MedicineViewProps) => {
     },
     imageFade:{
       ...gs.baseImage,
-      tintColor: o.itemtextfade,
+      tintColor: o.innertextcolorfade,
     },
     imageMove:{
       ...gs.baseImage,
-      tintColor: o.icontintcolor,
+      tintColor: o.icontint,
     },
     medicineDoneImage:{
       tintColor: o.doneicontint,
@@ -217,10 +218,10 @@ const MedicineView = (props: MedicineViewProps) => {
       minHeight: 40,
       margin: 2,
       paddingLeft: 10,
-      color: o.itemtext,
+      color: o.innertextcolor,
 
       borderRadius: 5,
-      borderColor: o.icontintcolor,
+      borderColor: o.icontint,
       borderBottomWidth: 1,
       borderStyle: 'solid',
     },
@@ -232,19 +233,19 @@ const MedicineView = (props: MedicineViewProps) => {
         {!isDisabled && isEditingMedicine?
           <View style={s.inputsContainer}>
             <View style={s.inputsLeft}>
-              <PressImage confirm={true} source={require('../../../../public/images/trash.png')} onPress={onDelete} color={o.trashicontint}></PressImage>
+              <PressImage confirm={true} source={Images.Trash} onPress={onDelete} color={o.trashicontint}/>
             </View>
             <View style={s.inputsCenter}>
               <TextInput 
                 style={s.inputStyle}
-                placeholderTextColor={o.itemtextfade}
+                placeholderTextColor={o.innertextcolorfade}
                 placeholder="Title"
                 defaultValue={medicine.Title}
                 onChangeText={(value: string)=>{setTempMedicine({...tempMedicine, Title: value})}} autoFocus
                 onSubmitEditing={onDoneMedicine}></TextInput>
               <TextInput 
                 style={s.inputStyle}
-                placeholderTextColor={o.itemtextfade}
+                placeholderTextColor={o.innertextcolorfade}
                 placeholder="Quatity"
                 defaultValue={medicine.Quantity?.toString()}
                 keyboardType="numeric" 
@@ -255,22 +256,22 @@ const MedicineView = (props: MedicineViewProps) => {
                 onSubmitEditing={onDoneMedicine}></TextInput>
               <TextInput
                 style={s.inputStyle}
-                placeholderTextColor={o.itemtextfade}
+                placeholderTextColor={o.innertextcolorfade}
                 placeholder="Unit"
                 defaultValue={medicine.Unit}
                 onChangeText={(value: string)=>{setTempMedicine({...tempMedicine, Unit: value})}}
                 onSubmitEditing={onDoneMedicine}></TextInput>
               <TextInput 
                 style={s.inputStyle}
-                placeholderTextColor={o.itemtextfade}
+                placeholderTextColor={o.innertextcolorfade}
                 placeholder="Purpose"
                 defaultValue={medicine.Purpose}
                 onChangeText={(value: string)=>{setTempMedicine({...tempMedicine, Purpose: value})}}
                 onSubmitEditing={onDoneMedicine}></TextInput>
             </View>
             <View style={s.inputsRight}>
-              <PressImage source={require('../../../../public/images/done.png')} onPress={onDoneMedicine} color={o.doneicontint}></PressImage>
-              <PressImage source={require('../../../../public/images/cancel.png')} onPress={onCancelMedicine} color={o.cancelicontint}></PressImage>
+              <PressImage source={Images.Done} onPress={onDoneMedicine} color={o.doneicontint}/>
+              <PressImage source={Images.Cancel} onPress={onCancelMedicine} color={o.cancelicontint}/>
             </View>
           </View>
           :
@@ -282,8 +283,8 @@ const MedicineView = (props: MedicineViewProps) => {
             defaultStyle={o}
             ></PressText>
         }
-        {!isEditingMedicine && !medicine.IsChecked && <PressImage source={require('../../../../public/images/medicine.png')} onPress={() => {if(!isDisabled)onChangeIsChecked();}}/>}
-        {!isEditingMedicine && medicine.IsChecked && <PressImage source={require('../../../../public/images/medicine-filled.png')} onPress={() => {if(!isDisabled)onChangeIsChecked();}} selected={medicine.IsChecked} colorSelected={t.icontintfade}/>}
+        {!isEditingMedicine && !medicine.IsChecked && <PressImage cT={o} source={Images.Medicine} onPress={() => {if(!isDisabled)onChangeIsChecked();}}/>}
+        {!isEditingMedicine && medicine.IsChecked && <PressImage cT={o} source={Images.MedicineFilled} onPress={() => {if(!isDisabled)onChangeIsChecked();}} fade={medicine.IsChecked}/>}
       </View>
     </View>
   );
