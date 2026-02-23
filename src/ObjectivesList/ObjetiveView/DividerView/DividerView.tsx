@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import React from "react";
 import { useLogContext } from "../../../Contexts/LogContext";
 import { Images } from "../../../Images";
+import { LinearGradient } from "expo-linear-gradient";
 
 export const New = () => {
   return(
@@ -116,6 +117,56 @@ const DividerView = (props: DividerViewProps) => {
     setCheckAll(newValue);
   }
 
+  const getDividerItemsView = () => {
+    if(!isItemsOpen) return <></>;
+
+    return(
+      <View style={[s.dividerNewItemContainer]}>
+        <PressImage cT={o} onPress={()=>{addNewItem(ItemType.Review);}} source={Images.Review}/>
+        <PressImage cT={o} onPress={()=>{addNewItem(ItemType.House);}} source={Images.Home}/>
+        <PressImage cT={o} onPress={()=>{addNewItem(ItemType.Link);}} source={Images.Link}/>
+        <PressImage cT={o} onPress={()=>{addNewItem(ItemType.Exercise);}} source={Images.ExerciseFilled}/>
+        <PressImage cT={o} onPress={()=>{addNewItem(ItemType.Divider);}} source={Images.Minus}/>
+        <PressImage cT={o} onPress={()=>{addNewItem(ItemType.Grocery);}} source={Images.GroceryFilled}/>
+        <PressImage cT={o} onPress={()=>{addNewItem(ItemType.Medicine);}} source={Images.MedicineFilled}/>
+        <PressImage cT={o} onPress={()=>{addNewItem(ItemType.Location);}} source={Images.LocationFilled}/>
+        <PressImage cT={o} onPress={()=>{addNewItem(ItemType.Question);}} source={Images.QuestionFilled}/>
+        <PressImage cT={o} onPress={()=>{addNewItem(ItemType.Note);}} source={Images.Note}/>
+        <PressImage cT={o} onPress={()=>{addNewItem(ItemType.Step);}} source={Images.StepFilled}/>
+        <PressImage cT={o} onPress={()=>{popMessage('Image: Under construction...', MessageType.Error)}} source={Images.ImageFilled}/>
+      </View>
+    )
+  }
+
+  const getDividerMainView = () => {
+    return(
+      <View style={[s.titleContainer, isSelecting && s.containerSelecting, isSelected && s.containerSelected, wasJustAdded && s.containerWasJustAdded]}>
+        {!isEditingTitle &&
+          <>
+            <PressImage cT={o} disable={isItemsOpen || isLocked || isDisabled} onPress={() => {if(!isDisabled)onChangeIsOpen();}} source={divider.IsOpen?Images.DownChevron:Images.UpChevron}/>
+            <PressImage cT={o} disable={isItemsOpen || isLocked || isDisabled} confirm onPress={() => {if(!isDisabled)orderDividerItems(divider);}} source={Images.AtoZ}/>
+          </>
+        }
+        <PressInput 
+          objTheme={o}
+          text={divider.Title}
+          onDelete={onDelete}
+          confirmDelete={true}
+          onDone={onChangeTitle}
+          uneditable={isDisabled || isLocked}
+          onEditingState={onEditingTitle}
+          >
+        </PressInput>
+        {!isEditingTitle &&
+          <>
+            <PressImage cT={o} disable={isItemsOpen || isLocked || isDisabled} onPress={onChangeAllCheckedUnchecked} source={checkAll?Images.Unchecked:Images.Checked} confirm/>
+            <PressImage cT={o} disable={isLocked || isDisabled} onPress={addingNewItem} source={Images.Add} showLock={isItemOpenLocked}/>
+          </>
+        }
+      </View>
+    )
+  }
+
   const s = StyleSheet.create({
     dividerContainer: {
       flex: 1,
@@ -125,6 +176,15 @@ const DividerView = (props: DividerViewProps) => {
       marginVertical: o.marginVertical,
 
       borderRadius: o.borderRadius,
+    },
+    linearGradient:{
+      flex: 1,
+      width: '100%',
+
+      // borderColor: t.tr,
+      borderWidth: 1,
+      borderRadius: 5,
+      borderStyle: 'solid',
     },
     dividerContainerOpen:{
       borderWidth: 1,
@@ -181,49 +241,10 @@ const DividerView = (props: DividerViewProps) => {
 
   return (
     <View style={[s.dividerContainer, isItemsOpen && s.dividerContainerOpen]} >
-      <View style={[s.titleContainer, isSelecting && s.containerSelecting, isSelected && s.containerSelected, wasJustAdded && s.containerWasJustAdded]}>
-        {!isEditingTitle &&
-          <>
-            <PressImage cT={o} disable={isItemsOpen || isLocked || isDisabled} onPress={() => {if(!isDisabled)onChangeIsOpen();}} source={divider.IsOpen?Images.DownChevron:Images.UpChevron}/>
-            <PressImage cT={o} disable={isItemsOpen || isLocked || isDisabled} confirm onPress={() => {if(!isDisabled)orderDividerItems(divider);}} source={Images.AtoZ}/>
-          </>
-        }
-        <PressInput 
-          objTheme={o}
-          text={divider.Title}
-          onDelete={onDelete}
-          confirmDelete={true}
-          onDone={onChangeTitle}
-          uneditable={isDisabled || isLocked}
-          onEditingState={onEditingTitle}
-
-          textStyle={s.inputTextStyle}
-          inputStyle={s.inputStyle}
-          trashImageStyle={{tintColor: o.trashicontint}}
-          >
-        </PressInput>
-        {!isEditingTitle &&
-          <>
-            <PressImage cT={o} disable={isItemsOpen || isLocked || isDisabled} onPress={onChangeAllCheckedUnchecked} source={checkAll?Images.Unchecked:Images.Checked} confirm/>
-            <PressImage cT={o} disable={isLocked || isDisabled} onPress={addingNewItem} source={isItemOpenLocked?Images.AddLock:Images.Add} raw={isItemOpenLocked}/>
-          </>
-        }
-      </View>
-      {isItemsOpen && 
-        <View style={[s.dividerNewItemContainer]}>
-          <PressImage cT={o} onPress={()=>{addNewItem(ItemType.Review);}} source={Images.Review}/>
-          <PressImage cT={o} onPress={()=>{addNewItem(ItemType.House);}} source={Images.Home}/>
-          <PressImage cT={o} onPress={()=>{addNewItem(ItemType.Link);}} source={Images.Link}/>
-          <PressImage cT={o} onPress={()=>{addNewItem(ItemType.Exercise);}} source={Images.ExerciseFilled}/>
-          <PressImage cT={o} onPress={()=>{addNewItem(ItemType.Divider);}} source={Images.Minus}/>
-          <PressImage cT={o} onPress={()=>{addNewItem(ItemType.Grocery);}} source={Images.GroceryFilled}/>
-          <PressImage cT={o} onPress={()=>{addNewItem(ItemType.Medicine);}} source={Images.MedicineFilled}/>
-          <PressImage cT={o} onPress={()=>{addNewItem(ItemType.Location);}} source={Images.LocationFilled}/>
-          <PressImage cT={o} onPress={()=>{addNewItem(ItemType.Question);}} source={Images.QuestionFilled}/>
-          <PressImage cT={o} onPress={()=>{addNewItem(ItemType.Note);}} source={Images.Note}/>
-          <PressImage cT={o} onPress={()=>{addNewItem(ItemType.Step);}} source={Images.StepFilled}/>
-          <PressImage cT={o} onPress={()=>{popMessage('Image: Under construction...', MessageType.Error)}} source={Images.ImageFilled}/>
-        </View>}
+      {/* <LinearGradient colors={[o.backgroundcolordark??'red', o.backgroundcolordarker??'yellow']} style={s.linearGradient} start={{x: 0, y: 0}} end={{x: 1, y: 0}}> */}
+        {getDividerMainView()}
+        {getDividerItemsView()}
+      {/* </LinearGradient> */}
     </View>
   );
 };

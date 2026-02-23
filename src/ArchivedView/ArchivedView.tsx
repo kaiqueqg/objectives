@@ -103,7 +103,7 @@ const ArchivedView = (props: ArchivedViewProps) => {
         />
         <PressText 
           style={[s.objectiveButtonContainer, {backgroundColor: getObjTheme(userPrefs.theme ,item.Theme).backgroundcolor}]}
-          textStyle={[s.text, {color: getObjTheme(userPrefs.theme ,item.Theme).textColor}]}
+          textStyle={[s.text, {color: getObjTheme(userPrefs.theme ,item.Theme).textcolor}]}
           onPress={() => onSelectCurrentObj(item.ObjectiveId)}
           text={item.Title}>
         </PressText>
@@ -113,7 +113,7 @@ const ArchivedView = (props: ArchivedViewProps) => {
 
   const s = StyleSheet.create({
     container: {
-      display: 'flex',
+      flex: 1,
       justifyContent: 'center',
       alignItems: 'center',
       flexDirection: 'row',

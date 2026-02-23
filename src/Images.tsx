@@ -1,5 +1,4 @@
 export type ImageName =
-  | 'AddLock'
   | 'Add'
   | 'AppIcon'
   | 'AppIconCopy'
@@ -23,6 +22,7 @@ export type ImageName =
   | 'CloudOffline'
   | 'Cold'
   | 'Copy'
+  | 'DarkMode'
   | 'Dev'
   | 'Done'
   | 'DoubleDownChevron'
@@ -53,6 +53,7 @@ export type ImageName =
   | 'LadybugGreen'
   | 'LadybugYellow'
   | 'LeftHand'
+  | 'LightMode'
   | 'Link'
   | 'List'
   | 'LocationFilled'
@@ -64,7 +65,6 @@ export type ImageName =
   | 'MedicineFilled'
   | 'Medicine'
   | 'Menu'
-  | 'MenuAlt'
   | 'Minus'
   | 'Move'
   | 'NewFile'
@@ -84,6 +84,7 @@ export type ImageName =
   | 'RightHand'
   | 'Save'
   | 'Search'
+  | 'Settings'
   | 'Show'
   | 'SlimPin'
   | 'Sort'
@@ -111,7 +112,6 @@ export type ImageName =
   | 'Zero';
 
 export const Images: Record<ImageName, any> = {
-  AddLock: require('../public/images/add-lock.png'),
   Add: require('../public/images/add.png'),
   AppIcon: require('../public/images/appicon.png'),
   AppIconCopy: require('../public/images/appicon - Copy.png'),
@@ -135,6 +135,7 @@ export const Images: Record<ImageName, any> = {
   CloudOffline: require('../public/images/cloud-offline.png'),
   Cold: require('../public/images/cold.png'),
   Copy: require('../public/images/copy.png'),
+  DarkMode: require('../public/images/dark-mode.png'),
   Dev: require('../public/images/dev.png'),
   Done: require('../public/images/done.png'),
   DoubleDownChevron: require('../public/images/doubledown-chevron.png'),
@@ -165,6 +166,7 @@ export const Images: Record<ImageName, any> = {
   LadybugGreen: require('../public/images/ladybuggreen.png'),
   LadybugYellow: require('../public/images/ladybugyellow.png'),
   LeftHand: require('../public/images/lefthand.png'),
+  LightMode: require('../public/images/light-mode.png'),
   Link: require('../public/images/link.png'),
   List: require('../public/images/list.png'),
   LocationFilled: require('../public/images/location-filled.png'),
@@ -175,7 +177,6 @@ export const Images: Record<ImageName, any> = {
   Med: require('../public/images/med.png'),
   MedicineFilled: require('../public/images/medicine-filled.png'),
   Medicine: require('../public/images/medicine.png'),
-  MenuAlt: require('../public/images/menu-.png'),
   Menu: require('../public/images/menu.png'),
   Minus: require('../public/images/minus.png'),
   Move: require('../public/images/move.png'),
@@ -196,6 +197,7 @@ export const Images: Record<ImageName, any> = {
   RightHand: require('../public/images/righthand.png'),
   Save: require('../public/images/save.png'),
   Search: require('../public/images/search.png'),
+  Settings: require('../public/images/settings.png'),
   Show: require('../public/images/show.png'),
   SlimPin: require('../public/images/slimPin.png'),
   Sort: require('../public/images/sort.png'),

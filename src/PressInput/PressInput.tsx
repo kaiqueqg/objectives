@@ -24,16 +24,6 @@ export interface PressInputProps {
   defaultText?: string,
   objTheme: ObjectivePallete,
 
-  containerStyle?: any,
-  inputContainerStyle?: any,
-  inputStyle? :any,
-  imageContainerStyle?: any,
-  trashImageStyle?: any,
-  doneImageStyle?: any,
-  cancelImageStyle?: any,
-  textStyle?: any,
-  defaultStyle?: any,
-
   multiline?: boolean,
   shouldntEndEditOnDone?: boolean,
 }
@@ -96,6 +86,36 @@ const PressInput = (props: PressInputProps) => {
     setInputHeight(event.nativeEvent.contentSize.height);
   }
 
+  const getEditingView = () => {
+    return(
+       <View style={[s.inputContainer]}>
+        {isDeleting && props.onDelete && <PressImage cT={o} onPress={props.onDelete} source={Images.Done} color={o.doneicontint}/>}
+        {!isDeleting && props.onDelete && <PressImage cT={o} onPress={onDelete} source={Images.Trash} color={o.trashicontint}/>}
+        {!props.onDelete && <PressImage cT={o} onPress={onCancel} source={Images.Cancel} color={o.cancelicontint}/>}
+        <TextInput 
+          style={[s.input, {height: inputHeight}]} 
+          multiline={props.multiline?? false} 
+          autoFocus={true}
+          value={newText}
+          onSubmitEditing={onDone}
+          onChangeText={handleChangeText}
+          onContentSizeChange={onChange}
+          selectionColor={o.innertextcolor}
+          >
+        </TextInput>
+        {props.onDelete && <PressImage cT={o} onPress={onCancel} source={Images.Cancel} color={o.cancelicontint}/>}
+        <PressImage cT={o} onPress={onDone} source={Images.Done} color={o.doneicontint}/>
+      </View>
+    )
+  }
+
+  const getDisplayView = () => {
+    if(props.text === '')
+      return <Text style={[s.defaultText]} onPress={()=>{changeIsEditing(true);}} onLongPress={props.onLongPress}>{props.defaultText}</Text>
+    else
+      return <Text style={[s.text]} onPress={()=>{changeIsEditing(true);}} onLongPress={props.onLongPress}>{props.text}</Text>
+  }
+
   const s = StyleSheet.create({
     container:{
       flex: 1,
@@ -142,8 +162,12 @@ const PressInput = (props: PressInputProps) => {
       borderStyle: 'solid',
     },
     text:{
-      color: o.textColor,
+      textAlign: "center",
+      flexDirection: 'row',
+      color: o.textcolor,
       marginLeft: 5,
+      fontWeight: 'bold',
+      fontSize: 20,
     },
     defaultText:{
       color: t.textcolorfade,
@@ -152,35 +176,11 @@ const PressInput = (props: PressInputProps) => {
   });
 
   return (
-    <View 
-      style={[s.container, (props.text.trim()===''&&!isEditing?s.containerWithoutText:undefined), props.containerStyle??undefined]}>
+    <View style={[s.container, (props.text.trim()===''&&!isEditing?s.containerWithoutText:undefined)]}>
       {isEditing?
-        <View style={[s.inputContainer, props.inputContainerStyle]}>
-          {isDeleting && props.onDelete && <PressImage cT={o} onPress={props.onDelete} source={Images.Done} color={o.doneicontint}/>}
-          {!isDeleting && props.onDelete && <PressImage cT={o} onPress={onDelete} source={Images.Trash} color={o.trashicontint}/>}
-          {!props.onDelete && <PressImage cT={o} onPress={onCancel} source={Images.Cancel} color={o.cancelicontint}/>}
-          <TextInput 
-            style={[s.input, props.inputStyle, {height: inputHeight}]} 
-            multiline={props.multiline?? false} 
-            autoFocus={true}
-            value={newText}
-            onSubmitEditing={onDone}
-            onChangeText={handleChangeText}
-            onContentSizeChange={onChange}
-            selectionColor={o.innertextcolor}
-            >
-          </TextInput>
-          {props.onDelete && <PressImage cT={o} onPress={onCancel} source={Images.Cancel} color={o.cancelicontint}/>}
-          <PressImage cT={o} onPress={onDone} source={Images.Done} color={o.doneicontint}/>
-        </View>
+        getEditingView()
         :
-        <>
-          {props.text === '' ?
-            <Text style={[s.defaultText, props.defaultStyle]} onPress={()=>{changeIsEditing(true);}} onLongPress={props.onLongPress}>{props.defaultText}</Text>
-            :
-            <Text style={[s.text, props.textStyle]} onPress={()=>{changeIsEditing(true);}} onLongPress={props.onLongPress}>{props.text}</Text>
-          }
-        </>
+        getDisplayView()
       }
     </View>
   );

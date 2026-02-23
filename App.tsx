@@ -1,9 +1,9 @@
-import { KeyboardAvoidingView, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import * as Font from 'expo-font';
 import React, { useEffect, useState } from 'react';
 import { UserProvider } from './src/Contexts/UserContext';
 import Main from './src/Main';
-import { colorPalette, dark } from './src/Colors';
+import { colorPalette } from './src/Colors';
 import { StorageProvider } from './src/Contexts/StorageContext';
 import { LogProvider } from './src/Contexts/LogContext';
 import { RequestProvider } from './src/Contexts/RequestContext';
@@ -41,7 +41,6 @@ export default function App() {
       flex: 1,
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: 'beige',//colorPalette.bluedarkerdarker,
     },
     loading: {
       color: colorPalette.beige,
@@ -51,22 +50,21 @@ export default function App() {
   });
 
   return (
-    <View style={s.container}>
-      <LogProvider>
-        <StorageProvider>
-          <RequestProvider>
-            <UserProvider>
+    <LogProvider>
+      <StorageProvider>
+        <RequestProvider>
+          <UserProvider>
+            <View style={s.container}>
               <Main></Main>
               {/* {isLoadingFont?
                 <Text style={s.loading}>Loading...</Text>
                 :
               } */}
-            </UserProvider>
-
-          </RequestProvider>
-        </StorageProvider>
-      </LogProvider>
-    </View>
+            </View>
+          </UserProvider>
+        </RequestProvider>
+      </StorageProvider>
+    </LogProvider>
   );
 }
 

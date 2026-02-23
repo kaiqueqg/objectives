@@ -27,6 +27,8 @@ export interface Objective {
   Tags: string[],
 }
 
+export enum Themes {Dark = 'Dark', Light = 'Light', Auto = 'Auto'}
+
 export enum ItemType {
   Step = 'Step',
   Question = 'Question',
@@ -214,7 +216,7 @@ export interface ImageInfo {
 }
 
 export const DefaultUserPrefs: UserPrefs = {
-  theme: 'dark',
+  theme: Themes.Dark,
   allowLocation: false,
   vibrate: true,
   autoSync: false,
@@ -260,9 +262,9 @@ export interface User{
   Status: string,
   userPrefs: UserPrefs,
 }
-
+    
 export interface UserPrefs{
-  theme: string,
+  theme: Themes,
   allowLocation: boolean,
   warmLocationOff: boolean,
   vibrate: boolean,
@@ -325,12 +327,21 @@ export const Codes = {
 
 export const Pattern = {
   Ok: [0, 30],
-  Wrong: [0, 100],
+  Wrong: [0, 20, 100, 200],
   Short: [0, 100],
   Alert: [0, 20, 100, 200],
 };
 
-export enum Views { UserView = 'UserView', ListView = 'ListView', AllView = 'AllView', IndividualView = 'IndividualView', DevView = 'DevView', ArchivedView = 'ArchivedView' }
+export enum Views { 
+  // UserView = 'UserView',
+  LoginView = 'LoginView',
+  ListView = 'ListView',
+  AllView = 'AllView',
+  IndividualView = 'IndividualView',
+  DevView = 'DevView',
+  ArchivedView = 'ArchivedView',
+  SettingsView = 'SettingsView',
+}
 
 export enum MultiSelectType { MOVE = 'Move', COPY = 'Copy' }
 export interface MultiSelectAction { type: MultiSelectType, originObjectiveId: string, items: Item[] }

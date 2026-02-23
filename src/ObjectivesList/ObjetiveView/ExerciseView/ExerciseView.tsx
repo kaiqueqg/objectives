@@ -313,9 +313,9 @@ const ExerciseView = (props: ExerciseViewProps) => {
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      backgroundColor: (exercise.IsDone && !exercise.IsDone)? o.backgroundcolor:o.innerbackgroundcolor,
+      backgroundColor: (exercise.IsDone && !isEditingExercise)? o.backgroundcolor:o.innerbackgroundcolor,
       
-      borderColor: (exercise.IsDone && !exercise.IsDone)?colorPalette.transparent:o.bordercolor,
+      borderColor: (exercise.IsDone && !isEditingExercise)?colorPalette.transparent:o.bordercolor,
       borderWidth: 1,
       borderStyle: 'solid',
       borderRadius: o.borderRadius,

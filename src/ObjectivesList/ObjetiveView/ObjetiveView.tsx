@@ -978,9 +978,8 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
             cT={o}
             // selected={isItemsOpen}
             onPress={addingNewItem}
-            source={isItemOpenLocked?Images.AddLock:Images.Add}
-            color={isItemOpenLocked?o.trashicontint:undefined}
-            raw={isItemOpenLocked}
+            source={Images.Add}
+            showLock={isItemOpenLocked}
           />
         );
       case ObjBottomIcons.FoldUnfoldAll:
@@ -1104,10 +1103,14 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       )
     }
     else if(item.Type === ItemType.Separator){
-      return <LinearGradient colors={['#00000000', o.innerbackgroundcolor??'#0000006f']} locations={[0, 0.99]} style={{ flex: 1 }}><View style={s.bodyListSpacer}></View></LinearGradient>
+      return (
+      // <LinearGradient colors={['#00000000', o.innerbackgroundcolor??'#0000006f']} locations={[0, 0.99]} style={{ flex: 1 }}>
+        <View style={s.bodyListSpacer}/>
+      // </LinearGradient>
+      )
     }
     else if(item.Type === ItemType.BottomToUp){
-      return <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', height: 100, backgroundColor:o.innerbackgroundcolor}}><PressImage onPress={()=>{setIsListGoingUp(false); itemsListScrollTo()}} source={Images.ToTop} cT={o}/></View>
+      return <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', height: 100, backgroundColor:colorPalette.transparent}}><PressImage onPress={()=>{setIsListGoingUp(false); itemsListScrollTo()}} source={Images.ToTop} cT={o}/></View>
     }
     return (
       <View style={[s.itemRow]}
@@ -1216,10 +1219,6 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
           confirmDelete={true}
           onDelete={onDeleteObjective} 
           onEditingState={onIsEditingTitle}
-          textStyle={s.titleTextStyle}
-          inputStyle={s.inputStyle}
-          containerStyle={s.titleContainerStyle}
-          trashImageStyle={{tintColor: o.trashicontint}}
           onLongPress={onChangeDev}>
         </PressInput>
       </View>
@@ -1432,17 +1431,6 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       backgroundColor: o.backgroundcolordark,
       marginBottom: 2,
     },
-    titleContainerStyle: {
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    titleTextStyle: {
-      textAlign: 'center',
-      fontWeight: 'bold',
-      fontSize: 20,
-      color: o.textColor,
-      width: '100%',
-    },
     bodyListSpacer:{
       height: 700,
     },
@@ -1519,15 +1507,15 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       alignItems: 'center',
     },
     tagInputContainer:{
-      color: o.textColor,
+      color: o.textcolor,
       fontWeight: 'bold',
-      borderColor: o.textColor,
+      borderColor: o.textcolor,
     },
     tagInputText:{
       textAlign: 'center',
       fontWeight: 'bold',
       fontSize: 20,
-      color: o.textColor,
+      color: o.textcolor,
     },
     tagEditTagTitle:{
       width: '100%',
@@ -1537,7 +1525,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
 
       fontSize: 15,
       fontWeight: 'bold',
-      color: o.textColor,
+      color: o.textcolor,
     },
     tagContainer:{
       display: 'flex',
@@ -1554,10 +1542,10 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       borderStyle: 'solid',
     },
     tagText:{
-      color: o.textColor,
+      color: o.textcolor,
     },
     tagContainerPin:{
-      backgroundColor: o.textColor,
+      backgroundColor: o.textcolor,
     },
     tagTextPin:{
       color: o.backgroundcolor,

@@ -1,4 +1,4 @@
-import { View, StyleSheet, Text, TextInput, Vibration , Pressable, BackHandler, ScrollView, NativeSyntheticEvent, TextInputSubmitEditingEventData, TextInputSubmitEditingEvent} from "react-native";
+import { View, StyleSheet, Text, TextInput, Vibration , Pressable, BackHandler, ScrollView, NativeSyntheticEvent, TextInputSubmitEditingEventData, TextInputSubmitEditingEvent, Button, ViewBase} from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import PressText from "../PressText/PressText";
 import Loading from "../Loading/Loading";
@@ -10,15 +10,28 @@ import Constants, { ExecutionEnvironment } from "expo-constants";
 import { colorPalette, dark, globalStyle as gs } from "../Colors";
 import { Item, MessageType, Objective, ObjectiveList, Pattern, TwoFactorAuthRequest } from "../Types";
 import PressImage from "../PressImage/PressImage";
-import ButtonView from "../BView/ButtonView";
 import { Images } from "../Images";
+import * as FileSystem from 'expo-file-system';
+import { useStorageContext } from "../Contexts/StorageContext";
+import ButtonView from "../BView/ButtonView";
+
+interface StorageAccessFrameworkType {
+  requestDirectoryPermissionsAsync: () => Promise<{ granted: boolean; directoryUri: string }>;
+  createFileAsync: (dirUri: string, fileName: string, mimeType: string) => Promise<string>;
+  writeAsStringAsync: (fileUri: string, content: string) => Promise<void>;
+  readDirectoryAsync: (dirUri: string) => Promise<string[]>;
+  deleteAsync: (uri: string) => Promise<void>;
+}
+
+const saf: StorageAccessFrameworkType = (FileSystem as any).StorageAccessFramework;
 
 export interface LoginViewProps {
   viewType: 'Full'|'Image'
 }
 
-const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
+export const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
   const { identityApi, objectivesApi } = useRequestContext();
+  const { storage } = useStorageContext();
   const { log, popMessage } = useLogContext();
   const { viewType } = props;
   const { 
@@ -26,7 +39,7 @@ const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
     fontTheme: f,
     user, userPrefs, writeUser, writeJwtToken, writeObjectives, writeItems, writeLastSync, writeUserPrefs,
     availableTags, selectedTags, writeAvailableTags, writeSelectedTags,
-    clearAllData, lastSync, objectives, readItems, deletedObjectives, deletedItems, deleteDeletedObjectives, deleteDeletedItems,
+    clearAllData, vibOk, vibWrong, lastSync, objectives, readItems, deletedObjectives, deletedItems, deleteDeletedObjectives, deleteDeletedItems,
   } = useUserContext();
 
   const [email, setEmail] = useState<string>('');
@@ -73,26 +86,22 @@ const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
   }
 
   const getLogoutView = () => {
-    return(
-      <View style={s.logoutView}>
-        <PressText 
-          style={s.refreshTokenButton}
-          textStyle={s.refreshTokenButtonText}
-          text={'Login again'}
-          onPress={()=>{setIsShowingRefreshTokenView(!isShowingRefreshTokenView)}}
-          defaultStyle={{itemtextfade: colorPalette.yellow}}>
-        </PressText>
-        {/* <ButtonView 
-          textStyle={s.logoutButtonText}
-          style={s.logoutButton}
-          onPress={logout}
-          defaultStyle={{ itemtextfade: colorPalette.green }}
-          outStyle={undefined}
-          inStyle={undefined}
-          text={'Logout'}></ButtonView> */}
-        <PressText text={'Logout'} textStyle={s.logoutButtonText} style={s.logoutButton} onPress={logout} defaultStyle={{itemtextfade: colorPalette.green}}></PressText>
-      </View>
-    )
+    if(userPrefs.isRightHand){
+      return(
+        <View style={s.logoutView}>
+            <ButtonView text='Reset' onPress={logout} type='neutral'/>
+            <ButtonView text='Logout' onPress={logout} type='reset'/>
+        </View>
+      )
+    }
+    else{
+      return(
+        <View style={s.logoutView}>
+            <ButtonView text='Logout' onPress={logout} type='reset'/>
+            <ButtonView text='Reset' onPress={logout} type='neutral'/>
+        </View>
+      )
+    }
   }
 
   const syncTags = (objectives: Objective[]) => {
@@ -210,31 +219,36 @@ const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
   }
 
   const login = async () => {
-    if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
-
     const loginBody = { Email: isShowingRefreshTokenView?user.Email.trim():email.trim(), Password: password.trim() };
+
+    setPassword('');
 
     if(!isValidEmail(loginBody.Email)){
       popMessage("Type a valid email.", MessageType.Alert);
+      vibWrong();
       return;
     }
 
     if(loginBody.Email === ""){
       popMessage("Type email to login!", MessageType.Alert);
+      vibWrong();
       return;
     }
 
     if(loginBody.Password === ""){
       popMessage("Type password to login!", MessageType.Alert);
+      vibWrong();
       return;
     }
 
     if(isShowingRefreshTokenView && loginBody.Email !== user.Email){
+      vibWrong();
       popMessage('Different user that is logged in.', MessageType.Error);
       return;
     }
 
     setIsLogging(true);
+    vibOk();
 
     try {
       const data = await identityApi.login(JSON.stringify(loginBody));
@@ -335,7 +349,7 @@ const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
     )
   }
  
-  const getUserDetailsView = () => {
+  const getFullView = () => {
     if(isLogged && !requiringTwoFA){
       return getLoggedView();
     }
@@ -380,6 +394,11 @@ const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
     login();
   }
 
+  const cancelTwoFA = () => {
+    setPassword('');
+    setRequiringTwoFA(false);
+  }
+
   const requiringTwoFAView = () => {
     return(
       <View style={[s.loginContainer]}>
@@ -389,10 +408,12 @@ const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
           :
           <>
             <View style={s.emailContainer}>
-              <TextInput autoCapitalize="none" placeholder="6 digit number" placeholderTextColor={t.textcolorfade} style={s.emailInput} onChangeText={onChangeVerificationCode} onSubmitEditing={sendVerificationTwoFA}></TextInput>
+              <TextInput autoFocus keyboardType="numeric" autoCapitalize="none" placeholder="6 digit number" placeholderTextColor={t.textcolorfade} style={s.emailInput} onChangeText={onChangeVerificationCode} onSubmitEditing={sendVerificationTwoFA}></TextInput>
             </View>
             <View style={s.logoutView}>
-              <PressText text={'Send'} textStyle={s.loginButtonText} style={s.loginButton} onPress={sendVerificationTwoFA}></PressText>
+              {userPrefs.isRightHand && <ButtonView text='Cancel' onPress={cancelTwoFA} type="neutral"/>}
+              <ButtonView text='Send' onPress={sendVerificationTwoFA} type="foward"/>
+              {!userPrefs.isRightHand && <ButtonView text='Cancel' onPress={cancelTwoFA} type="neutral"/>}
             </View>
           </>
         }
@@ -400,14 +421,43 @@ const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
     )
   }
 
+  const saveToJSON = async (): Promise<void> => {
+    try {
+      const perm = await saf.requestDirectoryPermissionsAsync();
+      if (!perm.granted) throw new Error("Permission denied");
+      const dir = perm.directoryUri;
+
+      const objectives = await storage.readObjectives();
+      const items = await storage.readItems();
+
+      await writeSafFile(dir, "objectives.json", JSON.stringify(objectives, null, 2));
+      await writeSafFile(dir, "items.json", JSON.stringify(items, null, 2));
+
+      popMessage("Saved.");
+    } catch (err) {
+      console.error(err);
+      popMessage("Error saving JSON files.", MessageType.Error);
+    }
+  }
+
+  const writeSafFile = async (directoryUri: string, name: string, content: string): Promise<void> => {
+    try {
+      const files = await saf.readDirectoryAsync(directoryUri);
+      const existing = files.find((u) => u.endsWith("/" + name));
+      if (existing) await saf.deleteAsync(existing); // overwrite if exists
+    } catch (err) {
+      console.warn("Error deleting existing file", err);
+    }
+
+    const fileUri = await saf.createFileAsync(directoryUri, name, "application/json");
+    await saf.writeAsStringAsync(fileUri, content);
+  }
+
   const getLoggedView = () => {
-    return(isShowingRefreshTokenView?
-      getLoggingInView()
-      :
-      <>
-        <Text style={s.header}>USER</Text>
-        <View style={s.userContainer}>
-          <View style={s.userInformationCard}>
+    return(
+        <View style={s.loggerContainer}>
+          <Text style={s.header}>USER</Text>
+          <View style={s.userContainer}>
             <View style={s.userView}>
               <Text style={s.userTextDef}>Email:</Text>
               <Text style={s.userText}>{user === null? "no user": user.Email}</Text>
@@ -428,7 +478,7 @@ const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
               <Text style={s.userTextDef}>2FA:</Text>
               <Text style={s.userText}>{user === null? "no user": (user.TwoFAActive?'Active':'Not Active')}</Text>
             </View>
-          </View>
+          <Text style={s.header}>TOOLS:</Text>
           <PressText 
             style={s.prefsTools}
             textStyle={s.prefsToolsText}
@@ -447,15 +497,23 @@ const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
             imageSource={Images.Backup}
             text={"Save full data on AWS S3."}>  
           </PressText>
-          {getLogoutView()}
+          {saf !== undefined && <PressText 
+            style={s.prefsTools}
+            textStyle={s.prefsToolsText}
+            onPress={() => {saveToJSON()}}
+            imageStyle={s.backupImage}
+            imageSource={Images.DownloadFiles}
+            text={"Download a JSON file of your data."}
+          ></PressText>}
+            {getLogoutView()}
+          </View>
         </View>
-      </>
-    )
+      )
   }
 
   const getLoggingInView = () => {
     return(
-      <View style={[s.loginContainer]}>
+      <View style={s.loginContainer}>
         <Text style={s.header}>{isShowingRefreshTokenView?'REFRESH TOKEN':'LOGIN'}</Text>
         {isLogging?
           <Loading></Loading>
@@ -469,13 +527,12 @@ const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
               }
             </View>
             <View style={s.passwordContainer}>
+              {!userPrefs.isRightHand && <PressImage onPress={()=>{setIsShowingPassword(!isShowingPassword)}} source={isShowingPassword?Images.Hide:Images.Show}/>}
               <TextInput ref={passRef} autoCapitalize="none" placeholder="Password" placeholderTextColor={t.textcolorfade} style={s.passwordInput} secureTextEntry={!isShowingPassword} onChangeText={onChangePassword} onSubmitEditing={login}></TextInput>
-              {!isShowingPassword && <PressImage onPress={()=>{setIsShowingPassword(!isShowingPassword)}} source={Images.Show}/>}
-              {isShowingPassword && <PressImage onPress={()=>{setIsShowingPassword(!isShowingPassword)}} source={Images.Hide}/>}
+              {userPrefs.isRightHand && <PressImage onPress={()=>{setIsShowingPassword(!isShowingPassword)}} source={isShowingPassword?Images.Hide:Images.Show}/>}
             </View>
             <View style={s.logoutView}>
-              <PressText text={isShowingRefreshTokenView?'Refresh':'Login'} textStyle={s.loginButtonText} style={isShowingRefreshTokenView?s.refreshTokenButton:s.loginButton} onPress={login}></PressText>
-              {isShowingRefreshTokenView && <PressText text={'Cancel'} textStyle={s.loginButtonText} style={s.logoutButton} onPress={() => setIsShowingRefreshTokenView(false)}></PressText>}
+              <ButtonView text={'Login'} onPress={login} type='foward'/>
             </View>
           </>
         }
@@ -488,10 +545,9 @@ const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
       color: t.textcolor,
       fontSize: 25,
       fontWeight: 'bold',
-      paddingBottom: 5,
+      paddingVertical: 15,
     },
     subHeader:{
-      // textAlign: 'center',
       color: t.textcolor,
       fontSize: 15,
       marginBottom: 10,
@@ -515,67 +571,37 @@ const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
       color: t.textcolor,
     },
     userTextDef:{
-      fontSize: 15,
       width: '50%',
+      fontSize: 15,
       color: t.textcolor,
     },
     userText: {
-      fontSize: f.userViewText.fontSize,
       width: '50%',
+      fontSize: f.userViewText.fontSize,
       color: t.textcolor,
     },
     userContainer: {
-      marginTop: 10,
-      justifyContent: 'center',
+      flex: 1,
     },
     userInformationCard:{
+      flex: 1,
       paddingVertical: 10,
       paddingHorizontal: 10,
-      // backgroundColor: t.backgroundcolordark,
-
-      // borderColor: t.bordercolorfade,
-      // borderWidth: 1,
-      // borderRadius: 2,
-      // borderStyle: 'solid',
     },
     userView: {
-      flex: 1,
       justifyContent: 'center',
       alignItems: 'center',
-      verticalAlign: 'middle',
       flexDirection: 'row',
       marginBottom: 2,
       paddingVertical: 2,
       paddingHorizontal: 5,
-
-      // borderColor: t.textcolorfade,
-      // borderBottomWidth: 1,
-      // borderRadius: 5,
-      // borderStyle: 'solid',
     },
     logoutView:{
       flexDirection: 'row',
       width: '100%',
       alignItems: 'center',
       justifyContent: 'center',
-      marginBottom: 10,
-    },
-    logoutButton: {
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: t.logoutbuttonbk,
-      paddingVertical: 15,
-      paddingHorizontal: 20,
-      margin: 10,
-      
-      borderRadius: 2,
-      borderStyle: 'solid',
-      borderWidth: 1,
-      borderColor: colorPalette.black,
-    },
-    logoutButtonText: {
-      color: colorPalette.black,
-      fontSize: f.userViewLogoutButton.fontSize,
+      marginVertical: 10,
     },
     refreshTokenButton: {
       justifyContent: 'center',
@@ -596,17 +622,15 @@ const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
     },
     loginContainer:{
       flex: 1,
-      alignItems: "center",
-      verticalAlign: "middle",
-      width: '100%',
-      paddingTop: 10,
+      justifyContent: 'center',
+      alignItems: 'center',
+      
       paddingHorizontal: 10,
-      backgroundColor: t.backgroundcolordarker,
-
-      borderColor: t.bordercolorfade,
-      borderWidth: 1,
-      borderRadius: 5,
-      borderStyle: 'solid',
+      paddingVertical: 20,
+    },
+    loggerContainer:{
+      flex: 1,
+      paddingHorizontal: 10,
     },
     emailContainer:{
       minHeight: 50,
@@ -643,46 +667,11 @@ const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
       borderRadius: 2,
       padding: 10,
     },
-    loginButton: {
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: t.loginbuttonbk,
-      paddingVertical: 15,
-      paddingHorizontal: 20,
-      margin: 2,
-      
-      borderRadius: 5,
-      borderStyle: 'solid',
-      borderWidth: 1,
-      borderColor: colorPalette.black,
-    },
-    loginButtonText: {
-      color: colorPalette.black,
-      fontSize: f.userViewLogoutButton.fontSize,
-    },
-    bottomImage: {
-      ...gs.baseImage,
-      tintColor: t.icontint,
-    },
-    doneImage:{
-      tintColor: t.doneicontint,
-    },
-    cancelImage:{
-      tintColor: t.cancelicontint,
-    },
-    imageContainer:{
-      ...gs.baseImageContainer,
-      marginHorizontal: 10,
-    },
-    image:{
-      ...gs.baseImage,
-      tintColor: t.icontint,
-    },
-    imageFade:{
-      ...gs.baseImage,
-      tintColor: t.icontintfade,
-    },
     smallImage:{
+      ...gs.baseSmallImage,
+      tintColor: t.icontint,
+    },
+    backupImage:{
       ...gs.baseSmallImage,
       tintColor: t.icontint,
     },
@@ -690,8 +679,8 @@ const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
 
   if(viewType === "Image")
     return(getSyncImage())
+  else if(viewType === 'Full')
+    return(getFullView())
   else
-    return(getUserDetailsView())
+    return <Text>ERROR</Text>
 }
-
-export default LoginView;

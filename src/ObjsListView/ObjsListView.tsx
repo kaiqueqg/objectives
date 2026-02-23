@@ -259,7 +259,7 @@ const ObjsListView = (props: ObjsListViewProps) => {
             isEditingPos && isSelected? s.objectiveButtonContainerSelected:undefined, 
             isEndingPos && isSelected? s.objectiveButtonContainerEnding:undefined, 
             {backgroundColor: objTheme.backgroundcolor}]}
-          textStyle={[s.text, {color: objTheme.textColor}]}
+          textStyle={[s.text, {color: objTheme.textcolor}]}
           onPress={() => onSelectCurrentObj(item.ObjectiveId)}
           defaultStyle={objTheme}
           defaultText="?"

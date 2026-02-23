@@ -27,6 +27,7 @@ export interface PressImageProps{
   text?: string,
 
   size?: number,
+  showLock?: boolean,
 }
 
 const PressImage = (props: PressImageProps) => {
@@ -113,6 +114,7 @@ const PressImage = (props: PressImageProps) => {
         delayLongPress={props.delayLongPress??800}>
         {/* <View style={[s.shadow]}/> */}
         {/* <View style={[s.border2]}/> */}
+        {props.showLock &&<Image style={[s.lockImage as ImageStyle, finalSize]} source={Images.Lock}></Image>}
         <Image style={[s.image, {tintColor: finalTintColor} as ImageStyle, finalSize]} source={props.source}></Image>
         {/* <Image style={[props.style as ImageStyle, props.disable? (props.disableStyle as ImageStyle):{}, s.image]} source={props.source}></Image> */}
         {props.text && <Text style={[s.text]}>{props.text}</Text>}
@@ -152,7 +154,7 @@ const PressImage = (props: PressImageProps) => {
     text: {
       position: 'absolute',
       zIndex: 1,
-      color: props.cT?.textColor?props.cT.textColor:colorPalette.red,
+      color: props.cT?.textcolor?props.cT.textcolor:colorPalette.red,
       fontSize: 16,
       fontWeight: 'bold',
     },
@@ -186,6 +188,13 @@ const PressImage = (props: PressImageProps) => {
     image:{
       ...gs.baseSmallImage,
     },
+    lockImage:{
+      // ...gs.baseVerySmallImage,
+      height: 5,
+      width: 5,
+      zIndex: 1,
+      position: "absolute",
+    }
   });
 
   return(

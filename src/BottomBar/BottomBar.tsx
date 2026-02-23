@@ -1,17 +1,19 @@
 import { View, StyleSheet, Vibration } from "react-native";
 import { AppPalette, colorPalette, dark, globalStyle as gs } from "../Colors";
-import { MessageType, Pattern, Views } from "../Types";
+import { MessageType, Pattern, Themes, Views } from "../Types";
 import PressImage from "../PressImage/PressImage";
 import { useUserContext } from "../Contexts/UserContext";
 import Loading from "../Loading/Loading";
 import { useLogContext } from "../Contexts/LogContext";
 import React, { useEffect, useState } from "react";
 import Constants, { ExecutionEnvironment } from 'expo-constants';
-import LoginView from "../UserView/LoginView";
+import {LoginView} from "../LoginView/LoginView";
 import { Images } from "../Images";
 
 export interface BottomBarProps {
 }
+
+enum BottomBarIcons { User = 'UserView', Settings = 'Settings', Theme = 'Theme', List = 'List', Archived = 'Archived', Dev = 'Dev' }
 
 const BottomBar = (props: BottomBarProps) => {
   const { user, userPrefs, theme: t, fontTheme: f, currentView, writeCurrentView, availableTags, selectedTags, currentObjectiveId, writeUserPrefs } = useUserContext();
@@ -40,23 +42,102 @@ const BottomBar = (props: BottomBarProps) => {
   
   const changeTheme = () => {
     if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
-    writeUserPrefs({...userPrefs, theme: userPrefs.theme === 'dark'?'light':'dark'});
+    let newTheme;
+
+    switch(userPrefs.theme){
+      case Themes.Auto:
+        newTheme = Themes.Dark;
+        break;
+      case Themes.Dark:
+        newTheme = Themes.Light;
+        break;
+      case Themes.Light:
+        newTheme = Themes.Auto;
+        break;
+      default:
+        newTheme = Themes.Dark;
+        break;
+    }
+
+    writeUserPrefs({...userPrefs, theme: newTheme});
+  }
+
+  const getThemeBottomIcon = () => {
+    switch(userPrefs.theme){
+      case Themes.Auto:
+        return Images.Theme
+      case Themes.Dark:
+        return Images.DarkMode
+      case Themes.Light:
+        return Images.LightMode
+      default:
+        return Images.Theme
+    }
+  }
+
+  const getBottomIcon = (icon: BottomBarIcons) => {
+    switch(icon){
+      case BottomBarIcons.User:
+        return(
+          <PressImage 
+            text={Constants.executionEnvironment === ExecutionEnvironment.StoreClient?"dev":undefined}
+            onPress={() => changeToView(Views.LoginView)}
+            source={Images.User}
+            selected={currentView === Views.LoginView}
+            color={user.Email===''?t.trashicontint:t.icontint}/>
+        )
+      case BottomBarIcons.Settings:
+        return(
+          <PressImage 
+            onPress={() => changeToView(Views.SettingsView)}
+            source={Images.Settings}
+            selected={currentView === Views.SettingsView}
+          />
+        )
+      case BottomBarIcons.Theme:
+        return(
+          <PressImage onPress={changeTheme} source={getThemeBottomIcon()}/>
+        )
+      case BottomBarIcons.List:
+        return(
+           <PressImage 
+              onPress={()=>{changeToView(Views.ListView)}}
+              source={Images.File}
+              fade={currentView === Views.ArchivedView}
+              selected={currentView === Views.ListView}
+              size={currentView === Views.ArchivedView?-4:-1}/>
+        )
+      case BottomBarIcons.Archived:
+        return(
+          <PressImage 
+            onPress={()=>{changeToView(Views.ArchivedView)}}
+            source={Images.Archive}
+            fade={currentView === Views.ListView}
+            selected={currentView === Views.ArchivedView}
+            size={currentView === Views.ListView?-4:(currentView === Views.ArchivedView?6:0)}/>
+        )
+    }
   }
 
   const getLeftBottomView = () => {
     return(
       <View style={s.leftContainer}>
-        <PressImage 
-          text={Constants.executionEnvironment === ExecutionEnvironment.StoreClient?"dev":undefined}
-          onPress={() => changeToView(Views.UserView)}
-          source={Images.User}
-          selected={currentView === Views.UserView}
-          color={user.Email===''?t.trashicontint:t.icontint}/>
-        {/* <PressImage
-          onPress={changeTheme}
-          source={Images.Theme}/> */}
-        {/* {showLoginStuff && <PressImage onPress={() => changeToView(Views.DevView)} source={Images.Dev} selected={currentView === Views.DevView}/>} */}
-        {showLoginStuff && <LoginView viewType="Image"/>}
+        {userPrefs.isRightHand?
+          <>
+            {getBottomIcon(BottomBarIcons.User)}
+            {getBottomIcon(BottomBarIcons.Settings)}
+            {getBottomIcon(BottomBarIcons.Theme)}
+            {/* {getBottomIcon(BottomBarIcons.Dev)} */}
+            {}
+          </>
+          :
+          <>
+            {/* {getBottomIcon(BottomBarIcons.Dev)} */}
+            {getBottomIcon(BottomBarIcons.Theme)}
+            {getBottomIcon(BottomBarIcons.Settings)}
+            {getBottomIcon(BottomBarIcons.User)}
+          </>
+        }
       </View>
     )
   }
@@ -64,18 +145,17 @@ const BottomBar = (props: BottomBarProps) => {
   const getRightBottomView = () => {
     return(
       <View style={s.rightContainer}>
-        <PressImage 
-          onPress={()=>{changeToView(Views.ArchivedView)}}
-          source={Images.Archive}
-          fade={currentView === Views.ListView}
-          selected={currentView === Views.ArchivedView}
-          size={currentView === Views.ListView?-4:(currentView === Views.ArchivedView?6:0)}/>
-        <PressImage 
-          onPress={()=>{changeToView(Views.ListView)}}
-          source={Images.File}
-          fade={currentView === Views.ArchivedView}
-          selected={currentView === Views.ListView}
-          size={currentView === Views.ArchivedView?-4:-1}/>
+        {userPrefs.isRightHand?
+          <>
+            {getBottomIcon(BottomBarIcons.Archived)}
+            {getBottomIcon(BottomBarIcons.List)}
+          </>
+          :
+          <>
+            {getBottomIcon(BottomBarIcons.List)}
+            {getBottomIcon(BottomBarIcons.Archived)}
+          </>
+        }
       </View>
     )
   }
@@ -86,20 +166,15 @@ const BottomBar = (props: BottomBarProps) => {
       justifyContent: 'center',
       alignItems: 'center',
       backgroundColor: t.backgroundcolordarker,
-
-      // borderColor: 'black',
-      // borderTopWidth: 1,
-      // borderStyle: 'solid',
     },
     leftContainer: {
       flexDirection: 'row',
-      justifyContent: 'flex-start',
-      alignItems: 'center',
+      justifyContent: userPrefs.isRightHand?'flex-start':'flex-end',
       width: '50%',
     },
     rightContainer: {
       flexDirection: 'row',
-      justifyContent: 'flex-end',
+      justifyContent: userPrefs.isRightHand?'flex-end':'flex-start',
       width: '50%',
     },
     imageContainerSelected:{
@@ -125,8 +200,9 @@ const BottomBar = (props: BottomBarProps) => {
 
   return (
     <View style={s.container}>
-      {getLeftBottomView()}
-      {getRightBottomView()}
+      {userPrefs.isRightHand?getLeftBottomView():getRightBottomView()}
+      {userPrefs.isRightHand?getRightBottomView():getLeftBottomView()}
+      {/* {getRightBottomView()} */}
     </View>
   );
 };

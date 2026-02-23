@@ -1,11 +1,13 @@
 // UserContext.tsx
 import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
-import { Item, Objective, MessageType, User, UserPrefs, Views, PopMessage, StoredImage, DefaultUser, ObjBottomIcons, MultiSelectAction, Step, DefaultUserPrefs } from '../Types';
+import { Item, Objective, MessageType, User, UserPrefs, Views, PopMessage, StoredImage, DefaultUser, ObjBottomIcons, MultiSelectAction, Step, DefaultUserPrefs, Themes } from '../Types';
 import { AppPalette, dark, globalStyle as gs, light } from '../Colors';
 import { FontPalette, fontDark, fontPaper, fontWhite } from '../../fonts/Font';
 import { useStorageContext } from './StorageContext';
 import { useLogContext } from './LogContext';
 import * as LocalAuthentication from 'expo-local-authentication';
+import { Pattern } from "../Types";
+import { Vibration } from 'react-native';
 
 interface UserProviderProps {
   children: ReactNode;
@@ -121,13 +123,29 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       await storage.writeUserPrefs(userPrefs);
       setUserPrefs(userPrefs);
 
-      if(userPrefs.theme === 'dark'){
+      if(userPrefs.theme === Themes.Dark){
         setTheme(dark);
         setFontTheme(fontDark);
       }
-      else if(userPrefs.theme === 'light'){
+      else if(userPrefs.theme === Themes.Light){
         setTheme(light);
         setFontTheme(fontDark);
+      }
+      else if(userPrefs.theme === Themes.Auto){
+        const now = new Date();
+        const hour = now.getHours(); // 0 → 23
+        const isBetween = hour >= 9 && hour < 18;
+
+        if(isBetween){
+          log.w('is')
+          setTheme(light);
+          setFontTheme(fontDark);
+        }
+        else{
+          log.w('not')
+          setTheme(dark);
+          setFontTheme(fontDark);
+        }
       }
     } catch (err) {
       log.err('writeUserPrefs', 'catch] writing user prefs.');
@@ -511,6 +529,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       log.err('deleteDeletedItems', 'Problem deleting deleted item', err);
     }
   };
+  ///-------------------- HELPERS
   const clearAllData = async () =>{ 
     await storage.clear();
     setUser(DefaultUser);
@@ -523,6 +542,19 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     setDeletedObjectives([]);
     setDeletedItems([]);
   };
+
+  const vibOk = () => {
+    if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
+  }
+  const vibWrong = () => {
+    if(userPrefs.vibrate) Vibration.vibrate(Pattern.Wrong);
+  }
+  const vibShort = () => {
+    if(userPrefs.vibrate) Vibration.vibrate(Pattern.Short);
+  }
+  const vibAlert = () => {
+    if(userPrefs.vibrate) Vibration.vibrate(Pattern.Alert);
+  }
   ///MULTI SELECT ITEMS
   const [multiSelectAction, setMultiSelectAction] = useState<MultiSelectAction|null>(null);
   ///-------------------- IMAGES
@@ -583,6 +615,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
         ///HELPERS
         clearAllData,
+        vibOk, vibAlert, vibShort, vibWrong,
 
         ///SECURITY
         requestBiometricAuth,
@@ -626,6 +659,7 @@ interface UserContextType {
   setMultiSelectAction: React.Dispatch<React.SetStateAction<MultiSelectAction | null>>,
   ///HELPERS
   clearAllData: () => void,
+  vibOk: () => void, vibWrong: () => void, vibShort: () => void, vibAlert: () => void,
   ///SECURITY
   requestBiometricAuth: (message?: string, fallbackMessage?: string) => Promise<boolean>
 }
