@@ -258,7 +258,7 @@ const ImageView = (props: ImageViewProps) => {
       alignItems: 'center',
       backgroundColor: o.innerbackgroundcolor,
       
-      borderColor: o.bordercolor,
+      borderColor: colorPalette.transparent,//o.bordercolor,
       borderWidth: 1,
       borderStyle: 'solid',
       borderRadius: o.borderRadius,

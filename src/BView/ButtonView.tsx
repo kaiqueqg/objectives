@@ -65,7 +65,7 @@ const ButtonView = (props: ButtonProps) => {
       verticalAlign: 'middle',
       backgroundColor: getBkColor(),
 
-      borderColor: t.bordercolorlight,
+      borderColor: '"black',
       borderWidth: 1,
       borderRadius: 5,
       borderStyle: 'solid',
@@ -81,7 +81,7 @@ const ButtonView = (props: ButtonProps) => {
       marginHorizontal: 15,
 
       color: getColor(),
-    }
+    },
   });
 
   const btnOnPress = () => {

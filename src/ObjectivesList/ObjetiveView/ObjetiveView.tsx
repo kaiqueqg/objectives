@@ -13,7 +13,7 @@ import PressText from "../../PressText/PressText";
 import PressImage from "../../PressImage/PressImage";
 import PressInput from "../../PressInput/PressInput";
 
-import { Item, ItemType, Note, Objective, Question, Step, Views, Wait, Location, Divider, Grocery, Pattern, MessageType, Medicine, Exercise, Weekdays, StepImportance, ItemNew, Link, Image, House, GenericItem, ObjBottomIcons, MultiSelectAction, MultiSelectType, Review } from "../../Types";
+import { Item, ItemType, Note, Objective, Question, Step, Views, Wait, Location, Divider, Grocery, Pattern, MessageType, Medicine, Exercise, Weekdays, StepImportance, ItemNew, Link, Image, House, GenericItem, ObjBottomIcons, MultiSelectAction, MultiSelectType, Review, Themes } from "../../Types";
 import { useEffect, useState } from "react";
 
 import QuestionView, {New as QuestionNew} from "./QuestionView/QuestionView";
@@ -137,9 +137,8 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     loadItems();
   }
 
-  const choseNewItemToAdd = async (type: ItemType, pos?:number) => {
+  const choseNewItemToAdd = async (type: ItemType, pos:number = items.length) => {
     const baseItem = {...ItemNew(user?user.UserId:'fakeuseridfakeuseridfakeuseridfakeuserid', obj.ObjectiveId, await storage.randomId(), type, pos??items.length, '')}
-    log.w('adding to ' + pos);
 
     let typeItem:any = {};
     switch (type) {
@@ -186,12 +185,14 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
         break;
     }
 
+    ///Create several items based on multiplier
     let itemList:Item[] = [];
     for (let i = 0; i < newItemsMultiplier; i++) {
       itemList.push({
         ...typeItem,
         ItemId: await storage.randomId(),
         LastModified: new Date().toISOString(),
+        pos: pos??+i,
       });
     }
 
@@ -200,38 +201,47 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
 
   const addNewItems = async (toAddItems: Item[], pos?:number) => {
     if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
-
     let sending:Item[] = [];
     if(pos !== null && pos !== undefined) {
-      const newList = items.filter((i: Item) => !items.includes(i));
-      const before = newList.slice(0, pos+1);
-      const after = newList.slice(pos+1);
+      // const newList = items.filter((i: Item) => !items.includes(i));
+      const before = items.slice(0, pos);
+      const after = items.slice(pos);
 
       let ajustedList = [...before, ...toAddItems, ...after];
 
       for(let i = 0; i < ajustedList.length; i++){
-        sending.push({...ajustedList[i], Pos: i, LastModified: (new Date()).toISOString()});
+        const newItem = {...ajustedList[i], Pos: i, LastModified: (new Date()).toISOString()};
+        sending.push(newItem);
       }
     }
     else{
       sending.push(...toAddItems);
     }
 
+
+    //Show red border to bring attention
     const justAdded = toAddItems.map((item:Item) => {
       return item.ItemId;
-    })
-
+    });
     setJustAddedItemId(justAdded);
-    // log.arrg('justAdded', justAdded)
     setTimeout(() => {
       setJustAddedItemId([]);
     }, 3000);
 
+    //Actual update
     await putItems(obj.ObjectiveId, sending);
     await loadItems();
-    itemsListScrollTo(items[items.length-2].ItemId);
 
-    if(!isItemOpenLocked) setIsItemsOpen(false);
+    const firstOnAddListItem = sending.find((item) => item.ItemId === toAddItems[0].ItemId);
+    if(firstOnAddListItem) itemsListScrollTo(pos);
+    
+    if(!isItemOpenLocked){
+      setIsItemsOpen(false);
+    }
+    else{
+    }
+    
+    log.r('end')
   }
 
   const onDeleteObjective = async () => {
@@ -990,7 +1000,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
         return(isListGoingUp?
           <PressImage cT={o} key={key} onPress={()=>{setIsListGoingUp(false); itemsListScrollTo()}} source={Images.ToTop}/>
           :
-          <PressImage cT={o} key={key} onPress={()=>{setIsListGoingUp(true); itemsListScrollTo(tempFilteredItems[tempFilteredItems.length-1].ItemId)}} source={Images.ToBottom}/>
+          <PressImage cT={o} key={key} onPress={()=>{setIsListGoingUp(true); itemsListScrollTo(tempFilteredItems.length-1)}} source={Images.ToBottom}/>
         );
       case ObjBottomIcons.Menu:
         return (<PressImage 
@@ -1189,24 +1199,31 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     setDevItemNumber(!devItemNumber);
   }
 
-  const itemsListScrollTo = (itemId?: string) => {
-    if(itemId === undefined){
+  const itemsListScrollTo = (pos?: number) => {
+    log.w('finding ' + pos)
+    if(pos === undefined){
       listRef.current?.scrollToIndex({ index: 0, animated: true })
       return;
     }
 
-    const newTo = tempFilteredItems.findIndex((e: Item)=>{
-      return e.ItemId === itemId;
-    });
+    log.arr('tempFilteredItems', tempFilteredItems)
 
+    if (pos < 0) {
+      log.r('index not found');
+      return;
+    }
+
+    log.r('f')
     if(listRef){
       try {
-        listRef.current?.scrollToIndex({ index: newTo, animated: true })
+        listRef.current?.scrollToIndex({ index: pos, animated: true })
       } catch (err) {}
     }
     else{
-      log.r(`itemsListScrollTo to ${newTo} and length is ${tempFilteredItems}`);
+      log.r(`itemsListScrollTo to ${pos} and length is ${tempFilteredItems}`);
     }
+
+    log.r('end')
   }
 
   const getTitleView = () => {
@@ -1661,25 +1678,25 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       borderStyle: 'solid',
     },
     colorPaletteNoTheme:{
-      backgroundColor: userPrefs.theme === 'dark'? colorPalette.objNoTheme:colorPalette.objNoThemeLight
+      backgroundColor: userPrefs.theme === Themes.Dark? colorPalette.objNoTheme:colorPalette.objNoThemeLight
     },
     colorPaletteBlue:{
-      backgroundColor: userPrefs.theme === 'dark'? colorPalette.objBlue:colorPalette.objBlueLight
+      backgroundColor: userPrefs.theme === Themes.Dark? colorPalette.objBlue:colorPalette.objBlueLight
     },
     colorPaletteRed:{
-      backgroundColor: userPrefs.theme === 'dark'? colorPalette.objRed:colorPalette.objRedLight
+      backgroundColor: userPrefs.theme === Themes.Dark? colorPalette.objRed:colorPalette.objRedLight
     },
     colorPaletteGreen:{
-      backgroundColor: userPrefs.theme === 'dark'? colorPalette.objGreen:colorPalette.objGreenLight
+      backgroundColor: userPrefs.theme === Themes.Dark? colorPalette.objGreen:colorPalette.objGreenLight
     },
     colorPaletteWhite:{
-      backgroundColor: userPrefs.theme === 'dark'? colorPalette.objWhite:colorPalette.objWhiteLight
+      backgroundColor: userPrefs.theme === Themes.Dark? colorPalette.objWhite:colorPalette.objWhiteLight
     },
     colorPaletteCyan:{
-      backgroundColor: userPrefs.theme === 'dark'? colorPalette.objCyan:colorPalette.objCyanLight
+      backgroundColor: userPrefs.theme === Themes.Dark? colorPalette.objCyan:colorPalette.objCyanLight
     },
     colorPalettePink:{
-      backgroundColor: userPrefs.theme === 'dark'? colorPalette.objPink:colorPalette.objPinkLight
+      backgroundColor: userPrefs.theme === Themes.Dark? colorPalette.objPink:colorPalette.objPinkLight
     },
     emptyImageContainer:{
       height: 40,

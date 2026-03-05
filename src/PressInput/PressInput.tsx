@@ -153,7 +153,7 @@ const PressInput = (props: PressInputProps) => {
     },
     input:{
       flex: 1,
-      color: t.backgroundcolordarker,
+      color: t.textcolor,
       marginHorizontal: 5,
       padding: 5,
       

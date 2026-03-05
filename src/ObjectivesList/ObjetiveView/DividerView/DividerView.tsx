@@ -22,7 +22,7 @@ export const New = () => {
 export interface DividerViewProps extends ItemViewProps{
   divider: Divider,
   orderDividerItems: (divider: Item) => void,
-  choseNewItemToAdd: (type: ItemType, pos?:number) => void,
+  choseNewItemToAdd: (type: ItemType, pos:number) => void,
   checkUncheckedDividerItems: (value: boolean, divider: Item )=> void,
 }
 
@@ -108,7 +108,10 @@ const DividerView = (props: DividerViewProps) => {
   }
 
   const addNewItem = (type: ItemType) => {
-    if(!isItemOpenLocked)setIsItemsOpen(false); choseNewItemToAdd(type, divider.Pos);
+    if(!isItemOpenLocked)
+      setIsItemsOpen(false); 
+    
+    choseNewItemToAdd(type, divider.Pos+1);
   }
 
   const onChangeAllCheckedUnchecked = () => {
@@ -181,7 +184,7 @@ const DividerView = (props: DividerViewProps) => {
       flex: 1,
       width: '100%',
 
-      // borderColor: t.tr,
+      borderColor: colorPalette.transparent,//
       borderWidth: 1,
       borderRadius: 5,
       borderStyle: 'solid',
@@ -209,7 +212,7 @@ const DividerView = (props: DividerViewProps) => {
       borderWidth: 1,
       borderRadius: 5,
       borderStyle: 'solid',
-      borderColor: o.bordercolor,
+      borderColor: colorPalette.transparent,//o.bordercolor,
 
       backgroundColor: o.backgroundcolordark,
     },

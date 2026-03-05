@@ -177,7 +177,7 @@ const StepView = (props: StepViewProps) => {
           </View>
           <View style={s.inputsCenter}>
             <View style={[s.titleRowContainer]}>
-              <TextInput 
+              <TextInput  
                 style={s.inputStyle}
                 placeholderTextColor={o.innertextcolorfade}
                 placeholder="Title"
@@ -186,9 +186,8 @@ const StepView = (props: StepViewProps) => {
                 onChangeText={(value: string)=>{setTempStep({...tempStep, Title: value})}} autoFocus={step.Title.trim() === ''}></TextInput>
             </View>
             <View style={[s.importanceIconContainer]}>
-              
               <PressImage cT={o} source={Images.Null} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.None);}}/>
-              <PressImage source={Images.Low} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.Low);}} raw/>
+              <PressImage source={Images.Low} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.Low);}} raw />
               <PressImage source={Images.Med} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.Medium);}} raw/>
               <PressImage source={Images.High} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.High);}} raw/>
               <PressImage source={Images.LadybugGreen} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.LadybugGreen);}} raw/>
@@ -200,7 +199,7 @@ const StepView = (props: StepViewProps) => {
             </View>
             <Pressable style={[s.autoDestroyContainer]} onPress={onChangeAutoDestroy}>
               <Text style={s.autoDestroyText}>Autodestroy when you click on</Text>
-              <PressImage cT={o} source={Images.Step} selected={step.Done}/>
+              <PressImage cT={o} source={Images.Step} selected={step.Done} disable={!tempStep.AutoDestroy}/>
             </Pressable>
           </View>
           <View style={s.inputsRight}>
@@ -228,7 +227,7 @@ const StepView = (props: StepViewProps) => {
       alignItems: 'center',
       backgroundColor: (step.Done && !isEditingStep)? o.backgroundcolor:o.innerbackgroundcolor,
       
-      borderColor: (step.Done && !isEditingStep)?colorPalette.transparent:o.bordercolor,
+      borderColor: colorPalette.transparent,//(step.Done && !isEditingStep)?colorPalette.transparent:o.bordercolor,
       borderWidth: 1,
       borderStyle: 'solid',
       borderRadius: o.borderRadius,
@@ -264,17 +263,18 @@ const StepView = (props: StepViewProps) => {
       verticalAlign: 'middle',
       flexDirection: "row",
       textAlign: 'center',
-      paddingHorizontal: 10,
+      paddingLeft: 10,
+      paddingRight: 5,
       marginBottom: 5,
-      backgroundColor: tempStep.AutoDestroy?o.backgroundcolordark:'#00000000',
+      backgroundColor: tempStep.AutoDestroy?o.backgroundcolordark:colorPalette.transparent,
 
-      borderColor: tempStep.AutoDestroy?o.bordercolor:'#00000000',
+      borderColor: tempStep.AutoDestroy?o.bordercolor:o.bordercolorfade,
       borderWidth: 1,
       borderRadius: 5,
       borderStyle: 'solid',
     },
     autoDestroyText:{
-      color: o.innertextcolor,
+      color: tempStep.AutoDestroy?o.innertextcolor:o.innertextcolorfade,
     },
     containerSelecting:{
       borderStyle: 'solid',

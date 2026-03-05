@@ -101,7 +101,7 @@ export const SettingsView: React.FC<SettingsViewProps> = (props: SettingsViewPro
       case Themes.Dark:
         return Themes.Light;
       case Themes.Light:
-        return Themes.Auto;
+        return Themes.Dark;
       default:
         return Themes.Dark;
     }
@@ -262,6 +262,14 @@ export const SettingsView: React.FC<SettingsViewProps> = (props: SettingsViewPro
             imageStyle={s.imageSmall}
             imageSource={Images.Sync}
             text={"Should automatically sync? - " + (userPrefs.autoSync? 'Yes.':'No.')}>
+          </PressText>
+          <PressText 
+            style={userPrefs.openLastObjectiveOnStart? s.userPrefsContainerOn:s.userPrefsContainerOff}
+            textStyle={userPrefs.openLastObjectiveOnStart? s.userPrefsTextOn:s.userPrefsTextOff}
+            onPress={() => {onChangePrefs({...userPrefs, openLastObjectiveOnStart: !userPrefs.openLastObjectiveOnStart})}}
+            imageStyle={s.imageSmall}
+            imageSource={Images.File}
+            text={"On start, should open last objective? - " + (userPrefs.openLastObjectiveOnStart? 'Yes.':'No.')}>
           </PressText>
           <View style={s.contentDivider}></View>
           <Text style={s.subHeader}>Objective bottom icons</Text>

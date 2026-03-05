@@ -239,6 +239,7 @@ export const DefaultUserPrefs: UserPrefs = {
   shouldLockOnOpen: false,
   shouldLockOnReopen: false,
   isRightHand: true,
+  openLastObjectiveOnStart: true,
 }
 
 export const DefaultUser:User = {
@@ -274,6 +275,7 @@ export interface UserPrefs{
   shouldLockOnOpen: boolean,
   shouldLockOnReopen: boolean,
   isRightHand: boolean,
+  openLastObjectiveOnStart: boolean,
 }
 
 export interface ObjectivesPrefs{

@@ -208,7 +208,7 @@ const LocationView = (props: LocationViewProps) => {
       alignItems: 'center',
       backgroundColor: (location.Url.trim() !== '' && !isEditingLocation)?colorPalette.transparent:o.innerbackgroundcolor,
       
-      borderColor: (location.Url.trim() !== '' && !isEditingLocation)?colorPalette.transparent:o.bordercolor,
+      borderColor: colorPalette.transparent,//(location.Url.trim() !== '' && !isEditingLocation)?colorPalette.transparent:o.bordercolor,
       borderWidth: 1,
       borderStyle: 'solid',
       borderRadius: o.borderRadius,

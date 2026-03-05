@@ -146,7 +146,7 @@ const MedicineView = (props: MedicineViewProps) => {
       alignItems: 'center',
       backgroundColor: (medicine.IsChecked && !isEditingMedicine)? colorPalette.transparent:o.innerbackgroundcolor,
       
-      borderColor: (medicine.IsChecked && !isEditingMedicine)?colorPalette.transparent:o.bordercolor,
+      borderColor: colorPalette.transparent,//(medicine.IsChecked && !isEditingMedicine)?colorPalette.transparent:o.bordercolor,
       borderWidth: 1,
       borderStyle: 'solid',
       borderRadius: o.borderRadius,

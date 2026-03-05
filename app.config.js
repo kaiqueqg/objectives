@@ -4,6 +4,7 @@ export default {
   expo: {
     name: "Objectives",
     slug: "Objectives",
+    scheme: "myapp",
     version: "1.0.0",
     orientation: "portrait",
     icon: "./public/images/appicon.png",

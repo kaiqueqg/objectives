@@ -1,4 +1,4 @@
-import { View, StyleSheet, StatusBar, AppStateStatus, AppState, KeyboardAvoidingView, Platform } from "react-native";
+import { View, StyleSheet, StatusBar, AppStateStatus, AppState, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, Pressable } from "react-native";
 import { Objective, Themes, Views } from "./Types";
 import { FontPalette } from "../fonts/Font";
 import { AppPalette, colorPalette } from "./Colors";
@@ -20,6 +20,7 @@ import { Images } from "./Images";
 import { SettingsView } from "./SettingsView/SettingsView";
 import { LoginView } from "./LoginView/LoginView";
 import { SafeAreaView } from 'react-native-safe-area-context';
+// import * as Linking from 'expo-linking';
 
 export interface MainProps{
 }
@@ -35,7 +36,7 @@ const Main = (props: MainProps) => {
     currentView, writeCurrentView,
     theme: t, fontTheme: f,
     objectives,
-    currentObjectiveId,
+    currentObjectiveId, writeCurrentObjectiveId
   } = useUserContext();
 
   const [currentObjective, setCurrentObjective] = useState<Objective|null>(null);
@@ -63,7 +64,18 @@ const Main = (props: MainProps) => {
       }
 
       if(appJustLaunched){
+        log.w('first')
         await onFirstOpenLock();
+
+        const v = await storage.readCurrentObjectiveId();
+        if(userPrefs.openLastObjectiveOnStart && v){
+          await writeCurrentObjectiveId(v);
+          await writeCurrentView(Views.IndividualView);
+        }
+      }
+      else{
+        
+        log.w('not first')
       }
 
       subscription = AppState.addEventListener('change', async (nextState) => {
@@ -81,8 +93,28 @@ const Main = (props: MainProps) => {
     }
     
     run();
-    
+
+    //test
+    // const subscriptiona = Linking.addEventListener('url', (event) => {
+    //   const { queryParams } = Linking.parse(event.url);
+
+    //   if (queryParams?.skipBio === 'true') {
+    //     setShowMainView(true);
+    //   }
+    // });
+
+    // // Cold start
+    // Linking.getInitialURL().then((url) => {
+    //   if (url) {
+    //     const { queryParams } = Linking.parse(url);
+    //     if (queryParams?.skipBio === 'true') {
+    //       setShowMainView(true);
+    //     }
+    //   }
+    // });
+
     return () => {
+      // if (subscriptiona) subscriptiona.remove();
       if (subscription) subscription.remove();
     };
   }, []);
@@ -200,20 +232,20 @@ const Main = (props: MainProps) => {
 
   return (
     <SafeAreaView style={s.safeAreaContainer}>
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-        {showMainView?
-          <View style={s.container}>
-            <PopMessageContainer></PopMessageContainer>
-              {getCurrentView()}
-            <BottomBar></BottomBar>
-            <StatusBar translucent backgroundColor="transparent" barStyle={statusBarTheme}/>
+        <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+          {showMainView?
+            <View style={s.container}>
+              <PopMessageContainer></PopMessageContainer>
+                {getCurrentView()}
+              <BottomBar></BottomBar>
+              <StatusBar translucent backgroundColor="transparent" barStyle={statusBarTheme}/>
+            </View>
+          :
+          <View style={s.lockedContainer}>
+            <PressImage source={Images.Lock} raw size={50} onPress={async () => await testBioAuth()}/>
           </View>
-        :
-        <View style={s.lockedContainer}>
-          <PressImage source={Images.Lock} raw size={50} onPress={async () => await testBioAuth()}/>
-        </View>
-        }
-      </KeyboardAvoidingView>
+          }
+        </KeyboardAvoidingView>
     </SafeAreaView>
     
   );

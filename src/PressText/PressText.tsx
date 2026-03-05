@@ -2,7 +2,7 @@ import React from "react";
 import { Pressable, Text, Image, ImageSourcePropType, StyleSheet, View } from "react-native";
 import { useUserContext } from "../Contexts/UserContext";
 import Loading from "../Loading/Loading";
-import { GeneralPalette, ObjectivePallete, globalStyle as gs } from "../Colors";
+import { GeneralPalette, ObjectivePallete, colorPalette, globalStyle as gs } from "../Colors";
 
 interface PressTextProps{
   style: any,
@@ -50,7 +50,7 @@ const PressText = (props: PressTextProps) => {
       ...props.defaultStyle,
       borderBottomWidth: 1,
       borderStyle: 'solid',
-      borderColor: o?.innertextcolorfade?? t.textcolorfade,
+      borderColor: colorPalette.transparent,//o?.innertextcolorfade?? t.textcolorfade,
       borderRadius: 5,
     },
     baseImage:{

@@ -134,7 +134,7 @@ const NoteView = (props: NoteViewProps) => {
       minHeight: 40,
       backgroundColor: (note.Text.trim() !== '' && !isEditingNote)?colorPalette.transparent:o.innerbackgroundcolor,
       
-      borderColor: (note.Text.trim() !== '' && !isEditingNote)?colorPalette.transparent:o.bordercolor,
+      borderColor: colorPalette.transparent,//(note.Text.trim() !== '' && !isEditingNote)?colorPalette.transparent:o.bordercolor,
       borderWidth: 1,
       borderStyle: 'solid',
       borderRadius: o.borderRadius,

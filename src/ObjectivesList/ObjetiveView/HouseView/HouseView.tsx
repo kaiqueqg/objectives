@@ -164,7 +164,7 @@ export const HouseView = (props: HouseViewProps) => {
       alignItems: 'center',
       backgroundColor: (house.WasContacted && !isEditingHouse)? colorPalette.transparent:o.innerbackgroundcolor,
       
-      borderColor: (house.WasContacted && !isEditingHouse)?colorPalette.transparent:o.bordercolor,
+      borderColor: colorPalette.transparent,//(house.WasContacted && !isEditingHouse)?colorPalette.transparent:o.bordercolor,
       borderWidth: 1,
       borderStyle: 'solid',
       borderRadius: o.borderRadius,

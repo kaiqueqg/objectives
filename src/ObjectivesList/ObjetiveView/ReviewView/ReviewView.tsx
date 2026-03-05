@@ -155,7 +155,7 @@ export const ReviewView = (props: ReviewViewProps) => {
       alignItems: 'center',
       backgroundColor: (!review.IsCurrentChoise && !isEditingReview)? colorPalette.transparent:o.innerbackgroundcolor,
       
-      borderColor: (!review.IsCurrentChoise && !isEditingReview)?colorPalette.transparent:o.bordercolor,
+      borderColor: colorPalette.transparent,//(!review.IsCurrentChoise && !isEditingReview)?colorPalette.transparent:o.bordercolor,
       borderWidth: 1,
       borderStyle: 'solid',
       borderRadius: o.borderRadius,

@@ -103,7 +103,7 @@ const QuestionView = (props: QuestionViewProps) => {
       alignItems: 'center',
       backgroundColor: (question.Statement.trim() !== '' && question.Answer.trim() !== '' && !isEditingQuestion)? o.backgroundcolor:o.innerbackgroundcolor,
       
-      borderColor: (question.Statement.trim() !== '' && question.Answer.trim() !== '' && !isEditingQuestion)?colorPalette.transparent:o.bordercolor,
+      borderColor: colorPalette.transparent,//(question.Statement.trim() !== '' && question.Answer.trim() !== '' && !isEditingQuestion)?colorPalette.transparent:o.bordercolor,
       borderWidth: 1,
       borderStyle: 'solid',
       borderRadius: o.borderRadius,

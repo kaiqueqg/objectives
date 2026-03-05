@@ -125,7 +125,7 @@ const LinkView = (props: LinkViewProps) => {
       alignItems: 'center',
       backgroundColor: (link.Title.trim() !=='' && !isEditingLinks)?colorPalette.transparent:o.innerbackgroundcolor,
       
-      borderColor: (link.Title.trim() !=='' && !isEditingLinks)?colorPalette.transparent:o.bordercolor,
+      borderColor: colorPalette.transparent,//(link.Title.trim() !=='' && !isEditingLinks)?colorPalette.transparent:o.bordercolor,
       borderWidth: 1,
       borderStyle: 'solid',
       borderRadius: o.borderRadius,

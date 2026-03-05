@@ -1,4 +1,5 @@
 import { ImageStyle, ViewStyle } from "react-native";
+import { Themes } from "./Types";
 
 export type ColorPalette = {
   transparent: string,
@@ -817,7 +818,8 @@ export const lightPink: ObjectivePallete = {
 /// -----------------------------
 
 export const getObjTheme = (appTheme: string, t: string): ObjectivePallete => {
-  if(appTheme === 'dark'){
+  if(appTheme === Themes.Dark){
+    console.log('dark')
     let rtn = noTheme;
 
     if(t === 'blue') rtn = darkBlue;
@@ -829,7 +831,8 @@ export const getObjTheme = (appTheme: string, t: string): ObjectivePallete => {
 
     return rtn;
   }
-  else if(appTheme === 'light'){
+  else if(appTheme === Themes.Dark){
+    console.log('light')
     let rtn = lightNoTheme;
 
     if(t === 'blue') rtn = lightBlue;

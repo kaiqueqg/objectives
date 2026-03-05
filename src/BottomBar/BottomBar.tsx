@@ -13,7 +13,7 @@ import { Images } from "../Images";
 export interface BottomBarProps {
 }
 
-enum BottomBarIcons { User = 'UserView', Settings = 'Settings', Theme = 'Theme', List = 'List', Archived = 'Archived', Dev = 'Dev' }
+enum BottomBarIcons { User = 'UserView', Settings = 'Settings', Theme = 'Theme', List = 'List', Archived = 'Archived', Dev = 'Dev', Sync = 'Sync' }
 
 const BottomBar = (props: BottomBarProps) => {
   const { user, userPrefs, theme: t, fontTheme: f, currentView, writeCurrentView, availableTags, selectedTags, currentObjectiveId, writeUserPrefs } = useUserContext();
@@ -52,7 +52,7 @@ const BottomBar = (props: BottomBarProps) => {
         newTheme = Themes.Light;
         break;
       case Themes.Light:
-        newTheme = Themes.Auto;
+        newTheme = Themes.Dark;
         break;
       default:
         newTheme = Themes.Dark;
@@ -114,7 +114,12 @@ const BottomBar = (props: BottomBarProps) => {
             source={Images.Archive}
             fade={currentView === Views.ListView}
             selected={currentView === Views.ArchivedView}
-            size={currentView === Views.ListView?-4:(currentView === Views.ArchivedView?6:0)}/>
+            size={currentView === Views.ListView?-4:(currentView === Views.ArchivedView?6:0)}
+          />
+        )
+      case BottomBarIcons.Sync:
+        return(
+          <LoginView viewType="Image"/>
         )
     }
   }
@@ -127,12 +132,13 @@ const BottomBar = (props: BottomBarProps) => {
             {getBottomIcon(BottomBarIcons.User)}
             {getBottomIcon(BottomBarIcons.Settings)}
             {getBottomIcon(BottomBarIcons.Theme)}
-            {/* {getBottomIcon(BottomBarIcons.Dev)} */}
-            {}
+            {getBottomIcon(BottomBarIcons.Dev)}
+            {getBottomIcon(BottomBarIcons.Sync)}
           </>
           :
           <>
-            {/* {getBottomIcon(BottomBarIcons.Dev)} */}
+            {getBottomIcon(BottomBarIcons.Sync)}
+            {getBottomIcon(BottomBarIcons.Dev)}
             {getBottomIcon(BottomBarIcons.Theme)}
             {getBottomIcon(BottomBarIcons.Settings)}
             {getBottomIcon(BottomBarIcons.User)}

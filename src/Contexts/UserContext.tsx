@@ -27,11 +27,11 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
     storage.readUserPrefs().then((userPrefs: any) => {
       if(userPrefs) setUserPrefs(userPrefs);
-      if(userPrefs.theme === 'dark'){
+      if(userPrefs.theme === Themes.Dark){
         setTheme(dark);
         setFontTheme(fontDark);
       }
-      else if(userPrefs.theme === 'light'){
+      else if(userPrefs.theme === Themes.Light){
         setTheme(light);
         setFontTheme(fontDark);
       }
@@ -137,12 +137,10 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         const isBetween = hour >= 9 && hour < 18;
 
         if(isBetween){
-          log.w('is')
           setTheme(light);
           setFontTheme(fontDark);
         }
         else{
-          log.w('not')
           setTheme(dark);
           setFontTheme(fontDark);
         }
@@ -482,6 +480,10 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
           newItems.push(item);
         })
       }
+
+      // const finalItems = newItems.map((item, i)=>{
+      //   return {...item, LastModified: (new Date()).toISOString(), Pos: i}
+      // })
 
       await storage.writeItems(objectiveId, newItems);
     } catch (err) {
