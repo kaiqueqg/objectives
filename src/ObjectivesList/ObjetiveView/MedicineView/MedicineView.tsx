@@ -1,14 +1,14 @@
 import { View, StyleSheet, Text, Vibration, TextInput, BackHandler, Keyboard } from "react-native";
 import { Medicine, Pattern, ItemViewProps } from "../../../Types";
-import { colorPalette, globalStyle as gs } from "../../../Colors";
-import { FontPalette } from "../../../../fonts/Font";
 import { useUserContext } from "../../../Contexts/UserContext";
+import { globalStyle as gs } from "../../../Colors";
 import PressImage from "../../../PressImage/PressImage";
 import { useEffect, useState } from "react";
 import PressText from "../../../PressText/PressText";
 import React from "react";
 import { useLogContext } from "../../../Contexts/LogContext";
 import { Images } from "../../../Images";
+import { cp } from "../../../ColorPalette";
 
 export const New = () => {
   return(
@@ -24,16 +24,16 @@ export const New = () => {
 }
 
 export interface MedicineViewProps extends ItemViewProps {
-  medicine: Medicine,
 }
 
 const MedicineView = (props: MedicineViewProps) => {
   const { userPrefs, theme: t, fontTheme: f, putItem } = useUserContext();
   const { log } = useLogContext();
-  const { objTheme: o, wasJustAdded, isSelected, isSelecting, isDisabled, onDeleteItem, loadMyItems, medicine } = props;
+  const { objTheme: o, wasJustAdded, isSelected, isSelecting, isDisabled, onDeleteItem, loadMyItems, item } = props;
+  const medicine = item as Medicine;
 
   const [isEditingMedicine, setIsEditingMedicine] = useState<boolean>(false);
-  const [tempMedicine, setTempMedicine] = useState<Medicine>(props.medicine);
+  const [tempMedicine, setTempMedicine] = useState<Medicine>(medicine);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
 
   useEffect(() => {
@@ -63,7 +63,7 @@ const MedicineView = (props: MedicineViewProps) => {
   }, [keyboardVisible]);
 
   useEffect(()=>{
-    setTempMedicine(props.medicine);
+    setTempMedicine(medicine);
   }, [medicine])
 
   const onDelete = async () => {
@@ -113,7 +113,7 @@ const MedicineView = (props: MedicineViewProps) => {
     }
 
     if(!isDisabled){
-      props.itemsListScrollTo(medicine.ItemId);
+      props.itemsListScrollTo(medicine.Pos);
       setIsEditingMedicine(!isEditingMedicine);
     }
   }
@@ -144,9 +144,9 @@ const MedicineView = (props: MedicineViewProps) => {
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      backgroundColor: (medicine.IsChecked && !isEditingMedicine)? colorPalette.transparent:o.innerbackgroundcolor,
+      backgroundColor: (medicine.IsChecked && !isEditingMedicine)? cp.transparent:o.innerbackgroundcolor,
       
-      borderColor: colorPalette.transparent,//(medicine.IsChecked && !isEditingMedicine)?colorPalette.transparent:o.bordercolor,
+      borderColor: cp.transparent,//(medicine.IsChecked && !isEditingMedicine)?colorPalette.transparent:o.bordercolor,
       borderWidth: 1,
       borderStyle: 'solid',
       borderRadius: o.borderRadius,

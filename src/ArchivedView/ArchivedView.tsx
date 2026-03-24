@@ -1,6 +1,5 @@
 import { View, StyleSheet, FlatList, Text, Vibration, BackHandler, Pressable } from "react-native";
-import { AppPalette, colorPalette, getObjTheme, globalStyle as gs } from "../Colors";
-import { FontPalette } from "../../fonts/Font";
+import { getObjTheme, globalStyle as gs } from "../Colors";
 import { useUserContext } from "../Contexts/UserContext";
 import PressText from "../PressText/PressText";
 import { Objective, Pattern, Views } from "../Types";
@@ -10,6 +9,7 @@ import React, { DO_NOT_USE_OR_YOU_WILL_BE_FIRED_CALLBACK_REF_RETURN_VALUES, JSX,
 import { useLogContext } from "../Contexts/LogContext";
 import { useStorageContext } from "../Contexts/StorageContext";
 import { Images } from "../Images";
+import { cp } from "../ColorPalette";
 
 export interface ArchivedViewProps {
 }
@@ -127,7 +127,7 @@ const ArchivedView = (props: ArchivedViewProps) => {
       flexDirection: "column",
       width: '60%',
 
-      borderColor: colorPalette.beigedark,
+      borderColor: cp.beigedark,
       borderLeftWidth: 1,
       borderStyle: 'solid',
     },

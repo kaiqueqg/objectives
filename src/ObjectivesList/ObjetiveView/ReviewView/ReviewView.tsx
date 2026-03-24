@@ -1,7 +1,5 @@
 import { View, StyleSheet, Text, Vibration, TextInput, BackHandler, Keyboard } from "react-native";
 import { Review, Pattern, ItemViewProps } from "../../../Types";
-import { colorPalette, globalStyle as gs } from "../../../Colors";
-import { FontPalette } from "../../../../fonts/Font";
 import { useUserContext } from "../../../Contexts/UserContext";
 import PressImage from "../../../PressImage/PressImage";
 import { useEffect, useState } from "react";
@@ -9,6 +7,7 @@ import PressText from "../../../PressText/PressText";
 import React from "react";
 import { useLogContext } from "../../../Contexts/LogContext";
 import { Images } from "../../../Images";
+import { cp } from "../../../ColorPalette";
 
 export const New = () => {
   return(
@@ -21,16 +20,16 @@ export const New = () => {
 }
 
 export interface ReviewViewProps extends ItemViewProps {
-  review: Review,
 }
 
 export const ReviewView = (props: ReviewViewProps) => {
   const { userPrefs, theme: t, fontTheme: f, putItem } = useUserContext();
   const { log } = useLogContext();
-  const { objTheme: o, wasJustAdded, isSelected, isSelecting, isDisabled, onDeleteItem, loadMyItems, review } = props;
+  const { objTheme: o, wasJustAdded, isSelected, isSelecting, isDisabled, onDeleteItem, loadMyItems, item } = props;
+  const review = item as Review;
 
   const [isEditingReview, setIsEditingReview] = useState<boolean>(false);
-  const [tempReview, setTempReview] = useState<Review>(props.review);
+  const [tempReview, setTempReview] = useState<Review>(review);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
 
   useEffect(() => {
@@ -60,7 +59,7 @@ export const ReviewView = (props: ReviewViewProps) => {
   }, [keyboardVisible]);
 
   useEffect(()=>{
-    setTempReview(props.review);
+    setTempReview(review);
   }, [review])
 
   const onDelete = async () => {
@@ -98,7 +97,7 @@ export const ReviewView = (props: ReviewViewProps) => {
     }
 
     if(!isDisabled){
-      props.itemsListScrollTo(review.ItemId);
+      props.itemsListScrollTo(review.Pos);
       setIsEditingReview(!isEditingReview);
     }
   }
@@ -153,9 +152,9 @@ export const ReviewView = (props: ReviewViewProps) => {
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      backgroundColor: (!review.IsCurrentChoise && !isEditingReview)? colorPalette.transparent:o.innerbackgroundcolor,
+      backgroundColor: (!review.IsCurrentChoise && !isEditingReview)? cp.transparent:o.innerbackgroundcolor,
       
-      borderColor: colorPalette.transparent,//(!review.IsCurrentChoise && !isEditingReview)?colorPalette.transparent:o.bordercolor,
+      borderColor: cp.transparent,//(!review.IsCurrentChoise && !isEditingReview)?colorPalette.transparent:o.bordercolor,
       borderWidth: 1,
       borderStyle: 'solid',
       borderRadius: o.borderRadius,

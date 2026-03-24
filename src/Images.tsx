@@ -109,9 +109,13 @@ export type ImageName =
   | 'User'
   | 'Vibrate'
   | 'Wait'
+  | 'Circle'
+  | 'Win95'
+  | 'Bell'
   | 'Zero';
 
 export const Images: Record<ImageName, any> = {
+  Bell: require('../public/images/bell.png'),
   Add: require('../public/images/add.png'),
   AppIcon: require('../public/images/appicon.png'),
   AppIconCopy: require('../public/images/appicon - Copy.png'),
@@ -223,4 +227,6 @@ export const Images: Record<ImageName, any> = {
   Vibrate: require('../public/images/vibrate.png'),
   Wait: require('../public/images/wait.png'),
   Zero: require('../public/images/zero.png'),
+  Circle: require('../public/images/circle.png'),
+  Win95: require('../public/images/win95.png'),
 };

@@ -1,7 +1,5 @@
 import { View, StyleSheet, Text, Vibration, TextInput, Keyboard, BackHandler, Pressable } from "react-native";
 import { Pattern,  Step, ItemViewProps, StepImportance } from "../../../Types";
-import { colorPalette, globalStyle as gs, ObjectivePallete } from "../../../Colors";
-import { FontPalette } from "../../../../fonts/Font";
 import { useUserContext } from "../../../Contexts/UserContext";
 import PressImage from "../../../PressImage/PressImage";
 import { useEffect, useState } from "react";
@@ -9,6 +7,7 @@ import { useLogContext } from "../../../Contexts/LogContext";
 import React from "react";
 import PressText from "../../../PressText/PressText";
 import { Images } from "../../../Images";
+import { cp } from "../../../ColorPalette";
 
 export const New = () => {
   return(
@@ -20,12 +19,12 @@ export const New = () => {
 }
 
 export interface StepViewProps extends ItemViewProps {
-  step: Step,
 }
 const StepView = (props: StepViewProps) => {
   const { userPrefs, theme: t, fontTheme: f, putItem } = useUserContext();
   const { log } = useLogContext();
-  const { objTheme: o, isSelected, isSelecting, isDisabled, onDeleteItem: onDelete, loadMyItems, step, isLocked, itemsListScrollTo, wasJustAdded} = props;
+  const { objTheme: o, isSelected, isSelecting, isDisabled, onDeleteItem: onDelete, loadMyItems, item, isLocked, itemsListScrollTo, wasJustAdded} = props;
+  const step = item as Step;
 
   const [isEditingStep, setIsEditingStep] = useState<boolean>(false);
   const [tempStep, setTempStep] = useState<Step>(step);
@@ -90,6 +89,8 @@ const StepView = (props: StepViewProps) => {
   }
 
   const onChangeIsDone = async () => {
+    if(isDisabled) return;
+
     if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
 
     if(step.AutoDestroy && !step.Done) { 
@@ -147,7 +148,7 @@ const StepView = (props: StepViewProps) => {
     }
 
     if(!isDisabled){
-      itemsListScrollTo(step.ItemId);
+      itemsListScrollTo(step.Pos);
       setIsEditingStep(!isEditingStep);
     }
   }
@@ -160,10 +161,10 @@ const StepView = (props: StepViewProps) => {
           style={s.titleContainer}
           textStyle={step.Done? s.titleFade:s.title}
           text={step.Title}
-          onPress={()=>{if(!isDisabled)onEditingStep()}}
+          onPress={()=>{onEditingStep()}}
           defaultStyle={o}
           ellipsizeMode='middle'/>
-        <PressImage cT={o} source={step.Done? Images.StepFilled:Images.Step} onPress={() => {if(!isDisabled)onChangeIsDone();}} confirm={step.AutoDestroy && !step.Done} fade={step.Done}/>
+        <PressImage cT={o} source={step.Done? Images.StepFilled:Images.Step} onPress={() => {onChangeIsDone();}} confirm={step.AutoDestroy && !step.Done} fade={step.Done}/>
       </View>
     )
   }
@@ -199,7 +200,7 @@ const StepView = (props: StepViewProps) => {
             </View>
             <Pressable style={[s.autoDestroyContainer]} onPress={onChangeAutoDestroy}>
               <Text style={s.autoDestroyText}>Autodestroy when you click on</Text>
-              <PressImage cT={o} source={Images.Step} selected={step.Done} disable={!tempStep.AutoDestroy}/>
+              <PressImage cT={o} source={Images.Step} isSelected={step.Done} disable={!tempStep.AutoDestroy}/>
             </Pressable>
           </View>
           <View style={s.inputsRight}>
@@ -227,7 +228,7 @@ const StepView = (props: StepViewProps) => {
       alignItems: 'center',
       backgroundColor: (step.Done && !isEditingStep)? o.backgroundcolor:o.innerbackgroundcolor,
       
-      borderColor: colorPalette.transparent,//(step.Done && !isEditingStep)?colorPalette.transparent:o.bordercolor,
+      borderColor: cp.transparent,//(step.Done && !isEditingStep)?colorPalette.transparent:o.bordercolor,
       borderWidth: 1,
       borderStyle: 'solid',
       borderRadius: o.borderRadius,
@@ -266,7 +267,7 @@ const StepView = (props: StepViewProps) => {
       paddingLeft: 10,
       paddingRight: 5,
       marginBottom: 5,
-      backgroundColor: tempStep.AutoDestroy?o.backgroundcolordark:colorPalette.transparent,
+      backgroundColor: tempStep.AutoDestroy?o.backgroundcolordark:cp.transparent,
 
       borderColor: tempStep.AutoDestroy?o.bordercolor:o.bordercolorfade,
       borderWidth: 1,
@@ -330,7 +331,7 @@ const StepView = (props: StepViewProps) => {
       alignItems: 'center',
     },
     importanceImageSelected:{
-      backgroundColor: colorPalette.lighter,
+      backgroundColor: cp.lighter,
 
       borderWidth: 1,
       borderStyle: 'dotted',

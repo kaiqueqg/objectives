@@ -22,7 +22,7 @@ interface RequestContextType {
   objectivesApi: {
     isUpObjective: (fError?: () => void) => Promise<any>,
     getObjectivesList: (fError?: () => void) => Promise<ObjectiveList|null>,
-    syncObjectivesList: (objectivesList: ObjectiveList, fError?: () => void) => Promise<ObjectiveList|null>,
+    syncObjectivesList: (objectivesList: ObjectiveList, fError?: (code: number) => void) => Promise<ObjectiveList|null>,
     backupData: (fError?: () => void) => Promise<boolean|null>,
     generateGetPresignedUrl: (fileInfo: ImageInfo, fError?: () => void) => Promise<PresignedUrl|null>,
     generatePutPresignedUrl: (fileInfo: ImageInfo, fError?: () => void) => Promise<PresignedUrl|null>,
@@ -43,7 +43,7 @@ export const RequestProvider: React.FC<RequestProviderProps> = ({ children }) =>
   const { log, popMessage } = useLogContext();
   const { storage } = useStorageContext();
   
-  const request = async (url: string, endpoint: string, method: string, body?: string, fError?: () => void): Promise<any> => {
+  const request = async (url: string, endpoint: string, method: string, body?: string): Promise<any> => {
     //^Headers
     const headers: {[key: string]: string} = {};
     headers['Content-Type'] = 'application/json';
@@ -60,7 +60,7 @@ export const RequestProvider: React.FC<RequestProviderProps> = ({ children }) =>
 
     const timeoutId = setTimeout(() => {
       controller.abort();
-      if(fError != undefined) fError();
+      // if(fError != undefined) fError();
     }, 60000);
 
     //^Fetch
@@ -75,12 +75,12 @@ export const RequestProvider: React.FC<RequestProviderProps> = ({ children }) =>
     } 
     catch (error){
       popMessage('Something really wrong with server route.', MessageType.Alert);
-      if(fError !== undefined){
-        fError();
-      }
-      else {
-        log.err("Error: " + error);
-      }
+      // if(fError !== undefined){
+        // fError();
+      // }
+      // else {
+      //   log.err("Error: " + error);
+      // }
 
       return undefined;
     }
@@ -104,12 +104,11 @@ export const RequestProvider: React.FC<RequestProviderProps> = ({ children }) =>
     },
     async requestIdentity<T>(endpoint: string, method: string, body?: string, fError?: () => void): Promise<T|null>{
       try {
-        const resp = await request("https://ptv4q6v3kf.execute-api.sa-east-1.amazonaws.com/dev", endpoint, method, body, fError);
+        const resp = await request("https://26nxfmsaf7.execute-api.eu-west-3.amazonaws.com/dev", endpoint, method, body);
         if(resp){
           const respData: Response<T> = await resp.json();
           if(resp.ok && respData.data){
-            if(respData.message) 
-              popMessage(respData.message);
+            if(respData.message) popMessage(respData.message);
 
             return respData.data;
           }else{
@@ -141,7 +140,7 @@ export const RequestProvider: React.FC<RequestProviderProps> = ({ children }) =>
     async getObjectivesList(fError?: () => void): Promise<ObjectiveList|null>{
       return this.requestObjectivesList<ObjectiveList>('/GetObjectivesList', 'GET', undefined, fError);
     },
-    async syncObjectivesList(objectivesList: ObjectiveList, fError?: () => void): Promise<ObjectiveList|null>{
+    async syncObjectivesList(objectivesList: ObjectiveList, fError?: (code: number) => void): Promise<ObjectiveList|null>{
       const rtn = await this.requestObjectivesList<ObjectiveList>('/SyncObjectivesList', 'PUT', JSON.stringify(objectivesList), fError);
       return rtn;
     },
@@ -258,9 +257,9 @@ export const RequestProvider: React.FC<RequestProviderProps> = ({ children }) =>
       return null;
     },
     //! Responsable to parse and react to equal among all, know, request errors.
-    async requestObjectivesList<T>(endpoint: string, method: string, body?: string, fError?: () => void): Promise<T|null>{
+    async requestObjectivesList<T>(endpoint: string, method: string, body?: string, fError?: (code: number) => void): Promise<T|null>{
       try {
-        const resp =await request("https://6gbemhsxx4.execute-api.sa-east-1.amazonaws.com/dev", endpoint, method, body, fError);
+        const resp =await request("https://i5ufjtn3aj.execute-api.eu-west-3.amazonaws.com/dev", endpoint, method, body);
         
         const respData: Response<T> = await resp.json();
         if(resp.ok && respData.data){
@@ -268,6 +267,7 @@ export const RequestProvider: React.FC<RequestProviderProps> = ({ children }) =>
         }else{
           if(resp.status === 401){
             popMessage('Unauthorized, you need to refresh token...', MessageType.Error);
+            if(fError) fError(401);
           }
           else if(resp.status === 500){
             log.r('Response: ', resp);
@@ -281,7 +281,7 @@ export const RequestProvider: React.FC<RequestProviderProps> = ({ children }) =>
         }
       } catch (err) {
         log.err('Error: ', endpoint, err);
-        if(fError) fError();
+        if(fError) fError(500);
       }
       return null;
     },

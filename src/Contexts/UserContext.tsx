@@ -13,16 +13,83 @@ interface UserProviderProps {
   children: ReactNode;
 }
 
+interface UserContextType {
+  ///USER
+  user: User, writeUser: (user: User) => void,
+  isLogged: boolean,
+  userPrefs: UserPrefs,  writeUserPrefs: (userPrefs: UserPrefs) => void,
+  theme: AppPalette, fontTheme: FontPalette,
+  ///JWT TOKEN
+  jwtToken: string|null, writeJwtToken: (token: string) => void, deleteJwtToken: () => void,
+  isAuthorized: boolean,
+  ///2FA Token
+  twoFAToken: string|null, writeTwoFAToken: (token: string) => void, deleteTwoFAToken: () => void,
+  ///VIEW
+  currentView: Views, writeCurrentView: (view: Views) => void,
+  currentObjectiveId: string, writeCurrentObjectiveId: (view: string) => void,
+  ///TAGS
+  availableTags: string[], writeAvailableTags: (availableTags: string[]) => void, putAvailableTags: (tags: string[]) => void, removeAvailableTags: (tags: string[]) => void,
+  selectedTags: string[], writeSelectedTags: (selectedTags: string[]) => void, putSelectedTags: (tags: string[]) => void, removeSelectedTags: (tags: string[]) => void, removeAvailableTagsIfUnique: (tags: string[]) => void
+  ///SYNC
+  lastSync: string|null, writeLastSync: (date: string) => void,
+  ///OBJECTIVE LIST
+  objectives: Objective[],
+  writeObjectives: (objective: Objective[]) => void, putObjective: (objective: Objective) => void, putObjectives: (objectives: Objective[]) => void,
+  deleteObjective: (objective: Objective) => void,
+  writeItems: (objectiveId: string, items: Item[]) => void, 
+  readItems: (objectiveId: string) => Promise<Item[]>, 
+  putItem: (item: Item) => void,
+  putItems: (objectiveId: string, items: Item[]) => void,
+  deleteItem: (item: Item) => void, 
+  deleteItems: (objectiveId: string, items: Item[]) => void, 
+  ///DELETED
+  deletedObjectives: Objective[], pushDeletedObjective: (obj: Objective) => void, deleteDeletedObjectives: () => void,
+  deletedItems: Item[], pushDeletedItem: (item: Item) => void,  deleteDeletedItems: () => void,
+  ///MULTISELECT
+  multiSelectAction: MultiSelectAction|null, 
+  setMultiSelectAction: React.Dispatch<React.SetStateAction<MultiSelectAction | null>>,
+  ///HELPERS
+  clearAllData: () => void,
+  vibOk: () => void, vibWrong: () => void, vibShort: () => void, vibAlert: () => void,
+  ///SECURITY
+  requestBiometricAuth: (message?: string, fallbackMessage?: string) => Promise<boolean>
+}
+
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const { storage } = useStorageContext();
   const { log } = useLogContext();
 
-  useEffect(() => {
+  const [currentView, setCurrentView] = useState<Views>(Views.ListView);
+  const [availableTags, setAvailableTags] = useState<string[]>([]);
+  const [theme, setTheme] = useState<AppPalette>(dark);
+  const [fontTheme, setFontTheme] = useState<FontPalette>(fontDark);
+  const [user, setUser] = useState<User>(DefaultUser);
+  const [jwtToken, setJwtToken] = useState<string|null>(null);
+  const [twoFAToken, setTwoFAToken] = useState<string|null>(null);
+  const [isLogged, setIsLogged] = useState<boolean>(false);
+  const [isAuthorized, setIsAuthorized] = useState<boolean>(false);
 
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [objectives, setObjectives] = useState<Objective[]>([]);
+  const [currentObjectiveId, setCurrentObjectiveId] = useState<string>('');
+  const [lastSync, setLastSync] = useState<string|null>(null);
+  const [deletedObjectives, setDeletedObjectives] = useState<Objective[]>([]);
+  const [deletedItems, setDeletedItems] = useState<Item[]>([]);
+  const [multiSelectAction, setMultiSelectAction] = useState<MultiSelectAction|null>(null);
+  const [storedImages, setStoredImages] = useState<StoredImage[]>([]);
+  const [storedNewImages, setStoredNewImages] = useState<StoredImage[]>([]);
+
+  useEffect(() => {
     storage.readUser().then((user: any) => {
       setUser(user);
+      setIsLogged(user.Email !== '');
+    });
+
+    storage.readJwtToken().then((jwt: string|null) => {
+      setJwtToken(jwt);
+      setIsAuthorized(jwt !== null);
     });
 
     storage.readUserPrefs().then((userPrefs: any) => {
@@ -39,6 +106,10 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     loadObjectives();
     loadLastSync();
   }, []);
+
+  useEffect(() => {
+    setIsLogged(user.Email !== '');
+  }, [user])
 
   const loadObjectives = async () => {
     const storageList = await storage.readObjectives();
@@ -93,7 +164,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   }
 
   ///-------------------- USER
-  const [user, setUser] = useState<User>(DefaultUser);
   const writeUser = async (user: User) => {
     try {
       await storage.writeUser(user);
@@ -151,26 +221,44 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     }
   };
 
-  const isLogged = () => {
-    return user.Email !== '';
-  }
-
-  const [theme, setTheme] = useState<AppPalette>(dark);
-  const [fontTheme, setFontTheme] = useState<FontPalette>(fontDark);
-
   ///-------------------- JWT TOKEN
-  const [jwtToken, setJwtToken] = useState<string|null>(null);
   const writeJwtToken = async (token: string) => {
     try {
       await storage.writeJwtToken(token);
       setJwtToken(token);
+      setIsAuthorized(true);
     } catch (err) {
       log.err('writeJwtToken', '[catch] error: ' + err);
     }
   };
+  const deleteJwtToken = async () => {
+    try {
+      await storage.deleteJwtToken();
+      setJwtToken(null);
+      setIsAuthorized(false);
+    } catch (err) {
+      log.err('deleteJwtToken', '[catch] error: ' + err);
+    }
+  };
+  ///-------------------- 2FA TOKEN
+   const writeTwoFAToken = async (token: string) => {
+    try {
+      await storage.writeTwoFAToken(token);
+      setTwoFAToken(token);
+    } catch (err) {
+      log.err('writeJwtToken', '[catch] error: ' + err);
+    }
+  };
+  const deleteTwoFAToken = async () => {
+    try {
+      await storage.deleteTwoFAToken();
+      setTwoFAToken(null);
+    } catch (err) {
+      log.err('deleteJwtToken', '[catch] error: ' + err);
+    }
+  };
 
   ///-------------------- VIEW
-  const [currentView, setCurrentView] = useState<Views>(Views.ListView);
   const writeCurrentView = async (view: Views) => {
     try {
       await storage.writeCurrentView(view);
@@ -180,7 +268,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     }
   };
   ///-------------------- TAGS
-  const [availableTags, setAvailableTags] = useState<string[]>([]);
   const writeAvailableTags = async (availableTags: string[]) => {
     try {
       const uniqueTags: string[] = Array.from(new Set(['Pin', ...availableTags]));
@@ -233,7 +320,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       log.err('removeAvailableTags', 'Problem removing available tags', err);
     }
   }
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const writeSelectedTags = async (selectedTags: string[]) => {
     try {
       const uniqueTags: string[] = Array.from(new Set(['Pin', ...selectedTags]));
@@ -261,7 +347,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   };
 
   ///-------------------- CURRENT OBJECTIVE
-  const [currentObjectiveId, setCurrentObjectiveId] = useState<string>('');
   const writeCurrentObjectiveId = async (id: string) => {
     try {
       await storage.writeCurrentObjectiveId(id);
@@ -271,7 +356,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     }
   };
   ///-------------------- SYNC
-  const [lastSync, setLastSync] = useState<string|null>(null);
   const writeLastSync = async (value: string) => {
     try {
       await storage.writeLastSync(value);
@@ -281,7 +365,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     }
   }
   ///-------------------- OBJECTIVES
-  const [objectives, setObjectives] = useState<Objective[]>([]);
   const writeObjectives = async (objectives: Objective[]) => {
     try {
       for(let i = 0; i < objectives.length; i++){
@@ -334,8 +417,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       setObjectives(newObjs);
 
       //!Adding to deteled
-      let newDeletedObj = [...deletedObjectives];
-      newDeletedObj.push(objective);
+      let newDeletedObj = [...deletedObjectives, objective];
       setDeletedObjectives(newDeletedObj);
       await storage.writeDeletedObjectives(newDeletedObj);
     } catch (err) {
@@ -491,11 +573,9 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     }
   };
   ///-------------------- DELETED
-  const [deletedObjectives, setDeletedObjectives] = useState<Objective[]>([]);
-  const [deletedItems, setDeletedItems] = useState<Item[]>([]);
   const pushDeletedObjective = async (obj: Objective) => {
     try {
-      let newObjs = {...deletedObjectives};
+      let newObjs = [...deletedObjectives];
       newObjs.push(obj);
   
       await storage.writeDeletedObjectives(newObjs);
@@ -514,7 +594,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   };
   const pushDeletedItem = async (item: Item) => {
     try {
-      let newItems = {...deletedItems};
+      let newItems = [...deletedItems];
       newItems.push(item);
   
       await storage.writeDeletedItems(newItems);
@@ -533,9 +613,11 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   };
   ///-------------------- HELPERS
   const clearAllData = async () =>{ 
-    await storage.clear();
-    setUser(DefaultUser);
-    setJwtToken(null);
+    await deleteUser();
+    await deleteJwtToken();
+
+    console.log('clearAllData ' + user.Email)
+    
     setAvailableTags(['Pin']);
     setSelectedTags(['Pin']);
     setCurrentObjectiveId('');
@@ -558,16 +640,13 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     if(userPrefs.vibrate) Vibration.vibrate(Pattern.Alert);
   }
   ///MULTI SELECT ITEMS
-  const [multiSelectAction, setMultiSelectAction] = useState<MultiSelectAction|null>(null);
   ///-------------------- IMAGES
-  const [storedImages, setStoredImages] = useState<StoredImage[]>([]);
   const putStoredImages = async (images: StoredImage[]) => {
     
   };
   const deleteStoredImages = async (images: StoredImage[]) => {
     
   };
-  const [storedNewImages, setStoredNewImages] = useState<StoredImage[]>([]);
   const putStoredNewImages = async (images: StoredImage[]) => {
     
   };
@@ -595,8 +674,11 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         userPrefs, writeUserPrefs,
         theme, fontTheme,
         isLogged,
+        isAuthorized,
         ///JWT TOKEN
-        jwtToken, writeJwtToken,
+        jwtToken, writeJwtToken, deleteJwtToken,
+        ///TwoFAToken
+        twoFAToken, writeTwoFAToken, deleteTwoFAToken,
         ///VIEW
         currentView, writeCurrentView,
         currentObjectiveId, writeCurrentObjectiveId,
@@ -626,45 +708,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     </UserContext.Provider>
   );
 };
-
-interface UserContextType {
-  ///USER
-  user: User, writeUser: (user: User) => void,
-  userPrefs: UserPrefs,  writeUserPrefs: (userPrefs: UserPrefs) => void,
-  theme: AppPalette, fontTheme: FontPalette,
-  isLogged: () => void,
-  ///JWT TOKEN
-  jwtToken: string|null, writeJwtToken: (token: string) => void, 
-  ///VIEW
-  currentView: Views, writeCurrentView: (view: Views) => void,
-  currentObjectiveId: string, writeCurrentObjectiveId: (view: string) => void,
-  ///TAGS
-  availableTags: string[], writeAvailableTags: (availableTags: string[]) => void, putAvailableTags: (tag: string[]) => void, removeAvailableTags: (tag: string[]) => void,
-  selectedTags: string[], writeSelectedTags: (selectedTags: string[]) => void, putSelectedTags: (tags: string[]) => void, removeSelectedTags: (tags: string[]) => void, removeAvailableTagsIfUnique: (tags: string[]) => void
-  ///SYNC
-  lastSync: string|null, writeLastSync: (date: string) => void,
-  ///OBJECTIVE LIST
-  objectives: Objective[],
-  writeObjectives: (objective: Objective[]) => void, putObjective: (objective: Objective) => void, putObjectives: (objectives: Objective[]) => void,
-  deleteObjective: (objective: Objective) => void,
-  writeItems: (objectiveId: string, items: Item[]) => void, 
-  readItems: (objectiveId: string) => Promise<Item[]>, 
-  putItem: (item: Item) => void,
-  putItems: (objectiveId: string, items: Item[]) => void,
-  deleteItem: (item: Item) => void, 
-  deleteItems: (objectiveId: string, items: Item[]) => void, 
-  ///DELETED
-  deletedObjectives: Objective[], pushDeletedObjective: (obj: Objective) => void, deleteDeletedObjectives: () => void,
-  deletedItems: Item[], pushDeletedItem: (item: Item) => void,  deleteDeletedItems: () => void,
-  ///MULTISELECT
-  multiSelectAction: MultiSelectAction|null, 
-  setMultiSelectAction: React.Dispatch<React.SetStateAction<MultiSelectAction | null>>,
-  ///HELPERS
-  clearAllData: () => void,
-  vibOk: () => void, vibWrong: () => void, vibShort: () => void, vibAlert: () => void,
-  ///SECURITY
-  requestBiometricAuth: (message?: string, fallbackMessage?: string) => Promise<boolean>
-}
 
 export const useUserContext = () => {
   const context = useContext(UserContext);

@@ -1,5 +1,4 @@
 import { View, StyleSheet, Vibration, Keyboard, BackHandler, TextInput } from "react-native";
-import { colorPalette, globalStyle as gs } from "../../../Colors";
 import { useUserContext } from "../../../Contexts/UserContext";
 import { Note, ItemViewProps, Pattern } from "../../../Types";
 import PressImage from "../../../PressImage/PressImage";
@@ -7,6 +6,7 @@ import { useEffect, useState } from "react";
 import { useLogContext } from "../../../Contexts/LogContext";
 import PressText from "../../../PressText/PressText";
 import { Images } from "../../../Images";
+import { cp } from "../../../ColorPalette";
 
 export const New = () => {
   return(
@@ -17,13 +17,13 @@ export const New = () => {
 }
 
 export interface NoteViewProps extends ItemViewProps {
-  note: Note,
 }
 
 const NoteView = (props: NoteViewProps) => {
   const { userPrefs, theme: t, fontTheme: f, putItem } = useUserContext();
   const { log, popMessage } = useLogContext();
-  const { objTheme: o, itemsListScrollTo, isLocked, wasJustAdded, isSelected, isSelecting, isDisabled, onDeleteItem, loadMyItems, note } = props;
+  const { objTheme: o, itemsListScrollTo, isLocked, wasJustAdded, isSelected, isSelecting, isDisabled, onDeleteItem, loadMyItems, item } = props;
+  const note = item as Note;
 
   const [newNote, setNewNote] = useState<Note>(note);
   const [isEditingNote, setIsEditingNote] = useState<boolean>(false);
@@ -82,11 +82,11 @@ const NoteView = (props: NoteViewProps) => {
     }
 
     if(!isDisabled){
-      itemsListScrollTo(note.ItemId);
+      itemsListScrollTo(note.Pos);
       setIsEditingNote(!isEditingNote);
     }
     else{
-      popMessage('qsds')
+      popMessage('note')
     }
   }
 
@@ -132,9 +132,9 @@ const NoteView = (props: NoteViewProps) => {
       justifyContent: 'center',
       alignItems: 'center',
       minHeight: 40,
-      backgroundColor: (note.Text.trim() !== '' && !isEditingNote)?colorPalette.transparent:o.innerbackgroundcolor,
+      backgroundColor: (note.Text.trim() !== '' && !isEditingNote)?cp.transparent:o.innerbackgroundcolor,
       
-      borderColor: colorPalette.transparent,//(note.Text.trim() !== '' && !isEditingNote)?colorPalette.transparent:o.bordercolor,
+      borderColor: cp.transparent,//(note.Text.trim() !== '' && !isEditingNote)?colorPalette.transparent:o.bordercolor,
       borderWidth: 1,
       borderStyle: 'solid',
       borderRadius: o.borderRadius,

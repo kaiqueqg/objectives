@@ -11,9 +11,7 @@ import PressImage from '../PressImage/PressImage';
 interface SettingsViewProps {
 }
 export const SettingsView: React.FC<SettingsViewProps> = (props: SettingsViewProps) => {
-  const { log, popMessage } = useLogContext();
-  const { storage } = useStorageContext();
-  const { theme: t, fontTheme: f, user, userPrefs, writeUserPrefs } = useUserContext();
+  const { theme: t, fontTheme: f, userPrefs, writeUserPrefs } = useUserContext();
   
   const onAddIconToDisplay = (icon: string) => {
     if (userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
@@ -66,6 +64,7 @@ export const SettingsView: React.FC<SettingsViewProps> = (props: SettingsViewPro
     const shouldFade = !userPrefs.ObjectivesPrefs.iconsToDisplay.includes(icon);
     return(
       <PressImage 
+        key={icon+shouldFade}
         onPress={()=>onAddIconToDisplay(ObjBottomIcons[icon])}
         source={source}
         fade={shouldFade}
@@ -75,23 +74,54 @@ export const SettingsView: React.FC<SettingsViewProps> = (props: SettingsViewPro
     )
   }
 
-  const getObjectiveIconsView = () => {
-    return(
-      <>
-        {getIconImage(ObjBottomIcons.Unarchive, Images.Unarchive)}
-        {getIconImage(ObjBottomIcons.Archive, Images.Archive)}
-        {getIconImage(ObjBottomIcons.Palette, Images.Palette)}
-        {getIconImage(ObjBottomIcons.Tags, Images.Tag)}
-        {getIconImage(ObjBottomIcons.Sorted, Images.AtoZ)}
-        {getIconImage(ObjBottomIcons.Search, Images.Search)}
-        {getIconImage(ObjBottomIcons.Pos, Images.Change)}
-        {getIconImage(ObjBottomIcons.IsLocked, Images.Lock)}
-        {getIconImage(ObjBottomIcons.Checked, Images.Checked)}
-        {getIconImage(ObjBottomIcons.Add, Images.Add)}
-        {getIconImage(ObjBottomIcons.FoldUnfoldAll, Images.DoubleDownChevron)}
-        {getIconImage(ObjBottomIcons.GoingTopDown, Images.ToBottom)}
-      </>
-    );
+  const objBottomIconImageRecord: Record<ObjBottomIcons, any> = {
+    [ObjBottomIcons.Menu]: Images.Menu,
+    [ObjBottomIcons.Archive]: Images.Archive,
+    [ObjBottomIcons.Unarchive]: Images.Unarchive,
+    [ObjBottomIcons.Palette]: Images.Palette,
+    [ObjBottomIcons.Checked]: Images.Checked,
+    [ObjBottomIcons.Tags]: Images.Tag,
+    [ObjBottomIcons.Sorted]: Images.Sort,
+    [ObjBottomIcons.Pos]: Images.Change,
+    [ObjBottomIcons.Add]: Images.Add,
+    [ObjBottomIcons.Search]: Images.Search,
+    [ObjBottomIcons.IsLocked]: Images.Lock,
+    [ObjBottomIcons.FoldUnfoldAll]: Images.DoubleDownChevron,
+    [ObjBottomIcons.GoingTopDown]: Images.ToBottom,
+  }
+
+  const getObjectiveIconsDisplayView = () => {
+    let itemsToDisplay: any[] = [];
+    let itemsToHide: any = [];
+
+    for(const v of Object.values(ObjBottomIcons)){
+      const should = userPrefs.ObjectivesPrefs.iconsToDisplay.includes(v);
+      if(should){
+        itemsToDisplay.push(getIconImage(v, objBottomIconImageRecord[v]));
+      }
+      else{
+        itemsToHide.push(getIconImage(v, objBottomIconImageRecord[v]));
+      }
+    }
+
+    return itemsToDisplay;
+  }
+
+  const getObjectiveIconsFadeView = () => {
+    let itemsToDisplay: any[] = [];
+    let itemsToHide: any = [];
+
+    for(const v of Object.values(ObjBottomIcons)){
+      const should = !userPrefs.ObjectivesPrefs.iconsToDisplay.includes(v);
+      if(should){
+        itemsToDisplay.push(getIconImage(v, objBottomIconImageRecord[v]));
+      }
+      else{
+        itemsToHide.push(getIconImage(v, objBottomIconImageRecord[v]));
+      }
+    }
+
+    return itemsToDisplay;
   }
 
   const changeTheme = () => {
@@ -128,6 +158,7 @@ export const SettingsView: React.FC<SettingsViewProps> = (props: SettingsViewPro
       alignItems: 'center',
     },
     scrollView:{
+      width: '100%',
       paddingBottom: 25,
       paddingTop: 10,
       paddingHorizontal: 10,
@@ -141,7 +172,14 @@ export const SettingsView: React.FC<SettingsViewProps> = (props: SettingsViewPro
     subHeader:{
       textAlign: 'center',
       color: t.textcolor,
+      fontWeight: 'bold',
       fontSize: 15,
+      margin: 10,
+    },
+    subSubHeader:{
+      textAlign: 'center',
+      color: t.textcolorfade,
+      fontSize: 13,
       margin: 10,
     },
     userPrefsContainerOn:{
@@ -205,7 +243,7 @@ export const SettingsView: React.FC<SettingsViewProps> = (props: SettingsViewPro
     objectiveIconContainer:{
       flexDirection: 'row',
       flexWrap: "wrap",
-      justifyContent: userPrefs.isRightHand?'flex-start':'flex-end',
+      justifyContent: userPrefs.isRightHand?'flex-end':'flex-start',
       minHeight: 45,
     },
   })
@@ -272,9 +310,12 @@ export const SettingsView: React.FC<SettingsViewProps> = (props: SettingsViewPro
             text={"On start, should open last objective? - " + (userPrefs.openLastObjectiveOnStart? 'Yes.':'No.')}>
           </PressText>
           <View style={s.contentDivider}></View>
-          <Text style={s.subHeader}>Objective bottom icons</Text>
+          <Text style={s.subHeader}>Objective bottom icons to display</Text>
           <View style={s.objectiveIconContainer}>
-            {getObjectiveIconsView()}
+            {getObjectiveIconsDisplayView()}
+          </View>
+          <View style={s.objectiveIconContainer}>
+            {getObjectiveIconsFadeView()}
           </View>
           <View style={s.contentDivider}></View>
           <Text style={s.subHeader}>Location</Text>

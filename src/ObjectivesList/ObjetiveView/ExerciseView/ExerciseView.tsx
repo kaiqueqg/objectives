@@ -1,6 +1,6 @@
 import { View, StyleSheet, Vibration, TextInput, Text, Keyboard, BackHandler } from "react-native";
 import { Exercise, Pattern, ItemViewProps, Weekdays } from "../../../Types";
-import { colorPalette, getObjTheme, globalStyle as gs } from "../../../Colors";
+import { globalStyle as gs } from "../../../Colors";
 import { FontPalette } from "../../../../fonts/Font";
 import { useUserContext } from "../../../Contexts/UserContext";
 import PressImage from "../../../PressImage/PressImage";
@@ -9,6 +9,7 @@ import PressText from "../../../PressText/PressText";
 import React from "react";
 import { useLogContext } from "../../../Contexts/LogContext";
 import { Images } from "../../../Images";
+import { cp } from "../../../ColorPalette";
 
 export const New = () => {
   return(
@@ -27,7 +28,6 @@ export const New = () => {
 }
 
 export interface ExerciseViewProps extends ItemViewProps {
-  exercise: Exercise,
 }
 
 export const bodyImages: Record<string, any> = {
@@ -63,7 +63,8 @@ export const bodyImages: Record<string, any> = {
 
 const ExerciseView = (props: ExerciseViewProps) => {
   const { userPrefs, theme: t, fontTheme: f, putItem } = useUserContext();
-  const { objTheme: o, wasJustAdded, isSelected, isSelecting, isDisabled, onDeleteItem, loadMyItems, exercise } = props;
+  const { objTheme: o, wasJustAdded, isSelected, isSelecting, isDisabled, onDeleteItem, loadMyItems, item } = props;
+  const exercise = item as Exercise;
   const { log } = useLogContext();
 
   const [isEditingExercise, setIsEditingExercise] = useState<boolean>(false);
@@ -243,7 +244,7 @@ const ExerciseView = (props: ExerciseViewProps) => {
     }
 
     if(!isDisabled){
-      props.itemsListScrollTo(exercise.ItemId);
+      props.itemsListScrollTo(exercise.Pos);
       setIsEditingExercise(!isEditingExercise);
     }
   }
@@ -315,7 +316,7 @@ const ExerciseView = (props: ExerciseViewProps) => {
       alignItems: 'center',
       backgroundColor: (exercise.IsDone && !isEditingExercise)? o.backgroundcolor:o.innerbackgroundcolor,
       
-      borderColor: colorPalette.transparent,//(exercise.IsDone && !isEditingExercise)?colorPalette.transparent:o.bordercolor,
+      borderColor: cp.transparent,//(exercise.IsDone && !isEditingExercise)?colorPalette.transparent:o.bordercolor,
       borderWidth: 1,
       borderStyle: 'solid',
       borderRadius: o.borderRadius,

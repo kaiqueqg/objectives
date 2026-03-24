@@ -3,7 +3,7 @@ import * as Font from 'expo-font';
 import React, { useEffect, useState } from 'react';
 import { UserProvider } from './src/Contexts/UserContext';
 import Main from './src/Main';
-import { colorPalette } from './src/Colors';
+import { cp } from './src/ColorPalette';
 import { StorageProvider } from './src/Contexts/StorageContext';
 import { LogProvider } from './src/Contexts/LogContext';
 import { RequestProvider } from './src/Contexts/RequestContext';
@@ -37,16 +37,6 @@ export default function App() {
     setIsLoadingFont(false);
   }
   const s = StyleSheet.create({
-    container: {
-      flex: 1,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    loading: {
-      color: colorPalette.beige,
-      fontWeight: 'bold',
-      fontSize: 20,
-    },
   });
 
   return (
@@ -54,13 +44,13 @@ export default function App() {
       <StorageProvider>
         <RequestProvider>
           <UserProvider>
-            <View style={s.container}>
+            {/* <View style={s.container}> */}
               <Main></Main>
               {/* {isLoadingFont?
                 <Text style={s.loading}>Loading...</Text>
                 :
               } */}
-            </View>
+            {/* </View> */}
           </UserProvider>
         </RequestProvider>
       </StorageProvider>

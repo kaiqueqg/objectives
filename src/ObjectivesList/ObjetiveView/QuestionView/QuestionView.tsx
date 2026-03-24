@@ -1,7 +1,7 @@
 import { View, StyleSheet,Text, Image, Vibration, TextInput, Keyboard, BackHandler } from "react-native";
 import { ItemViewProps, Pattern, Question } from "../../../Types";
 import { FontPalette, fontWhite } from "../../../../fonts/Font";
-import { colorPalette, globalStyle as gs } from "../../../Colors";
+import { globalStyle as gs } from "../../../Colors";
 import { useUserContext } from "../../../Contexts/UserContext";
 import PressInput from "../../../PressInput/PressInput";
 import PressImage from "../../../PressImage/PressImage";
@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import PressText from "../../../PressText/PressText";
 import React from "react";
 import { Images } from "../../../Images";
+import { cp } from "../../../ColorPalette";
 
 export const New = () => {
   return(
@@ -20,15 +21,15 @@ export const New = () => {
 }
 
 export interface QuestionViewProps extends ItemViewProps{
-  question: Question,
 }
 
 const QuestionView = (props: QuestionViewProps) => {
   const { userPrefs, theme: t, fontTheme: f, putItem } = useUserContext();
-  const { objTheme: o, wasJustAdded, isSelected, isSelecting, isDisabled, onDeleteItem, loadMyItems, question } = props;
+  const { objTheme: o, wasJustAdded, isSelected, isSelecting, isDisabled, onDeleteItem, loadMyItems, item } = props;
+  const question = item as Question;
 
   const [isEditingQuestion, setIsEditingQuestion] = useState<boolean>(false);
-  const [tempQuestion, setTempQuestion] = useState<Question>(props.question);
+  const [tempQuestion, setTempQuestion] = useState<Question>(question);
 
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   
@@ -82,7 +83,7 @@ const QuestionView = (props: QuestionViewProps) => {
     }
 
     if(!isDisabled){
-      props.itemsListScrollTo(question.ItemId);
+      props.itemsListScrollTo(question.Pos);
       setIsEditingQuestion(!isEditingQuestion);
     }
   }
@@ -103,7 +104,7 @@ const QuestionView = (props: QuestionViewProps) => {
       alignItems: 'center',
       backgroundColor: (question.Statement.trim() !== '' && question.Answer.trim() !== '' && !isEditingQuestion)? o.backgroundcolor:o.innerbackgroundcolor,
       
-      borderColor: colorPalette.transparent,//(question.Statement.trim() !== '' && question.Answer.trim() !== '' && !isEditingQuestion)?colorPalette.transparent:o.bordercolor,
+      borderColor: cp.transparent,//(question.Statement.trim() !== '' && question.Answer.trim() !== '' && !isEditingQuestion)?colorPalette.transparent:o.bordercolor,
       borderWidth: 1,
       borderStyle: 'solid',
       borderRadius: o.borderRadius,

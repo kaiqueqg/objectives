@@ -1,6 +1,5 @@
-import { View, StyleSheet, FlatList, Text, Vibration, BackHandler, Pressable, TextInput, Image } from "react-native";
-import { AppPalette, colorPalette, getObjTheme, globalStyle as gs } from "../Colors";
-import { FontPalette } from "../../fonts/Font";
+import { View, StyleSheet, FlatList, Text, Vibration, BackHandler, TextInput, Image } from "react-native";
+import { getObjTheme, globalStyle as gs } from "../Colors";
 import { useUserContext } from "../Contexts/UserContext";
 import PressText from "../PressText/PressText";
 import { MessageType, Objective, Pattern, Views } from "../Types";
@@ -12,6 +11,7 @@ import { Images } from "../Images";
 
 export interface ObjsListViewProps {
 }
+
 const ObjsListView = (props: ObjsListViewProps) => {
   const { log, popMessage, messageList } = useLogContext();
   const { storage } = useStorageContext();
@@ -247,8 +247,7 @@ const ObjsListView = (props: ObjsListViewProps) => {
               isEndingPos && isSelected? s.objectiveButtonContainerEnding:undefined]}
             textStyle={[s.text]}
             onPress={() => onSelectCurrentObj(item.ObjectiveId)}
-            text={item.Title}
-            defaultStyle={objTheme}></PressText>
+            text={item.Title}></PressText>
         </View>
       </>
       :
@@ -261,7 +260,6 @@ const ObjsListView = (props: ObjsListViewProps) => {
             {backgroundColor: objTheme.backgroundcolor}]}
           textStyle={[s.text, {color: objTheme.textcolor}]}
           onPress={() => onSelectCurrentObj(item.ObjectiveId)}
-          defaultStyle={objTheme}
           defaultText="?"
           hideDefaultTextBorder={true}
           ellipsizeMode={"middle"}
@@ -481,9 +479,9 @@ const ObjsListView = (props: ObjsListViewProps) => {
           }
         </View>
         <View style={s.rightBottomMenu}>
-          <PressImage onPress={()=>{setIsSortMenuOpen(!isSortMenuOpen)}} disable={isEditingPos} source={Images.Sort}  selected={isSortMenuOpen}/>
+          <PressImage onPress={()=>{setIsSortMenuOpen(!isSortMenuOpen)}} disable={isEditingPos} source={Images.Sort}  isSelected={isSortMenuOpen}/>
           {getMoveIcons()}
-          <PressImage onPress={()=>{setIsSearchOpen(!isSearchOpen)}} disable={isEditingPos} source={Images.Search} selected={isSearchOpen}/>
+          <PressImage onPress={()=>{setIsSearchOpen(!isSearchOpen)}} disable={isEditingPos} source={Images.Search} isSelected={isSearchOpen}/>
           <PressImage onPress={onAddNewObjective} disable={isEditingPos} source={Images.NewFile}/>
         </View>
       </View>
@@ -608,6 +606,10 @@ const ObjsListView = (props: ObjsListViewProps) => {
       justifyContent: 'flex-end',
       alignItems: 'center',
       backgroundColor: t.backgroundcolordark,
+
+      borderColor: t.bordercolorfade,
+      borderTopWidth: 1,
+      borderStyle: 'solid',
     },
     leftBottomMenu:{
       flex: 1,

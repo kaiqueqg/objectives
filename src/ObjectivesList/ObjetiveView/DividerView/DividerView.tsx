@@ -1,5 +1,4 @@
 import { View, StyleSheet, Text, Keyboard, BackHandler } from "react-native";
-import { colorPalette, globalStyle as gs } from "../../../Colors";
 import { useUserContext } from "../../../Contexts/UserContext";
 import { Divider, Item, ItemType, ItemViewProps, MessageType } from "../../../Types";
 import PressImage from "../../../PressImage/PressImage";
@@ -9,6 +8,7 @@ import React from "react";
 import { useLogContext } from "../../../Contexts/LogContext";
 import { Images } from "../../../Images";
 import { LinearGradient } from "expo-linear-gradient";
+import { cp } from "../../../ColorPalette";
 
 export const New = () => {
   return(
@@ -20,7 +20,6 @@ export const New = () => {
 }
 
 export interface DividerViewProps extends ItemViewProps{
-  divider: Divider,
   orderDividerItems: (divider: Item) => void,
   choseNewItemToAdd: (type: ItemType, pos:number) => void,
   checkUncheckedDividerItems: (value: boolean, divider: Item )=> void,
@@ -29,7 +28,8 @@ export interface DividerViewProps extends ItemViewProps{
 const DividerView = (props: DividerViewProps) => {
   const { theme: t, fontTheme: f, putItem } = useUserContext();
   const { log, popMessage } = useLogContext();
-  const { objTheme: o, wasJustAdded, isDisabled, isSelecting, isSelected, isLocked, onDeleteItem, loadMyItems, divider, orderDividerItems, choseNewItemToAdd, checkUncheckedDividerItems} = props;
+  const { objTheme: o, wasJustAdded, isDisabled, isSelecting, isSelected, isLocked, onDeleteItem, loadMyItems,  orderDividerItems, choseNewItemToAdd, checkUncheckedDividerItems, item} = props;
+  const divider = item as Divider;
 
   const [isEditingTitle, setIsEditingTitle] = useState<boolean>(false);
   const [isItemsOpen, setIsItemsOpen] = useState<boolean>(false);
@@ -79,11 +79,13 @@ const DividerView = (props: DividerViewProps) => {
   }
 
   const onEditingTitle = async (editingState: boolean) => {
-    if(editingState) props.itemsListScrollTo(divider.ItemId);
+    if(editingState) props.itemsListScrollTo(divider.Pos);
     setIsEditingTitle(editingState);
   }
 
   const onChangeIsOpen = async () => {
+    if(isDisabled) return;
+
     const newDivider = {...divider, IsOpen: !divider.IsOpen};
     await putItem(newDivider);
     loadMyItems();
@@ -141,13 +143,19 @@ const DividerView = (props: DividerViewProps) => {
     )
   }
 
+  const orderItems = () => {
+    if(!isDisabled) return;
+      
+    orderDividerItems(divider);
+  }
+
   const getDividerMainView = () => {
     return(
       <View style={[s.titleContainer, isSelecting && s.containerSelecting, isSelected && s.containerSelected, wasJustAdded && s.containerWasJustAdded]}>
         {!isEditingTitle &&
           <>
-            <PressImage cT={o} disable={isItemsOpen || isLocked || isDisabled} onPress={() => {if(!isDisabled)onChangeIsOpen();}} source={divider.IsOpen?Images.DownChevron:Images.UpChevron}/>
-            <PressImage cT={o} disable={isItemsOpen || isLocked || isDisabled} confirm onPress={() => {if(!isDisabled)orderDividerItems(divider);}} source={Images.AtoZ}/>
+            <PressImage cT={o} disable={isItemsOpen || isLocked || isDisabled} onPress={onChangeIsOpen} source={divider.IsOpen?Images.DownChevron:Images.UpChevron}/>
+            <PressImage cT={o} disable={isItemsOpen || isLocked || isDisabled} confirm onPress={orderItems} source={Images.AtoZ}/>
           </>
         }
         <PressInput 
@@ -184,7 +192,7 @@ const DividerView = (props: DividerViewProps) => {
       flex: 1,
       width: '100%',
 
-      borderColor: colorPalette.transparent,//
+      borderColor: cp.transparent,
       borderWidth: 1,
       borderRadius: 5,
       borderStyle: 'solid',
@@ -212,7 +220,7 @@ const DividerView = (props: DividerViewProps) => {
       borderWidth: 1,
       borderRadius: 5,
       borderStyle: 'solid',
-      borderColor: colorPalette.transparent,//o.bordercolor,
+      borderColor: cp.transparent,//o.bordercolor,
 
       backgroundColor: o.backgroundcolordark,
     },

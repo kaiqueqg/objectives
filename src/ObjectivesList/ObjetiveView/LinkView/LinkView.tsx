@@ -1,13 +1,13 @@
 import { View, StyleSheet, Text, TextInput, Linking, Vibration, Keyboard, BackHandler } from "react-native";
 import { Link, ItemViewProps,  MessageType, Pattern } from "../../../Types";
-import { colorPalette, globalStyle as gs } from "../../../Colors";
-import { FontPalette } from "../../../../fonts/Font";
+import { globalStyle as gs } from "../../../Colors";
 import { useUserContext } from "../../../Contexts/UserContext";
 import PressImage from "../../../PressImage/PressImage";
 import { useEffect, useRef, useState } from "react";
 import PressText from "../../../PressText/PressText";
 import { useLogContext } from "../../../Contexts/LogContext";
 import { Images } from "../../../Images";
+import { cp } from "../../../ColorPalette";
 
 export const New = () => {
   return(
@@ -19,13 +19,13 @@ export const New = () => {
 }
 
 export interface LinkViewProps extends ItemViewProps {
-  link: Link,
 }
 
 const LinkView = (props: LinkViewProps) => {
   const { log, popMessage } = useLogContext();
   const { userPrefs, theme: t, fontTheme: f, putItem } = useUserContext();
-  const { objTheme: o, wasJustAdded, isSelected, isSelecting, isDisabled, onDeleteItem, loadMyItems, link } = props;
+  const { objTheme: o, wasJustAdded, isSelected, isSelecting, isDisabled, onDeleteItem, loadMyItems, item } = props;
+  const link = item as Link;
 
   
   const [newTitle, setNewTitle] = useState<string>(link.Title);
@@ -104,7 +104,7 @@ const LinkView = (props: LinkViewProps) => {
     }
 
     if(!isDisabled){
-      props.itemsListScrollTo(link.ItemId);
+      props.itemsListScrollTo(link.Pos);
       setIsEditingLinks(!isEditingLinks);
     }
   }
@@ -123,9 +123,9 @@ const LinkView = (props: LinkViewProps) => {
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      backgroundColor: (link.Title.trim() !=='' && !isEditingLinks)?colorPalette.transparent:o.innerbackgroundcolor,
+      backgroundColor: (link.Title.trim() !=='' && !isEditingLinks)?cp.transparent:o.innerbackgroundcolor,
       
-      borderColor: colorPalette.transparent,//(link.Title.trim() !=='' && !isEditingLinks)?colorPalette.transparent:o.bordercolor,
+      borderColor: cp.transparent,//(link.Title.trim() !=='' && !isEditingLinks)?colorPalette.transparent:o.bordercolor,
       borderWidth: 1,
       borderStyle: 'solid',
       borderRadius: o.borderRadius,

@@ -1,11 +1,10 @@
 
 import { View, StyleSheet, Text } from "react-native";
-import { AppPalette, colorPalette, getObjTheme } from "../Colors";
-import { FontPalette } from "../../fonts/Font";
 import { useUserContext } from "../Contexts/UserContext";
 import { MessageType, PopMessage } from "../Types";
 import { useEffect } from "react";
 import { useLogContext } from "../Contexts/LogContext";
+import { cp } from "../ColorPalette";
 
 export interface PopMessageViewProps {
   message: PopMessage,
@@ -48,18 +47,18 @@ const PopMessageView = (props: PopMessageViewProps) => {
       maxHeight: 30,
       minHeight: 30,
       
-      backgroundColor: colorPalette.greenlight,
+      backgroundColor: cp.greenlight,
       justifyContent: 'center',
       alignItems: 'center',
     },
     messageError:{
-      backgroundColor: colorPalette.redlight,
+      backgroundColor: cp.redlight,
     },
     messageAlert:{
-      backgroundColor: colorPalette.yellow,
+      backgroundColor: cp.yellow,
     },
     messageText:{
-      color: colorPalette.black,
+      color: cp.black,
       fontSize: 15,
     },
   });

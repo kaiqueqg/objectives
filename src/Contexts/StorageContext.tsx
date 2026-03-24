@@ -17,6 +17,7 @@ export const StorageProvider: React.FC<StorageProviderProps> = ({ children }) =>
     User: string,
     UserPrefs: string,
     JwtToken: string,
+    TwoFAToken: string,
     CurrentView: string,
     AvailableTags: string,
     SelectedTags: string,
@@ -34,6 +35,7 @@ export const StorageProvider: React.FC<StorageProviderProps> = ({ children }) =>
     User: '@Objectives:user',
     UserPrefs: '@Objectives:userprefs',
     JwtToken: '@Objectives:jwt',
+    TwoFAToken: '@Objectives:twoFAToken',
     CurrentView: '@Objectives:CurrentView',
     AvailableTags: '@Objectives:AvailableTags',
     SelectedTags: '@Objectives:SelectedTags',
@@ -60,6 +62,7 @@ export const StorageProvider: React.FC<StorageProviderProps> = ({ children }) =>
       return randomString;
     },
   
+    //^-------------------- USER
     async writeUser(user: User){
       try {
         await AsyncStorage.setItem(keys.User, JSON.stringify(user));
@@ -97,6 +100,7 @@ export const StorageProvider: React.FC<StorageProviderProps> = ({ children }) =>
       }
     },
     
+    //^-------------------- JWT TOKEN
     async writeJwtToken(token: string){
       try {
         await AsyncStorage.setItem(keys.JwtToken, token);
@@ -128,7 +132,41 @@ export const StorageProvider: React.FC<StorageProviderProps> = ({ children }) =>
         log.err('readJwtToken', '[catch] deleting jwt token.');
       }
     },
+
+    //^-------------------- 2FA TOKEN
+    async writeTwoFAToken(token: string){
+      try {
+        await AsyncStorage.setItem(keys.TwoFAToken, token);
+      } catch (err) {
+        log.err('writeTwoFAToken', '[catch] error: ' + err);
+        popMessage('Error getting saved Two FA Token info.');
+      }
+    },
+    
+    async readTwoFAToken(){
+      try {
+        const token = await AsyncStorage.getItem(keys.JwtToken);
+        if(token === null){
+          return null;
+        }
+        else{
+          return token;
+        }
+      } catch (err) {
+        log.err('readTwoFAToken', '[catch] error: ' + err);
+        return null
+      }
+    },
   
+    async deleteTwoFAToken(){
+      try {
+        await AsyncStorage.removeItem(keys.JwtToken);
+      } catch (error) {
+        log.err('deleteTwoFAToken', '[catch] deleting Two FA Token.');
+      }
+    },
+  
+    //^-------------------- USER PREFS
     async writeUserPrefs(userPrefs: UserPrefs){
       try{
         await AsyncStorage.setItem(keys.UserPrefs, JSON.stringify(userPrefs));
@@ -541,6 +579,11 @@ export interface StorageService {
   writeJwtToken(token: string): Promise<void>;
   readJwtToken(): Promise<string | null>;
   deleteJwtToken(): Promise<void>;
+
+  // 2FA Token
+  writeTwoFAToken(token: string): Promise<void>;
+  readTwoFAToken(): Promise<string | null>;
+  deleteTwoFAToken(): Promise<void>;
 
   // USER PREFS
   writeUserPrefs(userPrefs: UserPrefs): Promise<void>;

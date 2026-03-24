@@ -3,16 +3,17 @@ import { Image, ImageStyle, ImageSourcePropType, View, ViewProps, Vibration, Sty
 import { useUserContext } from "../Contexts/UserContext";
 import { Pattern } from "../Types";
 import { useLogContext } from "../Contexts/LogContext";
-import { GeneralPalette } from "../Colors";
+import { ObjectivePallete } from "../Colors";
 
 export interface ButtonProps extends ViewProps {
-  cT?: GeneralPalette,
+  cT?: ObjectivePallete,
   
   text?: string,
   onPress?: () => void,
   imageSource?: ImageSourcePropType,
 
   isLoading?: boolean,
+  isSelected?: boolean,
 
   type?: 'foward'|'backward'|'neutral'|'reset',
   size?: number,
@@ -21,7 +22,7 @@ export interface ButtonProps extends ViewProps {
 }
 
 const ButtonView = (props: ButtonProps) => {
-  const {theme: t } = useUserContext();
+  const {theme: t, user } = useUserContext();
   const { popMessage } = useLogContext();
 
   const getBkColor = () => {
@@ -54,8 +55,8 @@ const ButtonView = (props: ButtonProps) => {
     },
     out:{
       borderColor: 'black',
-      borderRightWidth: 2,
-      borderBottomWidth: 2,
+      borderRightWidth: 3,
+      borderBottomWidth: 3,
       borderRadius: 8,
       borderStyle: 'solid',
     },
@@ -65,7 +66,7 @@ const ButtonView = (props: ButtonProps) => {
       verticalAlign: 'middle',
       backgroundColor: getBkColor(),
 
-      borderColor: '"black',
+      borderColor: 'black',
       borderWidth: 1,
       borderRadius: 5,
       borderStyle: 'solid',
@@ -85,6 +86,7 @@ const ButtonView = (props: ButtonProps) => {
   });
 
   const btnOnPress = () => {
+    // if(user.userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
 
     if(props.onPress){
       props.onPress();

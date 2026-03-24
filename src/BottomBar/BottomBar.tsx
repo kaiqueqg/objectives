@@ -1,19 +1,20 @@
 import { View, StyleSheet, Vibration } from "react-native";
-import { AppPalette, colorPalette, dark, globalStyle as gs } from "../Colors";
+import { globalStyle as gs } from "../Colors";
 import { MessageType, Pattern, Themes, Views } from "../Types";
 import PressImage from "../PressImage/PressImage";
 import { useUserContext } from "../Contexts/UserContext";
-import Loading from "../Loading/Loading";
+import {Loading} from "../Loading/Loading";
 import { useLogContext } from "../Contexts/LogContext";
 import React, { useEffect, useState } from "react";
 import Constants, { ExecutionEnvironment } from 'expo-constants';
 import {LoginView} from "../LoginView/LoginView";
 import { Images } from "../Images";
+import SyncView from "../SyncView/SyncView";
 
 export interface BottomBarProps {
 }
 
-enum BottomBarIcons { User = 'UserView', Settings = 'Settings', Theme = 'Theme', List = 'List', Archived = 'Archived', Dev = 'Dev', Sync = 'Sync' }
+enum BottomBarIcons { User = 'UserView', Settings = 'Settings', Theme = 'Theme', List = 'List', Archived = 'Archived', Dev = 'Dev', Sync = 'Sync', Alerts = 'Alerts' }
 
 const BottomBar = (props: BottomBarProps) => {
   const { user, userPrefs, theme: t, fontTheme: f, currentView, writeCurrentView, availableTags, selectedTags, currentObjectiveId, writeUserPrefs } = useUserContext();
@@ -25,7 +26,7 @@ const BottomBar = (props: BottomBarProps) => {
 
   const changeToView = (newView: Views) => {
     if(currentView === newView){
-      if(currentObjectiveId === ''){
+      if(currentObjectiveId === '' && currentView === Views.ListView){
         if(userPrefs.vibrate) Vibration.vibrate(Pattern.Wrong);
         popMessage('No objective selected.', MessageType.Alert);
       }
@@ -45,9 +46,9 @@ const BottomBar = (props: BottomBarProps) => {
     let newTheme;
 
     switch(userPrefs.theme){
-      case Themes.Auto:
-        newTheme = Themes.Dark;
-        break;
+      // case Themes.Auto:
+      //   newTheme = Themes.Dark;
+      //   break;
       case Themes.Dark:
         newTheme = Themes.Light;
         break;
@@ -64,14 +65,16 @@ const BottomBar = (props: BottomBarProps) => {
 
   const getThemeBottomIcon = () => {
     switch(userPrefs.theme){
-      case Themes.Auto:
-        return Images.Theme
+      // case Themes.Auto:
+      //   return Images.Theme
       case Themes.Dark:
-        return Images.DarkMode
+        return <PressImage onPress={changeTheme} source={Images.DarkMode}/>
       case Themes.Light:
-        return Images.LightMode
+        return <PressImage onPress={changeTheme} source={Images.LightMode}/>
+      case Themes.Win95:
+        return <PressImage onPress={changeTheme} source={Images.Win95} raw/>
       default:
-        return Images.Theme
+        return <PressImage onPress={changeTheme} source={Images.DarkMode}/>
     }
   }
 
@@ -83,28 +86,27 @@ const BottomBar = (props: BottomBarProps) => {
             text={Constants.executionEnvironment === ExecutionEnvironment.StoreClient?"dev":undefined}
             onPress={() => changeToView(Views.LoginView)}
             source={Images.User}
-            selected={currentView === Views.LoginView}
+            isSelected={currentView === Views.LoginView}
             color={user.Email===''?t.trashicontint:t.icontint}/>
         )
       case BottomBarIcons.Settings:
         return(
-          <PressImage 
+          <PressImage
             onPress={() => changeToView(Views.SettingsView)}
             source={Images.Settings}
-            selected={currentView === Views.SettingsView}
+            isSelected={currentView === Views.SettingsView}
           />
         )
       case BottomBarIcons.Theme:
         return(
-          <PressImage onPress={changeTheme} source={getThemeBottomIcon()}/>
+          getThemeBottomIcon()
         )
       case BottomBarIcons.List:
         return(
            <PressImage 
               onPress={()=>{changeToView(Views.ListView)}}
               source={Images.File}
-              fade={currentView === Views.ArchivedView}
-              selected={currentView === Views.ListView}
+              isSelected={currentView === Views.ListView}
               size={currentView === Views.ArchivedView?-4:-1}/>
         )
       case BottomBarIcons.Archived:
@@ -112,14 +114,26 @@ const BottomBar = (props: BottomBarProps) => {
           <PressImage 
             onPress={()=>{changeToView(Views.ArchivedView)}}
             source={Images.Archive}
-            fade={currentView === Views.ListView}
-            selected={currentView === Views.ArchivedView}
-            size={currentView === Views.ListView?-4:(currentView === Views.ArchivedView?6:0)}
+            isSelected={currentView === Views.ArchivedView}
+            size={currentView === Views.ListView?-4:-1}
           />
         )
       case BottomBarIcons.Sync:
+        return(<LoginView viewType="Image"/>)
+      case BottomBarIcons.Dev:
+        if(user.Role === 'Admin' || ExecutionEnvironment.StoreClient) return <></>;
         return(
-          <LoginView viewType="Image"/>
+          <PressImage
+            onPress={()=>{changeToView(Views.DevView)}}
+            source={Images.Dev}
+            isSelected={currentView === Views.DevView}/>
+        )
+      case BottomBarIcons.Alerts:
+        return(
+          <PressImage 
+            onPress={()=>{changeToView(Views.AlertsView)}}
+            source={Images.Bell}
+            isSelected={currentView === Views.AlertsView}/>
         )
     }
   }
@@ -132,11 +146,14 @@ const BottomBar = (props: BottomBarProps) => {
             {getBottomIcon(BottomBarIcons.User)}
             {getBottomIcon(BottomBarIcons.Settings)}
             {getBottomIcon(BottomBarIcons.Theme)}
-            {getBottomIcon(BottomBarIcons.Dev)}
             {getBottomIcon(BottomBarIcons.Sync)}
+            {getBottomIcon(BottomBarIcons.Alerts)}
+            {getBottomIcon(BottomBarIcons.Dev)}
           </>
           :
           <>
+            {getBottomIcon(BottomBarIcons.Dev)}
+            {getBottomIcon(BottomBarIcons.Alerts)}
             {getBottomIcon(BottomBarIcons.Sync)}
             {getBottomIcon(BottomBarIcons.Dev)}
             {getBottomIcon(BottomBarIcons.Theme)}
@@ -172,6 +189,11 @@ const BottomBar = (props: BottomBarProps) => {
       justifyContent: 'center',
       alignItems: 'center',
       backgroundColor: t.backgroundcolordarker,
+
+      borderColor: t.bordercolorfade,
+      borderTopWidth: 1,
+      borderBottomWidth: 1,
+      borderStyle: 'solid',
     },
     leftContainer: {
       flexDirection: 'row',
@@ -183,32 +205,12 @@ const BottomBar = (props: BottomBarProps) => {
       justifyContent: userPrefs.isRightHand?'flex-end':'flex-start',
       width: '50%',
     },
-    imageContainerSelected:{
-    },
-    bottomImage: {
-      ...gs.baseImage,
-      tintColor: t.icontint,
-    },
-    doneImage:{
-      tintColor: t.doneicontint,
-    },
-    cancelImage:{
-      tintColor: t.cancelicontint,
-    },
-    trashImage:{
-      tintColor: t.trashicontint,
-    },
-    bottomImageSelected:{
-      ...gs.baseBiggerImage,
-      tintColor: t.bottombariconselected,
-    },
   });
 
   return (
     <View style={s.container}>
       {userPrefs.isRightHand?getLeftBottomView():getRightBottomView()}
       {userPrefs.isRightHand?getRightBottomView():getLeftBottomView()}
-      {/* {getRightBottomView()} */}
     </View>
   );
 };

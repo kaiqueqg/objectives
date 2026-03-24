@@ -1,6 +1,6 @@
 import { View, StyleSheet, Text, Vibration, TextInput, Platform, Image as ReactImage, TouchableOpacity, Button, Keyboard, BackHandler } from "react-native";
 import { Item, Image, Pattern, ItemViewProps, ItemNew, StoredImage } from "../../../Types";
-import { dark, globalStyle as gs } from "../../../Colors";
+import { globalStyle as gs } from "../../../Colors";
 import { FontPalette } from "../../../../fonts/Font";
 import { useUserContext } from "../../../Contexts/UserContext";
 import PressImage from "../../../PressImage/PressImage";
@@ -13,8 +13,9 @@ import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 import { useStorageContext } from "../../../Contexts/StorageContext";
 import { useRequestContext } from "../../../Contexts/RequestContext";
-import Loading from "../../../Loading/Loading";
+import {Loading} from "../../../Loading/Loading";
 import { Images } from "../../../Images";
+import { cp } from "../../../ColorPalette";
 
 export const New = () => {
   return(
@@ -35,7 +36,6 @@ export const New = () => {
 }
 
 export interface ImageViewProps extends ItemViewProps {
-  image: Image,
 }
 
 const ImageView = (props: ImageViewProps) => {
@@ -43,10 +43,11 @@ const ImageView = (props: ImageViewProps) => {
   const { log }= useLogContext();
   const { storage } = useStorageContext();
   const { objectivesApi } = useRequestContext();
-  const { objTheme: o, isSelected, isSelecting, wasJustAdded, isDisabled, onDeleteItem, loadMyItems, image } = props;
+  const { objTheme: o, isSelected, isSelecting, wasJustAdded, isDisabled, onDeleteItem, loadMyItems, item } = props;
+  const image = item as Image;
 
   const [isEditingImage, setIsEditingImage] = useState<boolean>(false);
-  const [tempImage, setTempImage] = useState<Image>(props.image);
+  const [tempImage, setTempImage] = useState<Image>(image);
 
   const [storedImage, setStoredImage] = useState<StoredImage|null>(null);
 
@@ -94,7 +95,6 @@ const ImageView = (props: ImageViewProps) => {
 
     if(fileDir){
       const list:string[] = await FileSystem.readDirectoryAsync(fileDir);
-      log.arr(list);
     }
   }
 
@@ -258,7 +258,7 @@ const ImageView = (props: ImageViewProps) => {
       alignItems: 'center',
       backgroundColor: o.innerbackgroundcolor,
       
-      borderColor: colorPalette.transparent,//o.bordercolor,
+      borderColor: cp.transparent,//o.bordercolor,
       borderWidth: 1,
       borderStyle: 'solid',
       borderRadius: o.borderRadius,

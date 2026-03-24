@@ -1,15 +1,16 @@
 import React from "react";
 import { Pressable, Text, Image, ImageSourcePropType, StyleSheet, View } from "react-native";
 import { useUserContext } from "../Contexts/UserContext";
-import Loading from "../Loading/Loading";
-import { GeneralPalette, ObjectivePallete, colorPalette, globalStyle as gs } from "../Colors";
+import { ObjectivePallete, globalStyle as gs } from "../Colors";
+import { Loading } from "../Loading/Loading";
+import { cp } from "../ColorPalette";
 
 interface PressTextProps{
   style: any,
   textStyle: any,
   text: string,
   defaultText?: string,
-  defaultStyle?: GeneralPalette,
+  defaultStyle?: ObjectivePallete,
   hideDefaultTextBorder?: boolean,
   onPress: () => void,
   imageSource?: ImageSourcePropType,
@@ -22,7 +23,6 @@ interface PressTextProps{
 
 const PressText = (props: PressTextProps) => {
   const { theme: t } = useUserContext();
-  const { defaultStyle: o } = props;
 
   const getDefautTextStyle = () => {
     return [s.text, props.textStyle, s.textDefault, props.hideDefaultTextBorder?undefined:s.textDefaultBorder];
@@ -50,7 +50,7 @@ const PressText = (props: PressTextProps) => {
       ...props.defaultStyle,
       borderBottomWidth: 1,
       borderStyle: 'solid',
-      borderColor: colorPalette.transparent,//o?.innertextcolorfade?? t.textcolorfade,
+      borderColor: cp.transparent,//o?.innertextcolorfade?? t.textcolorfade,
       borderRadius: 5,
     },
     baseImage:{
@@ -62,11 +62,9 @@ const PressText = (props: PressTextProps) => {
   return (
     <Pressable style={[s.pressTextStyle, props.style]} onPress={props.onPress}>
       {props.imageSource && 
-        (props.isLoading?
-          <Loading></Loading>
-          :
+        <Loading isLoading={props.isLoading}>
           <Image style={[s.baseImage, props.imageStyle]} source={props.imageSource}></Image>
-        )
+        </Loading>
       }
       {props.text.trim() === ''?
         <Text

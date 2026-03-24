@@ -2,7 +2,7 @@ import React, { JSX, useRef } from "react";
 import { View, StyleSheet, Pressable, Vibration, Alert, FlatList, Text, BackHandler, KeyboardAvoidingView, Platform, TextInput, ScrollView, Dimensions } from "react-native";
 import * as ExpoLocation from 'expo-location';
 
-import { colorPalette, getObjTheme, globalStyle as gs, lightBlue, noTheme, lightNoTheme, darkBlue } from "../../Colors";
+import { getObjTheme, globalStyle as gs, lightBlue, noTheme, lightNoTheme, darkBlue, ObjectivePallete } from "../../Colors";
 
 import { useUserContext } from "../../Contexts/UserContext";
 import { useLogContext } from "../../Contexts/LogContext";
@@ -29,8 +29,8 @@ import ImageView, {New as ImageNew} from "./ImageView/ImageView";
 import {HouseView, New as HouseNew } from "./HouseView/HouseView";
 import {ReviewView, New as ReviewNew } from "./ReviewView/ReviewView";
 import { Images } from "../../Images";
-
-
+import { ShakeWrapper } from "../../Wrapper/ShakeWrapper";
+import { cp } from "../../ColorPalette";
 
 export interface ObjectiveViewProps {
   obj: Objective,
@@ -49,7 +49,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     multiSelectAction, setMultiSelectAction,
     currentView, writeCurrentView } = useUserContext();
     const { obj } = props;
-  const o = getObjTheme(userPrefs.theme, props.obj.Theme);
+  const o: ObjectivePallete = getObjTheme(userPrefs.theme, props.obj.Theme);
   let hiddenItems = 0;
 
   const [items, setItems] = useState<Item[]>([]);
@@ -240,8 +240,6 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     }
     else{
     }
-    
-    log.r('end')
   }
 
   const onDeleteObjective = async () => {
@@ -264,10 +262,6 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
 
   const onLock = async () => {
     await putObjective({...obj, IsLocked: !obj.IsLocked, LastModified: (new Date()).toISOString() });
-  }
-
-  const lockAlertCallback = () => {
-    setAlertLock(false);
   }
 
   const onChangeIsMenuOpen = () => {
@@ -790,8 +784,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
           onPress={()=>removeTag(cTag)}
           style={[s.tagContainer, cTag === 'Pin'?s.tagContainerPin:undefined]}
           textStyle={[s.tagText, cTag === 'Pin'?s.tagTextPin:undefined]}
-          text={cTag}
-          defaultStyle={o}>
+          text={cTag}>
         </PressText>
       )
     }
@@ -826,8 +819,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
           onPress={()=>onAddNewTag(cTag)}
           style={[s.tagContainer, cTag === 'Pin'?s.tagContainerPin:undefined]}
           textStyle={[s.tagText, cTag === 'Pin'?s.tagTextPin:undefined]}
-          text={cTag}
-          defaultStyle={o}>
+          text={cTag}>
         </PressText>
       )
     }
@@ -911,7 +903,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
           <PressImage
             key={key}
             cT={o}
-            selected={isPaletteOpen}
+            isSelected={isPaletteOpen}
             onPress={() => showButtomItem(ObjBottomIcons.Palette)}
             source={Images.Palette}
           />
@@ -921,7 +913,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
           <PressImage
             key={key}
             cT={o}
-            selected={isTagOpen}
+            isSelected={isTagOpen}
             onPress={() => showButtomItem(ObjBottomIcons.Tags)}
             source={Images.Tag}
           />
@@ -931,7 +923,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
           <PressImage 
           key={key}
           cT={o}
-          selected={isSearchOpen}
+          isSelected={isSearchOpen}
           onPress={()=>showButtomItem(ObjBottomIcons.Search)}
           source={Images.Search}/>
         );
@@ -950,23 +942,40 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
           <PressImage
             key={key}
             cT={o}
-            selected={isMultiSelectOpen}
+            isSelected={isMultiSelectOpen}
             onPress={() => showButtomItem(ObjBottomIcons.Pos)}
             source={Images.Change}
           />
         );
       case ObjBottomIcons.IsLocked:
-        return (
-          <PressImage
-            key={key}
-            cT={o}
-            onPress={onLock}
-            confirm={obj.IsLocked}
-            fade={!obj.IsLocked}
-            source={Images.Lock}
-            color={o.trashicontint}
-          />
-        );
+        if(alertLock){
+          return(
+            <ShakeWrapper onShakeComplete={()=>setAlertLock(false)}>
+              <PressImage
+                key={key}
+                cT={o}
+                onPress={onLock}
+                confirm={obj.IsLocked}
+                fade={!obj.IsLocked}
+                source={Images.Lock}
+                color={o.trashicontint}
+              />
+            </ShakeWrapper>
+          )
+        }
+        else{
+          return (
+            <PressImage
+                key={key}
+                cT={o}
+                onPress={onLock}
+                confirm={obj.IsLocked}
+                fade={!obj.IsLocked}
+                source={Images.Lock}
+                color={o.trashicontint}
+              />
+          );
+        }
       case ObjBottomIcons.Checked:
         return (
           <PressImage
@@ -986,7 +995,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
           <PressImage
             key={key}
             cT={o}
-            // selected={isItemsOpen}
+            isSelected={isItemsOpen}
             onPress={addingNewItem}
             source={Images.Add}
             showLock={isItemOpenLocked}
@@ -1006,7 +1015,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
         return (<PressImage 
             key={key}
             cT={o}
-            selected={isMenuIconOpen}
+            isSelected={isMenuIconOpen}
             onPress={()=>showButtomItem(ObjBottomIcons.Menu)}
             source={Images.Menu}/>
         );
@@ -1024,6 +1033,10 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     }
   }
 
+  const shakeLock = () => {
+    setAlertLock(true);
+  }
+
   const getItemView = ({item}:any):JSX.Element => {
     let rtnItem;
     const isSelectingItem = selectingItems.some((i: Item)=>i.ItemId === item.ItemId);
@@ -1034,67 +1047,62 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     }
 
     const wasJustAdded = justAddedItemId.includes((item as Item).ItemId);
+
+    const commonProps = {item: item,
+      isSelecting: isSelectingItem,
+      isSelected: itemIsSelected,
+      wasJustAdded: wasJustAdded,
+      isDisabled: isMultiSelectOpen,
+      isLocked: obj.IsLocked,
+      loadMyItems: loadItems,
+      objTheme: o,
+      onDeleteItem: onDeleteItem,
+      itemsListScrollTo: itemsListScrollTo,
+      shakeLock: shakeLock,
+    }
+
     if(item.Type === ItemType.Divider){
       rtnItem = <DividerView 
         key={item.ItemId}
+        {...commonProps}
         loadMyItems={loadItems}
-        isSelecting={isSelectingItem} 
-        isSelected={itemIsSelected}
-        wasJustAdded={wasJustAdded}
-        isDisabled={isMultiSelectOpen}
-        isLocked={obj.IsLocked}
-        objTheme={o}
-        divider={item as Divider}
         orderDividerItems={orderDividerItems}
-        onDeleteItem={onDeleteItem}
         choseNewItemToAdd={(type: ItemType, pos?:number) => {choseNewItemToAdd(type, pos)}}
-        itemsListScrollTo={itemsListScrollTo}
         checkUncheckedDividerItems={checkUncheckedDividerItems}
         ></DividerView>  
     }
     else  if(item.Type === ItemType.Step){
-      rtnItem = <StepView 
-        key={item.ItemId}
-        isSelecting={isSelectingItem}
-        isSelected={itemIsSelected}
-        wasJustAdded={wasJustAdded}
-        isDisabled={isMultiSelectOpen}
-        isLocked={obj.IsLocked}
-        loadMyItems={loadItems}
-        objTheme={o} step={item as Step}
-        onDeleteItem={onDeleteItem}
-        itemsListScrollTo={itemsListScrollTo}
-      ></StepView>
+      rtnItem = <StepView key={item.ItemId} {...commonProps}/>
     }
     else if(item.Type === ItemType.Grocery){
-      rtnItem = <GroceryView key={item.ItemId} isSelecting={isSelectingItem} isSelected={itemIsSelected} wasJustAdded={wasJustAdded} isDisabled={isMultiSelectOpen} isLocked={obj.IsLocked} loadMyItems={loadItems} objTheme={o} grocery={item as Grocery} onDeleteItem={onDeleteItem} itemsListScrollTo={itemsListScrollTo} ></GroceryView>
+      rtnItem = <GroceryView key={item.ItemId} {...commonProps}/>
     }
     else if(item.Type === ItemType.Medicine){
-      rtnItem = <MedicineView key={item.ItemId} isSelecting={isSelectingItem} isSelected={itemIsSelected} wasJustAdded={wasJustAdded} isDisabled={isMultiSelectOpen} isLocked={obj.IsLocked} loadMyItems={loadItems} objTheme={o} medicine={item as Medicine} onDeleteItem={onDeleteItem} itemsListScrollTo={itemsListScrollTo}></MedicineView>
+      rtnItem = <MedicineView key={item.ItemId} {...commonProps}/>
     }
     else if(item.Type === ItemType.Exercise){
-      rtnItem = <ExerciseView key={item.ItemId} isSelecting={isSelectingItem} isSelected={itemIsSelected} wasJustAdded={wasJustAdded} isDisabled={isMultiSelectOpen} isLocked={obj.IsLocked} loadMyItems={loadItems} objTheme={o} exercise={item as Exercise} onDeleteItem={onDeleteItem} itemsListScrollTo={itemsListScrollTo}></ExerciseView>
+      rtnItem = <ExerciseView key={item.ItemId} {...commonProps}/>
     }
     else if(item.Type === ItemType.Location){
-      rtnItem = <LocationView key={item.ItemId} isSelecting={isSelectingItem} isSelected={itemIsSelected} wasJustAdded={wasJustAdded} isDisabled={isMultiSelectOpen} isLocked={obj.IsLocked} loadMyItems={loadItems} objTheme={o} location={item as Location} onDeleteItem={onDeleteItem} itemsListScrollTo={itemsListScrollTo}></LocationView>
+      rtnItem = <LocationView key={item.ItemId} {...commonProps}/>
     }
     else if(item.Type === ItemType.Note){
-      rtnItem = <NoteView key={item.ItemId} isSelecting={isSelectingItem} isSelected={itemIsSelected} wasJustAdded={wasJustAdded} isDisabled={isMultiSelectOpen} isLocked={obj.IsLocked} loadMyItems={loadItems} objTheme={o} note={item as Note} onDeleteItem={onDeleteItem} itemsListScrollTo={itemsListScrollTo}></NoteView>
+      rtnItem = <NoteView key={item.ItemId} {...commonProps}/>
     }
     else if(item.Type === ItemType.Question){
-      rtnItem = <QuestionView key={item.ItemId} isSelecting={isSelectingItem} isSelected={itemIsSelected} wasJustAdded={wasJustAdded} isDisabled={isMultiSelectOpen} isLocked={obj.IsLocked} loadMyItems={loadItems} objTheme={o} question={item as Question} onDeleteItem={onDeleteItem} itemsListScrollTo={itemsListScrollTo}></QuestionView>
+      rtnItem = <QuestionView key={item.ItemId} {...commonProps}/>
     }
     else if(item.Type === ItemType.Link){
-      rtnItem = <LinkView key={item.ItemId} isSelecting={isSelectingItem} isSelected={itemIsSelected} wasJustAdded={wasJustAdded} isDisabled={isMultiSelectOpen} isLocked={obj.IsLocked} loadMyItems={loadItems} objTheme={o} link={item as Link} onDeleteItem={onDeleteItem} itemsListScrollTo={itemsListScrollTo}></LinkView>
+      rtnItem = <LinkView key={item.ItemId} {...commonProps}/>
     }
     else if(item.Type === ItemType.Image){
-      rtnItem = <ImageView key={item.ItemId} isSelecting={isSelectingItem} isSelected={itemIsSelected} wasJustAdded={wasJustAdded} isDisabled={isMultiSelectOpen} isLocked={obj.IsLocked} loadMyItems={loadItems} objTheme={o} image={item as Image} onDeleteItem={onDeleteItem} itemsListScrollTo={itemsListScrollTo}></ImageView>
+      rtnItem = <ImageView key={item.ItemId} {...commonProps}/>
     }
     else if(item.Type === ItemType.House){
-      rtnItem = <HouseView key={item.ItemId} isSelecting={isSelectingItem} isSelected={itemIsSelected} wasJustAdded={wasJustAdded} isDisabled={isMultiSelectOpen} isLocked={obj.IsLocked} loadMyItems={loadItems} objTheme={o} house={item as House} onDeleteItem={onDeleteItem} itemsListScrollTo={itemsListScrollTo}></HouseView>
+      rtnItem = <HouseView key={item.ItemId} {...commonProps}/>
     }
     else if(item.Type === ItemType.Review){
-      rtnItem = <ReviewView key={item.ItemId} isSelecting={isSelectingItem} isSelected={itemIsSelected} wasJustAdded={wasJustAdded} isDisabled={isMultiSelectOpen} isLocked={obj.IsLocked} loadMyItems={loadItems} objTheme={o} review={item as Review} onDeleteItem={onDeleteItem} itemsListScrollTo={itemsListScrollTo}></ReviewView>
+      rtnItem = <ReviewView key={item.ItemId} {...commonProps}/>
     }
     else if(item.Type === ItemType.StartPlaceholder){
       rtnItem = (
@@ -1120,7 +1128,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       )
     }
     else if(item.Type === ItemType.BottomToUp){
-      return <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', height: 100, backgroundColor:colorPalette.transparent}}><PressImage onPress={()=>{setIsListGoingUp(false); itemsListScrollTo()}} source={Images.ToTop} cT={o}/></View>
+      return <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', height: 100, backgroundColor:cp.transparent}}><PressImage onPress={()=>{setIsListGoingUp(false); itemsListScrollTo()}} source={Images.ToTop} cT={o}/></View>
     }
     return (
       <View style={[s.itemRow]}
@@ -1200,20 +1208,16 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
   }
 
   const itemsListScrollTo = (pos?: number) => {
-    log.w('finding ' + pos)
     if(pos === undefined){
       listRef.current?.scrollToIndex({ index: 0, animated: true })
       return;
     }
-
-    log.arr('tempFilteredItems', tempFilteredItems)
 
     if (pos < 0) {
       log.r('index not found');
       return;
     }
 
-    log.r('f')
     if(listRef){
       try {
         listRef.current?.scrollToIndex({ index: pos, animated: true })
@@ -1223,7 +1227,6 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       log.r(`itemsListScrollTo to ${pos} and length is ${tempFilteredItems}`);
     }
 
-    log.r('end')
   }
 
   const getTitleView = () => {
@@ -1352,7 +1355,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
         {getTagList()}
         <Text style={s.tagEditTagTitle}>NEW</Text>
         <View style={s.tagListContainer}>
-          <PressImage onPress={onEraseNewTag} source={Images.Eraser}/>
+          <PressImage onPress={onEraseNewTag} source={Images.Eraser} color={o.cancelicontint}/>
           <TextInput
             style={s.inputStyle}
             value={newTag}
@@ -1363,7 +1366,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
             onSubmitEditing={onHandleSubmit}
             autoFocus>
           </TextInput>
-          <PressImage onPress={() => {setIsTagOpen(false)}} source={Images.Done}/>
+          <PressImage onPress={() => {setIsTagOpen(false)}} source={Images.Done} color={o.doneicontint}/>
         </View>
       </View>
     )
@@ -1495,6 +1498,10 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       alignItems: 'center',
       justifyContent: side,
       backgroundColor: o.innerbackgroundcolor,
+
+      borderColor: o.bordercolorfade,
+      borderTopWidth: 1,
+      borderStyle: 'solid',
     },
     tagEditingContainer:{
       justifyContent: 'center',
@@ -1678,25 +1685,25 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       borderStyle: 'solid',
     },
     colorPaletteNoTheme:{
-      backgroundColor: userPrefs.theme === Themes.Dark? colorPalette.objNoTheme:colorPalette.objNoThemeLight
+      backgroundColor: userPrefs.theme === Themes.Dark? cp.objNoTheme:cp.objNoThemeLight
     },
     colorPaletteBlue:{
-      backgroundColor: userPrefs.theme === Themes.Dark? colorPalette.objBlue:colorPalette.objBlueLight
+      backgroundColor: userPrefs.theme === Themes.Dark? cp.objBlue:cp.objBlueLight
     },
     colorPaletteRed:{
-      backgroundColor: userPrefs.theme === Themes.Dark? colorPalette.objRed:colorPalette.objRedLight
+      backgroundColor: userPrefs.theme === Themes.Dark? cp.objRed:cp.objRedLight
     },
     colorPaletteGreen:{
-      backgroundColor: userPrefs.theme === Themes.Dark? colorPalette.objGreen:colorPalette.objGreenLight
+      backgroundColor: userPrefs.theme === Themes.Dark? cp.objGreen:cp.objGreenLight
     },
     colorPaletteWhite:{
-      backgroundColor: userPrefs.theme === Themes.Dark? colorPalette.objWhite:colorPalette.objWhiteLight
+      backgroundColor: userPrefs.theme === Themes.Dark? cp.objWhite:cp.objWhiteLight
     },
     colorPaletteCyan:{
-      backgroundColor: userPrefs.theme === Themes.Dark? colorPalette.objCyan:colorPalette.objCyanLight
+      backgroundColor: userPrefs.theme === Themes.Dark? cp.objCyan:cp.objCyanLight
     },
     colorPalettePink:{
-      backgroundColor: userPrefs.theme === Themes.Dark? colorPalette.objPink:colorPalette.objPinkLight
+      backgroundColor: userPrefs.theme === Themes.Dark? cp.objPink:cp.objPinkLight
     },
     emptyImageContainer:{
       height: 40,

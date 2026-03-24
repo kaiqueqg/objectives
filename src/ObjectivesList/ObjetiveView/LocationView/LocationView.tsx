@@ -1,17 +1,16 @@
 import { View, StyleSheet, Vibration, Alert, Linking, TextInput, Text, Keyboard, BackHandler,  } from "react-native";
 import { Item, Location, MessageType, ItemViewProps, ItemType, Pattern } from "../../../Types";
-import { colorPalette, dark, globalStyle as gs } from "../../../Colors";
-import { FontPalette } from "../../../../fonts/Font";
+import { globalStyle as gs } from "../../../Colors";
 import { useUserContext } from "../../../Contexts/UserContext";
 import PressImage from "../../../PressImage/PressImage";
-import PressInput from "../../../PressInput/PressInput";
 import { useEffect, useRef, useState } from "react";
 import * as ExpoLocation from 'expo-location';
 import { getDistance } from "geolib";
 import { useLogContext } from "../../../Contexts/LogContext";
 import PressText from "../../../PressText/PressText";
-import Loading from "../../../Loading/Loading";
+import {Loading} from "../../../Loading/Loading";
 import { Images } from "../../../Images";
+import { cp } from "../../../ColorPalette";
 
 export const New = () => {
   return(
@@ -23,15 +22,15 @@ export const New = () => {
 }
 
 export interface LocationViewProps extends ItemViewProps {
-  location: Location,
 }
 const LocationView = (props: LocationViewProps) => {
   const { popMessage, log } = useLogContext();
   const { theme: t, fontTheme: f, putItem, userPrefs } = useUserContext();
-  const { objTheme: o, wasJustAdded, isSelected, isSelecting, isDisabled, onDeleteItem, loadMyItems, location } = props;
+  const { objTheme: o, wasJustAdded, isSelected, isSelecting, isDisabled, onDeleteItem, loadMyItems, item } = props;
+  const location = item as Location;
 
   const [isEditingLocation, setIsEditingLocation] = useState<boolean>(false);
-  const [tempLocation, setTempLocation] = useState<Location>(props.location);
+  const [tempLocation, setTempLocation] = useState<Location>(location);
   const [currentLocation, setCurrentLocation] = useState<any>();
   const [currentDistance, setCurrentDistance] = useState<string>('');
   const [isGettingCurrentLocation, setIsGettingCurrentLocation] = useState<boolean>(false);
@@ -187,7 +186,7 @@ const LocationView = (props: LocationViewProps) => {
     }
 
     if(!isDisabled){
-      props.itemsListScrollTo(location.ItemId);
+      props.itemsListScrollTo(location.Pos);
       setIsEditingLocation(!isEditingLocation);
     }
   }
@@ -206,9 +205,9 @@ const LocationView = (props: LocationViewProps) => {
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      backgroundColor: (location.Url.trim() !== '' && !isEditingLocation)?colorPalette.transparent:o.innerbackgroundcolor,
+      backgroundColor: (location.Url.trim() !== '' && !isEditingLocation)?cp.transparent:o.innerbackgroundcolor,
       
-      borderColor: colorPalette.transparent,//(location.Url.trim() !== '' && !isEditingLocation)?colorPalette.transparent:o.bordercolor,
+      borderColor: cp.transparent,//(location.Url.trim() !== '' && !isEditingLocation)?colorPalette.transparent:o.bordercolor,
       borderWidth: 1,
       borderStyle: 'solid',
       borderRadius: o.borderRadius,

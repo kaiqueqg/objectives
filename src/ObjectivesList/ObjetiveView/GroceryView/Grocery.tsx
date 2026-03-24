@@ -1,12 +1,13 @@
 import { View, StyleSheet, Text, Vibration, TextInput, Keyboard, BackHandler } from "react-native";
 import { Grocery, Item, Pattern, ItemViewProps } from "../../../Types";
-import { colorPalette, globalStyle as gs } from "../../../Colors";
+import { globalStyle as gs } from "../../../Colors";
 import { FontPalette } from "../../../../fonts/Font";
 import { useUserContext } from "../../../Contexts/UserContext";
 import PressImage from "../../../PressImage/PressImage";
 import { useEffect, useState } from "react";
 import PressText from "../../../PressText/PressText";
 import { Images } from "../../../Images";
+import { cp } from "../../../ColorPalette";
 
 export const New = () => {
   return(
@@ -21,15 +22,15 @@ export const New = () => {
 }
 
 export interface GroceryViewProps extends ItemViewProps {
-  grocery: Grocery,
 }
 
 const GroceryView = (props: GroceryViewProps) => {
   const { userPrefs, theme: t, fontTheme: f, putItem } = useUserContext();
-  const { objTheme: o, wasJustAdded, isSelected, isSelecting, isDisabled, onDeleteItem, loadMyItems, grocery } = props;
+  const { objTheme: o, wasJustAdded, isSelected, isSelecting, isDisabled, onDeleteItem, loadMyItems, item } = props;
+  const grocery = item as Grocery;
 
   const [isEditingGrocery, setIsEditingGrocery] = useState<boolean>(false);
-  const [tempGrocery, setTempGrocery] = useState<Grocery>(props.grocery);
+  const [tempGrocery, setTempGrocery] = useState<Grocery>(grocery);
 
   const [keyboardVisible, setKeyboardVisible] = useState(false);
       
@@ -60,7 +61,7 @@ const GroceryView = (props: GroceryViewProps) => {
   }, [keyboardVisible]);
 
   useEffect(()=>{
-    setTempGrocery(props.grocery);
+    setTempGrocery(grocery);
   }, [grocery])
 
   const onDelete = async () => {
@@ -109,7 +110,7 @@ const GroceryView = (props: GroceryViewProps) => {
     }
 
     if(!isDisabled){
-      props.itemsListScrollTo(grocery.ItemId);
+      props.itemsListScrollTo(grocery.Pos);
       setIsEditingGrocery(!isEditingGrocery);
     }
   }
@@ -130,7 +131,7 @@ const GroceryView = (props: GroceryViewProps) => {
       alignItems: 'center',
       backgroundColor: (grocery.IsChecked && !isEditingGrocery)? o.backgroundcolor:o.innerbackgroundcolor,
       
-      borderColor: colorPalette.transparent,//(grocery.IsChecked && !isEditingGrocery)?colorPalette.transparent:o.bordercolor,
+      borderColor: cp.transparent,//(grocery.IsChecked && !isEditingGrocery)?colorPalette.transparent:o.bordercolor,
       borderWidth: 1,
       borderStyle: 'solid',
       borderRadius: o.borderRadius,

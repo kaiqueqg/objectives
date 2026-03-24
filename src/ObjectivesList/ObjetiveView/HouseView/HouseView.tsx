@@ -1,6 +1,6 @@
 import { View, StyleSheet, Text, Vibration, TextInput, Linking, Keyboard, BackHandler } from "react-native";
 import { House, Pattern, ItemViewProps, MessageType } from "../../../Types";
-import { colorPalette, globalStyle as gs } from "../../../Colors";
+import { globalStyle as gs } from "../../../Colors";
 import { FontPalette } from "../../../../fonts/Font";
 import { useUserContext } from "../../../Contexts/UserContext";
 import PressImage from "../../../PressImage/PressImage";
@@ -9,6 +9,7 @@ import PressText from "../../../PressText/PressText";
 import React from "react";
 import { useLogContext } from "../../../Contexts/LogContext";
 import { Images } from "../../../Images";
+import { cp } from "../../../ColorPalette";
 
 export const New = () => {
   return(
@@ -28,16 +29,16 @@ export const New = () => {
 }
 
 export interface HouseViewProps extends ItemViewProps {
-  house: House,
 }
 
 export const HouseView = (props: HouseViewProps) => {
   const { userPrefs, theme: t, fontTheme: f, putItem } = useUserContext();
   const { log, popMessage } = useLogContext();
-  const { objTheme: o, wasJustAdded, isSelected, isSelecting, isDisabled, onDeleteItem, loadMyItems, house } = props;
+  const { objTheme: o, wasJustAdded, isSelected, isSelecting, isDisabled, onDeleteItem, loadMyItems, item } = props;
+  const house = item as House;
 
   const [isEditingHouse, setIsEditingHouse] = useState<boolean>(false);
-  const [tempHouse, setTempHouse] = useState<House>(props.house);
+  const [tempHouse, setTempHouse] = useState<House>(house);
 
   const [keyboardVisible, setKeyboardVisible] = useState(false);
     
@@ -68,7 +69,7 @@ export const HouseView = (props: HouseViewProps) => {
   }, [keyboardVisible]);
 
   useEffect(()=>{
-    setTempHouse(props.house);
+    setTempHouse(house);
   }, [house])
 
   const onDelete = async () => {
@@ -112,7 +113,7 @@ export const HouseView = (props: HouseViewProps) => {
     }
 
     if(!isDisabled){
-      props.itemsListScrollTo(house.ItemId);
+      props.itemsListScrollTo(house.Pos);
       setIsEditingHouse(!isEditingHouse);
     }
   }
@@ -162,9 +163,9 @@ export const HouseView = (props: HouseViewProps) => {
       flexDirection: 'column',
       justifyContent: 'center',
       alignItems: 'center',
-      backgroundColor: (house.WasContacted && !isEditingHouse)? colorPalette.transparent:o.innerbackgroundcolor,
+      backgroundColor: (house.WasContacted && !isEditingHouse)? cp.transparent:o.innerbackgroundcolor,
       
-      borderColor: colorPalette.transparent,//(house.WasContacted && !isEditingHouse)?colorPalette.transparent:o.bordercolor,
+      borderColor: cp.transparent,//(house.WasContacted && !isEditingHouse)?colorPalette.transparent:o.bordercolor,
       borderWidth: 1,
       borderStyle: 'solid',
       borderRadius: o.borderRadius,
@@ -217,7 +218,7 @@ export const HouseView = (props: HouseViewProps) => {
       color: o.innertextcolor,
     },
     attentionText:{
-      color: colorPalette.red,
+      color: cp.red,
       fontWeight: 'bold',
     },
     houseDoneImage:{

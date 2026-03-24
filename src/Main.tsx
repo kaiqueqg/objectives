@@ -1,7 +1,5 @@
-import { View, StyleSheet, StatusBar, AppStateStatus, AppState, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, Pressable } from "react-native";
+import { View, StyleSheet, StatusBar, AppStateStatus, AppState, KeyboardAvoidingView, Platform, Text, TextInput } from "react-native";
 import { Objective, Themes, Views } from "./Types";
-import { FontPalette } from "../fonts/Font";
-import { AppPalette, colorPalette } from "./Colors";
 import BottomBar from "./BottomBar/BottomBar";
 import { useUserContext } from "./Contexts/UserContext";
 import React, { useEffect, useRef, useState } from "react";
@@ -20,6 +18,8 @@ import { Images } from "./Images";
 import { SettingsView } from "./SettingsView/SettingsView";
 import { LoginView } from "./LoginView/LoginView";
 import { SafeAreaView } from 'react-native-safe-area-context';
+import SyncView from "./SyncView/SyncView";
+import AlertsView from "./AlertsView/AlertsView";
 // import * as Linking from 'expo-linking';
 
 export interface MainProps{
@@ -64,7 +64,6 @@ const Main = (props: MainProps) => {
       }
 
       if(appJustLaunched){
-        log.w('first')
         await onFirstOpenLock();
 
         const v = await storage.readCurrentObjectiveId();
@@ -74,8 +73,6 @@ const Main = (props: MainProps) => {
         }
       }
       else{
-        
-        log.w('not first')
       }
 
       subscription = AppState.addEventListener('change', async (nextState) => {
@@ -185,6 +182,7 @@ const Main = (props: MainProps) => {
   }
 
   const getCurrentView = () => {
+    // return <AlertsView/>
     if(currentView === Views.LoginView){
       return <LoginView viewType="Full"/>;
     }
@@ -200,15 +198,33 @@ const Main = (props: MainProps) => {
     else if(currentView === Views.SettingsView){
       return <SettingsView/>
     }
+    else if(currentView === Views.SyncView){
+      return <SyncView/>
+    }
+    else if(currentView === Views.AlertsView){
+      return <AlertsView/>
+    }
     else if(currentObjective){
       return <ObjectiveView obj={currentObjective}></ObjectiveView>
     }
   }
 
   const s = StyleSheet.create({
-    container: {
+    safeAreaContainer:{
       flex: 1,
       backgroundColor: t.backgroundcolor,
+
+      // borderColor: 'red',
+      // borderWidth: 1,
+      // borderRadius: 5,
+      // borderStyle: 'solid',
+    },
+    keyboardAvoidingView: {
+      flex: 1,
+      // borderColor: 'green',
+      // borderWidth: 1,
+      // borderRadius: 5,
+      // borderStyle: 'solid',
     },
     lockedContainer:{
       flex: 1,
@@ -220,25 +236,31 @@ const Main = (props: MainProps) => {
       backgroundColor: 'black',
       padding: 100,
     },
+    container: {
+      flex: 1,
+      backgroundColor: t.backgroundcolor,
+
+      // borderColor: 'yellow',
+      // borderWidth: 1,
+      // borderRadius: 5,
+      // borderStyle: 'solid',
+    },
     lockImage:{
       width: 40,
       height: 40,
-    },
-    safeAreaContainer:{
-      flex: 1,
-      backgroundColor: t.backgroundcolor,
     },
   });
 
   return (
     <SafeAreaView style={s.safeAreaContainer}>
-        <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-          {showMainView?
+        <KeyboardAvoidingView style={s.keyboardAvoidingView} behavior={'height'}>
+          {
+          true?
             <View style={s.container}>
               <PopMessageContainer></PopMessageContainer>
-                {getCurrentView()}
+              {getCurrentView()}
               <BottomBar></BottomBar>
-              <StatusBar translucent backgroundColor="transparent" barStyle={statusBarTheme}/>
+              <StatusBar translucent={false} backgroundColor="transparent" barStyle={statusBarTheme}/>
             </View>
           :
           <View style={s.lockedContainer}>

@@ -1,21 +1,12 @@
-import { View, StyleSheet, Text, StatusBar, Vibration, BackHandler, Platform, AppState, AppStateStatus, FlatList, ScrollView  } from "react-native";
-import { Item, MessageType, Objective, ObjectiveList, Pattern, PopMessage, Step, UserPrefs, Views } from "./../Types";
-import { FontPalette } from "../../fonts/Font";
-import { AppPalette, colorPalette, globalStyle as gs } from "./../Colors";
+import { View, StyleSheet, Text, BackHandler, ScrollView  } from "react-native";
+import { Views } from "./../Types";
 import { useUserContext } from "./../Contexts/UserContext";
-import React, { useEffect, useState } from "react";
-import PopMessageView from "./../Log/PopMessageView";
-import PopMessageContainer from "./../Log/PopMessageContainer";
-import Loading from "../Loading/Loading";
-import { useLogContext } from "../Contexts/LogContext";
-import PressImage from "../PressImage/PressImage";
-import PressText from "../PressText/PressText";
-import { Images } from "../Images";
+import React, { useEffect } from "react";
+import SyncView from "../SyncView/SyncView";
 export interface MainProps{
 }
 
 const DevView = (props: MainProps) => {
-  const { log, consoleLogs, deleteLog } = useLogContext();
   const { writeCurrentView, theme: t } = useUserContext();
 
   useEffect(()=>{
@@ -28,10 +19,6 @@ const DevView = (props: MainProps) => {
       subscription.remove();
     };
   }, []);
-
-  const clear = () => {
-    deleteLog();
-  }
 
   const s = StyleSheet.create({
     devContainer:{
@@ -79,12 +66,7 @@ const DevView = (props: MainProps) => {
 
   return(
     <View style={s.devContainer}>
-      <ScrollView style={s.devScrollMessages}>
-        <Text style={s.devMessages}>{consoleLogs}</Text>
-      </ScrollView>
-      <View style={s.devButtonRow}>
-        <PressImage source={Images.Trash} onPress={clear}/>
-      </View>
+      <SyncView/>
     </View>
   )
 }

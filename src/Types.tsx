@@ -27,7 +27,7 @@ export interface Objective {
   Tags: string[],
 }
 
-export enum Themes {Dark = 'Dark', Light = 'Light', Auto = 'Auto'}
+export enum Themes {Dark = 'Dark', Light = 'Light', Auto = 'Auto', Win95 = 'Win95' }
 
 export enum ItemType {
   Step = 'Step',
@@ -67,6 +67,7 @@ export enum ObjBottomIcons {
 }
 
 export interface ItemViewProps {
+  item: Item,
   objTheme: ObjectivePallete,
   isSelecting: boolean,
   isSelected: boolean,
@@ -75,7 +76,8 @@ export interface ItemViewProps {
   wasJustAdded:boolean,
   onDeleteItem: (item: Item) => void,
   loadMyItems: () => void,
-  itemsListScrollTo: (itemId: string) => void,
+  itemsListScrollTo: (pos?: number) => void,
+  shakeLock: () => void,
 }
 
 export const ItemNew = (userId: string, objectiveId: string, itemId: string, type: ItemType, pos: number, title: string) => {
@@ -343,6 +345,8 @@ export enum Views {
   DevView = 'DevView',
   ArchivedView = 'ArchivedView',
   SettingsView = 'SettingsView',
+  SyncView = 'SyncView',
+  AlertsView = 'AlertsView',
 }
 
 export enum MultiSelectType { MOVE = 'Move', COPY = 'Copy' }

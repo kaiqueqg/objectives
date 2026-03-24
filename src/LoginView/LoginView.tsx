@@ -1,19 +1,21 @@
-import { View, StyleSheet, Text, TextInput, Vibration , Pressable, BackHandler, ScrollView, NativeSyntheticEvent, TextInputSubmitEditingEventData, TextInputSubmitEditingEvent, Button, ViewBase} from "react-native";
-import React, { useEffect, useRef, useState } from "react";
+import { View, StyleSheet, Text, TextInput, Vibration , TextInputSubmitEditingEvent } from "react-native";
+import React, { useEffect, useEffectEvent, useRef, useState } from "react";
 import PressText from "../PressText/PressText";
-import Loading from "../Loading/Loading";
+import {Loading} from "../Loading/Loading";
 
 import { useUserContext } from "../Contexts/UserContext";
 import { useLogContext } from "../Contexts/LogContext";
 import { useRequestContext } from "../Contexts/RequestContext";
-import Constants, { ExecutionEnvironment } from "expo-constants";
-import { colorPalette, dark, globalStyle as gs } from "../Colors";
-import { Item, MessageType, Objective, ObjectiveList, Pattern, TwoFactorAuthRequest } from "../Types";
+import { globalStyle as gs } from "../Colors";
+import { Item, MessageType, Objective, ObjectiveList, Pattern, TwoFactorAuthRequest, Views } from "../Types";
 import PressImage from "../PressImage/PressImage";
 import { Images } from "../Images";
 import * as FileSystem from 'expo-file-system';
 import { useStorageContext } from "../Contexts/StorageContext";
-import ButtonView from "../BView/ButtonView";
+import ButtonView from "../ButtonView/ButtonView";
+import { cp } from "../ColorPalette";
+import ReloggingView from "./ReloggingView";
+import TwoFAView from "./TwoFAView";
 
 interface StorageAccessFrameworkType {
   requestDirectoryPermissionsAsync: () => Promise<{ granted: boolean; directoryUri: string }>;
@@ -26,79 +28,63 @@ interface StorageAccessFrameworkType {
 const saf: StorageAccessFrameworkType = (FileSystem as any).StorageAccessFramework;
 
 export interface LoginViewProps {
-  viewType: 'Full'|'Image'
+  viewType: 'Full'|'Image',
 }
 
 export const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
   const { identityApi, objectivesApi } = useRequestContext();
-  const { storage } = useStorageContext();
+  const { storage,  } = useStorageContext();
+  const { writeCurrentView } = useUserContext();
   const { log, popMessage } = useLogContext();
   const { viewType } = props;
   const { 
     theme: t,
     fontTheme: f,
-    user, userPrefs, writeUser, writeJwtToken, writeObjectives, writeItems, writeLastSync, writeUserPrefs,
+    user, userPrefs, writeUser, writeJwtToken, deleteJwtToken, writeTwoFAToken, isLogged, isAuthorized, writeObjectives, writeItems, writeLastSync, writeUserPrefs,
     availableTags, selectedTags, writeAvailableTags, writeSelectedTags,
     clearAllData, vibOk, vibWrong, lastSync, objectives, readItems, deletedObjectives, deletedItems, deleteDeletedObjectives, deleteDeletedItems,
   } = useUserContext();
 
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
+  const [inputEmail, setInputEmail] = useState<string>('');
+  const [inputPass, setInputPass] = useState<string>('');
   const [isShowingPassword, setIsShowingPassword] = useState<boolean>(false);
   const [isLogging, setIsLogging] = useState<boolean>(false);
-  const [isLogged, setIsLogged] = useState<boolean>(false);
   const [isBackingUpData, setIsBackingUpData] = useState<boolean>(false);
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
-  const [doneSync, setDoneSync] = useState<boolean>(false);
-  const [failedSync, setFailedSync] = useState<boolean>(false);
-  const [isLambdaCold, setIsLambdaCold] = useState<boolean>(false);
 
   const [isEmailWrong, setIsEmailWrong] = useState<boolean>(false);
   const [isPasswordWrong, setIsPasswordWrong] = useState<boolean>(false);
-  const [isShowingRefreshTokenView, setIsShowingRefreshTokenView] = useState<boolean>(false);
 
-  const [isRequiringTwoFA, setIsRequiringTwoFA] = useState<boolean>(false);
-  const [requiringTwoFA, setRequiringTwoFA] = useState<boolean>(false);
-  const [verificationCode, setVerificationCode] = useState<string>('');
-  const [twoFATempToken, setTwoFATempToken] = useState<string>('');
+  const [showRequireTwoFAView, setShowRequireTwoFAView] = useState<boolean>(false);
 
   const emailRef = useRef<TextInput>(null);
   const passRef = useRef<TextInput>(null);
 
   useEffect(() => {
-    if(user.Email !== '') {
-      setIsLogged(true);
-    }
-  },[])
+  }, [])
 
   const onChangeEmail = (value: string) => {
     setIsEmailWrong(false);
-    setEmail(value);
+    setInputEmail(value);
   }
 
   const onChangePassword = (value: string) => {
     setIsPasswordWrong(false);
-    setPassword(value);
-  }
-
-  const onChangeVerificationCode = (value: string) => {
-    setVerificationCode(value);
+    setInputPass(value);
   }
 
   const getLogoutView = () => {
     if(userPrefs.isRightHand){
       return(
         <View style={s.logoutView}>
-            <ButtonView text='Reset' onPress={logout} type='neutral'/>
-            <ButtonView text='Logout' onPress={logout} type='reset'/>
+          <ButtonView text='Logout' onPress={logout} type='reset'/>
         </View>
       )
     }
     else{
       return(
         <View style={s.logoutView}>
-            <ButtonView text='Logout' onPress={logout} type='reset'/>
-            <ButtonView text='Reset' onPress={logout} type='neutral'/>
+          <ButtonView text='Logout' onPress={logout} type='reset'/>
         </View>
       )
     }
@@ -108,9 +94,9 @@ export const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
     //^ Download tags, unique or not.
     let download: string[] = [];
     objectives.forEach((obj: any) => {
-        if (Array.isArray(obj.Tags)) {
-            download.push(...obj.Tags);
-        }
+      if (Array.isArray(obj.Tags)) {
+        download.push(...obj.Tags);
+      }
     });
     //^ All unique downloaded tags.
     const uniqueDownloadTags = Array.from(new Set(download));
@@ -127,9 +113,6 @@ export const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
   const syncObjectivesList = async () => {
     try {
       if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
-
-      setFailedSync(false);
-      setDoneSync(false);
 
       let syncObjectives: Objective[] = [];
       let syncItems: Item[] = [];
@@ -170,7 +153,7 @@ export const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
       }
   
       setIsSyncing(true);
-      const data = await objectivesApi.syncObjectivesList(objectiveList);
+      const data = await objectivesApi.syncObjectivesList(objectiveList, handleRequestError);
       
       if(data !== null && data !==undefined && data.Objectives){
         syncTags(data.Objectives);
@@ -189,10 +172,8 @@ export const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
         
         popMessage('Sync done.');
         setIsSyncing(false);
-        setDoneSync(true);
         setTimeout(() => {
           writeLastSync((new Date()).toISOString());
-          setDoneSync(false);
         }, 10000);
   
         return;
@@ -200,17 +181,17 @@ export const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
   
       popMessage('Sync failed.', MessageType.Error);
       setIsSyncing(false);
-      setFailedSync(true);
-      setTimeout(() => {
-        setFailedSync(false);
-      }, 10000);
     } catch (err) {
       setIsSyncing(false);
-      setFailedSync(true);
-      setTimeout(() => {
-        setFailedSync(false);
-      }, 10000);
     } 
+  }
+
+  const handleRequestError = (code: number) => {
+    if(code === 401){
+      deleteJwtToken();
+      setInputEmail(user.Email);
+      writeCurrentView(Views.LoginView);
+    }
   }
 
   const isValidEmail = (input: string) => {
@@ -218,46 +199,48 @@ export const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
     return regex.test(input);
   }
 
-  const login = async () => {
-    const loginBody = { Email: isShowingRefreshTokenView?user.Email.trim():email.trim(), Password: password.trim() };
-
-    setPassword('');
+  const testBeforeLogin = async (email: string, pass: string) => {
+    const loginBody = { Email: email.trim(), Password: pass.trim() };
 
     if(!isValidEmail(loginBody.Email)){
-      popMessage("Type a valid email.", MessageType.Alert);
+      popMessage("Enter a valid email address!", MessageType.Alert);
       vibWrong();
+      emailRef.current?.focus();
       return;
     }
 
     if(loginBody.Email === ""){
-      popMessage("Type email to login!", MessageType.Alert);
-      vibWrong();
+      if(loginBody.Password !== "") popMessage("Enter an email to log in!", MessageType.Alert);
+      if(loginBody.Password !== "") vibWrong();
+      emailRef.current?.focus();
       return;
     }
 
     if(loginBody.Password === ""){
-      popMessage("Type password to login!", MessageType.Alert);
-      vibWrong();
+      if(loginBody.Email === "") popMessage("Enter a password to log in!", MessageType.Alert);
+      if(loginBody.Email === "") vibWrong();
+      passRef.current?.focus();
       return;
     }
+    
+    await login(loginBody);
+  }
 
-    if(isShowingRefreshTokenView && loginBody.Email !== user.Email){
-      vibWrong();
-      popMessage('Different user that is logged in.', MessageType.Error);
-      return;
-    }
-
+  const login = async (loginBody: {Email: string, Password: string}) => {
+    setInputPass('');
     setIsLogging(true);
     vibOk();
 
     try {
       const data = await identityApi.login(JSON.stringify(loginBody));
+      console.log(data)
       if(data){
         /// Fist require 2FA
         if(data.RequiringTwoFA){
           if(data.TwoFATempToken && data.TwoFATempToken.trim() !== ''){
-            setTwoFATempToken(data.TwoFATempToken);
-            setRequiringTwoFA(true);
+            console.log(data.TwoFATempToken);
+            writeTwoFAToken(data.TwoFATempToken);
+            setShowRequireTwoFAView(true);
           }
           else{
             popMessage('There was a problem with requiring 2FA code.', MessageType.Error);
@@ -268,7 +251,6 @@ export const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
           if(data.User && data.Token){
             writeUser(data.User);
             writeJwtToken(data.Token);
-            setIsLogged(true);
 
             syncObjectivesList();
           }
@@ -282,48 +264,11 @@ export const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
     }
 
     setIsLogging(false);
-    setIsShowingRefreshTokenView(false);
-  }
-
-  const sendVerificationTwoFA = async () => {
-    setIsRequiringTwoFA(true);
-
-    if(!(/^[0-9]{6}$/.test(verificationCode))){
-      setVerificationCode('');
-      popMessage('Bad verification code. Must be 6 numbers.', MessageType.Alert);
-      return;
-    }
-    
-    if(twoFATempToken) {
-      const sendRequest: TwoFactorAuthRequest = { TwoFACode: verificationCode, TwoFATempToken: twoFATempToken };
-      const data = await identityApi.validateTwoFA(sendRequest);
-
-      if(data && data.User && data.Token){
-        await writeUser(data.User);
-        writeJwtToken(data.Token);
-        setIsLogged(true);
-        setRequiringTwoFA(false);
-
-        syncObjectivesList();
-      }
-      else{
-        popMessage('Login was ok but no data was returned.', MessageType.Error);
-        logout();
-      }
-    }
-    else{
-      popMessage(`There's no token to try to approve 2FA code.`)
-    }
-
-    setIsRequiringTwoFA(false);
   }
   
   const logout = async () => {
     if(userPrefs.vibrate) Vibration.vibrate(Pattern.Wrong);
     await clearAllData();
-    setIsLogged(false);
-    setIsShowingRefreshTokenView(false);
-    setRequiringTwoFA(false);
   }
 
   const backupData = async () => {
@@ -342,83 +287,36 @@ export const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
 
   const getSyncImage = () => {
     return(
-      <>
-        {isSyncing &&  !isLambdaCold && <Loading></Loading>}
-        {!isSyncing && !isLambdaCold && <PressImage onPress={syncObjectivesList} source={Images.Sync} hide={user.Email === ''?true:false}/>}
-      </>
+      <PressImage
+        onPress={syncObjectivesList}
+        source={Images.Sync}
+        disable={!isLogged || !isAuthorized}
+        isLoading={isSyncing}
+        onPressDisabled={() => {
+          popMessage('Need to login to sync.', MessageType.Alert);
+        }}
+      />
     )
   }
- 
+
   const getFullView = () => {
-    if(isLogged && !requiringTwoFA){
-      return getLoggedView();
-    }
-    else if(requiringTwoFA){
-      return requiringTwoFAView();
-    }
-    else if(!isLogged && !requiringTwoFA){
-      return getLoggingInView();
+    console.log(showRequireTwoFAView+' '+isLogged+' '+isAuthorized);
+    if(showRequireTwoFAView){
+      return <TwoFAView login={testBeforeLogin} back={() => {setShowRequireTwoFAView(false); if(isLogged && isAuthorized) syncObjectivesList();}}/>
     }
     else{
-      <Text>Nothing</Text>
-    }
-  }
-
-  const onEmailEnter = (event: TextInputSubmitEditingEvent) => {
-    if(!isValidEmail(email.trim())){
-      popMessage('Type a valid email.', MessageType.Alert);
-      setIsEmailWrong(true);
-      return;
-    }
-
-    if(password.trim() !== ''){
-      login();
-    }
-    else{
-      passRef.current?.focus();
-    }
-  }
-
-  const onPasswordEnter = (event: TextInputSubmitEditingEvent) => {
-    if(password.trim() === ''){
-      popMessage('Type a password.', MessageType.Alert);
-      setIsPasswordWrong(true);
-      return;
-    }
-
-    if(email.trim() === ''){
-      emailRef.current?.focus();
-      return;
-    }
-
-    login();
-  }
-
-  const cancelTwoFA = () => {
-    setPassword('');
-    setRequiringTwoFA(false);
-  }
-
-  const requiringTwoFAView = () => {
-    return(
-      <View style={[s.loginContainer]}>
-        <Text style={s.header}>{'2FA Verification code'}</Text>
-        {isRequiringTwoFA?
-          <Loading></Loading>
-          :
-          <>
-            <View style={s.emailContainer}>
-              <TextInput autoFocus keyboardType="numeric" autoCapitalize="none" placeholder="6 digit number" placeholderTextColor={t.textcolorfade} style={s.emailInput} onChangeText={onChangeVerificationCode} onSubmitEditing={sendVerificationTwoFA}></TextInput>
-            </View>
-            <View style={s.logoutView}>
-              {userPrefs.isRightHand && <ButtonView text='Cancel' onPress={cancelTwoFA} type="neutral"/>}
-              <ButtonView text='Send' onPress={sendVerificationTwoFA} type="foward"/>
-              {!userPrefs.isRightHand && <ButtonView text='Cancel' onPress={cancelTwoFA} type="neutral"/>}
-            </View>
-          </>
+      if(isLogged){
+        if(isAuthorized){
+          return getLoggedView();
         }
-      </View>
-    )
+        else{
+          return <ReloggingView email={user.Email} login={testBeforeLogin} logout={logout}/>
+        }
+      }
+      else{
+        return getLoggingView();
+      }
+    }
   }
 
   const saveToJSON = async (): Promise<void> => {
@@ -453,6 +351,8 @@ export const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
     await saf.writeAsStringAsync(fileUri, content);
   }
 
+  // view
+
   const getLoggedView = () => {
     return(
         <View style={s.loggerContainer}>
@@ -478,68 +378,72 @@ export const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
               <Text style={s.userTextDef}>2FA:</Text>
               <Text style={s.userText}>{user === null? "no user": (user.TwoFAActive?'Active':'Not Active')}</Text>
             </View>
-          <Text style={s.header}>TOOLS:</Text>
-          <PressText 
-            style={s.prefsTools}
-            textStyle={s.prefsToolsText}
-            onPress={() => {syncObjectivesList()}}
-            isLoading={isSyncing}
-            imageStyle={s.smallImage}
-            imageSource={Images.Sync}
-            text={"Sync data."}>  
-          </PressText>
-          <PressText 
-            style={s.prefsTools}
-            textStyle={s.prefsToolsText}
-            onPress={() => {backupData()}}
-            isLoading={isBackingUpData}
-            imageStyle={s.smallImage}
-            imageSource={Images.Backup}
-            text={"Save full data on AWS S3."}>  
-          </PressText>
-          {saf !== undefined && <PressText 
-            style={s.prefsTools}
-            textStyle={s.prefsToolsText}
-            onPress={() => {saveToJSON()}}
-            imageStyle={s.backupImage}
-            imageSource={Images.DownloadFiles}
-            text={"Download a JSON file of your data."}
-          ></PressText>}
-            {getLogoutView()}
+            <Text style={s.header}>TOOLS:</Text>
+            <PressText 
+              style={s.prefsTools}
+              textStyle={s.prefsToolsText}
+              onPress={() => {syncObjectivesList()}}
+              isLoading={isSyncing}
+              imageStyle={s.smallImage}
+              imageSource={Images.Sync}
+              text={"Sync data."}>
+            </PressText>
+            <PressText 
+              style={s.prefsTools}
+              textStyle={s.prefsToolsText}
+              onPress={() => {backupData()}}
+              isLoading={isBackingUpData}
+              imageStyle={s.smallImage}
+              imageSource={Images.Backup}
+              text={"Save full data on AWS S3."}>
+            </PressText>
+            {saf !== undefined && <PressText 
+              style={s.prefsTools}
+              textStyle={s.prefsToolsText}
+              onPress={() => {saveToJSON()}}
+              imageStyle={s.backupImage}
+              imageSource={Images.DownloadFiles}
+              text={"Download a JSON file of your data."}
+            ></PressText>}
+              {getLogoutView()}
           </View>
         </View>
       )
   }
 
-  const getLoggingInView = () => {
+  const getPasswordInputView = () => {
     return(
-      <View style={s.loginContainer}>
-        <Text style={s.header}>{isShowingRefreshTokenView?'REFRESH TOKEN':'LOGIN'}</Text>
-        {isLogging?
-          <Loading></Loading>
-          :
-          <>
-            <View style={s.emailContainer}>
-              {isShowingRefreshTokenView?
-              <TextInput style={s.emailInput} value={user.Email} editable={false}></TextInput>
-              :
-              <TextInput ref={emailRef} autoCapitalize="none" placeholder="Email" placeholderTextColor={t.textcolorfade} style={s.emailInput} onChangeText={onChangeEmail} onSubmitEditing={onEmailEnter}></TextInput>
-              }
-            </View>
-            <View style={s.passwordContainer}>
-              {!userPrefs.isRightHand && <PressImage onPress={()=>{setIsShowingPassword(!isShowingPassword)}} source={isShowingPassword?Images.Hide:Images.Show}/>}
-              <TextInput ref={passRef} autoCapitalize="none" placeholder="Password" placeholderTextColor={t.textcolorfade} style={s.passwordInput} secureTextEntry={!isShowingPassword} onChangeText={onChangePassword} onSubmitEditing={login}></TextInput>
-              {userPrefs.isRightHand && <PressImage onPress={()=>{setIsShowingPassword(!isShowingPassword)}} source={isShowingPassword?Images.Hide:Images.Show}/>}
-            </View>
-            <View style={s.logoutView}>
-              <ButtonView text={'Login'} onPress={login} type='foward'/>
-            </View>
-          </>
-        }
+      <View style={s.passwordContainer}>
+        {!userPrefs.isRightHand && <PressImage onPress={()=>{setIsShowingPassword(!isShowingPassword)}} source={isShowingPassword?Images.Hide:Images.Show}/>}
+        <TextInput ref={passRef} autoCapitalize="none" placeholder="Password" placeholderTextColor={t.textcolorfade} style={s.passwordInput} secureTextEntry={!isShowingPassword} onChangeText={onChangePassword} onSubmitEditing={() => testBeforeLogin(inputEmail, inputPass)}></TextInput>
+        {userPrefs.isRightHand && <PressImage onPress={()=>{setIsShowingPassword(!isShowingPassword)}} source={isShowingPassword?Images.Hide:Images.Show}/>}
       </View>
     )
   }
 
+  const getLoggingView = () => {
+    return(
+      <View style={s.loginContainer}>
+        <Text style={s.header}>{'LOGIN'}</Text> 
+          <Loading isLoading={isLogging}>
+            <View style={s.emailContainer}>
+              <TextInput
+                ref={emailRef}
+                autoCapitalize="none"
+                placeholder="Email"
+                placeholderTextColor={t.textcolorfade}
+                style={s.emailInput}
+                onChangeText={onChangeEmail}
+                onSubmitEditing={() => testBeforeLogin(inputEmail, inputPass)}/>
+            </View>
+            {getPasswordInputView()}
+            <View style={s.logoutView}>
+              <ButtonView text={'Login'} onPress={() => testBeforeLogin(inputEmail, inputPass)} type='foward'/>
+            </View>
+          </Loading>
+      </View>
+    )
+  }
   const s = StyleSheet.create({
     header:{
       color: t.textcolor,
@@ -614,10 +518,10 @@ export const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
       borderRadius: 2,
       borderStyle: 'solid',
       borderWidth: 1,
-      borderColor: colorPalette.black,
+      borderColor: cp.black,
     },
     refreshTokenButtonText: {
-      color: colorPalette.black,
+      color: cp.black,
       fontSize: f.userViewLogoutButton.fontSize,
     },
     loginContainer:{

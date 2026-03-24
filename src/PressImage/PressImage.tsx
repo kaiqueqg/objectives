@@ -1,14 +1,25 @@
 import React, { useEffect, useState } from "react";
 import { Image, ImageStyle, ImageSourcePropType, View, Vibration, StyleSheet, Text, Pressable } from "react-native";
 import { useUserContext } from "../Contexts/UserContext";
-import { Pattern } from "../Types";
+import { MessageType, Pattern } from "../Types";
 import { useLogContext } from "../Contexts/LogContext";
-import { colorPalette, GeneralPalette, globalStyle as gs, ObjectivePallete } from "../Colors";
+
+import { globalStyle as gs, ObjectivePallete } from "../Colors";
 import { Images } from "../Images";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  withRepeat,
+  Easing,
+  withSequence
+} from 'react-native-reanimated';
+import { cp } from "../ColorPalette";
+import { Loading } from "../Loading/Loading";
 
 export interface PressImageProps{
   source: ImageSourcePropType,
-  cT?: GeneralPalette,
+  cT?: ObjectivePallete,
   raw?: boolean,
   color?: string,
 
@@ -18,21 +29,26 @@ export interface PressImageProps{
   onLongPress?: () => void,
   delayLongPress?: number,
 
-  hide?: boolean,
   disable?: boolean,
+  disableMsg?: string,
+  onPressDisabled?: () => void,
+  
+  hide?: boolean,
   confirm?: boolean,
-  selected?: boolean,
+  isSelected?: boolean,
   fade?: boolean,
   
   text?: string,
 
   size?: number,
   showLock?: boolean,
+
+  isLoading?: boolean,
 }
 
 const PressImage = (props: PressImageProps) => {
   const {userPrefs, theme: t} = useUserContext();
-  const {log} = useLogContext();
+  const {log, popMessage} = useLogContext();
   const [isConfirming, setIsConfirming] = useState<boolean>(false);
   const [wasLongPressed, setWasLongPressed] = useState(false);
 
@@ -46,7 +62,7 @@ const PressImage = (props: PressImageProps) => {
 
       if(props.fade) return props.cT.icontintfade;
 
-      if(props.selected) return props.cT.icontintselected;
+      if(props.isSelected) return props.cT.icontintselected;
       
       if(props.color) return props.color;
       return props.cT.icontint;
@@ -56,7 +72,7 @@ const PressImage = (props: PressImageProps) => {
     
     if(props.fade) return t.icontintfade;
     
-    if(props.selected) return t.icontintselected;
+    if(props.isSelected) return t.icontintselected;
     
     if(props.color) return props.color;
     return t.icontint;
@@ -100,24 +116,39 @@ const PressImage = (props: PressImageProps) => {
     }
     else{
       if(userPrefs.vibrate) Vibration.vibrate(Pattern.Wrong);
+      if(props.disableMsg) popMessage(props.disableMsg, MessageType.Alert);
+      if(props.onPressDisabled) props.onPressDisabled();
     }
+  }
+
+  const getDisplayImage = () => {
+    return(
+      <Loading isLoading={props.isLoading}>
+        {props.showLock &&<Image style={[s.lockImage as ImageStyle, finalSize]} source={Images.Lock}></Image>}
+        <Animated.Image style={[s.image, {tintColor: finalTintColor} as ImageStyle, finalSize]} source={props.source}/>
+        {/* <Image style={[props.style as ImageStyle, props.disable? (props.disableStyle as ImageStyle):{}, s.image]} source={props.source}></Image> */}
+        {props.text && <Text style={[s.text]}>{props.text}</Text>}
+      </Loading>
+    )
   }
 
   const getNormalImage = () => {
     return(
       <Pressable 
-        // style={[s.container, props.pressStyle, props.selected? props.selectedStyle:{}]}
         style={[s.container]}
         onPressOut={normalTouchEnd}
         onPressIn={props.onPressIn}
         onLongPress={handleLongPress}
         delayLongPress={props.delayLongPress??800}>
-        {/* <View style={[s.shadow]}/> */}
-        {/* <View style={[s.border2]}/> */}
-        {props.showLock &&<Image style={[s.lockImage as ImageStyle, finalSize]} source={Images.Lock}></Image>}
-        <Image style={[s.image, {tintColor: finalTintColor} as ImageStyle, finalSize]} source={props.source}></Image>
-        {/* <Image style={[props.style as ImageStyle, props.disable? (props.disableStyle as ImageStyle):{}, s.image]} source={props.source}></Image> */}
-        {props.text && <Text style={[s.text]}>{props.text}</Text>}
+        {props.isSelected?
+          <View style={s.out}>
+            <View style={s.in}>
+              {getDisplayImage()}
+            </View>
+          </View>
+          :
+          getDisplayImage()
+        }
       </Pressable>
     )
   }
@@ -146,7 +177,7 @@ const PressImage = (props: PressImageProps) => {
       setIsConfirming(false);
     }, 2000);
   }
-  
+
   const s = StyleSheet.create({
     container:{
       ...gs.baseImageContainer,
@@ -154,35 +185,30 @@ const PressImage = (props: PressImageProps) => {
     text: {
       position: 'absolute',
       zIndex: 1,
-      color: props.cT?.textcolor?props.cT.textcolor:colorPalette.red,
-      fontSize: 16,
+      fontSize: 10,
+      color: props.cT?.textcolor?props.cT.textcolor:cp.red,
       fontWeight: 'bold',
     },
-
-    shadow: {
-      position: "absolute",
-      left: 4,
-      top: 4,
-
-      width: 40,
-      height: 40,
-      backgroundColor: 'black',
-
-      borderColor: '#00000000',
-      borderWidth: 1,
-      borderRadius: 25,
+    out:{
+      borderColor: t.bordercolorselected,
+      borderRightWidth: 1,
+      borderBottomWidth: 1,
+      // borderLeftWidth: 2,
+      // borderTopWidth: 2,
+      borderRadius: 8,
       borderStyle: 'solid',
     },
-    border2: {
-      position: "absolute",
+    in:{
+      padding: 4,
+      justifyContent: 'center',
+      alignItems: 'center',
+      verticalAlign: 'middle',
 
-      width: 40,
-      height: 40,
-      backgroundColor: t.backgroundcolor,
+      backgroundColor: cp.darky,
 
-      borderColor: 'black',
+      borderColor: t.bordercolorselected,
       borderWidth: 1,
-      borderRadius: 25,
+      borderRadius: 7,
       borderStyle: 'solid',
     },
     image:{

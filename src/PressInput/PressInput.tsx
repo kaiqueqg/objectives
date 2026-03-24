@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import PressImage from "../PressImage/PressImage";
 import { useUserContext } from "../Contexts/UserContext";
 import { ObjectivePallete, globalStyle as gs } from "../Colors";
-import { FontPalette } from "../../fonts/Font";
 import React from "react";
 import { useLogContext } from "../Contexts/LogContext";
 import { Pattern } from "../Types";
@@ -122,7 +121,7 @@ const PressInput = (props: PressInputProps) => {
       padding: 5,
     },
     containerWithoutText:{
-      borderBottomWidth: 1,
+      // borderBottomWidth: 1,
       borderStyle: 'solid',
       borderColor: o.innertextcolorfade,
     },
