@@ -1,5 +1,5 @@
 
-import { View, StyleSheet, Text } from "react-native";
+import { View, StyleSheet, Text, Pressable } from "react-native";
 import { useUserContext } from "../Contexts/UserContext";
 import { MessageType, PopMessage } from "../Types";
 import { useEffect } from "react";
@@ -23,17 +23,25 @@ const PopMessageView = (props: PopMessageViewProps) => {
   const getTheme = () => {
     switch(message.type){
       case MessageType.Normal:
-        return (<View style={[s.messageContainer]}>
+        return (
+        <Pressable style={[s.messageContainer]} onPress={()=>{removeMessage(message.id)}}>
           <Text style={s.messageText}>{message.text}</Text>
-        </View>)
+        </Pressable>)
+      case MessageType.Positive:
+        return (
+        <Pressable style={[s.messageContainer, s.messagePositive]} onPress={()=>{removeMessage(message.id)}}>
+          <Text style={s.messageText}>{message.text}</Text>
+        </Pressable>)
       case MessageType.Error:
-        return (<View style={[s.messageContainer, s.messageError]}>
+        return (
+        <Pressable style={[s.messageContainer, s.messageError]} onPress={()=>{removeMessage(message.id)}}>
           <Text style={s.messageText}>{message.text}</Text>
-        </View>)
+        </Pressable>)
       case MessageType.Alert:
-        return (<View style={[s.messageContainer, s.messageAlert]}>
+        return (
+        <Pressable style={[s.messageContainer, s.messageAlert]} onPress={()=>{removeMessage(message.id)}}>
           <Text style={s.messageText}>{message.text}</Text>
-        </View>)
+        </Pressable>)
       default:
         return <></>
     }
@@ -41,15 +49,28 @@ const PopMessageView = (props: PopMessageViewProps) => {
 
   const s = StyleSheet.create({
     messageContainer:{
-      display: 'flex',
+      alignSelf: 'flex-end',
       color: 'beige',
-      height: 30, 
-      maxHeight: 30,
-      minHeight: 30,
+
+      borderColor: 'black',
+      borderWidth: 1,
+      borderTopLeftRadius: 15,
+      borderBottomLeftRadius: 15,
+      borderTopRightRadius: 15,
+      borderBottomRightRadius: 0,
+      borderStyle: 'solid',
+
+      marginVertical: 3,
+      marginHorizontal: 5,
+      paddingVertical: 5,
+      paddingHorizontal: 10,
       
-      backgroundColor: cp.greenlight,
+      backgroundColor: cp.greylighter,
       justifyContent: 'center',
       alignItems: 'center',
+    },
+    messagePositive:{
+      backgroundColor: cp.greenlight,
     },
     messageError:{
       backgroundColor: cp.redlight,

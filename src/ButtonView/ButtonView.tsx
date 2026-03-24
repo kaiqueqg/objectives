@@ -4,6 +4,7 @@ import { useUserContext } from "../Contexts/UserContext";
 import { Pattern } from "../Types";
 import { useLogContext } from "../Contexts/LogContext";
 import { ObjectivePallete } from "../Colors";
+import { clamp } from "../Helper";
 
 export interface ButtonProps extends ViewProps {
   cT?: ObjectivePallete,
@@ -15,7 +16,7 @@ export interface ButtonProps extends ViewProps {
   isLoading?: boolean,
   isSelected?: boolean,
 
-  type?: 'foward'|'backward'|'neutral'|'reset',
+  type?: 'foward'|'backward'|'neutral'|'reset'|'positive',
   size?: number,
 
   vibrate?: boolean,
@@ -25,12 +26,18 @@ const ButtonView = (props: ButtonProps) => {
   const {theme: t, user } = useUserContext();
   const { popMessage } = useLogContext();
 
+  const index = 1;
+  let vertical = clamp(props.size, 10, 50);
+  let horizontal = clamp(props.size, 15, 50);
+  let f = clamp(props.size, 15, 50);
+
   const getBkColor = () => {
     if(props.type){
       if(props.type === 'foward') return t.fowardbk;
       if(props.type === 'backward') return t.backwardbk;
       if(props.type === 'neutral') return t.neutralbk;
       if(props.type === 'reset') return t.resetbk;
+      if(props.type === 'positive') return t.positivebk;
     }
 
     return t.backgroundcolordarker;
@@ -42,15 +49,16 @@ const ButtonView = (props: ButtonProps) => {
       if(props.type === 'backward') return t.backwardtext;
       if(props.type === 'neutral') return t.neutraltext;
       if(props.type === 'reset') return t.resettext;
+      if(props.type === 'positive') return t.positivetext;
     }
 
     return t.textcolor;
   }
-
+  
   const s = StyleSheet.create({
     press:{
-      minHeight: 40,
-      minWidth: 40,
+      // minHeight: props.size?props.size+40:40,
+      // minWidth: props.size?props.size+40:40,
       margin: 5,
     },
     out:{
@@ -76,10 +84,10 @@ const ButtonView = (props: ButtonProps) => {
       alignItems: 'center',
       verticalAlign: 'middle',
       fontWeight: 'bold',
-      fontSize: props.size?(props.size+15):15,
+      fontSize: f,
 
-      marginVertical: 10,
-      marginHorizontal: 15,
+      marginVertical: vertical,
+      marginHorizontal: horizontal,
 
       color: getColor(),
     },

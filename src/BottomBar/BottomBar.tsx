@@ -30,7 +30,7 @@ const BottomBar = (props: BottomBarProps) => {
         if(userPrefs.vibrate) Vibration.vibrate(Pattern.Wrong);
         popMessage('No objective selected.', MessageType.Alert);
       }
-      else{
+      else if(currentObjectiveId !== ''){
         if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
         writeCurrentView(Views.IndividualView);
       }

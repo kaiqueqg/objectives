@@ -86,6 +86,8 @@ export type AppPalette = {
   backwardtext: string,
   resetbk: string,
   resettext: string,
+  positivebk: string,
+  positivetext: string,
 
   backgroundTag: string,
   backgroundTagSelected: string,
@@ -152,6 +154,8 @@ export const light: AppPalette = {
   backwardtext: cp.black,
   resetbk: cp.redlightlight,
   resettext: cp.black,
+  positivebk: cp.greenlightlight,
+  positivetext: cp.black,
 }
 
 export const dark: AppPalette = {
@@ -202,6 +206,8 @@ export const dark: AppPalette = {
   backwardtext: cp.black,
   resetbk: cp.redlighty,
   resettext: cp.black,
+  positivebk: cp.green,
+  positivetext: cp.black,
 };
 
 export const win95 = {

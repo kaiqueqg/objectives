@@ -233,12 +233,10 @@ export const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
 
     try {
       const data = await identityApi.login(JSON.stringify(loginBody));
-      console.log(data)
       if(data){
         /// Fist require 2FA
         if(data.RequiringTwoFA){
           if(data.TwoFATempToken && data.TwoFATempToken.trim() !== ''){
-            console.log(data.TwoFATempToken);
             writeTwoFAToken(data.TwoFATempToken);
             setShowRequireTwoFAView(true);
           }
@@ -300,7 +298,6 @@ export const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
   }
 
   const getFullView = () => {
-    console.log(showRequireTwoFAView+' '+isLogged+' '+isAuthorized);
     if(showRequireTwoFAView){
       return <TwoFAView login={testBeforeLogin} back={() => {setShowRequireTwoFAView(false); if(isLogged && isAuthorized) syncObjectivesList();}}/>
     }

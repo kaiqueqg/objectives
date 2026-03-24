@@ -352,7 +352,7 @@ export enum Views {
 export enum MultiSelectType { MOVE = 'Move', COPY = 'Copy' }
 export interface MultiSelectAction { type: MultiSelectType, originObjectiveId: string, items: Item[] }
 
-export enum MessageType { Normal, Error, Alert, }
+export enum MessageType { Normal='Normal', Error='Error', Alert='Alert', Positive='Positive' }
 
 export interface PopMessage { 
   id: string,

@@ -615,9 +615,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const clearAllData = async () =>{ 
     await deleteUser();
     await deleteJwtToken();
-
-    console.log('clearAllData ' + user.Email)
-    
     setAvailableTags(['Pin']);
     setSelectedTags(['Pin']);
     setCurrentObjectiveId('');

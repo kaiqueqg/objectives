@@ -271,13 +271,17 @@ export const LogProvider: React.FC<LogProviderProps> = ({ children }) => {
   const removeMessage = (removeId: string) => {
     setMessageList(prevMessages => prevMessages.filter(msg => msg.id !== removeId));
   }
+
+  const deleteMessageList = () => {
+    setMessageList([]);
+  }
     
   return (
     <LogContext.Provider 
     value={{
       log,
       consoleLogs, deleteConsoleLog,
-      messageList, popMessage, removeMessage,
+      messageList, popMessage, removeMessage, deleteMessageList,
     }}>
     {children}
     </LogContext.Provider>
@@ -292,6 +296,7 @@ export interface LogContextType {
   messageList: PopMessage[];
   popMessage: (text: string, type?: MessageType, timeoutInSeconds?: number) => void;
   removeMessage: (removeId: string) => void;
+  deleteMessageList: () => void;
 }
 
 export const useLogContext = () => {
