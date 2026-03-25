@@ -170,7 +170,7 @@ export const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
         deleteDeletedObjectives();
         deleteDeletedItems();
         
-        popMessage('Sync done.');
+        popMessage('Sync done.', MessageType.Positive);
         setIsSyncing(false);
         setTimeout(() => {
           writeLastSync((new Date()).toISOString());

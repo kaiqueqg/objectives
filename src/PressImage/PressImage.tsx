@@ -181,6 +181,11 @@ const PressImage = (props: PressImageProps) => {
   const s = StyleSheet.create({
     container:{
       ...gs.baseImageContainer,
+
+      // borderColor: 'red',
+      // borderWidth: 1,
+      // borderRadius: 5,
+      // borderStyle: 'solid',
     },
     text: {
       position: 'absolute',

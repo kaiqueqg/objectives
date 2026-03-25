@@ -5,6 +5,8 @@ import { Pattern } from "../Types";
 import { useLogContext } from "../Contexts/LogContext";
 import { ObjectivePallete } from "../Colors";
 import { clamp } from "../Helper";
+import PressImage from "../PressImage/PressImage";
+import { Images } from "../Images";
 
 export interface ButtonProps extends ViewProps {
   cT?: ObjectivePallete,
@@ -60,6 +62,7 @@ const ButtonView = (props: ButtonProps) => {
       // minHeight: props.size?props.size+40:40,
       // minWidth: props.size?props.size+40:40,
       margin: 5,
+      alignItems: 'center',
     },
     out:{
       borderColor: 'black',
@@ -72,7 +75,11 @@ const ButtonView = (props: ButtonProps) => {
       justifyContent: 'center',
       alignItems: 'center',
       verticalAlign: 'middle',
+      flexDirection: 'row',
       backgroundColor: getBkColor(),
+
+      // paddingVertical: vertical,
+      // paddingHorizontal: horizontal,
 
       borderColor: 'black',
       borderWidth: 1,
@@ -86,10 +93,16 @@ const ButtonView = (props: ButtonProps) => {
       fontWeight: 'bold',
       fontSize: f,
 
+      marginLeft: props.imageSource?0:horizontal,
+      marginRight: horizontal,
       marginVertical: vertical,
-      marginHorizontal: horizontal,
 
       color: getColor(),
+
+      // borderColor: 'red',
+      // borderWidth: 1,
+      // borderRadius: 5,
+      // borderStyle: 'solid',
     },
   });
 
@@ -109,6 +122,7 @@ const ButtonView = (props: ButtonProps) => {
     <Pressable style={s.press} onPress={btnOnPress}>
       <View style={s.out}>
         <View style={s.in}>
+          {props.imageSource && <PressImage source={props.imageSource} color={t.icontintconstrast}/>}
           <Text style={s.text}>
             {props.text?props.text.trim():''}
           </Text>

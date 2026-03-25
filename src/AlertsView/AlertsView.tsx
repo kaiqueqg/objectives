@@ -67,11 +67,11 @@ const AlertsView: React.FC<AlertsViewProps> = (props: AlertsViewProps) => {
         
       </ScrollView>
       <View style={s.buttonsView}>
-        <ButtonView text='Error' type='reset' onPress={() => {popMessage('Error', MessageType.Error)}} />
-        <ButtonView text='Alert' type='backward' onPress={() => {popMessage('Alert', MessageType.Alert)}}/>
+        <ButtonView text='Error' type='reset' onPress={() => {popMessage('Error', MessageType.Error)}} size={-5}/>
+        <ButtonView text='Alert' type='backward' onPress={() => {popMessage('PossqdqsdqsdqsdqsitivePossqdqsdqsdqsdqsitivePossqdqsdqsdqsdqsitivePossqdqsdqsdqsdqsitivePossqdqsdqsdqsdqsitive', MessageType.Alert)}}/>
         <ButtonView text='Positive' type='positive' onPress={() => {popMessage('Possqdqsdqsdqsdqsitive', MessageType.Positive)}}/>
-        <ButtonView text='Normal' type='foward' onPress={() => {popMessage('Normal')}}/>
-        <ButtonView text='Console' type='neutral' onPress={() => {log.w('Console')}}/>
+        <ButtonView text='Normal' type='neutral' onPress={() => {popMessage('Normal')}}/>
+        <ButtonView text='Console' type='foward' onPress={() => {log.w('Console')}}/>
         <PressImage source={Images.Trash} onPress={deleteConsoleLog}/>
       </View>
     </View>

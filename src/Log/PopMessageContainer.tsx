@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import PopMessageView from "./PopMessageView";
 import { useLogContext } from "../Contexts/LogContext";
 import ButtonView from "../ButtonView/ButtonView";
+import { Images } from "../Images";
 
 export interface PopMessageContainerProps {
 }
@@ -22,6 +23,7 @@ const PopMessageContainer = (props: PopMessageContainerProps) => {
       right: 0,
 
       margin: 5,
+      alignItems: 'flex-end',
     },
     deleteAllText:{
       alignSelf: 'flex-end',
@@ -31,6 +33,8 @@ const PopMessageContainer = (props: PopMessageContainerProps) => {
       margin: 5,
       padding: 5,
       color: t.textcolorcontrast,
+
+      elevation: 5,
 
       backgroundColor: t.backgroundcolorcontrast,
 
@@ -42,12 +46,22 @@ const PopMessageContainer = (props: PopMessageContainerProps) => {
   });
 
   return (
-    <View style={s.messageList}>
-      {messageList.length > 1 && <Text style={s.deleteAllText} onPress={deleteMessageList}>{'Delete All'}</Text>}
+    messageList.length > 0?
+      <View style={s.messageList}>
+      {messageList.length > 1 && 
+        <ButtonView
+          text="Delete all"
+          type='neutral'
+          imageSource={Images.Trash}
+          onPress={deleteMessageList}
+        />
+      }
       {messageList.map((item, index)=>{
         return <PopMessageView key={'message'+index} message={item}></PopMessageView>
       })}
     </View>
+    :
+    <></>
   );
 };
 

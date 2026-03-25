@@ -51,6 +51,7 @@ export type AppPalette = {
   backgroundcolorcontrast?: string,
 
   icontint?: string,
+  icontintconstrast?: string,
   icontintfade?: string,
   icontintselected?: string,
   icontintcolorcontrast?: string, 
@@ -134,6 +135,7 @@ export const light: AppPalette = {
   bottombariconselected: cp.bluedarky,
 
   icontint: cp.black,
+  icontintconstrast: cp.black,
   icontintfade: cp.greylighty,
   icontintselected: cp.bluedarky,
 
@@ -148,7 +150,7 @@ export const light: AppPalette = {
 
   fowardbk: cp.bluelight,
   fowardtext: cp.black,
-  neutralbk: cp.greylighter,
+  neutralbk: cp.beige,
   neutraltext: cp.black,
   backwardbk: cp.yellow,
   backwardtext: cp.black,
@@ -186,6 +188,7 @@ export const dark: AppPalette = {
   bottombariconselected: cp.bluelight,
 
   icontint: cp.beige,
+  icontintconstrast: cp.black,
   icontintfade: cp.beigedark,
   icontintselected: cp.bluelight,
 
@@ -200,7 +203,7 @@ export const dark: AppPalette = {
 
   fowardbk: cp.blue,
   fowardtext: cp.black,
-  neutralbk: cp.greylight,
+  neutralbk: cp.beige,
   neutraltext: cp.black,
   backwardbk: cp.yellow,
   backwardtext: cp.black,
