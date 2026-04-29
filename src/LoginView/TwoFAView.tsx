@@ -104,9 +104,9 @@ const TwoFAView: React.FC<TwoFAViewProps> = (props: TwoFAViewProps) => {
           <TextInput autoFocus keyboardType="numeric" autoCapitalize="none" placeholder="6 digit number" placeholderTextColor={t.textcolorfade} style={s.emailInput} onChangeText={onChangeVerificationCode} onSubmitEditing={sendVerificationTwoFA}/>
         </View>
         <View style={s.logoutView}>
-          {userPrefs.isRightHand && <ButtonView text='Cancel' onPress={props.back} type="neutral"/>}
+          {userPrefs.handPosition && <ButtonView text='Cancel' onPress={props.back} type="neutral"/>}
           <ButtonView text='Send' onPress={sendVerificationTwoFA} type="foward"/>
-          {!userPrefs.isRightHand && <ButtonView text='Cancel' onPress={props.back} type="neutral"/>}
+          {!userPrefs.handPosition && <ButtonView text='Cancel' onPress={props.back} type="neutral"/>}
         </View>
       </Loading>
     </View>

@@ -74,7 +74,7 @@ export const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
   }
 
   const getLogoutView = () => {
-    if(userPrefs.isRightHand){
+    if(userPrefs.handPosition){
       return(
         <View style={s.logoutView}>
           <ButtonView text='Logout' onPress={logout} type='reset'/>
@@ -411,9 +411,9 @@ export const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
   const getPasswordInputView = () => {
     return(
       <View style={s.passwordContainer}>
-        {!userPrefs.isRightHand && <PressImage onPress={()=>{setIsShowingPassword(!isShowingPassword)}} source={isShowingPassword?Images.Hide:Images.Show}/>}
+        {!userPrefs.handPosition && <PressImage onPress={()=>{setIsShowingPassword(!isShowingPassword)}} source={isShowingPassword?Images.Hide:Images.Show}/>}
         <TextInput ref={passRef} autoCapitalize="none" placeholder="Password" placeholderTextColor={t.textcolorfade} style={s.passwordInput} secureTextEntry={!isShowingPassword} onChangeText={onChangePassword} onSubmitEditing={() => testBeforeLogin(inputEmail, inputPass)}></TextInput>
-        {userPrefs.isRightHand && <PressImage onPress={()=>{setIsShowingPassword(!isShowingPassword)}} source={isShowingPassword?Images.Hide:Images.Show}/>}
+        {userPrefs.handPosition && <PressImage onPress={()=>{setIsShowingPassword(!isShowingPassword)}} source={isShowingPassword?Images.Hide:Images.Show}/>}
       </View>
     )
   }

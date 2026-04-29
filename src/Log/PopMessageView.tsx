@@ -8,6 +8,8 @@ import { cp } from "../ColorPalette";
 
 export interface PopMessageViewProps {
   message: PopMessage,
+
+
 }
 const PopMessageView = (props: PopMessageViewProps) => {
   const { removeMessage, log } = useLogContext();
@@ -18,21 +20,23 @@ const PopMessageView = (props: PopMessageViewProps) => {
 
 
   useEffect(()=>{
-    setTimeout(()=>{
-      removeMessage(message.id);
-    }, message.timeout);
-
-    const id = setInterval(() => {
-      setScale((prev) => {
-        const newValue = prev - 0.001;
-
-        if(newValue < 0) clearInterval(id);
-
-        return newValue;
-      });
-    }, 16);
-
-    return () => clearInterval(id);
+    if(message.timeout !== Infinity){
+      setTimeout(()=>{
+        removeMessage(message.id);
+      }, message.timeout);
+  
+      const id = setInterval(() => {
+        setScale((prev) => {
+          const newValue = prev - 0.001;
+  
+          if(newValue < 0) clearInterval(id);
+  
+          return newValue;
+        });
+      }, 16);
+  
+      return () => clearInterval(id);
+    }
   },[]);
 
   const getTheme = () => {
@@ -48,6 +52,9 @@ const PopMessageView = (props: PopMessageViewProps) => {
         break;
       case MessageType.Alert:
         styleToAdd = s.messageAlert;
+        break;
+      case MessageType.Console:
+        styleToAdd = s.messageConsole;
         break;
     }
 
@@ -90,6 +97,9 @@ const PopMessageView = (props: PopMessageViewProps) => {
     },
     messageAlert:{
       backgroundColor: cp.yellow,
+    },
+    messageConsole:{
+      backgroundColor: t.backgroundcolordarker,
     },
     messageText:{
       color: cp.black,

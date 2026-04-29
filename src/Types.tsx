@@ -125,6 +125,7 @@ export interface Wait extends Item {
 
 export interface Note extends Item {
   Text: string,
+  IsShowing: boolean,
 }
 
 export interface Question extends Item {
@@ -216,6 +217,21 @@ export interface ImageInfo {
   itemId: string;
   fileName: string;
 }
+    
+export enum HandPosition {Left = 'Left', Right = 'Right', Center = 'Center' }
+export interface UserPrefs{
+  theme: Themes,
+  allowLocation: boolean,
+  warmLocationOff: boolean,
+  vibrate: boolean,
+  autoSync: boolean,
+  ObjectivesPrefs: ObjectivesPrefs,
+  singleTagSelected: boolean,
+  shouldLockOnOpen: boolean,
+  shouldLockOnReopen: boolean,
+  handPosition: HandPosition,
+  openLastObjectiveOnStart: boolean,
+}
 
 export const DefaultUserPrefs: UserPrefs = {
   theme: Themes.Dark,
@@ -240,7 +256,7 @@ export const DefaultUserPrefs: UserPrefs = {
   singleTagSelected: false,
   shouldLockOnOpen: false,
   shouldLockOnReopen: false,
-  isRightHand: true,
+  handPosition: HandPosition.Right,
   openLastObjectiveOnStart: true,
 }
 
@@ -264,20 +280,6 @@ export interface User{
   TwoFAActive: boolean,
   Status: string,
   userPrefs: UserPrefs,
-}
-    
-export interface UserPrefs{
-  theme: Themes,
-  allowLocation: boolean,
-  warmLocationOff: boolean,
-  vibrate: boolean,
-  autoSync: boolean,
-  ObjectivesPrefs: ObjectivesPrefs,
-  singleTagSelected: boolean,
-  shouldLockOnOpen: boolean,
-  shouldLockOnReopen: boolean,
-  isRightHand: boolean,
-  openLastObjectiveOnStart: boolean,
 }
 
 export interface ObjectivesPrefs{
@@ -352,7 +354,7 @@ export enum Views {
 export enum MultiSelectType { MOVE = 'Move', COPY = 'Copy' }
 export interface MultiSelectAction { type: MultiSelectType, originObjectiveId: string, items: Item[] }
 
-export enum MessageType { Normal='Normal', Error='Error', Alert='Alert', Positive='Positive' }
+export enum MessageType { Console='Console', Normal='Normal', Error='Error', Alert='Alert', Positive='Positive' }
 
 export interface PopMessage { 
   id: string,

@@ -28,9 +28,9 @@ const ButtonView = (props: ButtonProps) => {
   const {theme: t, user } = useUserContext();
   const { popMessage } = useLogContext();
 
-  const index = 1;
-  let vertical = clamp(props.size, 10, 50);
-  let horizontal = clamp(props.size, 15, 50);
+  const def: number = 15;
+  let vertical = props.size? clamp(def+props.size, 1, 50):def;
+  let horizontal = props.size? clamp(def+props.size, 5, 50):def;
   let f = clamp(props.size, 15, 50);
 
   const getBkColor = () => {

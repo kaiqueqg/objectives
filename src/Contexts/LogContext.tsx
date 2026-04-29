@@ -31,7 +31,10 @@ export interface LogInterface {
 }
 
 export const LogProvider: React.FC<LogProviderProps> = ({ children }) => {
-  
+  const [messageList, setMessageList] = useState<PopMessage[]>([]);
+  const [messageListLogs, setMessageListLogs] = useState<PopMessage[]>([]);
+  const [consoleLogs, setConsoleLogs] = useState<string[]>([]);
+
   const randomId = (size?: number) => {
     const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     let randomString = "";
@@ -43,7 +46,6 @@ export const LogProvider: React.FC<LogProviderProps> = ({ children }) => {
     return randomString;
   };
   
-  const [consoleLogs, setConsoleLogs] = useState<string[]>([]);
   const deleteConsoleLog = () => {
     setConsoleLogs([]);
   }
@@ -108,6 +110,14 @@ export const LogProvider: React.FC<LogProviderProps> = ({ children }) => {
         });
 
         setConsoleLogs([...consoleLogs, ...formattedTexts]);
+
+        let addList: PopMessage[] = [];
+        for (let i = 0; i < texts.length; i++) {
+          const t = texts[i];
+          addList.push({id: randomId(), text: t, timeout: Infinity, type: MessageType.Console});
+        }
+        setMessageListLogs([...messageListLogs, ...addList]);
+
         console.log(`\x1b[38;2;255;255;255m[DEV]`, ...formattedTexts);
       }
     },
@@ -119,11 +129,19 @@ export const LogProvider: React.FC<LogProviderProps> = ({ children }) => {
       });
 
       setConsoleLogs([...consoleLogs, ...formattedTexts]);
+
+      let addList: PopMessage[] = [];
+      for (let i = 0; i < objs.length; i++) {
+        const t = objs[i].Title;
+        addList.push({id: randomId(), text: t, timeout: Infinity, type: MessageType.Console});
+      }
+      setMessageListLogs([...messageListLogs, ...addList]);
+
       console.log(`\x1b[38;2;255;255;80m[DEV]`, ...formattedTexts);
     },
-    i(...texts: Item[]){
+    i(...items: Item[]){
       if (currentLogLevel <= LogLevel.Dev) {
-        const formattedTexts = texts.map(text => {
+        const formattedTexts = items.map(text => {
           if(text.Type===ItemType.Divider) return (text as Divider).Title;
           if(text.Type===ItemType.Grocery) return (text as Grocery).Title;
           if(text.Type===ItemType.Location) return (text as Location).Title;
@@ -133,6 +151,15 @@ export const LogProvider: React.FC<LogProviderProps> = ({ children }) => {
         }).filter((t): t is string => t !== undefined);
 
         if(formattedTexts) setConsoleLogs([...consoleLogs, ...formattedTexts]);
+
+        let addList: PopMessage[] = [];
+        for (let i = 0; i < items.length; i++) {
+          const t = items[i].Title;
+          addList.push({id: randomId(), text: t, timeout: Infinity, type: MessageType.Console});
+        }
+        setMessageListLogs([...messageListLogs, ...addList]);
+
+
         console.log(`\x1b[38;2;255;255;80m[DEV]`, ...formattedTexts);
       }
     },
@@ -148,6 +175,14 @@ export const LogProvider: React.FC<LogProviderProps> = ({ children }) => {
           }
         });
         setConsoleLogs([...consoleLogs, ...formattedTexts]);
+
+        let addList: PopMessage[] = [];
+        for (let i = 0; i < texts.length; i++) {
+          const t = texts[i];
+          addList.push({id: randomId(), text: t, timeout: Infinity, type: MessageType.Console});
+        }
+        setMessageListLogs([...messageListLogs, ...addList]);
+
         console.log(`\x1b[38;2;255;255;255m[DEV]`, ...formattedTexts);
       }
     },
@@ -163,6 +198,15 @@ export const LogProvider: React.FC<LogProviderProps> = ({ children }) => {
           }
         });
         setConsoleLogs([...consoleLogs, ...formattedTexts]);
+
+        let addList: PopMessage[] = [];
+        for (let i = 0; i < texts.length; i++) {
+          const t = texts[i];
+          addList.push({id: randomId(), text: t, timeout: Infinity, type: MessageType.Console});
+        }
+        setMessageListLogs([...messageListLogs, ...addList]);
+
+
         console.log(`\x1b[38;2;255;255;80m[DEV]`, ...formattedTexts);
       }
     },
@@ -178,6 +222,15 @@ export const LogProvider: React.FC<LogProviderProps> = ({ children }) => {
           }
         });
         setConsoleLogs([...consoleLogs, ...formattedTexts]);
+
+        let addList: PopMessage[] = [];
+        for (let i = 0; i < texts.length; i++) {
+          const t = texts[i];
+          addList.push({id: randomId(), text: t, timeout: Infinity, type: MessageType.Console});
+        }
+        setMessageListLogs([...messageListLogs, ...addList]);
+
+
         console.log(`\x1b[38;2;255;80;80m[DEV]`, ...formattedTexts);
       }
     },
@@ -193,6 +246,14 @@ export const LogProvider: React.FC<LogProviderProps> = ({ children }) => {
           }
         });
         setConsoleLogs([...consoleLogs, ...formattedTexts]);
+
+        let addList: PopMessage[] = [];
+        for (let i = 0; i < texts.length; i++) {
+          const t = texts[i];
+          addList.push({id: randomId(), text: t, timeout: Infinity, type: MessageType.Console});
+        }
+        setMessageListLogs([...messageListLogs, ...addList]);
+        
         console.log(`\x1b[38;2;80;80;255m[DEV]`, ...formattedTexts);
       }
     },
@@ -208,6 +269,15 @@ export const LogProvider: React.FC<LogProviderProps> = ({ children }) => {
           }
         });
         setConsoleLogs([...consoleLogs, ...formattedTexts]);
+
+        let addList: PopMessage[] = [];
+        for (let i = 0; i < texts.length; i++) {
+          const t = texts[i];
+          addList.push({id: randomId(), text: t, timeout: Infinity, type: MessageType.Console});
+        }
+        setMessageListLogs([...messageListLogs, ...addList]);
+
+
         console.log(`\x1b[38;2;80;255;80m[DEV]`, ...formattedTexts);
       }
     },
@@ -223,6 +293,15 @@ export const LogProvider: React.FC<LogProviderProps> = ({ children }) => {
           }
         });
         setConsoleLogs([...consoleLogs, ...formattedTexts]);
+
+        let addList: PopMessage[] = [];
+        for (let i = 0; i < texts.length; i++) {
+          const t = texts[i];
+          addList.push({id: randomId(), text: t, timeout: Infinity, type: MessageType.Console});
+        }
+        setMessageListLogs([...messageListLogs, ...addList]);
+
+
         console.log(`\x1b[38;2;255;255;80m[WAR]`, ...formattedTexts);
       }
     },
@@ -239,18 +318,22 @@ export const LogProvider: React.FC<LogProviderProps> = ({ children }) => {
         });
     
         setConsoleLogs([...consoleLogs, ...formattedTexts]);
+
+        let addList: PopMessage[] = [];
+        for (let i = 0; i < texts.length; i++) {
+          const t = texts[i];
+          addList.push({id: randomId(), text: t, timeout: Infinity, type: MessageType.Console});
+        }
+        setMessageListLogs([...messageListLogs, ...addList]);
+
+        
         console.log(`\x1b[38;2;255;80;80m[ERR]`, ...formattedTexts);
       }
     },
   }
 
-  const [messageList, setMessageList] = useState<PopMessage[]>([]);
+  
   const popMessage = (text: string, type?: MessageType, timeoutInSeconds?: number) => {
-    //remove existing equal messages
-    // let newList = messageList.filter((item)=>{
-    //   return item.text.trim() !== text;
-    // });
-
     const words = text.split(/\s+/).length;
     const displayTime = Math.max(5, words * 0.8);
 
@@ -265,23 +348,26 @@ export const LogProvider: React.FC<LogProviderProps> = ({ children }) => {
       timeout,
     };
 
-    setConsoleLogs([...consoleLogs, msg.text]);
+    setMessageListLogs([...messageListLogs, msg]);
     setMessageList(prev => [...prev, msg]);
   }
   const removeMessage = (removeId: string) => {
     setMessageList(prevMessages => prevMessages.filter(msg => msg.id !== removeId));
   }
-
   const deleteMessageList = () => {
     setMessageList([]);
+  }
+
+  const deleteMessageListLogs = () => {
+    setMessageListLogs([]);
   }
     
   return (
     <LogContext.Provider 
     value={{
       log,
-      consoleLogs, deleteConsoleLog,
-      messageList, popMessage, removeMessage, deleteMessageList,
+      consoleLogs, deleteConsoleLog, deleteMessageListLogs,
+      messageList, messageListLogs, popMessage, removeMessage, deleteMessageList,
     }}>
     {children}
     </LogContext.Provider>
@@ -290,13 +376,14 @@ export const LogProvider: React.FC<LogProviderProps> = ({ children }) => {
 
 export interface LogContextType {
   log: LogInterface;
-
   consoleLogs: string[];
   deleteConsoleLog: () => void,
-  messageList: PopMessage[];
-  popMessage: (text: string, type?: MessageType, timeoutInSeconds?: number) => void;
-  removeMessage: (removeId: string) => void;
-  deleteMessageList: () => void;
+  messageListLogs: PopMessage[],
+  deleteMessageListLogs: () => void,
+  messageList: PopMessage[],
+  popMessage: (text: string, type?: MessageType, timeoutInSeconds?: number) => void,
+  removeMessage: (removeId: string) => void,
+  deleteMessageList: () => void,
 }
 
 export const useLogContext = () => {

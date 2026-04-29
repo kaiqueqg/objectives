@@ -54,6 +54,7 @@ const PopMessageContainer = (props: PopMessageContainerProps) => {
           type='neutral'
           imageSource={Images.Trash}
           onPress={deleteMessageList}
+          size={-5}
         />
       }
       {messageList.map((item, index)=>{

@@ -101,9 +101,9 @@ const ReloggingView: React.FC<ReloggingViewProps> = (props: ReloggingViewProps) 
               <TextInput style={s.emailInput} value={props.email} editable={false}/>
             </View>
             <View style={s.passwordContainer}>
-              {!userPrefs.isRightHand && <PressImage onPress={()=>{setIsShowingPassword(!isShowingPassword)}} source={isShowingPassword?Images.Hide:Images.Show}/>}
+              {!userPrefs.handPosition && <PressImage onPress={()=>{setIsShowingPassword(!isShowingPassword)}} source={isShowingPassword?Images.Hide:Images.Show}/>}
               <TextInput ref={passRef} autoCapitalize="none" placeholder="Password" placeholderTextColor={t.textcolorfade} style={s.passwordInput} secureTextEntry={!isShowingPassword} onChangeText={onChangePassword} onSubmitEditing={onPressLogin}></TextInput>
-              {userPrefs.isRightHand && <PressImage onPress={()=>{setIsShowingPassword(!isShowingPassword)}} source={isShowingPassword?Images.Hide:Images.Show}/>}
+              {userPrefs.handPosition && <PressImage onPress={()=>{setIsShowingPassword(!isShowingPassword)}} source={isShowingPassword?Images.Hide:Images.Show}/>}
             </View>
             <View style={s.logoutView}>
               <ButtonView text={'Logout'} onPress={props.logout} type='reset'/>

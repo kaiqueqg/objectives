@@ -111,6 +111,7 @@ const PressImage = (props: PressImageProps) => {
       }
       else if(props.onPress){
         if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
+
         props.onPress();
       }
     }
@@ -157,6 +158,7 @@ const PressImage = (props: PressImageProps) => {
     setIsConfirming(false);
     if(props.onPress) {
       if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
+
       props.onPress();
     }
   }
@@ -181,11 +183,6 @@ const PressImage = (props: PressImageProps) => {
   const s = StyleSheet.create({
     container:{
       ...gs.baseImageContainer,
-
-      // borderColor: 'red',
-      // borderWidth: 1,
-      // borderRadius: 5,
-      // borderStyle: 'solid',
     },
     text: {
       position: 'absolute',
@@ -220,7 +217,6 @@ const PressImage = (props: PressImageProps) => {
       ...gs.baseSmallImage,
     },
     lockImage:{
-      // ...gs.baseVerySmallImage,
       height: 5,
       width: 5,
       zIndex: 1,

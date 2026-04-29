@@ -144,8 +144,8 @@ const DividerView = (props: DividerViewProps) => {
   }
 
   const orderItems = () => {
-    if(!isDisabled) return;
-      
+    if(isDisabled) return;
+    
     orderDividerItems(divider);
   }
 

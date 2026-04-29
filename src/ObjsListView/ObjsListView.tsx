@@ -2,7 +2,7 @@ import { View, StyleSheet, FlatList, Text, Vibration, BackHandler, TextInput, Im
 import { getObjTheme, globalStyle as gs } from "../Colors";
 import { useUserContext } from "../Contexts/UserContext";
 import PressText from "../PressText/PressText";
-import { MessageType, Objective, Pattern, Views } from "../Types";
+import { HandPosition, MessageType, Objective, Pattern, Views } from "../Types";
 import PressImage from "../PressImage/PressImage";
 import React, { JSX, useEffect, useRef, useState } from "react";
 import { useLogContext } from "../Contexts/LogContext";
@@ -470,22 +470,31 @@ const ObjsListView = (props: ObjsListViewProps) => {
 
   const getBottomMenuView = () => {
     return(
-      <View style={s.bottomMenu}>
-        <View style={s.leftBottomMenu}>
-          {userPrefs.singleTagSelected?
-            <PressImage onPress={changeSingleTag} disable={isEditingPos} source={Images.TagSingle}/>
-            :
-            <PressImage onPress={changeSingleTag} disable={isEditingPos} source={Images.Tag} />
-          }
-        </View>
-        <View style={s.rightBottomMenu}>
+      userPrefs.handPosition === HandPosition.Right || userPrefs.handPosition === HandPosition.Center?
+        <View style={s.bottomMenu}>
+          <PressImage onPress={changeSingleTag} disable={isEditingPos} source={userPrefs.singleTagSelected?Images.TagSingle:Images.Tag}/>
           <PressImage onPress={()=>{setIsSortMenuOpen(!isSortMenuOpen)}} disable={isEditingPos} source={Images.Sort}  isSelected={isSortMenuOpen}/>
           {getMoveIcons()}
           <PressImage onPress={()=>{setIsSearchOpen(!isSearchOpen)}} disable={isEditingPos} source={Images.Search} isSelected={isSearchOpen}/>
           <PressImage onPress={onAddNewObjective} disable={isEditingPos} source={Images.NewFile}/>
         </View>
-      </View>
+        :
+        <View style={s.bottomMenu}>
+          <PressImage onPress={onAddNewObjective} disable={isEditingPos} source={Images.NewFile}/>
+          <PressImage onPress={()=>{setIsSearchOpen(!isSearchOpen)}} disable={isEditingPos} source={Images.Search} isSelected={isSearchOpen}/>
+          {getMoveIcons()}
+          <PressImage onPress={()=>{setIsSortMenuOpen(!isSortMenuOpen)}} disable={isEditingPos} source={Images.Sort}  isSelected={isSortMenuOpen}/>
+          <PressImage onPress={changeSingleTag} disable={isEditingPos} source={userPrefs.singleTagSelected?Images.TagSingle:Images.Tag}/>
+        </View>
     )
+  }
+
+  const getSide = () => {
+    if(userPrefs && userPrefs.handPosition === HandPosition.Center) return 'space-around';
+    if(userPrefs && userPrefs.handPosition === HandPosition.Left) return 'flex-start';
+    if(userPrefs && userPrefs.handPosition === HandPosition.Right) return 'flex-end';
+
+    return 'space-around';
   }
 
   const s = StyleSheet.create({
@@ -603,25 +612,13 @@ const ObjsListView = (props: ObjsListViewProps) => {
     bottomMenu: {
       width: '100%',
       flexDirection: 'row',
-      justifyContent: 'flex-end',
+      justifyContent: getSide(),
       alignItems: 'center',
       backgroundColor: t.backgroundcolordark,
 
       borderColor: t.bordercolorfade,
       borderTopWidth: 1,
       borderStyle: 'solid',
-    },
-    leftBottomMenu:{
-      flex: 1,
-      flexDirection: 'row',
-      justifyContent: 'flex-start',
-      alignItems: 'center',
-    },
-    rightBottomMenu:{
-      flex: 1,
-      flexDirection: 'row',
-      justifyContent: 'flex-end',
-      alignItems: 'center',
     },
     sortMenu: {
       width: '100%',

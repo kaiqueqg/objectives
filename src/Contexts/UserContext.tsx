@@ -15,6 +15,7 @@ interface UserProviderProps {
 
 interface UserContextType {
   ///USER
+  isReady: boolean,
   user: User, writeUser: (user: User) => void,
   isLogged: boolean,
   userPrefs: UserPrefs,  writeUserPrefs: (userPrefs: UserPrefs) => void,
@@ -61,6 +62,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const { storage } = useStorageContext();
   const { log } = useLogContext();
 
+  const [isReady, setIsReady] = useState<boolean>(false);
   const [currentView, setCurrentView] = useState<Views>(Views.ListView);
   const [availableTags, setAvailableTags] = useState<string[]>([]);
   const [theme, setTheme] = useState<AppPalette>(dark);
@@ -105,6 +107,8 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     })
     loadObjectives();
     loadLastSync();
+
+    setIsReady(true);
   }, []);
 
   useEffect(() => {
@@ -667,6 +671,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     <UserContext.Provider 
       value={{
         ///USER
+        isReady,
         user, writeUser,
         userPrefs, writeUserPrefs,
         theme, fontTheme,

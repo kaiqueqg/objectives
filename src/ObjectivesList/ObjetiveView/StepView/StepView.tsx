@@ -68,16 +68,22 @@ const StepView = (props: StepViewProps) => {
     await onDelete(step);
   }
 
-  const onDoneStep = async (newImp?: StepImportance) => {
+  const onDoneStep = async () => {
     const newStep:Step = {
       ...tempStep,
       Title: tempStep.Title.trim(),
-      Importance: newImp??tempStep.Importance,
+      Importance: tempStep.Importance,
       AutoDestroy: tempStep.AutoDestroy,
     };
     await putItem(newStep);
     setIsEditingStep(false);
     loadMyItems();
+  }
+
+  const onChangeImportance = (imp: StepImportance) => {
+    setTempStep(prev=>{
+      return {...prev, Importance: imp};
+    })
   }
 
   const onChangeAutoDestroy = () => {
@@ -187,16 +193,16 @@ const StepView = (props: StepViewProps) => {
                 onChangeText={(value: string)=>{setTempStep({...tempStep, Title: value})}} autoFocus={step.Title.trim() === ''}></TextInput>
             </View>
             <View style={[s.importanceIconContainer]}>
-              <PressImage cT={o} source={Images.Null} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.None);}}/>
-              <PressImage source={Images.Low} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.Low);}} raw />
-              <PressImage source={Images.Med} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.Medium);}} raw/>
-              <PressImage source={Images.High} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.High);}} raw/>
-              <PressImage source={Images.LadybugGreen} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.LadybugGreen);}} raw/>
-              <PressImage source={Images.LadybugYellow} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.LadybugYellow);}} raw/>
-              <PressImage source={Images.Ladybug} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.Ladybug);}} raw/>
-              <PressImage cT={o} source={Images.QuestionMark} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.Question);}}/>
-              <PressImage cT={o} source={Images.Wait} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.Waiting);}}/>
-              <PressImage cT={o} source={Images.InProgress} onPress={() => {if(!isDisabled)onDoneStep(StepImportance.InProgress);}}/>
+              <PressImage cT={o} source={Images.Null} onPress={() => {if(!isDisabled)onChangeImportance(StepImportance.None);}} isSelected={tempStep.Importance===StepImportance.None}/>
+              <PressImage source={Images.Low} onPress={() => {if(!isDisabled)onChangeImportance(StepImportance.Low);}} raw  isSelected={tempStep.Importance===StepImportance.Low}/>
+              <PressImage source={Images.Med} onPress={() => {if(!isDisabled)onChangeImportance(StepImportance.Medium);}} raw isSelected={tempStep.Importance===StepImportance.Medium}/>
+              <PressImage source={Images.High} onPress={() => {if(!isDisabled)onChangeImportance(StepImportance.High);}} raw isSelected={tempStep.Importance===StepImportance.High}/>
+              <PressImage source={Images.LadybugGreen} onPress={() => {if(!isDisabled)onChangeImportance(StepImportance.LadybugGreen);}} raw isSelected={tempStep.Importance===StepImportance.LadybugGreen}/>
+              <PressImage source={Images.LadybugYellow} onPress={() => {if(!isDisabled)onChangeImportance(StepImportance.LadybugYellow);}} raw isSelected={tempStep.Importance===StepImportance.LadybugYellow}/>
+              <PressImage source={Images.Ladybug} onPress={() => {if(!isDisabled)onChangeImportance(StepImportance.Ladybug);}} raw isSelected={tempStep.Importance===StepImportance.Ladybug}/>
+              <PressImage cT={o} source={Images.QuestionMark} onPress={() => {if(!isDisabled)onChangeImportance(StepImportance.Question);}} isSelected={tempStep.Importance===StepImportance.Question}/>
+              <PressImage cT={o} source={Images.Wait} onPress={() => {if(!isDisabled)onChangeImportance(StepImportance.Waiting);}} isSelected={tempStep.Importance===StepImportance.Waiting}/>
+              <PressImage cT={o} source={Images.InProgress} onPress={() => {if(!isDisabled)onChangeImportance(StepImportance.InProgress);}} isSelected={tempStep.Importance===StepImportance.InProgress}/>
             </View>
             <Pressable style={[s.autoDestroyContainer]} onPress={onChangeAutoDestroy}>
               <Text style={s.autoDestroyText}>Autodestroy when you click on</Text>

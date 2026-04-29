@@ -20,6 +20,7 @@ import { LoginView } from "./LoginView/LoginView";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import SyncView from "./SyncView/SyncView";
 import AlertsView from "./AlertsView/AlertsView";
+import { Loading } from "./Loading/Loading";
 // import * as Linking from 'expo-linking';
 
 export interface MainProps{
@@ -32,6 +33,7 @@ const Main = (props: MainProps) => {
   const { storage } = useStorageContext();
   const { requestBiometricAuth } = useUserContext();
   const {
+    isReady,
     userPrefs,
     currentView, writeCurrentView,
     theme: t, fontTheme: f,
@@ -239,11 +241,6 @@ const Main = (props: MainProps) => {
     container: {
       flex: 1,
       backgroundColor: t.backgroundcolor,
-
-      // borderColor: 'yellow',
-      // borderWidth: 1,
-      // borderRadius: 5,
-      // borderStyle: 'solid',
     },
     lockImage:{
       width: 40,
@@ -253,23 +250,21 @@ const Main = (props: MainProps) => {
 
   return (
     <SafeAreaView style={s.safeAreaContainer}>
-        <KeyboardAvoidingView style={s.keyboardAvoidingView} behavior={'height'}>
-          {
-          true?
-            <View style={s.container}>
-              <PopMessageContainer></PopMessageContainer>
-              {getCurrentView()}
-              <BottomBar></BottomBar>
-              <StatusBar translucent={false} backgroundColor="transparent" barStyle={statusBarTheme}/>
-            </View>
-          :
-          <View style={s.lockedContainer}>
-            <PressImage source={Images.Lock} raw size={50} onPress={async () => await testBioAuth()}/>
+      <Loading isLoading={!isReady}>
+        {true?
+          <View style={s.container}>
+            <PopMessageContainer></PopMessageContainer>
+            {getCurrentView()}
+            <BottomBar></BottomBar>
+            <StatusBar translucent={false} backgroundColor="transparent" barStyle={statusBarTheme}/>
           </View>
-          }
-        </KeyboardAvoidingView>
+        :
+        <View style={s.lockedContainer}>
+          <PressImage source={Images.Lock} raw size={50} onPress={async () => await testBioAuth()}/>
+        </View>
+        }
+      </Loading>
     </SafeAreaView>
-    
   );
 };
 

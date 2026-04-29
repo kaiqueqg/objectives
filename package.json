@@ -39,6 +39,7 @@
     "react-native": "0.81.5",
     "react-native-draglist": "^3.6.1",
     "react-native-image-picker": "^7.2.3",
+    "react-native-keyboard-controller": "^1.21.6",
     "react-native-maps": "1.20.1",
     "react-native-reanimated": "~4.1.1",
     "react-native-safe-area-context": "^5.4.0",

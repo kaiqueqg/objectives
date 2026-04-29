@@ -1,17 +1,24 @@
 import { View, Text, Vibration, StyleSheet, ScrollView } from 'react-native';
 import PressText from '../PressText/PressText';
-import { ObjBottomIcons, Pattern, Themes, UserPrefs } from '../Types';
+import { HandPosition, ObjBottomIcons, Pattern, Themes, UserPrefs } from '../Types';
 import { useLogContext } from '../Contexts/LogContext';
 import { useUserContext } from '../Contexts/UserContext';
 import { useStorageContext } from '../Contexts/StorageContext';
 import { Images } from '../Images';
 import { globalStyle as gs } from "../Colors";
 import PressImage from '../PressImage/PressImage';
+import ObjectiveView from '../ObjectivesList/ObjetiveView/ObjetiveView';
+import { useState } from 'react';
 
 interface SettingsViewProps {
 }
 export const SettingsView: React.FC<SettingsViewProps> = (props: SettingsViewProps) => {
   const { theme: t, fontTheme: f, userPrefs, writeUserPrefs } = useUserContext();
+//   const [contentHeight, setContentHeight] = useState<number>(0);
+//   const [layoutHeight, setLayoutHeight] = useState<number>(0);
+//   const [offsetY, setOffsetY] = useState<number>(0);
+
+// const hasMoreContent = offsetY + layoutHeight < contentHeight;
   
   const onAddIconToDisplay = (icon: string) => {
     if (userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
@@ -95,7 +102,8 @@ export const SettingsView: React.FC<SettingsViewProps> = (props: SettingsViewPro
     let itemsToHide: any = [];
 
     for(const v of Object.values(ObjBottomIcons)){
-      const should = userPrefs.ObjectivesPrefs.iconsToDisplay.includes(v);
+      let should = userPrefs.ObjectivesPrefs.iconsToDisplay.includes(v);
+      if(v === ObjBottomIcons.Menu) should = false;
       if(should){
         itemsToDisplay.push(getIconImage(v, objBottomIconImageRecord[v]));
       }
@@ -150,6 +158,24 @@ export const SettingsView: React.FC<SettingsViewProps> = (props: SettingsViewPro
     }
   }
 
+  const onChangeHandPosition = () => {
+    let newHandPos: HandPosition = HandPosition.Left;
+
+    switch(userPrefs.handPosition) {
+      case HandPosition.Right:
+        newHandPos = HandPosition.Left;
+        break;
+      case HandPosition.Left:
+        newHandPos = HandPosition.Center;
+        break;
+      case HandPosition.Center:
+        newHandPos = HandPosition.Right;
+        break;
+    }
+
+    onChangePrefs({...userPrefs, handPosition: newHandPos});
+  }
+
   const s = StyleSheet.create({
     settingsContainer:{
       flex: 1,
@@ -162,6 +188,11 @@ export const SettingsView: React.FC<SettingsViewProps> = (props: SettingsViewPro
       paddingBottom: 25,
       paddingTop: 10,
       paddingHorizontal: 10,
+
+      // borderColor: hasMoreContent ?'red':'blue',
+      // borderWidth: 1,
+      // borderRadius: 5,
+      // borderStyle: 'solid',
     },
     header:{
       color: t.textcolor,
@@ -243,14 +274,19 @@ export const SettingsView: React.FC<SettingsViewProps> = (props: SettingsViewPro
     objectiveIconContainer:{
       flexDirection: 'row',
       flexWrap: "wrap",
-      justifyContent: userPrefs.isRightHand?'flex-end':'flex-start',
+      justifyContent: userPrefs.handPosition?'flex-end':'flex-start',
       minHeight: 45,
     },
   })
 
   return (
     <View style={s.settingsContainer}>
-      <ScrollView style={s.scrollView} persistentScrollbar={true}>
+      <ScrollView style={s.scrollView}
+      // onContentSizeChange={(w, h) => setContentHeight(h)}
+      // onLayout={(e) => setLayoutHeight(e.nativeEvent.layout.height)}
+      // onScroll={(e) => setOffsetY(e.nativeEvent.contentOffset.y)}
+      // scrollEventThrottle={16}
+       persistentScrollbar={true}>
         <Text style={s.header}>SETTINGS:</Text>
           <Text style={s.subHeader}>General</Text>
           <PressText
@@ -264,10 +300,10 @@ export const SettingsView: React.FC<SettingsViewProps> = (props: SettingsViewPro
           <PressText
             style={s.userPrefsContainerOn}
             textStyle={s.userPrefsTextOn}
-            onPress={() => {onChangePrefs({...userPrefs, isRightHand: !userPrefs.isRightHand})}}
+            onPress={onChangeHandPosition}
             imageStyle={s.image}
-            imageSource={userPrefs.isRightHand?Images.RightHand:Images.LeftHand}
-            text={"Which hand? - " + (userPrefs.isRightHand? 'Right hand.':'Left Hand.')}>
+            imageSource={userPrefs.handPosition?Images.RightHand:Images.LeftHand}
+            text={"Which hand? - " + userPrefs.handPosition + ' hand.'}>
           </PressText>
           <PressText 
             style={userPrefs.shouldLockOnOpen? s.userPrefsContainerOn:s.userPrefsContainerOff}

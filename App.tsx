@@ -44,13 +44,7 @@ export default function App() {
       <StorageProvider>
         <RequestProvider>
           <UserProvider>
-            {/* <View style={s.container}> */}
               <Main></Main>
-              {/* {isLoadingFont?
-                <Text style={s.loading}>Loading...</Text>
-                :
-              } */}
-            {/* </View> */}
           </UserProvider>
         </RequestProvider>
       </StorageProvider>

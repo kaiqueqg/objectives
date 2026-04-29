@@ -1,6 +1,6 @@
 import { View, StyleSheet, Vibration } from "react-native";
 import { globalStyle as gs } from "../Colors";
-import { MessageType, Pattern, Themes, Views } from "../Types";
+import { HandPosition, MessageType, Pattern, Themes, Views } from "../Types";
 import PressImage from "../PressImage/PressImage";
 import { useUserContext } from "../Contexts/UserContext";
 import {Loading} from "../Loading/Loading";
@@ -106,8 +106,7 @@ const BottomBar = (props: BottomBarProps) => {
            <PressImage 
               onPress={()=>{changeToView(Views.ListView)}}
               source={Images.File}
-              isSelected={currentView === Views.ListView}
-              size={currentView === Views.ArchivedView?-4:-1}/>
+              isSelected={currentView === Views.ListView}/>
         )
       case BottomBarIcons.Archived:
         return(
@@ -115,7 +114,6 @@ const BottomBar = (props: BottomBarProps) => {
             onPress={()=>{changeToView(Views.ArchivedView)}}
             source={Images.Archive}
             isSelected={currentView === Views.ArchivedView}
-            size={currentView === Views.ListView?-4:-1}
           />
         )
       case BottomBarIcons.Sync:
@@ -138,55 +136,18 @@ const BottomBar = (props: BottomBarProps) => {
     }
   }
 
-  const getLeftBottomView = () => {
-    return(
-      <View style={s.leftContainer}>
-        {userPrefs.isRightHand?
-          <>
-            {getBottomIcon(BottomBarIcons.User)}
-            {getBottomIcon(BottomBarIcons.Settings)}
-            {getBottomIcon(BottomBarIcons.Theme)}
-            {getBottomIcon(BottomBarIcons.Sync)}
-            {getBottomIcon(BottomBarIcons.Alerts)}
-            {getBottomIcon(BottomBarIcons.Dev)}
-          </>
-          :
-          <>
-            {getBottomIcon(BottomBarIcons.Dev)}
-            {getBottomIcon(BottomBarIcons.Alerts)}
-            {getBottomIcon(BottomBarIcons.Sync)}
-            {getBottomIcon(BottomBarIcons.Dev)}
-            {getBottomIcon(BottomBarIcons.Theme)}
-            {getBottomIcon(BottomBarIcons.Settings)}
-            {getBottomIcon(BottomBarIcons.User)}
-          </>
-        }
-      </View>
-    )
-  }
+  const getSide = () => {
+    if(userPrefs && userPrefs.handPosition === HandPosition.Center) return 'space-around';
+    if(userPrefs && userPrefs.handPosition === HandPosition.Left) return 'flex-start';
+    if(userPrefs && userPrefs.handPosition === HandPosition.Right) return 'flex-end';
 
-  const getRightBottomView = () => {
-    return(
-      <View style={s.rightContainer}>
-        {userPrefs.isRightHand?
-          <>
-            {getBottomIcon(BottomBarIcons.Archived)}
-            {getBottomIcon(BottomBarIcons.List)}
-          </>
-          :
-          <>
-            {getBottomIcon(BottomBarIcons.List)}
-            {getBottomIcon(BottomBarIcons.Archived)}
-          </>
-        }
-      </View>
-    )
+    return 'space-around';
   }
 
   const s = StyleSheet.create({
     container: {
       flexDirection: 'row',
-      justifyContent: 'center',
+      justifyContent: 'space-between',
       alignItems: 'center',
       backgroundColor: t.backgroundcolordarker,
 
@@ -195,22 +156,33 @@ const BottomBar = (props: BottomBarProps) => {
       borderBottomWidth: 1,
       borderStyle: 'solid',
     },
-    leftContainer: {
-      flexDirection: 'row',
-      justifyContent: userPrefs.isRightHand?'flex-start':'flex-end',
-      width: '50%',
-    },
-    rightContainer: {
-      flexDirection: 'row',
-      justifyContent: userPrefs.isRightHand?'flex-end':'flex-start',
-      width: '50%',
-    },
   });
 
   return (
     <View style={s.container}>
-      {userPrefs.isRightHand?getLeftBottomView():getRightBottomView()}
-      {userPrefs.isRightHand?getRightBottomView():getLeftBottomView()}
+      {userPrefs.handPosition === HandPosition.Right || userPrefs.handPosition === HandPosition.Center?
+        <>
+          {getBottomIcon(BottomBarIcons.User)}
+          {getBottomIcon(BottomBarIcons.Settings)}
+          {getBottomIcon(BottomBarIcons.Theme)}
+          {getBottomIcon(BottomBarIcons.Dev)}
+          {getBottomIcon(BottomBarIcons.Sync)}
+          {getBottomIcon(BottomBarIcons.Alerts)}
+          {getBottomIcon(BottomBarIcons.Archived)}
+          {getBottomIcon(BottomBarIcons.List)}
+        </>
+        :
+        <>
+          {getBottomIcon(BottomBarIcons.List)}
+          {getBottomIcon(BottomBarIcons.Archived)}
+          {getBottomIcon(BottomBarIcons.Alerts)}
+          {getBottomIcon(BottomBarIcons.Dev)}
+          {getBottomIcon(BottomBarIcons.Sync)}
+          {getBottomIcon(BottomBarIcons.Theme)}
+          {getBottomIcon(BottomBarIcons.Settings)}
+          {getBottomIcon(BottomBarIcons.User)}
+        </>
+      }
     </View>
   );
 };

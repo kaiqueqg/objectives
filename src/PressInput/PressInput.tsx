@@ -166,7 +166,7 @@ const PressInput = (props: PressInputProps) => {
       color: o.textcolor,
       marginLeft: 5,
       fontWeight: 'bold',
-      fontSize: 20,
+      fontSize: 16,
     },
     defaultText:{
       color: t.textcolorfade,

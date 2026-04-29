@@ -3,16 +3,18 @@ import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useLogContext } from '../Contexts/LogContext';
 import ButtonView from '../ButtonView/ButtonView';
 import { useUserContext } from '../Contexts/UserContext';
-import { MessageType } from '../Types';
+import { MessageType, PopMessage } from '../Types';
 import PressImage from '../PressImage/PressImage';
 import { Images } from '../Images';
+import { ExecutionEnvironment } from 'expo-constants';
+import PopMessageView from '../Log/PopMessageView';
 
 interface AlertsViewProps {
 }
 
 const AlertsView: React.FC<AlertsViewProps> = (props: AlertsViewProps) => {
-  const { log, consoleLogs, popMessage, deleteConsoleLog } = useLogContext();
-  const { theme } = useUserContext();
+  const { log, messageListLogs, popMessage, deleteMessageListLogs } = useLogContext();
+  const { theme, user } = useUserContext();
   
   const s = StyleSheet.create({
     container: {
@@ -35,6 +37,10 @@ const AlertsView: React.FC<AlertsViewProps> = (props: AlertsViewProps) => {
       paddingVertical: 5,
 
       backgroundColor: theme.backgroundcolordarker,
+
+      borderTopColor: theme.bordercolor,
+      borderTopWidth: 1,
+      borderStyle: 'solid',
     },
     scrollView: {
       flex: 1,
@@ -60,20 +66,20 @@ const AlertsView: React.FC<AlertsViewProps> = (props: AlertsViewProps) => {
     <View style={s.container}>
       <ScrollView style={s.scrollView}>
         {
-          consoleLogs.map((t: string, i: number) => {
-            return <Text key={i} style={s.text}>{t}</Text>
+          messageListLogs.map((t: PopMessage, i: number) => {
+            return <PopMessageView message={{id: i.toString(), text: t.text, timeout: Infinity, type: t.type}}></PopMessageView>
           })
         }
-        
       </ScrollView>
-      <View style={s.buttonsView}>
-        <ButtonView text='Error' type='reset' onPress={() => {popMessage('Error', MessageType.Error)}} size={-5}/>
-        <ButtonView text='Alert' type='backward' onPress={() => {popMessage('PossqdqsdqsdqsdqsitivePossqdqsdqsdqsdqsitivePossqdqsdqsdqsdqsitivePossqdqsdqsdqsdqsitivePossqdqsdqsdqsdqsitive', MessageType.Alert)}}/>
-        <ButtonView text='Positive' type='positive' onPress={() => {popMessage('Possqdqsdqsdqsdqsitive', MessageType.Positive)}}/>
-        <ButtonView text='Normal' type='neutral' onPress={() => {popMessage('Normal')}}/>
-        <ButtonView text='Console' type='foward' onPress={() => {log.w('Console')}}/>
-        <PressImage source={Images.Trash} onPress={deleteConsoleLog}/>
-      </View>
+      {(user.Role === 'Admin' || ExecutionEnvironment.StoreClient) && 
+       <View style={s.buttonsView}>
+        <ButtonView text='Error' type='reset' onPress={() => {popMessage('Error', MessageType.Error)}} size={-10}/>
+        <ButtonView text='Alert' type='backward' onPress={() => {popMessage('Alert', MessageType.Alert)}} size={-10}/>
+        <ButtonView text='Positive' type='positive' onPress={() => {popMessage('All good', MessageType.Positive)}} size={-10}/>
+        <ButtonView text='Normal' type='neutral' onPress={() => {popMessage('Normal')}} size={-10}/>
+        <ButtonView text='Console' type='foward' onPress={() => {log.w('Console')}} size={-10}/>
+        <PressImage source={Images.Trash} onPress={deleteMessageListLogs}/>
+      </View>}
     </View>
   );
 };

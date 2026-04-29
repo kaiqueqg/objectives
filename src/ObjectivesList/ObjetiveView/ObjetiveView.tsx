@@ -13,7 +13,7 @@ import PressText from "../../PressText/PressText";
 import PressImage from "../../PressImage/PressImage";
 import PressInput from "../../PressInput/PressInput";
 
-import { Item, ItemType, Note, Objective, Question, Step, Views, Wait, Location, Divider, Grocery, Pattern, MessageType, Medicine, Exercise, Weekdays, StepImportance, ItemNew, Link, Image, House, GenericItem, ObjBottomIcons, MultiSelectAction, MultiSelectType, Review, Themes } from "../../Types";
+import { Item, ItemType, Note, Objective, Question, Step, Views, Wait, Location, Divider, Grocery, Pattern, MessageType, Medicine, Exercise, Weekdays, StepImportance, ItemNew, Link, Image, House, GenericItem, ObjBottomIcons, MultiSelectAction, MultiSelectType, Review, Themes, HandPosition } from "../../Types";
 import { useEffect, useState } from "react";
 
 import QuestionView, {New as QuestionNew} from "./QuestionView/QuestionView";
@@ -217,7 +217,6 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     else{
       sending.push(...toAddItems);
     }
-
 
     //Show red border to bring attention
     const justAdded = toAddItems.map((item:Item) => {
@@ -505,12 +504,12 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
 
   const sortItemsAlphabetically = (items: Item[]): Item[] => {
     return items.sort((a, b) => {
-        const titleA = getSortableText(a);
-        const titleB = getSortableText(b);
+      const titleA = getSortableText(a);
+      const titleB = getSortableText(b);
 
-        if (titleA < titleB) return -1;
-        if (titleA > titleB) return 1;
-        return 0;
+      return titleA.localeCompare(titleB, undefined, {
+        sensitivity: "base",
+      });
     });
   }
 
@@ -601,6 +600,8 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
   }
 
   const orderDividerItems = async (divider: Item) => {
+    log.w('orderDividerItems ', divider)
+
     if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
 
     let start = false;
@@ -615,6 +616,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       }
     }
 
+    log.arrb('itemsToOrder', itemsToOrder);
     let itemsOrdered:Item[] = sortItemsAlphabetically(itemsToOrder);
 
     let finalList:Item[] = [];
@@ -623,6 +625,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     const after = newList.slice(divider.Pos+1);
 
     let ajustedList = [...before, ...itemsOrdered, ...after];
+    log.arrb('ajustedList', ajustedList);
 
     for(let i = 0; i < ajustedList.length; i++){
       finalList.push({...ajustedList[i], Pos: i, LastModified: (new Date()).toISOString()});
@@ -954,7 +957,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
               <PressImage
                 key={key}
                 cT={o}
-                onPress={onLock}
+                onPress={() => showButtomItem(ObjBottomIcons.IsLocked)}
                 confirm={obj.IsLocked}
                 fade={!obj.IsLocked}
                 source={Images.Lock}
@@ -968,14 +971,14 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
             <PressImage
                 key={key}
                 cT={o}
-                onPress={onLock}
+                onPress={() => showButtomItem(ObjBottomIcons.IsLocked)}
                 confirm={obj.IsLocked}
                 fade={!obj.IsLocked}
                 source={Images.Lock}
                 color={o.trashicontint}
               />
           );
-        }
+        };
       case ObjBottomIcons.Checked:
         return (
           <PressImage
@@ -996,28 +999,21 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
             key={key}
             cT={o}
             isSelected={isItemsOpen}
-            onPress={addingNewItem}
+            onPress={() => showButtomItem(ObjBottomIcons.Add)}
             source={Images.Add}
             showLock={isItemOpenLocked}
           />
         );
       case ObjBottomIcons.FoldUnfoldAll:
         return(
-          <PressImage cT={o} key={key} onPress={() => {foldUnfoldAllDividers(openAll)}} source={openAll?Images.DoubleUpChevron:Images.DoubleDownChevron}/>
+          <PressImage cT={o} key={key} onPress={() => showButtomItem(ObjBottomIcons.FoldUnfoldAll)} source={openAll?Images.DoubleUpChevron:Images.DoubleDownChevron}/>
         );
       case ObjBottomIcons.GoingTopDown:
-        return(isListGoingUp?
-          <PressImage cT={o} key={key} onPress={()=>{setIsListGoingUp(false); itemsListScrollTo()}} source={Images.ToTop}/>
-          :
-          <PressImage cT={o} key={key} onPress={()=>{setIsListGoingUp(true); itemsListScrollTo(tempFilteredItems.length-1)}} source={Images.ToBottom}/>
+        return(
+          <PressImage cT={o} key={key} onPress={() => showButtomItem(ObjBottomIcons.GoingTopDown)} source={isListGoingUp?Images.ToTop:Images.ToBottom}/>
         );
       case ObjBottomIcons.Menu:
-        return (<PressImage 
-            key={key}
-            cT={o}
-            isSelected={isMenuIconOpen}
-            onPress={()=>showButtomItem(ObjBottomIcons.Menu)}
-            source={Images.Menu}/>
+        return (<PressImage key={key} cT={o} isSelected={isMenuIconOpen} onPress={()=>showButtomItem(ObjBottomIcons.Menu)} source={Images.Menu}/>
         );
       default:
       return null;
@@ -1185,20 +1181,61 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       case ObjBottomIcons.Search:
         onOpenSearch();
         break;
+      case ObjBottomIcons.IsLocked:
+        onLock();
+        break;
+      case ObjBottomIcons.FoldUnfoldAll:
+        foldUnfoldAllDividers(openAll);
+        break;
+      case ObjBottomIcons.GoingTopDown:
+        if(isListGoingUp) {
+          setIsListGoingUp(false);
+          itemsListScrollTo()
+        }
+        else{
+          setIsListGoingUp(true);
+          itemsListScrollTo(tempFilteredItems.length-1)
+        }
+        break
       default:
         break;
     }
   }
 
   const getBottomMenuView = () => {
-    const showMenu: boolean = userPrefs.ObjectivesPrefs.iconsToDisplay.length < 12;
     const l = [...userPrefs.ObjectivesPrefs.iconsToDisplay].reverse();
+    const showMenuByQuantity: boolean = userPrefs.ObjectivesPrefs.iconsToDisplay.length < 11;
+
+    let iconsToDisplay: React.ReactNode[] = [];
+
+    if(userPrefs.handPosition === HandPosition.Right || userPrefs.handPosition === HandPosition.Center){
+      for (let i = 0; i < l.length; i++) {
+        const e = l[i] as ObjBottomIcons;
+
+        if(e === ObjBottomIcons.Menu) continue;
+        if(e === ObjBottomIcons.Archive && obj.IsArchived) continue;
+        if(e === ObjBottomIcons.Unarchive && !obj.IsArchived) continue;
+
+        iconsToDisplay.push(getButtonIconViews(i.toString(), e));
+      }
+    }
+    else{
+      for (let i = l.length-1; i >= 0; i--) {
+        const e = l[i] as ObjBottomIcons;
+
+        if(e === ObjBottomIcons.Menu) continue;
+        if(e === ObjBottomIcons.Archive && obj.IsArchived) continue;
+        if(e === ObjBottomIcons.Unarchive && !obj.IsArchived) continue;
+
+        iconsToDisplay.push(getButtonIconViews(i.toString(), e));
+      }
+    }
 
     return(
       <View style={s.bottomContainer}>
-        {showMenu && !userPrefs.isRightHand && getButtonIconViews('-1', ObjBottomIcons.Menu)}
-        {l.map((i, index) => getButtonIconViews(index.toString(), i as ObjBottomIcons))}
-        {showMenu && userPrefs.isRightHand && getButtonIconViews(l.length.toString(), ObjBottomIcons.Menu)}
+        {showMenuByQuantity && (userPrefs.handPosition === HandPosition.Right || userPrefs.handPosition === HandPosition.Center) && getButtonIconViews(l.length.toString(), ObjBottomIcons.Menu)}
+        {iconsToDisplay}
+        {showMenuByQuantity && userPrefs.handPosition === HandPosition.Left && getButtonIconViews('-1', ObjBottomIcons.Menu)}
       </View>
     )
   }
@@ -1424,7 +1461,13 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     )
   }
 
-  const side = (userPrefs && userPrefs.isRightHand)? 'flex-end':'flex-start';
+  const getSide = () => {
+    if(userPrefs && userPrefs.handPosition === HandPosition.Center) return 'space-around';
+    if(userPrefs && userPrefs.handPosition === HandPosition.Left) return 'flex-start';
+    if(userPrefs && userPrefs.handPosition === HandPosition.Right) return 'flex-end';
+
+    return 'space-around';
+  }
 
   const s = StyleSheet.create(
   {
@@ -1452,7 +1495,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       marginBottom: 2,
     },
     bodyListSpacer:{
-      height: 700,
+      height: 400,
     },
     startPlaceholderContainer: {
       flex: 1,
@@ -1496,7 +1539,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       flexDirection: 'row',
       flexWrap: 'wrap',
       alignItems: 'center',
-      justifyContent: side,
+      justifyContent: getSide(),
       backgroundColor: o.innerbackgroundcolor,
 
       borderColor: o.bordercolorfade,
@@ -1730,7 +1773,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       {getEditTagView()}
       {getSearchView()}
       <View style={s.bodyContainer}>
-        {userPrefs.isRightHand?
+        {userPrefs.handPosition?
         <>
           {getListView()}
           {getSideMenus()}

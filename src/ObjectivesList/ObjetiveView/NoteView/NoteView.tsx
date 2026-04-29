@@ -12,6 +12,7 @@ export const New = () => {
   return(
     {
       Text: '',
+      IsShowing: true,
     }
   )
 }
@@ -75,6 +76,12 @@ const NoteView = (props: NoteViewProps) => {
     }
   }
 
+  const onIsShowing = () => {
+    setNewNote(prev => {
+      return {...newNote, IsShowing: !newNote.IsShowing}
+    })
+  }
+
   const onEditingNote = () => {
     if(isLocked) {
       Vibration.vibrate(Pattern.Wrong);
@@ -99,8 +106,13 @@ const NoteView = (props: NoteViewProps) => {
 
     return(
       <View style={s.displayContainer}>
-        {note.Title && <PressText style={s.titleContainerStyle} textStyle={s.titleStyle} onPress={onEditingNote} text={newNote.Title}></PressText>}
-        {displayText && <PressText style={s.textContainerStyle} textStyle={s.textStyle} onPress={onEditingNote} text={newNote.Text}></PressText>}
+        {note.Title && 
+        <View style={s.displayTitleContainer}>
+          <PressText style={s.titleContainerStyle} textStyle={s.titleStyle} onPress={onEditingNote} text={newNote.Title}></PressText>
+          <PressImage fade={!newNote.IsShowing} size={-5} source={Images.Note} onPress={onIsShowing}/>
+        </View>
+        }
+        {displayText && newNote.IsShowing && <PressText style={s.textContainerStyle} textStyle={s.textStyle} onPress={onEditingNote} text={newNote.Text}></PressText>}
       </View>
     )
   }
@@ -148,6 +160,13 @@ const NoteView = (props: NoteViewProps) => {
       paddingHorizontal: 10,
       paddingBottom: 5,
       minHeight: 40,
+    },
+    displayTitleContainer:{
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      verticalAlign: 'middle',
+      flexDirection: 'row',
     },
     inputsContainer:{
       flex: 1,
