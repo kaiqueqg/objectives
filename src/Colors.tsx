@@ -282,6 +282,7 @@ export type ObjectivePallete = {
   textcolor?: string,
   textcolorfade?: string,
   textcolorcontrast?: string,
+  textcoloralert?: string,
 
   innerbackgroundcolor?: string,
   
@@ -329,6 +330,7 @@ export const noTheme: ObjectivePallete = {
   trashicontint: cp.redlight,
 
   textcolor: cp.beige,
+  textcoloralert: cp.red,
 
   backgroundcolor: cp.bluedark,
   backgroundcolordark: cp.bluedarkerdarker,
@@ -368,6 +370,8 @@ export const lightNoTheme: ObjectivePallete = {
   innerbackgroundcolor: cp.itemNoThemeLight,
   
   textcolor: cp.black,
+  textcoloralert: cp.redlightlight,
+
   innertextcolor: cp.black,
   innertextcolorcontrast: cp.black,
   innertextcolorfade: cp.grey,

@@ -657,8 +657,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
   ///-------------------- Security
   const requestBiometricAuth = async (message?: string, fallbackMessage?: string): Promise<boolean> => {
-    
-
     const result = await LocalAuthentication.authenticateAsync({
       promptMessage: message??'Confirm with your fingerprint',
       fallbackLabel: fallbackMessage??'Use the code.',

@@ -361,6 +361,15 @@ export interface PopMessage {
   text: string,
   timeout: number,
   type: MessageType,
+  createdAt: Date,
+  options?: PopMessageOptions
+}
+
+export interface PopMessageOptions {
+  Type?: MessageType,
+  TimeoutInSeconds?: number,
+  ShowDateTime?: boolean,
+  ShowTimeSince?: boolean,
 }
 
 export enum LogLevel { Dev, Warn, Error, None }

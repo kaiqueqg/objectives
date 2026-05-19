@@ -1,15 +1,14 @@
 
 import { View, StyleSheet, Text, Pressable, Animated } from "react-native";
 import { useUserContext } from "../Contexts/UserContext";
-import { MessageType, PopMessage } from "../Types";
+import { MessageType, PopMessage, PopMessageOptions } from "../Types";
 import { useEffect, useState } from "react";
 import { useLogContext } from "../Contexts/LogContext";
 import { cp } from "../ColorPalette";
+import { getElapsedTime, randomId } from "../Helper";
 
 export interface PopMessageViewProps {
   message: PopMessage,
-
-
 }
 const PopMessageView = (props: PopMessageViewProps) => {
   const { removeMessage, log } = useLogContext();
@@ -59,8 +58,9 @@ const PopMessageView = (props: PopMessageViewProps) => {
     }
 
     return(
-      <Pressable style={[s.messageContainer, styleToAdd]} onPress={()=>{removeMessage(message.id)}}>
+      <Pressable key={message.id} style={[s.messageContainer, styleToAdd]} onPress={()=>{removeMessage(message.id)}}>
         <Text style={s.messageText}>{message.text}</Text>
+        {message.options && message.options.ShowTimeSince && <Text style={s.messageSince}>{getElapsedTime(message.createdAt)}</Text>}
       </Pressable>
     )
   }
@@ -69,9 +69,8 @@ const PopMessageView = (props: PopMessageViewProps) => {
     messageContainer:{
       opacity: scale,
       alignSelf: 'flex-end',
-      color: 'beige',
       flexDirection: 'column',
-
+      
       borderColor: 'black',
       borderWidth: 1,
       borderTopLeftRadius: 15,
@@ -99,11 +98,18 @@ const PopMessageView = (props: PopMessageViewProps) => {
       backgroundColor: cp.yellow,
     },
     messageConsole:{
-      backgroundColor: t.backgroundcolordarker,
+      backgroundColor: cp.greylight,
     },
     messageText:{
-      color: cp.black,
+      textAlign: "center",
+      color: 'black',
       fontSize: 15,
+      fontWeight: 'bold',
+    },
+    messageSince:{
+      textAlign: "right",
+      color: '#000000',
+      fontSize: 8,
       fontWeight: 'bold',
     },
   });

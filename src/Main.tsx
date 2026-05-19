@@ -1,6 +1,7 @@
 import { View, StyleSheet, StatusBar, AppStateStatus, AppState, KeyboardAvoidingView, Platform, Text, TextInput } from "react-native";
 import { Objective, Themes, Views } from "./Types";
 import BottomBar from "./BottomBar/BottomBar";
+import * as ScreenCapture from 'expo-screen-capture';
 import { useUserContext } from "./Contexts/UserContext";
 import React, { useEffect, useRef, useState } from "react";
 import ObjectiveView from "./ObjectivesList/ObjetiveView/ObjetiveView";
@@ -42,34 +43,38 @@ const Main = (props: MainProps) => {
   } = useUserContext();
 
   const [currentObjective, setCurrentObjective] = useState<Objective|null>(null);
-  const [showMainView, setShowMainView] = useState<boolean>(false);
   const [statusBarTheme, setStatusBarTheme] = useState<'default' | 'light-content' | 'dark-content'>('default');
+  const [isLocked, setIsLocked] = useState<boolean>(true);
   
   const appState = useRef<AppStateStatus>(AppState.currentState);
 
   useEffect(() => {
     let subscription: any;
-
     const run = async () => {
       // if(Constants.executionEnvironment !== ExecutionEnvironment.StoreClient) return;
 
-      const compatible:boolean = await LocalAuthentication.hasHardwareAsync();
-      const enrolled:boolean = await LocalAuthentication.isEnrolledAsync();
+      const compatible:boolean = await LocalAuthentication.hasHardwareAsync(); //Is biometrics possible?
+      const enrolled:boolean = await LocalAuthentication.isEnrolledAsync(); //Is it ready to use?
       const currentUserPrefs = await storage.readUserPrefs();
+
+      //Unlock in case is not possible
       if (!currentUserPrefs || !enrolled || !compatible) {
-        setShowMainView(true);
-        return;
-      }
-      if(!currentUserPrefs.shouldLockOnOpen && !currentUserPrefs.shouldLockOnReopen){
-        await noFingerprintUnlockNeeded();
+        setIsLocked(false);
         return;
       }
 
+      //Unlock because user didnt choose to use lock
+      if(!currentUserPrefs.shouldLockOnOpen && !currentUserPrefs.shouldLockOnReopen){
+        setIsLocked(false);
+      }
+
+      //Things to be tested in case of app was open from zero
       if(appJustLaunched){
         await onFirstOpenLock();
 
         const v = await storage.readCurrentObjectiveId();
         if(userPrefs.openLastObjectiveOnStart && v){
+
           await writeCurrentObjectiveId(v);
           await writeCurrentView(Views.IndividualView);
         }
@@ -78,12 +83,17 @@ const Main = (props: MainProps) => {
       }
 
       subscription = AppState.addEventListener('change', async (nextState) => {
+        ScreenCapture.preventScreenCaptureAsync();
+
+        //to background
         if (appState.current.match(/active/) && nextState.match(/inactive|background/)) {
-          await onGoingToBackground();
+          onGoingToBackground();
         }
 
+        //from background
         if(appState.current.match(/inactive|background/) && nextState === 'active') {
-          await onReopenLock();
+          onReopenLock();
+          ScreenCapture.allowScreenCaptureAsync();
         }
         appState.current = nextState;
       });
@@ -142,24 +152,19 @@ const Main = (props: MainProps) => {
         setStatusBarTheme("dark-content");
         break;
     }
-  }, [userPrefs])
-
-  const noFingerprintUnlockNeeded = async () => {
-    setShowMainView(true);
-    return;
-  }
+  }, [userPrefs]);
 
   const onGoingToBackground = async () => {
     const listeningUserPrefs = await storage.readUserPrefs();
     
     if(listeningUserPrefs && listeningUserPrefs.shouldLockOnReopen){
-      setShowMainView(false);
+      setIsLocked(true);
     }
   }
 
   const testBioAuth = async () => {
     if(await requestBiometricAuth()){
-      setShowMainView(true);
+      setIsLocked(false);
     }
   }
 
@@ -215,18 +220,9 @@ const Main = (props: MainProps) => {
     safeAreaContainer:{
       flex: 1,
       backgroundColor: t.backgroundcolor,
-
-      // borderColor: 'red',
-      // borderWidth: 1,
-      // borderRadius: 5,
-      // borderStyle: 'solid',
     },
     keyboardAvoidingView: {
       flex: 1,
-      // borderColor: 'green',
-      // borderWidth: 1,
-      // borderRadius: 5,
-      // borderStyle: 'solid',
     },
     lockedContainer:{
       flex: 1,
@@ -235,7 +231,7 @@ const Main = (props: MainProps) => {
       
       width: '100%',
       height: '100%',
-      backgroundColor: 'black',
+      backgroundColor: t.backgroundcolor,
       padding: 100,
     },
     container: {
@@ -250,17 +246,17 @@ const Main = (props: MainProps) => {
 
   return (
     <SafeAreaView style={s.safeAreaContainer}>
+      <StatusBar translucent={false} backgroundColor="transparent" barStyle={statusBarTheme}/>
       <Loading isLoading={!isReady}>
-        {true?
-          <View style={s.container}>
-            <PopMessageContainer></PopMessageContainer>
-            {getCurrentView()}
-            <BottomBar></BottomBar>
-            <StatusBar translucent={false} backgroundColor="transparent" barStyle={statusBarTheme}/>
-          </View>
-        :
+        {isLocked?
         <View style={s.lockedContainer}>
           <PressImage source={Images.Lock} raw size={50} onPress={async () => await testBioAuth()}/>
+        </View>
+        :
+        <View style={s.container}>
+          <PopMessageContainer></PopMessageContainer>
+          {getCurrentView()}
+          <BottomBar></BottomBar>
         </View>
         }
       </Loading>

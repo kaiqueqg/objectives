@@ -112,7 +112,11 @@ export type ImageName =
   | 'Circle'
   | 'Win95'
   | 'Bell'
-  | 'Zero';
+  | 'Zero'
+  | 'MatchCase'
+  | 'MatchIgnoreAccent'
+  | 'MatchWholeWord'
+  ;
 
 export const Images: Record<ImageName, any> = {
   Bell: require('../public/images/bell.png'),
@@ -229,4 +233,7 @@ export const Images: Record<ImageName, any> = {
   Zero: require('../public/images/zero.png'),
   Circle: require('../public/images/circle.png'),
   Win95: require('../public/images/win95.png'),
+  MatchCase: require('../public/images/matchCase.png'),
+  MatchIgnoreAccent: require('../public/images/matchIgnoreAccent.png'),
+  MatchWholeWord: require('../public/images/matchWholeWord.png'),
 };

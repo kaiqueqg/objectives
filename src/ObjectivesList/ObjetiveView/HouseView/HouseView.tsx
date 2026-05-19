@@ -125,7 +125,7 @@ export const HouseView = (props: HouseViewProps) => {
           if (supported) {
             Linking.openURL(house.Listing);
           } else {
-            popMessage('Cannot open this URL', MessageType.Error);
+            popMessage('Cannot open this URL', {Type: MessageType.Error});
           }
         })
         .catch((err) => {});
@@ -134,7 +134,7 @@ export const HouseView = (props: HouseViewProps) => {
 
   const openUrl = async () => {
     if(house.MapLink && house.MapLink.trim()) {
-      Linking.openURL(house.MapLink).catch(err => popMessage('Error opening Google Maps:', MessageType.Error, 5));
+      Linking.openURL(house.MapLink).catch(err => popMessage('Error opening Google Maps:', {Type: MessageType.Error, TimeoutInSeconds: 5}));
     }
   };
 

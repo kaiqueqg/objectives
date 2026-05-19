@@ -29,7 +29,7 @@ const TwoFAView: React.FC<TwoFAViewProps> = (props: TwoFAViewProps) => {
 
     if(!(/^[0-9]{6}$/.test(verificationCode))){
       setVerificationCode('');
-      popMessage('Bad verification code. Must be 6 numbers.', MessageType.Alert);
+      popMessage('Bad verification code. Must be 6 numbers.', {Type: MessageType.Alert});
       props.back();
       return;
     }
@@ -44,7 +44,7 @@ const TwoFAView: React.FC<TwoFAViewProps> = (props: TwoFAViewProps) => {
         setIsRequiringTwoFA(false);
       }
       else{
-        popMessage('Login was ok but no data was returned.', MessageType.Error);
+        popMessage('Login was ok but no data was returned.', {Type: MessageType.Error});
       }
     }
     else{

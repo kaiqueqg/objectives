@@ -119,14 +119,14 @@ const LocationView = (props: LocationViewProps) => {
   const addCurrentLocation = async () => {
     setIsGettingCurrentLocation(true);
     if(!userPrefs.allowLocation){
-      popMessage('Allow location on preferences...', MessageType.Error, 5);
+      popMessage('Allow location on preferences...', {Type: MessageType.Error, TimeoutInSeconds: 5});
       setIsGettingCurrentLocation(false);
       return;
     }
 
     const isEnabled = await ExpoLocation.hasServicesEnabledAsync();
     if(!isEnabled){
-      popMessage('Turn on phone GPS to get current location!', MessageType.Alert, 3);
+      popMessage('Turn on phone GPS to get current location!', {Type: MessageType.Alert, TimeoutInSeconds: 3});
       setCurrentLocation(undefined);
       setIsGettingCurrentLocation(false);
       return;
@@ -135,7 +135,7 @@ const LocationView = (props: LocationViewProps) => {
     const location = await fillCurrentLocation();
 
     if(!currentLocation){
-      popMessage('Current location wasn\'t available.', MessageType.Error, 5);
+      popMessage('Current location wasn\'t available.', {Type: MessageType.Error, TimeoutInSeconds: 5});
     }
     else{
       let newUrl = 'https://www.google.com/maps/search/?api=1&query=' + currentLocation.coords.latitude+','+currentLocation.coords.longitude;

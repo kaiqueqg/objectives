@@ -138,7 +138,7 @@ const DividerView = (props: DividerViewProps) => {
         <PressImage cT={o} onPress={()=>{addNewItem(ItemType.Question);}} source={Images.QuestionFilled}/>
         <PressImage cT={o} onPress={()=>{addNewItem(ItemType.Note);}} source={Images.Note}/>
         <PressImage cT={o} onPress={()=>{addNewItem(ItemType.Step);}} source={Images.StepFilled}/>
-        <PressImage cT={o} onPress={()=>{popMessage('Image: Under construction...', MessageType.Error)}} source={Images.ImageFilled}/>
+        <PressImage cT={o} onPress={()=>{popMessage('Image: Under construction...', {Type: MessageType.Error})}} source={Images.ImageFilled}/>
       </View>
     )
   }

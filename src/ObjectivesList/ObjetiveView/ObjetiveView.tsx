@@ -31,6 +31,26 @@ import {ReviewView, New as ReviewNew } from "./ReviewView/ReviewView";
 import { Images } from "../../Images";
 import { ShakeWrapper } from "../../Wrapper/ShakeWrapper";
 import { cp } from "../../ColorPalette";
+import { compareTextForSearch, randomId, removeAccents } from "../../Helper";
+
+export const DefaultObjective: Objective = {
+  ObjectiveId: randomId(),
+  UserId: randomId(),
+  CreatedAt: (new Date()).toISOString(),
+  Done: false,
+  IsArchived: false,
+  IsLocked: false,
+  IsShowing: true,
+  LastModified: (new Date()).toISOString(),
+  Pos: 0,
+  Tags: [],
+  Theme: 'noTheme',
+  Title: 'Title',
+  IsShowingCheckedExercise: true,
+  IsShowingCheckedGrocery: true,
+  IsShowingCheckedMedicine: true,
+  IsShowingCheckedStep: true,
+}
 
 export interface ObjectiveViewProps {
   obj: Objective,
@@ -80,6 +100,9 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
   const [itemSearchToShow, setItemSearchToShow] = useState<string[]>([]);
   const [searchText, setSearchText] = useState<string>('');
   const [searchNoItemFound, setSearchNoItemFound] = useState<boolean>(false);
+  const [searchMatchCase, setSearchMatchCase] = useState<boolean>(false);
+  const [searchMatchAccent, setSearchMatchAccent] = useState<boolean>(false);
+  const [searchdMatchWholeWord, setSearchdMatchWholeWord] = useState<boolean>(false);
 
   const [newTag, setNewTag] = useState<string>('');
 
@@ -92,6 +115,8 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
 
   /// testing, to delete maybe later
   const [justAddedItemId, setJustAddedItemId] = useState<string[]>([]);
+
+  const searchOptions = {searchdMatchWholeWord: searchdMatchWholeWord, searchMatchAccent: searchMatchAccent, searchMatchCase: searchMatchCase};
 
   useEffect(()=>{
     const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -118,10 +143,10 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     const hasLocation = list.some(obj => obj.Type === ItemType.Location);
     if(hasLocation){
       let { status } = await ExpoLocation.requestForegroundPermissionsAsync();
-      if (status !== 'granted') popMessage('Permission to access location was denied', MessageType.Error, 3);
+      if (status !== 'granted') popMessage('Permission to access location was denied', {Type: MessageType.Error, TimeoutInSeconds: 3});
 
       const isEnabled = await ExpoLocation.hasServicesEnabledAsync();
-      if(!isEnabled && userPrefs.allowLocation && userPrefs.warmLocationOff) popMessage('Turn on phone GPS to get distance to places!', MessageType.Alert, 5);
+      if(!isEnabled && userPrefs.allowLocation && userPrefs.warmLocationOff) popMessage('Turn on phone GPS to get distance to places!', {Type: MessageType.Alert, TimeoutInSeconds: 5});
     }
   }
   
@@ -647,16 +672,16 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
 
     if(tag.length > 100) {
-      popMessage(`That's one big tag...`, MessageType.Alert);
+      popMessage(`That's one big tag...`, {Type: MessageType.Alert});
     }
     if(tag.trim() === '') {
       if(tag.length > 0){
-        popMessage('Clever girl!', MessageType.Alert);
+        popMessage('Clever girl!', {Type: MessageType.Alert});
         setNewTag('');
       }
       else{
         if(userPrefs.vibrate) Vibration.vibrate(Pattern.Wrong);
-        popMessage('Type something for the tag...', MessageType.Alert);
+        popMessage('Type something for the tag...', {Type: MessageType.Alert});
       }
 
       return;
@@ -665,7 +690,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     const tagToAdd = tag.trim();
 
     if(tagToAdd.toLowerCase() === 'all' || tagToAdd.toLowerCase() === 'none'){
-      popMessage('All and None are protected tags', MessageType.Error);
+      popMessage('All and None are protected tags', {Type: MessageType.Error});
       return;
     }
 
@@ -713,37 +738,37 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     let newList: string[] = [];
     items.forEach((item: Item)=>{
       if(item.Type === ItemType.Step){
-        if(searchTextIgnoreCase((item as Step).Title, search)) newList.push(item.ItemId);
+        if(compareTextForSearch((item as Step).Title, search, searchOptions)) newList.push(item.ItemId);
       }
       else if(item.Type === ItemType.Question){
-        if(searchTextIgnoreCase((item as Question).Statement, search)) newList.push(item.ItemId);
+        if(compareTextForSearch((item as Question).Statement, search, searchOptions)) newList.push(item.ItemId);
       }
       else if(item.Type === ItemType.Note){
-        if(searchTextIgnoreCase((item as Note).Text, search)) newList.push(item.ItemId);
+        if(compareTextForSearch((item as Note).Text, search, searchOptions)) newList.push(item.ItemId);
       }
       else if(item.Type === ItemType.Location){
-        if(searchTextIgnoreCase((item as Location).Title, search)) newList.push(item.ItemId);
+        if(compareTextForSearch((item as Location).Title, search, searchOptions)) newList.push(item.ItemId);
       }
       else if(item.Type === ItemType.Divider){
-        if(searchTextIgnoreCase((item as Divider).Title, search)) newList.push(item.ItemId);
+        if(compareTextForSearch((item as Divider).Title, search, searchOptions)) newList.push(item.ItemId);
       }
       else if(item.Type === ItemType.Grocery){
-        if(searchTextIgnoreCase((item as Grocery).Title, search)) newList.push(item.ItemId);
+        if(compareTextForSearch((item as Grocery).Title, search, searchOptions)) newList.push(item.ItemId);
       }
       else if(item.Type === ItemType.Medicine){
-        if(searchTextIgnoreCase((item as Medicine).Title, search)) newList.push(item.ItemId);
+        if(compareTextForSearch((item as Medicine).Title, search, searchOptions)) newList.push(item.ItemId);
       }
       else if(item.Type === ItemType.Exercise){
-        if(searchTextIgnoreCase((item as Exercise).Title, search)) newList.push(item.ItemId);
+        if(compareTextForSearch((item as Exercise).Title, search, searchOptions)) newList.push(item.ItemId);
       }
       else if(item.Type === ItemType.Link){
-        if(searchTextIgnoreCase((item as Link).Title, search)) newList.push(item.ItemId);
+        if(compareTextForSearch((item as Link).Title, search, searchOptions)) newList.push(item.ItemId);
       }
       else if(item.Type === ItemType.Image){
-        if(searchTextIgnoreCase((item as Image).Title, search)) newList.push(item.ItemId);
+        if(compareTextForSearch((item as Image).Title, search, searchOptions)) newList.push(item.ItemId);
       }
       else if(item.Type === ItemType.House){
-        if(searchTextIgnoreCase((item as House).Title, search)) newList.push(item.ItemId);
+        if(compareTextForSearch((item as House).Title, search, searchOptions)) newList.push(item.ItemId);
       }
       else{
       }
@@ -752,11 +777,11 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     if(newList.length === 0) {
       setSearchNoItemFound(true);
     }
-    setItemSearchToShow(newList);
-  }
+    else{
+      setSearchNoItemFound(false);
+    }
 
-  const searchTextIgnoreCase = (text: string, search: string):boolean => {
-    return text.trim().toLowerCase().includes(search.trim().toLowerCase());
+    setItemSearchToShow(newList);
   }
 
   const removeTag = async (tag: string) => {
@@ -868,12 +893,17 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
             defaultValue={searchText}
             style={s.inputStyle}
             placeholderTextColor={o.innertextcolorfade}
-            placeholder="item that includes..."
+            placeholder="search..."
             onChangeText={onSearchTextChange}
             submitBehavior="submit"
             autoFocus>
           </TextInput>
           <PressImage cT={o} onPress={onEraseSearch} source={Images.Eraser}/>
+        </View>
+        <View style={s.searchBottomOptionsRow}>
+          <PressImage cT={o} onPress={()=>{setSearchdMatchWholeWord(!searchdMatchWholeWord); doSearchText(searchText.trim());}} source={Images.MatchWholeWord} fade={!searchdMatchWholeWord}/>
+          <PressImage cT={o} onPress={()=>{setSearchMatchAccent(!searchMatchAccent); doSearchText(searchText.trim());}} source={Images.MatchIgnoreAccent} fade={!searchMatchAccent}/>
+          <PressImage cT={o} onPress={()=>{setSearchMatchCase(!searchMatchCase); doSearchText(searchText.trim());}} source={Images.MatchCase} fade={!searchMatchCase}/>
         </View>
       </View>
     )
@@ -1425,7 +1455,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
         <PressImage cT={o} onPress={() => {choseNewItemToAdd(ItemType.Question)}} source={Images.QuestionFilled}/>
         <PressImage cT={o} onPress={() => {choseNewItemToAdd(ItemType.Note)}} source={Images.Note}/>
         <PressImage cT={o} onPress={() => {choseNewItemToAdd(ItemType.Step)}} source={Images.StepFilled}/>
-        <PressImage cT={o} onPress={()=>{popMessage('Image: Under construction...', MessageType.Error)}} source={Images.ImageFilled}/>
+        <PressImage cT={o} onPress={()=>{popMessage('Image: Under construction...', {Type: MessageType.Error})}} source={Images.ImageFilled}/>
         <PressText style={gs.baseBiggerImageContainer} text={newItemsMultiplier.toString() + 'x'} onPress={increaseNewItemMultiplier} textStyle={{fontWeight: 'bold', color: o.innertextcolor}}></PressText>
       </View>
     )
@@ -1642,15 +1672,16 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       borderStyle: 'solid',
     },
     searchTitle:{
-      verticalAlign: 'middle',
-      textAlign: 'center',
-      width: '100%',
-      color: o.innertextcolor,
+      color: o.textcolor,
       fontWeight: 'bold',
       fontSize: 25,
     },
     searchBottomRow:{
       flexDirection: "row",
+    },
+    searchBottomOptionsRow:{
+      flexDirection: "row",
+      width: '100%',
     },
     inputStyle: {
       flex: 1,
@@ -1658,7 +1689,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
       justifyContent: 'center',
       alignItems: 'center',
 
-      color: o.innertextcolor,
+      color: searchNoItemFound?o.trashicontint:o.innertextcolor,
       
       borderColor: o.innertextcolor,
       borderBottomWidth: 1,

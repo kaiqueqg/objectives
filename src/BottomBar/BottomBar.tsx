@@ -28,7 +28,7 @@ const BottomBar = (props: BottomBarProps) => {
     if(currentView === newView){
       if(currentObjectiveId === '' && currentView === Views.ListView){
         if(userPrefs.vibrate) Vibration.vibrate(Pattern.Wrong);
-        popMessage('No objective selected.', MessageType.Alert);
+        popMessage('No objective selected.', {Type: MessageType.Alert});
       }
       else if(currentObjectiveId !== ''){
         if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);

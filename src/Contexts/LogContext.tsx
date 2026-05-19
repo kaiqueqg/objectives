@@ -1,6 +1,6 @@
 // LogContext.tsx
 import React, { createContext, useState, useContext, ReactNode } from 'react';
-import { Divider, Grocery, Item, ItemType, Location, LogLevel, MessageType, PopMessage, Note, Question, Step, Wait, Objective } from '../Types';
+import { Divider, Grocery, Item, ItemType, Location, LogLevel, MessageType, PopMessage, Note, Question, Step, Wait, Objective, PopMessageOptions } from '../Types';
 
 interface LogProviderProps {
   children: ReactNode;
@@ -114,7 +114,7 @@ export const LogProvider: React.FC<LogProviderProps> = ({ children }) => {
         let addList: PopMessage[] = [];
         for (let i = 0; i < texts.length; i++) {
           const t = texts[i];
-          addList.push({id: randomId(), text: t, timeout: Infinity, type: MessageType.Console});
+          addList.push({id: randomId(), text: t, timeout: Infinity, type: MessageType.Console, createdAt: new Date()});
         }
         setMessageListLogs([...messageListLogs, ...addList]);
 
@@ -133,7 +133,7 @@ export const LogProvider: React.FC<LogProviderProps> = ({ children }) => {
       let addList: PopMessage[] = [];
       for (let i = 0; i < objs.length; i++) {
         const t = objs[i].Title;
-        addList.push({id: randomId(), text: t, timeout: Infinity, type: MessageType.Console});
+        addList.push({id: randomId(), text: t, timeout: Infinity, type: MessageType.Console, createdAt: new Date()});
       }
       setMessageListLogs([...messageListLogs, ...addList]);
 
@@ -155,7 +155,7 @@ export const LogProvider: React.FC<LogProviderProps> = ({ children }) => {
         let addList: PopMessage[] = [];
         for (let i = 0; i < items.length; i++) {
           const t = items[i].Title;
-          addList.push({id: randomId(), text: t, timeout: Infinity, type: MessageType.Console});
+          addList.push({id: randomId(), text: t, timeout: Infinity, type: MessageType.Console, createdAt: new Date()});
         }
         setMessageListLogs([...messageListLogs, ...addList]);
 
@@ -179,7 +179,7 @@ export const LogProvider: React.FC<LogProviderProps> = ({ children }) => {
         let addList: PopMessage[] = [];
         for (let i = 0; i < texts.length; i++) {
           const t = texts[i];
-          addList.push({id: randomId(), text: t, timeout: Infinity, type: MessageType.Console});
+          addList.push({id: randomId(), text: t, timeout: Infinity, type: MessageType.Console, createdAt: new Date()});
         }
         setMessageListLogs([...messageListLogs, ...addList]);
 
@@ -202,7 +202,7 @@ export const LogProvider: React.FC<LogProviderProps> = ({ children }) => {
         let addList: PopMessage[] = [];
         for (let i = 0; i < texts.length; i++) {
           const t = texts[i];
-          addList.push({id: randomId(), text: t, timeout: Infinity, type: MessageType.Console});
+          addList.push({id: randomId(), text: t, timeout: Infinity, type: MessageType.Console, createdAt: new Date()});
         }
         setMessageListLogs([...messageListLogs, ...addList]);
 
@@ -226,7 +226,7 @@ export const LogProvider: React.FC<LogProviderProps> = ({ children }) => {
         let addList: PopMessage[] = [];
         for (let i = 0; i < texts.length; i++) {
           const t = texts[i];
-          addList.push({id: randomId(), text: t, timeout: Infinity, type: MessageType.Console});
+          addList.push({id: randomId(), text: t, timeout: Infinity, type: MessageType.Console, createdAt: new Date()});
         }
         setMessageListLogs([...messageListLogs, ...addList]);
 
@@ -250,7 +250,7 @@ export const LogProvider: React.FC<LogProviderProps> = ({ children }) => {
         let addList: PopMessage[] = [];
         for (let i = 0; i < texts.length; i++) {
           const t = texts[i];
-          addList.push({id: randomId(), text: t, timeout: Infinity, type: MessageType.Console});
+          addList.push({id: randomId(), text: t, timeout: Infinity, type: MessageType.Console, createdAt: new Date()});
         }
         setMessageListLogs([...messageListLogs, ...addList]);
         
@@ -273,7 +273,7 @@ export const LogProvider: React.FC<LogProviderProps> = ({ children }) => {
         let addList: PopMessage[] = [];
         for (let i = 0; i < texts.length; i++) {
           const t = texts[i];
-          addList.push({id: randomId(), text: t, timeout: Infinity, type: MessageType.Console});
+          addList.push({id: randomId(), text: t, timeout: Infinity, type: MessageType.Console, createdAt: new Date()});
         }
         setMessageListLogs([...messageListLogs, ...addList]);
 
@@ -297,7 +297,7 @@ export const LogProvider: React.FC<LogProviderProps> = ({ children }) => {
         let addList: PopMessage[] = [];
         for (let i = 0; i < texts.length; i++) {
           const t = texts[i];
-          addList.push({id: randomId(), text: t, timeout: Infinity, type: MessageType.Console});
+          addList.push({id: randomId(), text: t, timeout: Infinity, type: MessageType.Console, createdAt: new Date()});
         }
         setMessageListLogs([...messageListLogs, ...addList]);
 
@@ -322,7 +322,7 @@ export const LogProvider: React.FC<LogProviderProps> = ({ children }) => {
         let addList: PopMessage[] = [];
         for (let i = 0; i < texts.length; i++) {
           const t = texts[i];
-          addList.push({id: randomId(), text: t, timeout: Infinity, type: MessageType.Console});
+          addList.push({id: randomId(), text: t, timeout: Infinity, type: MessageType.Console, createdAt: new Date()});
         }
         setMessageListLogs([...messageListLogs, ...addList]);
 
@@ -333,19 +333,22 @@ export const LogProvider: React.FC<LogProviderProps> = ({ children }) => {
   }
 
   
-  const popMessage = (text: string, type?: MessageType, timeoutInSeconds?: number) => {
+  const popMessage = (text: string, options?: PopMessageOptions) => {
     const words = text.split(/\s+/).length;
     const displayTime = Math.max(5, words * 0.8);
 
-    let timeout = timeoutInSeconds?timeoutInSeconds:displayTime;
+    let timeout = (options && options.TimeoutInSeconds)??displayTime;
     timeout = Math.min(Math.max(timeout, 1), 30);
     timeout *= 1000;
 
+    const date = new Date();
     const msg: PopMessage = {
-      id: randomId(),
+      id: date.toISOString(),
       text,
-      type: type ?? MessageType.Normal,
+      type: (options && options.Type) ?? MessageType.Normal,
       timeout,
+      createdAt: date,
+      options: options,
     };
 
     setMessageListLogs([...messageListLogs, msg]);
@@ -381,7 +384,7 @@ export interface LogContextType {
   messageListLogs: PopMessage[],
   deleteMessageListLogs: () => void,
   messageList: PopMessage[],
-  popMessage: (text: string, type?: MessageType, timeoutInSeconds?: number) => void,
+  popMessage: (text: string, options?: PopMessageOptions) => void,
   removeMessage: (removeId: string) => void,
   deleteMessageList: () => void,
 }

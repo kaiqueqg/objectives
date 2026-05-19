@@ -90,7 +90,7 @@ const LinkView = (props: LinkViewProps) => {
           if (supported) {
             Linking.openURL(link.Link);
           } else {
-            popMessage('Cannot open this URL', MessageType.Error);
+            popMessage('Cannot open this URL', {Type: MessageType.Error});
           }
         })
         .catch((err) => {});

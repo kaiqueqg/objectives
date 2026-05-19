@@ -170,7 +170,7 @@ export const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
         deleteDeletedObjectives();
         deleteDeletedItems();
         
-        popMessage('Sync done.', MessageType.Positive);
+        popMessage('Sync done.', {Type: MessageType.Positive});
         setIsSyncing(false);
         setTimeout(() => {
           writeLastSync((new Date()).toISOString());
@@ -179,7 +179,7 @@ export const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
         return;
       }
   
-      popMessage('Sync failed.', MessageType.Error);
+      popMessage('Sync failed.', {Type: MessageType.Error});
       setIsSyncing(false);
     } catch (err) {
       setIsSyncing(false);
@@ -203,21 +203,21 @@ export const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
     const loginBody = { Email: email.trim(), Password: pass.trim() };
 
     if(!isValidEmail(loginBody.Email)){
-      popMessage("Enter a valid email address!", MessageType.Alert);
+      popMessage("Enter a valid email address!", {Type: MessageType.Alert});
       vibWrong();
       emailRef.current?.focus();
       return;
     }
 
     if(loginBody.Email === ""){
-      if(loginBody.Password !== "") popMessage("Enter an email to log in!", MessageType.Alert);
+      if(loginBody.Password !== "") popMessage("Enter an email to log in!", {Type: MessageType.Alert});
       if(loginBody.Password !== "") vibWrong();
       emailRef.current?.focus();
       return;
     }
 
     if(loginBody.Password === ""){
-      if(loginBody.Email === "") popMessage("Enter a password to log in!", MessageType.Alert);
+      if(loginBody.Email === "") popMessage("Enter a password to log in!", {Type: MessageType.Alert});
       if(loginBody.Email === "") vibWrong();
       passRef.current?.focus();
       return;
@@ -241,7 +241,7 @@ export const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
             setShowRequireTwoFAView(true);
           }
           else{
-            popMessage('There was a problem with requiring 2FA code.', MessageType.Error);
+            popMessage('There was a problem with requiring 2FA code.', {Type: MessageType.Error});
           }
         }
         else{
@@ -253,7 +253,7 @@ export const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
             syncObjectivesList();
           }
           else{
-            popMessage('Login was ok but no data was returned.', MessageType.Error);
+            popMessage('Login was ok but no data was returned.', {Type: MessageType.Error});
           }
         }
       }
@@ -291,7 +291,7 @@ export const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
         disable={!isLogged || !isAuthorized}
         isLoading={isSyncing}
         onPressDisabled={() => {
-          popMessage('Need to login to sync.', MessageType.Alert);
+          popMessage('Need to login to sync.', {Type: MessageType.Alert});
         }}
       />
     )
@@ -331,7 +331,7 @@ export const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
       popMessage("Saved.");
     } catch (err) {
       console.error(err);
-      popMessage("Error saving JSON files.", MessageType.Error);
+      popMessage("Error saving JSON files.", {Type: MessageType.Error});
     }
   }
 

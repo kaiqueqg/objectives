@@ -67,15 +67,15 @@ const AlertsView: React.FC<AlertsViewProps> = (props: AlertsViewProps) => {
       <ScrollView style={s.scrollView}>
         {
           messageListLogs.map((t: PopMessage, i: number) => {
-            return <PopMessageView message={{id: i.toString(), text: t.text, timeout: Infinity, type: t.type}}></PopMessageView>
+            return <PopMessageView message={{id: i.toString(), text: t.text, timeout: Infinity, type: t.type, createdAt: t.createdAt, options:{ShowTimeSince: true}}}></PopMessageView>
           })
         }
       </ScrollView>
       {(user.Role === 'Admin' || ExecutionEnvironment.StoreClient) && 
        <View style={s.buttonsView}>
-        <ButtonView text='Error' type='reset' onPress={() => {popMessage('Error', MessageType.Error)}} size={-10}/>
-        <ButtonView text='Alert' type='backward' onPress={() => {popMessage('Alert', MessageType.Alert)}} size={-10}/>
-        <ButtonView text='Positive' type='positive' onPress={() => {popMessage('All good', MessageType.Positive)}} size={-10}/>
+        <ButtonView text='Error' type='reset' onPress={() => {popMessage('Error', {Type: MessageType.Error})}} size={-10}/>
+        <ButtonView text='Alert' type='backward' onPress={() => {popMessage('Alert', {Type: MessageType.Alert})}} size={-10}/>
+        <ButtonView text='Positive' type='positive' onPress={() => {popMessage('All good', {Type: MessageType.Positive})}} size={-10}/>
         <ButtonView text='Normal' type='neutral' onPress={() => {popMessage('Normal')}} size={-10}/>
         <ButtonView text='Console' type='foward' onPress={() => {log.w('Console')}} size={-10}/>
         <PressImage source={Images.Trash} onPress={deleteMessageListLogs}/>

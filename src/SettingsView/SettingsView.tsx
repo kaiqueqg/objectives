@@ -1,6 +1,6 @@
 import { View, Text, Vibration, StyleSheet, ScrollView } from 'react-native';
 import PressText from '../PressText/PressText';
-import { HandPosition, ObjBottomIcons, Pattern, Themes, UserPrefs } from '../Types';
+import { HandPosition, MessageType, ObjBottomIcons, Pattern, Themes, UserPrefs } from '../Types';
 import { useLogContext } from '../Contexts/LogContext';
 import { useUserContext } from '../Contexts/UserContext';
 import { useStorageContext } from '../Contexts/StorageContext';
@@ -13,12 +13,8 @@ import { useState } from 'react';
 interface SettingsViewProps {
 }
 export const SettingsView: React.FC<SettingsViewProps> = (props: SettingsViewProps) => {
-  const { theme: t, fontTheme: f, userPrefs, writeUserPrefs } = useUserContext();
-//   const [contentHeight, setContentHeight] = useState<number>(0);
-//   const [layoutHeight, setLayoutHeight] = useState<number>(0);
-//   const [offsetY, setOffsetY] = useState<number>(0);
-
-// const hasMoreContent = offsetY + layoutHeight < contentHeight;
+  const { theme: t, fontTheme: f, userPrefs, writeUserPrefs, requestBiometricAuth } = useUserContext();
+  const { popMessage } = useLogContext();
   
   const onAddIconToDisplay = (icon: string) => {
     if (userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
@@ -53,18 +49,34 @@ export const SettingsView: React.FC<SettingsViewProps> = (props: SettingsViewPro
     return iconPos === 0? '':iconPos.toString()+'º';
   }
 
-  const inChangeLockOpen = () => {
-    if(userPrefs.shouldLockOnOpen)
-      onChangePrefs({...userPrefs, shouldLockOnOpen: false, shouldLockOnReopen: false});
-    else
+  const inChangeLockOpen = async () => {
+    if(userPrefs.shouldLockOnOpen){
+      const a = await requestBiometricAuth();
+      if(a){
+        onChangePrefs({...userPrefs, shouldLockOnOpen: false, shouldLockOnReopen: false});
+      }
+      else{
+        popMessage('Unauthorized', {Type: MessageType.Error});
+      }
+    }
+    else{
       onChangePrefs({...userPrefs, shouldLockOnOpen: true});
+    }
   }
 
-  const onChangeLockReopen = () => {
-    if(userPrefs.shouldLockOnReopen)
-      onChangePrefs({...userPrefs, shouldLockOnReopen: false})
-    else
+  const onChangeLockReopen = async () => {
+    if(userPrefs.shouldLockOnReopen){
+      const a = await requestBiometricAuth();
+      if(a){
+        onChangePrefs({...userPrefs, shouldLockOnReopen: false})
+      }
+      else{
+        popMessage('Unauthorized', {Type: MessageType.Error});
+      }
+    }
+    else{
       onChangePrefs({...userPrefs, shouldLockOnReopen: true, shouldLockOnOpen: true})
+    }
   }
   
   const getIconImage = (icon: ObjBottomIcons, source:any) => {
@@ -271,6 +283,10 @@ export const SettingsView: React.FC<SettingsViewProps> = (props: SettingsViewPro
       ...gs.baseSmallImage,
       tintColor: t.icontint,
     },
+    imageSmallFade:{
+      ...gs.baseSmallImage,
+      tintColor: t.icontintfade,
+    },
     objectiveIconContainer:{
       flexDirection: 'row',
       flexWrap: "wrap",
@@ -309,7 +325,7 @@ export const SettingsView: React.FC<SettingsViewProps> = (props: SettingsViewPro
             style={userPrefs.shouldLockOnOpen? s.userPrefsContainerOn:s.userPrefsContainerOff}
             textStyle={userPrefs.shouldLockOnOpen? s.userPrefsTextOn:s.userPrefsTextOff}
             onPress={inChangeLockOpen}
-            imageStyle={s.image}
+            imageStyle={userPrefs.shouldLockOnOpen?s.imageSmall:s.imageSmallFade}
             imageSource={Images.Fingerprint}
             text={"Should lock app on first open? - " + (userPrefs.shouldLockOnOpen? 'Yes.':'No.')}>
           </PressText>
@@ -317,7 +333,7 @@ export const SettingsView: React.FC<SettingsViewProps> = (props: SettingsViewPro
             style={userPrefs.shouldLockOnReopen? s.userPrefsContainerOn:s.userPrefsContainerOff}
             textStyle={userPrefs.shouldLockOnReopen? s.userPrefsTextOn:s.userPrefsTextOff}
             onPress={onChangeLockReopen}
-            imageStyle={s.image}
+            imageStyle={userPrefs.shouldLockOnReopen?s.imageSmall:s.imageSmallFade}
             imageSource={Images.Fingerprint}
             text={"Should lock app every times it's open? - " + (userPrefs.shouldLockOnReopen? 'Yes.':'No.')}>
           </PressText>
@@ -325,7 +341,7 @@ export const SettingsView: React.FC<SettingsViewProps> = (props: SettingsViewPro
             style={userPrefs.vibrate? s.userPrefsContainerOn:s.userPrefsContainerOff}
             textStyle={userPrefs.vibrate? s.userPrefsTextOn:s.userPrefsTextOff}
             onPress={() => {onChangePrefs({...userPrefs, vibrate: !userPrefs.vibrate})}}
-            imageStyle={s.image}
+            imageStyle={userPrefs.vibrate?s.imageSmall:s.imageSmallFade}
             imageSource={Images.Vibrate}
             text={"Should button vibrate? - " + (userPrefs.vibrate? 'Yes.':'No.')}>
           </PressText>
@@ -333,7 +349,7 @@ export const SettingsView: React.FC<SettingsViewProps> = (props: SettingsViewPro
             style={userPrefs.autoSync? s.userPrefsContainerOn:s.userPrefsContainerOff}
             textStyle={userPrefs.autoSync? s.userPrefsTextOn:s.userPrefsTextOff}
             onPress={() => {onChangePrefs({...userPrefs, autoSync: !userPrefs.autoSync})}}
-            imageStyle={s.imageSmall}
+            imageStyle={userPrefs.autoSync?s.imageSmall:s.imageSmallFade}
             imageSource={Images.Sync}
             text={"Should automatically sync? - " + (userPrefs.autoSync? 'Yes.':'No.')}>
           </PressText>
@@ -341,7 +357,7 @@ export const SettingsView: React.FC<SettingsViewProps> = (props: SettingsViewPro
             style={userPrefs.openLastObjectiveOnStart? s.userPrefsContainerOn:s.userPrefsContainerOff}
             textStyle={userPrefs.openLastObjectiveOnStart? s.userPrefsTextOn:s.userPrefsTextOff}
             onPress={() => {onChangePrefs({...userPrefs, openLastObjectiveOnStart: !userPrefs.openLastObjectiveOnStart})}}
-            imageStyle={s.imageSmall}
+            imageStyle={userPrefs.openLastObjectiveOnStart?s.imageSmall:s.imageSmallFade}
             imageSource={Images.File}
             text={"On start, should open last objective? - " + (userPrefs.openLastObjectiveOnStart? 'Yes.':'No.')}>
           </PressText>

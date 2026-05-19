@@ -8,6 +8,7 @@ import React, { JSX, useEffect, useRef, useState } from "react";
 import { useLogContext } from "../Contexts/LogContext";
 import { useStorageContext } from "../Contexts/StorageContext";
 import { Images } from "../Images";
+import { compareTextForSearch } from "../Helper";
 
 export interface ObjsListViewProps {
 }
@@ -39,8 +40,14 @@ const ObjsListView = (props: ObjsListViewProps) => {
 
   const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
   const [objsSearchToShow, setObjsSearchToShow] = useState<string[]>([]);
+
+  //Search
   const [searchText, setSearchText] = useState<string>('');
   const [searchNoItemFound, setSearchNoItemFound] = useState<boolean>(false);
+  const [searchMatchCase, setSearchMatchCase] = useState<boolean>(false);
+  const [searchMatchAccent, setSearchMatchAccent] = useState<boolean>(false);
+  const [searchdMatchWholeWord, setSearchdMatchWholeWorld] = useState<boolean>(false);
+  const searchOptions = {searchdMatchWholeWord: searchdMatchWholeWord, searchMatchAccent: searchMatchAccent, searchMatchCase: searchMatchCase};
 
   const [isSortMenuOpen, setIsSortMenuOpen] = useState<boolean>(false);
 
@@ -51,7 +58,7 @@ const ObjsListView = (props: ObjsListViewProps) => {
       }
       else{
         if(userPrefs.vibrate) Vibration.vibrate(Pattern.Wrong);
-        popMessage('No objective selected.', MessageType.Alert);
+        popMessage('No objective selected.', {Type: MessageType.Alert});
       }
       return true;
     });
@@ -202,7 +209,7 @@ const ObjsListView = (props: ObjsListViewProps) => {
     }
     else{
       if(userPrefs.vibrate) Vibration.vibrate(Pattern.Wrong);
-      popMessage(`You can't unselect "Pin" tag.`, MessageType.Error, 3);
+      popMessage(`You can't unselect "Pin" tag.`, {Type: MessageType.Error, TimeoutInSeconds: 3});
     }
   }
 
@@ -380,16 +387,12 @@ const ObjsListView = (props: ObjsListViewProps) => {
   const doSearchText = (search: string) => {
     let newList: string[] = [];
     objectives.forEach((o: Objective)=>{
-      if(searchTextIgnoreCase(o.Title, search)) newList.push(o.ObjectiveId);
+      if(compareTextForSearch(o.Title, search, searchOptions)) newList.push(o.ObjectiveId);
     });
 
     setSearchNoItemFound(newList.length === 0);
 
     setObjsSearchToShow(newList);
-  }
-
-  const searchTextIgnoreCase = (text: string, search: string):boolean => {
-    return text.trim().toLowerCase().includes(search.trim().toLowerCase());
   }
 
   const getSearchBarView = () => {
@@ -403,13 +406,18 @@ const ObjsListView = (props: ObjsListViewProps) => {
             defaultValue={searchText}
             style={s.inputStyle}
             placeholderTextColor={t.textcolorfade}
-            placeholder="Title that includes..."
+            placeholder="search..."
             onChangeText={onSearchTextChange}
             submitBehavior="submit"
             onSubmitEditing={()=>{popMessage('on')}}
             autoFocus>
           </TextInput>
           <PressImage onPress={onEraseSearch} source={Images.Eraser}/>
+        </View>
+        <View style={s.searchBottomOptionsRow}>
+          <PressImage onPress={()=>{setSearchdMatchWholeWorld(!searchdMatchWholeWord); doSearchText(searchText.trim());}} source={Images.MatchWholeWord} fade={!searchdMatchWholeWord}/>
+          <PressImage onPress={()=>{setSearchMatchAccent(!searchMatchAccent); doSearchText(searchText.trim());}} source={Images.MatchIgnoreAccent} fade={!searchMatchAccent}/>
+          <PressImage onPress={()=>{setSearchMatchCase(!searchMatchCase); doSearchText(searchText.trim());}} source={Images.MatchCase} fade={!searchMatchCase}/>
         </View>
       </View>
     )
@@ -500,9 +508,6 @@ const ObjsListView = (props: ObjsListViewProps) => {
   const s = StyleSheet.create({
     container: {
       flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      width: '100%',
     },
     containerList: {
       flex: 1,
@@ -642,15 +647,16 @@ const ObjsListView = (props: ObjsListViewProps) => {
       borderStyle: 'solid',
     },
     searchTitle:{
-      verticalAlign: 'middle',
-      textAlign: 'center',
-      width: '100%',
       color: t.textcolor,
       fontWeight: 'bold',
       fontSize: 25,
     },
     searchBottomRow:{
       flexDirection: "row",
+    },
+    searchBottomOptionsRow:{
+      flexDirection: "row",
+      width: '100%',
     },
     inputStyle: {
       flex: 1,

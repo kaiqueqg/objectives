@@ -74,7 +74,7 @@ export const RequestProvider: React.FC<RequestProviderProps> = ({ children }) =>
       return null;
     } 
     catch (error){
-      popMessage('Something really wrong with server route.', MessageType.Alert);
+      popMessage('Something really wrong with server route.', {Type: MessageType.Alert});
       // if(fError !== undefined){
         // fError();
       // }
@@ -116,10 +116,10 @@ export const RequestProvider: React.FC<RequestProviderProps> = ({ children }) =>
               log.r('Response: ', resp);
             }
             else if(respData.message){
-              popMessage(respData.message, MessageType.Error);
+              popMessage(respData.message, {Type: MessageType.Error});
             }
             else{
-              popMessage('No info error.', MessageType.Error);
+              popMessage('No info error.', {Type: MessageType.Error});
             }
 
             return null;
@@ -266,17 +266,17 @@ export const RequestProvider: React.FC<RequestProviderProps> = ({ children }) =>
           return respData.data;
         }else{
           if(resp.status === 401){
-            popMessage('Unauthorized, you need to refresh token...', MessageType.Error);
+            popMessage('Unauthorized, you need to refresh token...', {Type: MessageType.Error});
             if(fError) fError(401);
           }
           else if(resp.status === 500){
             log.r('Response: ', resp);
           }
           else if(respData.message){
-            popMessage(respData.message, MessageType.Error);
+            popMessage(respData.message, {Type: MessageType.Error});
           }
           else{
-            popMessage('No info error.', MessageType.Error, 5);
+            popMessage('No info error.', {Type: MessageType.Error, TimeoutInSeconds: 5});
           }
         }
       } catch (err) {

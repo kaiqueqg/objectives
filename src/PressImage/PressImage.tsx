@@ -117,7 +117,7 @@ const PressImage = (props: PressImageProps) => {
     }
     else{
       if(userPrefs.vibrate) Vibration.vibrate(Pattern.Wrong);
-      if(props.disableMsg) popMessage(props.disableMsg, MessageType.Alert);
+      if(props.disableMsg) popMessage(props.disableMsg, {Type: MessageType.Alert});
       if(props.onPressDisabled) props.onPressDisabled();
     }
   }
