@@ -18,7 +18,7 @@ export interface ButtonProps extends ViewProps {
   isLoading?: boolean,
   isSelected?: boolean,
 
-  type?: 'foward'|'backward'|'neutral'|'reset'|'positive',
+  type?: 'foward'|'backward'|'neutral'|'reset'|'positive'|'question',
   size?: number,
 
   vibrate?: boolean,

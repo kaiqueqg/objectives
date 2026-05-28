@@ -103,7 +103,7 @@ export const cp = {
   itemPinkDark: 'rgba(234, 109, 146, 1)',
 
   objNoThemeLight: 'rgb(255, 255, 255)',
-  itemNoThemeLight: 'rgba(204, 204, 204, 1)',
+  itemNoThemeLight: 'rgb(227, 227, 227)',
   itemNoThemeLightDark: 'rgba(170, 170, 170, 1)',
   
   objBlueLight: 'rgb(214, 228, 253)',

@@ -358,7 +358,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
 
     setSelectingItems([]);
 
-    popMessage('Items selected to move.');
+    popMessage('Move to...', {Type: MessageType.Alert});
   }
 
   const copyItems = () => {
@@ -441,6 +441,8 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
     
     await loadItems();
     resetMultiSelectStates();
+
+    popMessage('Done.', {Type: MessageType.Positive});
   }
 
   const multiSelectDeleteItems = async () => {
@@ -1473,7 +1475,7 @@ const ObjectiveView = (props: ObjectiveViewProps) => {
         <PressImage cT={o} onPress={() => {eraseItems()}} source={Images.Eraser} disable={multiSelectAction===null} confirm/>
         {!isSelectingPastePos && <PressImage cT={o} onPress={() => {moveItems()}} source={Images.Next} disable={selectingItems.length===0} />}
         {!isSelectingPastePos && <PressImage cT={o} onPress={() => {copyItems()}} source={Images.Copy} disable={selectingItems.length===0} />}
-        <PressImage cT={o} onPress={() => {setIsSelectingPastePos(true); popMessage('Select place to move after.')}} source={Images.Insert} disable={multiSelectAction===null} />
+        <PressImage cT={o} onPress={() => {setIsSelectingPastePos(true); popMessage('Move where?')}} source={Images.Insert} disable={multiSelectAction===null} />
         {!isSelectingPastePos && <PressImage cT={o} onPress={multiSelectDeleteItems} source={Images.Trash} disable={selectingItems.length===0} color={o.trashicontint} confirm/>}
       </View>
     )

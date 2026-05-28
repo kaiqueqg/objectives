@@ -55,6 +55,9 @@ const PopMessageView = (props: PopMessageViewProps) => {
       case MessageType.Console:
         styleToAdd = s.messageConsole;
         break;
+      case MessageType.Question:
+        styleToAdd = s.messageQuestion;
+        break;
     }
 
     return(
@@ -99,6 +102,9 @@ const PopMessageView = (props: PopMessageViewProps) => {
     },
     messageConsole:{
       backgroundColor: cp.greylight,
+    },
+    messageQuestion:{
+      backgroundColor: cp.bluelight,
     },
     messageText:{
       textAlign: "center",

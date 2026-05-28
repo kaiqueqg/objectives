@@ -26,7 +26,7 @@ const AlertsView: React.FC<AlertsViewProps> = (props: AlertsViewProps) => {
     },
     buttonsView: {
       width: '100%',
-      justifyContent: 'flex-start',
+      justifyContent: 'space-evenly',
       alignItems: 'center',
       verticalAlign: 'middle',
       textAlign: 'center',
@@ -67,7 +67,7 @@ const AlertsView: React.FC<AlertsViewProps> = (props: AlertsViewProps) => {
       <ScrollView style={s.scrollView}>
         {
           messageListLogs.map((t: PopMessage, i: number) => {
-            return <PopMessageView message={{id: i.toString(), text: t.text, timeout: Infinity, type: t.type, createdAt: t.createdAt, options:{ShowTimeSince: true}}}></PopMessageView>
+            return <PopMessageView key={i.toString()} message={{id: i.toString(), text: t.text, timeout: Infinity, type: t.type, createdAt: t.createdAt, options:{ShowTimeSince: true}}}></PopMessageView>
           })
         }
       </ScrollView>
@@ -75,9 +75,10 @@ const AlertsView: React.FC<AlertsViewProps> = (props: AlertsViewProps) => {
        <View style={s.buttonsView}>
         <ButtonView text='Error' type='reset' onPress={() => {popMessage('Error', {Type: MessageType.Error})}} size={-10}/>
         <ButtonView text='Alert' type='backward' onPress={() => {popMessage('Alert', {Type: MessageType.Alert})}} size={-10}/>
-        <ButtonView text='Positive' type='positive' onPress={() => {popMessage('All good', {Type: MessageType.Positive})}} size={-10}/>
+        <ButtonView text='Positive' type='positive' onPress={() => {popMessage('Positive', {Type: MessageType.Positive})}} size={-10}/>
         <ButtonView text='Normal' type='neutral' onPress={() => {popMessage('Normal')}} size={-10}/>
-        <ButtonView text='Console' type='foward' onPress={() => {log.w('Console')}} size={-10}/>
+        <ButtonView text='Question' type='foward' onPress={() => {popMessage('Question', {Type: MessageType.Question})}} size={-10}/>
+        <ButtonView text='Console' type='neutral' onPress={() => {log.w('Console')}} size={-10}/>
         <PressImage source={Images.Trash} onPress={deleteMessageListLogs}/>
       </View>}
     </View>
