@@ -1,6 +1,6 @@
 // UserContext.tsx
 import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
-import { Item, Objective, MessageType, User, UserPrefs, Views, PopMessage, StoredImage, DefaultUser, ObjBottomIcons, MultiSelectAction, Step, DefaultUserPrefs, Themes } from '../Types';
+import { Item, Objective, User, UserPrefs, Views, StoredImage, DefaultUser, MultiSelectAction, DefaultUserPrefs, Themes } from '../Types';
 import { AppPalette, dark, globalStyle as gs, light } from '../Colors';
 import { FontPalette, fontDark, fontPaper, fontWhite } from '../../fonts/Font';
 import { useStorageContext } from './StorageContext';
@@ -416,11 +416,11 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         }
       }
 
-      //!Write new objectives
+      //TODO Write new objectives
       await storage.writeObjectives(newObjs);
       setObjectives(newObjs);
 
-      //!Adding to deteled
+      //Adding to deteled
       let newDeletedObj = [...deletedObjectives, objective];
       setDeletedObjectives(newDeletedObj);
       await storage.writeDeletedObjectives(newDeletedObj);

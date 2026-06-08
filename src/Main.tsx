@@ -70,11 +70,11 @@ const Main = (props: MainProps) => {
 
       //Things to be tested in case of app was open from zero
       if(appJustLaunched){
+        await onAutoSync();
         await onFirstOpenLock();
 
         const v = await storage.readCurrentObjectiveId();
-        if(userPrefs.openLastObjectiveOnStart && v){
-
+        if(currentUserPrefs.openLastObjectiveOnStart && v){
           await writeCurrentObjectiveId(v);
           await writeCurrentView(Views.IndividualView);
         }
@@ -103,27 +103,7 @@ const Main = (props: MainProps) => {
     
     run();
 
-    //test
-    // const subscriptiona = Linking.addEventListener('url', (event) => {
-    //   const { queryParams } = Linking.parse(event.url);
-
-    //   if (queryParams?.skipBio === 'true') {
-    //     setShowMainView(true);
-    //   }
-    // });
-
-    // // Cold start
-    // Linking.getInitialURL().then((url) => {
-    //   if (url) {
-    //     const { queryParams } = Linking.parse(url);
-    //     if (queryParams?.skipBio === 'true') {
-    //       setShowMainView(true);
-    //     }
-    //   }
-    // });
-
     return () => {
-      // if (subscriptiona) subscriptiona.remove();
       if (subscription) subscription.remove();
     };
   }, []);
@@ -166,6 +146,10 @@ const Main = (props: MainProps) => {
     if(await requestBiometricAuth()){
       setIsLocked(false);
     }
+  }
+
+  const onAutoSync = async () => {
+    
   }
 
   const onFirstOpenLock = async () => {

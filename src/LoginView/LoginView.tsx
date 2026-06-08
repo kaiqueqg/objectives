@@ -41,7 +41,7 @@ export const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
     theme: t,
     fontTheme: f,
     user, userPrefs, writeUser, writeJwtToken, deleteJwtToken, writeTwoFAToken, isLogged, isAuthorized, writeObjectives, writeItems, writeLastSync, writeUserPrefs,
-    availableTags, selectedTags, writeAvailableTags, writeSelectedTags,
+    availableTags, selectedTags, writeAvailableTags, writeSelectedTags,    
     clearAllData, vibOk, vibWrong, lastSync, objectives, readItems, deletedObjectives, deletedItems, deleteDeletedObjectives, deleteDeletedItems,
   } = useUserContext();
 
@@ -61,6 +61,9 @@ export const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
   const passRef = useRef<TextInput>(null);
 
   useEffect(() => {
+    if(userPrefs?.autoSync){
+      syncObjectivesList();
+    }
   }, [])
 
   const onChangeEmail = (value: string) => {
@@ -71,23 +74,6 @@ export const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
   const onChangePassword = (value: string) => {
     setIsPasswordWrong(false);
     setInputPass(value);
-  }
-
-  const getLogoutView = () => {
-    if(userPrefs.handPosition){
-      return(
-        <View style={s.logoutView}>
-          <ButtonView text='Logout' onPress={logout} type='reset'/>
-        </View>
-      )
-    }
-    else{
-      return(
-        <View style={s.logoutView}>
-          <ButtonView text='Logout' onPress={logout} type='reset'/>
-        </View>
-      )
-    }
   }
 
   const syncTags = (objectives: Objective[]) => {
@@ -110,33 +96,36 @@ export const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
     writeSelectedTags([...selectedTagsStillOnAvailable, ...downloadTagsNotInAvailable]);
   }
 
-  const syncObjectivesList = async () => {
+  const syncObjectivesList = async (handleRequestError?: () => void) => {
     try {
       if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
 
       let syncObjectives: Objective[] = [];
       let syncItems: Item[] = [];
-      if(lastSync){ //^ If there is a last sync date, sync only the new objectives and items
+
+      // If there is a last sync date, sync only the new objectives and items
+      if(lastSync){ 
         for(let i = 0; i < objectives.length; i++){
+          // gathering objectives to sync
           const current = objectives[i];
           if(current.LastModified > lastSync){
             syncObjectives.push(current);
           }
           else{
+            log.r(current.LastModified)
           }
+
+          // Gathering items to sync
           const objItems = await readItems(objectives[i].ObjectiveId);
-    
           for(let j = 0; j < objItems.length; j++) {
             const currentItem = objItems[j];
             if(currentItem.LastModified > lastSync){
               syncItems.push(currentItem);
             }
-            else{
-            }
           }
         }
       }
-      else{//^ If there is no last sync date, sync all objectives and items
+      else{// If there is no last sync date, sync all objectives and items
         syncObjectives = [...objectives];
         for(let i = 0; i < syncObjectives.length; i++){
           const objItems = await readItems(syncObjectives[i].ObjectiveId);
@@ -283,39 +272,6 @@ export const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
     setIsBackingUpData(false);
   }
 
-  const getSyncImage = () => {
-    return(
-      <PressImage
-        onPress={syncObjectivesList}
-        source={Images.Sync}
-        disable={!isLogged || !isAuthorized}
-        isLoading={isSyncing}
-        onPressDisabled={() => {
-          popMessage('Need to login to sync.', {Type: MessageType.Alert});
-        }}
-      />
-    )
-  }
-
-  const getFullView = () => {
-    if(showRequireTwoFAView){
-      return <TwoFAView login={testBeforeLogin} back={() => {setShowRequireTwoFAView(false); if(isLogged && isAuthorized) syncObjectivesList();}}/>
-    }
-    else{
-      if(isLogged){
-        if(isAuthorized){
-          return getLoggedView();
-        }
-        else{
-          return <ReloggingView email={user.Email} login={testBeforeLogin} logout={logout}/>
-        }
-      }
-      else{
-        return getLoggingView();
-      }
-    }
-  }
-
   const saveToJSON = async (): Promise<void> => {
     try {
       const perm = await saf.requestDirectoryPermissionsAsync();
@@ -348,8 +304,7 @@ export const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
     await saf.writeAsStringAsync(fileUri, content);
   }
 
-  // view
-
+  //- Views
   const getLoggedView = () => {
     return(
         <View style={s.loggerContainer}>
@@ -408,6 +363,56 @@ export const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
       )
   }
 
+  const getSyncImageView = () => {
+    return(
+      <PressImage
+        onPress={syncObjectivesList}
+        source={Images.Sync}
+        disable={!isLogged || !isAuthorized}
+        isLoading={isSyncing}
+        onPressDisabled={() => {
+          popMessage('Need to login to sync.', {Type: MessageType.Alert});
+        }}
+      />
+    )
+  }
+
+  const getFullView = () => {
+    if(showRequireTwoFAView){
+      return <TwoFAView login={testBeforeLogin} back={() => {setShowRequireTwoFAView(false); if(isLogged && isAuthorized) syncObjectivesList();}}/>
+    }
+    else{
+      if(isLogged){
+        if(isAuthorized){
+          return getLoggedView();
+        }
+        else{
+          return <ReloggingView email={user.Email} login={testBeforeLogin} logout={logout}/>
+        }
+      }
+      else{
+        return getLoggingView();
+      }
+    }
+  }
+
+  const getLogoutView = () => {
+    if(userPrefs.handPosition){
+      return(
+        <View style={s.logoutView}>
+          <ButtonView text='Logout' onPress={logout} type='reset'/>
+        </View>
+      )
+    }
+    else{
+      return(
+        <View style={s.logoutView}>
+          <ButtonView text='Logout' onPress={logout} type='reset'/>
+        </View>
+      )
+    }
+  }
+
   const getPasswordInputView = () => {
     return(
       <View style={s.passwordContainer}>
@@ -441,6 +446,7 @@ export const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
       </View>
     )
   }
+
   const s = StyleSheet.create({
     header:{
       color: t.textcolor,
@@ -579,7 +585,7 @@ export const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
   })
 
   if(viewType === "Image")
-    return(getSyncImage())
+    return(getSyncImageView())
   else if(viewType === 'Full')
     return(getFullView())
   else

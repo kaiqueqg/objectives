@@ -1,6 +1,6 @@
 import { View, Text, Vibration, StyleSheet, ScrollView } from 'react-native';
 import PressText from '../PressText/PressText';
-import { HandPosition, MessageType, ObjBottomIcons, Pattern, Themes, UserPrefs } from '../Types';
+import { DefaultUserPrefs, HandPosition, MessageType, ObjBottomIcons, Pattern, Themes, UserPrefs } from '../Types';
 import { useLogContext } from '../Contexts/LogContext';
 import { useUserContext } from '../Contexts/UserContext';
 import { useStorageContext } from '../Contexts/StorageContext';
@@ -13,8 +13,9 @@ import { useState } from 'react';
 interface SettingsViewProps {
 }
 export const SettingsView: React.FC<SettingsViewProps> = (props: SettingsViewProps) => {
-  const { theme: t, fontTheme: f, userPrefs, writeUserPrefs, requestBiometricAuth } = useUserContext();
+  const { theme: t, fontTheme: f, userPrefs, writeUserPrefs, requestBiometricAuth, isLogged } = useUserContext();
   const { popMessage } = useLogContext();
+  const { log } = useLogContext();
   
   const onAddIconToDisplay = (icon: string) => {
     if (userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
@@ -39,6 +40,7 @@ export const SettingsView: React.FC<SettingsViewProps> = (props: SettingsViewPro
 
   const onChangePrefs = (newPrefs: UserPrefs) => {
     if(newPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
+
     writeUserPrefs(newPrefs);
   }
 
@@ -188,6 +190,10 @@ export const SettingsView: React.FC<SettingsViewProps> = (props: SettingsViewPro
     onChangePrefs({...userPrefs, handPosition: newHandPos});
   }
 
+  const onChangeOpenLastObjectiveOnStart = () => {
+    onChangePrefs({...userPrefs, openLastObjectiveOnStart: !userPrefs.openLastObjectiveOnStart});
+  }
+
   const s = StyleSheet.create({
     settingsContainer:{
       flex: 1,
@@ -200,11 +206,6 @@ export const SettingsView: React.FC<SettingsViewProps> = (props: SettingsViewPro
       paddingBottom: 25,
       paddingTop: 10,
       paddingHorizontal: 10,
-
-      // borderColor: hasMoreContent ?'red':'blue',
-      // borderWidth: 1,
-      // borderRadius: 5,
-      // borderStyle: 'solid',
     },
     header:{
       color: t.textcolor,
@@ -303,7 +304,7 @@ export const SettingsView: React.FC<SettingsViewProps> = (props: SettingsViewPro
       // onScroll={(e) => setOffsetY(e.nativeEvent.contentOffset.y)}
       // scrollEventThrottle={16}
        persistentScrollbar={true}>
-        <Text style={s.header}>SETTINGS:</Text>
+        <Text style={s.header} onLongPress={()=>{writeUserPrefs(DefaultUserPrefs); popMessage('Returned to default')}}>SETTINGS:</Text>
           <Text style={s.subHeader}>General</Text>
           <PressText
             style={s.userPrefsContainerOn}
@@ -345,18 +346,19 @@ export const SettingsView: React.FC<SettingsViewProps> = (props: SettingsViewPro
             imageSource={Images.Vibrate}
             text={"Should button vibrate? - " + (userPrefs.vibrate? 'Yes.':'No.')}>
           </PressText>
-          <PressText 
+          {isLogged && 
+            <PressText 
             style={userPrefs.autoSync? s.userPrefsContainerOn:s.userPrefsContainerOff}
             textStyle={userPrefs.autoSync? s.userPrefsTextOn:s.userPrefsTextOff}
             onPress={() => {onChangePrefs({...userPrefs, autoSync: !userPrefs.autoSync})}}
             imageStyle={userPrefs.autoSync?s.imageSmall:s.imageSmallFade}
             imageSource={Images.Sync}
             text={"Should automatically sync? - " + (userPrefs.autoSync? 'Yes.':'No.')}>
-          </PressText>
+          </PressText>}
           <PressText 
             style={userPrefs.openLastObjectiveOnStart? s.userPrefsContainerOn:s.userPrefsContainerOff}
             textStyle={userPrefs.openLastObjectiveOnStart? s.userPrefsTextOn:s.userPrefsTextOff}
-            onPress={() => {onChangePrefs({...userPrefs, openLastObjectiveOnStart: !userPrefs.openLastObjectiveOnStart})}}
+            onPress={onChangeOpenLastObjectiveOnStart}
             imageStyle={userPrefs.openLastObjectiveOnStart?s.imageSmall:s.imageSmallFade}
             imageSource={Images.File}
             text={"On start, should open last objective? - " + (userPrefs.openLastObjectiveOnStart? 'Yes.':'No.')}>

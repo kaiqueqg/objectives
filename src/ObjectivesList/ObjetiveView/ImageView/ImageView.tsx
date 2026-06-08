@@ -227,7 +227,6 @@ const ImageView = (props: ImageViewProps) => {
   }
 
   const getTitle = (): string => {
-    //image.Name? 'has name': log.b('not image name');
     return image.Title;
   }
 

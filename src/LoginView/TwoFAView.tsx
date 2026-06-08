@@ -6,6 +6,7 @@ import { useUserContext } from '../Contexts/UserContext';
 import { MessageType, TwoFactorAuthRequest } from '../Types';
 import { useRequestContext } from '../Contexts/RequestContext';
 import { useLogContext } from '../Contexts/LogContext';
+import * as Clipboard from 'expo-clipboard';
 
 interface TwoFAViewProps{
   login: (email: string, pass: string) => Promise<void>,
@@ -24,10 +25,17 @@ const TwoFAView: React.FC<TwoFAViewProps> = (props: TwoFAViewProps) => {
     setVerificationCode(value);
   }
 
-  const sendVerificationTwoFA = async () => {
+  const pasteAndSend = async () => {
+    const text = await Clipboard.getStringAsync();
+    await sendVerificationTwoFA(text);
+  }
+
+  const sendVerificationTwoFA = async (text?: string) => {
     setIsRequiringTwoFA(true);
 
-    if(!(/^[0-9]{6}$/.test(verificationCode))){
+    const sendText = text?? verificationCode;
+
+    if(!(/^[0-9]{6}$/.test(sendText))){
       setVerificationCode('');
       popMessage('Bad verification code. Must be 6 numbers.', {Type: MessageType.Alert});
       props.back();
@@ -35,7 +43,7 @@ const TwoFAView: React.FC<TwoFAViewProps> = (props: TwoFAViewProps) => {
     }
     
     if(twoFAToken) {
-      const sendRequest: TwoFactorAuthRequest = { TwoFACode: verificationCode, TwoFATempToken: twoFAToken };
+      const sendRequest: TwoFactorAuthRequest = { TwoFACode: sendText, TwoFATempToken: twoFAToken };
       const data = await identityApi.validateTwoFA(sendRequest);
 
       if(data && data.User && data.Token){
@@ -101,11 +109,12 @@ const TwoFAView: React.FC<TwoFAViewProps> = (props: TwoFAViewProps) => {
       <Text style={s.header}>{'2FA Verification code'}</Text>
       <Loading isLoading={isRequiringTwoFA}>
         <View style={s.emailContainer}>
-          <TextInput autoFocus keyboardType="numeric" autoCapitalize="none" placeholder="6 digit number" placeholderTextColor={t.textcolorfade} style={s.emailInput} onChangeText={onChangeVerificationCode} onSubmitEditing={sendVerificationTwoFA}/>
+          <TextInput autoFocus keyboardType="numeric" autoCapitalize="none" placeholder="6 digit number" placeholderTextColor={t.textcolorfade} style={s.emailInput} onChangeText={onChangeVerificationCode} onSubmitEditing={()=>{sendVerificationTwoFA()}}/>
         </View>
         <View style={s.logoutView}>
           {userPrefs.handPosition && <ButtonView text='Cancel' onPress={props.back} type="neutral"/>}
           <ButtonView text='Send' onPress={sendVerificationTwoFA} type="foward"/>
+          <ButtonView text='Paste and send' onPress={pasteAndSend} type="foward"/>
           {!userPrefs.handPosition && <ButtonView text='Cancel' onPress={props.back} type="neutral"/>}
         </View>
       </Loading>

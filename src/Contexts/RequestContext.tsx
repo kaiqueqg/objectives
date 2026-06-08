@@ -4,7 +4,7 @@ import { Item, LogLevel, LoginResponse, Objective, ObjectiveList, Step, User, Us
 import { useLogContext } from './LogContext';
 import { useStorageContext } from './StorageContext';
 import * as FileSystem from 'expo-file-system';
-import Constants from 'expo-constants';
+import Constants, { ExecutionEnvironment } from 'expo-constants';
 
 interface RequestProviderProps {
   children: ReactNode;
@@ -43,6 +43,17 @@ export const RequestProvider: React.FC<RequestProviderProps> = ({ children }) =>
   const { log, popMessage } = useLogContext();
   const { storage } = useStorageContext();
   
+  const isDev = Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
+
+  const getObjectivesListURL = () => {
+    if(isDev){
+      return 'https://edq84bnlq8.execute-api.eu-west-3.amazonaws.com/dev';
+    }
+    else{
+      return 'https://hxg8hu7mfa.execute-api.eu-west-3.amazonaws.com/prod';
+    }
+  }
+
   const request = async (url: string, endpoint: string, method: string, body?: string): Promise<any> => {
     //^Headers
     const headers: {[key: string]: string} = {};
@@ -259,7 +270,7 @@ export const RequestProvider: React.FC<RequestProviderProps> = ({ children }) =>
     //! Responsable to parse and react to equal among all, know, request errors.
     async requestObjectivesList<T>(endpoint: string, method: string, body?: string, fError?: (code: number) => void): Promise<T|null>{
       try {
-        const resp =await request("https://i5ufjtn3aj.execute-api.eu-west-3.amazonaws.com/dev", endpoint, method, body);
+        const resp =await request(getObjectivesListURL(), endpoint, method, body);
         
         const respData: Response<T> = await resp.json();
         if(resp.ok && respData.data){
