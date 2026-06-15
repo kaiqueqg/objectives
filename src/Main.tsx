@@ -10,9 +10,6 @@ import ObjsListView from "./ObjsListView/ObjsListView";
 import DevView from "./DevView/DevView";
 import { useLogContext } from "./Contexts/LogContext";
 import { useStorageContext } from "./Contexts/StorageContext";
-import ArchivedView from "./ArchivedView/ArchivedView";
-import { Alert } from 'react-native';
-import Constants, { ExecutionEnvironment } from "expo-constants";
 import PressImage from "./PressImage/PressImage";
 import * as LocalAuthentication from 'expo-local-authentication';
 import { Images } from "./Images";
@@ -32,7 +29,7 @@ let appJustLaunched = true;
 const Main = (props: MainProps) => {
   const { messageList, popMessage, log } = useLogContext();
   const { storage } = useStorageContext();
-  const { requestBiometricAuth } = useUserContext();
+  const { requestBiometricAuth, isLogged, user } = useUserContext();
   const {
     isReady,
     userPrefs,
@@ -154,7 +151,7 @@ const Main = (props: MainProps) => {
 
   const onFirstOpenLock = async () => {
     const listeningUserPrefs = await storage.readUserPrefs();
-    if(listeningUserPrefs && listeningUserPrefs.shouldLockOnOpen){
+    if((listeningUserPrefs && listeningUserPrefs.shouldLockOnOpen) || (isLogged && user.Role === 'Admin')){
       await testBioAuth();
     }
     appJustLaunched = false;
@@ -173,15 +170,16 @@ const Main = (props: MainProps) => {
   }
 
   const getCurrentView = () => {
-    // return <AlertsView/>
     if(currentView === Views.LoginView){
       return <LoginView viewType="Full"/>;
     }
     else if(currentView === Views.ArchivedView){
-      return <ArchivedView/>
+      const list = objectives.filter(obj => obj.IsArchived);
+      return <ObjsListView displayObjectives={list} isArchivedView/>
     }
     else if(currentView === Views.ListView){
-      return <ObjsListView/>
+      const list = objectives.filter(obj => !obj.IsArchived);
+      return <ObjsListView  displayObjectives={list}/>
     }
     else if(currentView === Views.DevView){
       return <DevView/>

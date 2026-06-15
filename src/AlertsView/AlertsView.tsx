@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useLogContext } from '../Contexts/LogContext';
 import ButtonView from '../ButtonView/ButtonView';
 import { useUserContext } from '../Contexts/UserContext';
-import { MessageType, PopMessage } from '../Types';
+import { HandPosition, MessageType, PopMessage } from '../Types';
 import PressImage from '../PressImage/PressImage';
 import { Images } from '../Images';
 import { ExecutionEnvironment } from 'expo-constants';
@@ -14,14 +14,11 @@ interface AlertsViewProps {
 
 const AlertsView: React.FC<AlertsViewProps> = (props: AlertsViewProps) => {
   const { log, messageListLogs, popMessage, deleteMessageListLogs } = useLogContext();
-  const { theme, user } = useUserContext();
+  const { theme, user, userPrefs } = useUserContext();
   
   const s = StyleSheet.create({
     container: {
       flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      verticalAlign: 'middle',
       flexDirection: 'column',
     },
     buttonsView: {
@@ -43,8 +40,6 @@ const AlertsView: React.FC<AlertsViewProps> = (props: AlertsViewProps) => {
       borderStyle: 'solid',
     },
     scrollView: {
-      flex: 1,
-      width: '100%',
     },
     text:{
       flex: 1,
@@ -57,7 +52,6 @@ const AlertsView: React.FC<AlertsViewProps> = (props: AlertsViewProps) => {
 
       borderColor: theme.bordercolorfade,
       borderWidth: 1,
-      // borderRadius: 5,
       borderStyle: 'solid',
     },
   });
@@ -67,7 +61,7 @@ const AlertsView: React.FC<AlertsViewProps> = (props: AlertsViewProps) => {
       <ScrollView style={s.scrollView}>
         {
           messageListLogs.map((t: PopMessage, i: number) => {
-            return <PopMessageView key={i.toString()} message={{id: i.toString(), text: t.text, timeout: Infinity, type: t.type, createdAt: t.createdAt, options:{ShowTimeSince: true}}}></PopMessageView>
+            return <PopMessageView key={i.toString()} message={{id: i.toString(), text: t.text, timeout: Infinity, type: t.type, createdAt: t.createdAt, options:{ShowTimeSince: true}}}/>
           })
         }
       </ScrollView>

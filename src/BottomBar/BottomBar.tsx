@@ -164,7 +164,7 @@ const BottomBar = (props: BottomBarProps) => {
         <>
           {getBottomIcon(BottomBarIcons.User)}
           {getBottomIcon(BottomBarIcons.Settings)}
-          {getBottomIcon(BottomBarIcons.Theme)}
+          {/* {getBottomIcon(BottomBarIcons.Theme)} */}
           {getBottomIcon(BottomBarIcons.Dev)}
           {getBottomIcon(BottomBarIcons.Sync)}
           {getBottomIcon(BottomBarIcons.Alerts)}
@@ -178,7 +178,7 @@ const BottomBar = (props: BottomBarProps) => {
           {getBottomIcon(BottomBarIcons.Alerts)}
           {getBottomIcon(BottomBarIcons.Dev)}
           {getBottomIcon(BottomBarIcons.Sync)}
-          {getBottomIcon(BottomBarIcons.Theme)}
+          {/* {getBottomIcon(BottomBarIcons.Theme)} */}
           {getBottomIcon(BottomBarIcons.Settings)}
           {getBottomIcon(BottomBarIcons.User)}
         </>

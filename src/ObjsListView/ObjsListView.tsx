@@ -11,6 +11,8 @@ import { Images } from "../Images";
 import { compareTextForSearch } from "../Helper";
 
 export interface ObjsListViewProps {
+  displayObjectives: Objective[],
+  isArchivedView?: boolean,
 }
 
 const ObjsListView = (props: ObjsListViewProps) => {
@@ -32,8 +34,7 @@ const ObjsListView = (props: ObjsListViewProps) => {
   const [isEditingPos, setIsEditingPos] = useState<boolean>(false);
   const [isEndingPos, setIsEndingPos] = useState<boolean>(false);
   const [objectivesSelected, setObjectivesSelected] = useState<Objective[]>([]);
-  const [unarchivedObjectives, setUnarchivedObjectives] = useState<Objective[]>([]);
-  const [unarchivedTags, setUnarchivedTags] = useState<string[]>([]);
+  // const [displayObjectives, setDisplayObjectives] = useState<Objective[]>([]);
 
   const [isTagsListFolded, setIsTagsListFolded] = useState<boolean>(false);
   const [isObjectiveListFolded, setIsObjectiveListFolded] = useState<boolean>(false);
@@ -68,17 +69,8 @@ const ObjsListView = (props: ObjsListViewProps) => {
     };
   }, []);
 
-  useEffect(() => {
-
-  }, [messageList])
-
   useEffect(()=>{
-    const unarchivedObjectives = objectives.filter(obj => !obj.IsArchived);
-    setUnarchivedObjectives(unarchivedObjectives);
-
-    let unarchivedTags = unarchivedObjectives.map(obj => obj.Tags).flat();
-    const uniqueUnarchivedTags = Array.from(new Set(['Pin', ...unarchivedTags]));
-    setUnarchivedTags(uniqueUnarchivedTags);
+    
   }, [objectives, availableTags, selectedTags]);
 
   const onSelectCurrentObj = async (id: string) => { 
@@ -234,7 +226,7 @@ const ObjsListView = (props: ObjsListViewProps) => {
     const shouldShowTag =  matchingTags.length === 1 && matchingTags[0] === 'Pin';
 
     if(!tagShow) return null;
-    if(item.IsArchived) return null;
+    // if(item.IsArchived) return null;
 
     const isSelected = objectivesSelected.some(obj => obj === item);
 
@@ -283,7 +275,7 @@ const ObjsListView = (props: ObjsListViewProps) => {
     return (
       <View style={s.containerListTagsTitle}>
         <View style={gs.baseImageContainer}></View>
-        <Text style={s.containerObjectiveTitleText}>{'OBJECTIVES'}</Text>
+        <Text style={s.containerObjectiveTitleText}>{props.isArchivedView?'ARCHIVED OBJECTIVES':'OBJECTIVES'}</Text>
         {isObjectiveListFolded?
           <PressImage onPress={()=>{setIsObjectiveListFolded(false)}} disable={isEditingPos} source={Images.UpChevron}/>
           :
@@ -297,7 +289,7 @@ const ObjsListView = (props: ObjsListViewProps) => {
     if(isObjectiveListFolded) return <></>;
 
     let displayList: Objective[] = [];
-    unarchivedObjectives.forEach((o:Objective) => {
+    props.displayObjectives.forEach((o:Objective) => {
       let shouldAddIsInSearch = true
       if(objsSearchToShow.length && !objsSearchToShow.includes(o.ObjectiveId)) shouldAddIsInSearch = false;
       
@@ -317,7 +309,7 @@ const ObjsListView = (props: ObjsListViewProps) => {
       <Text key={storage.randomId()} style={[s.tag, s.tagSpecial]} onPress={() => {unselectAllTags()}}>{'None'}</Text>,
       <Text key={'Pin'} style={[s.tag, s.tagSelected]} onPress={() => {selectUnselectedTag('Pin')}}>{'Pin'}</Text>,
     ];
-    
+
     const availableTagsSorted = availableTags.sort((a, b) => {
       if (a === "Pin") return -1;
       if (b === "Pin") return 1;
@@ -327,9 +319,16 @@ const ObjsListView = (props: ObjsListViewProps) => {
     for(let i = 0; i < availableTagsSorted.length; i++){
       if(availableTagsSorted[i] !== 'Pin'){
         const isSelected = selectedTags.some(obj => obj === availableTagsSorted[i]);
-        listOfTags.push(
-          <Text key={availableTagsSorted[i]} style={[s.tag, isSelected? s.tagSelected:undefined]} onPress={()=>selectUnselectedTag(availableTagsSorted[i])}>{availableTagsSorted[i]}</Text>
-        )
+
+        const tagExistInDisplayObjectives = props.displayObjectives.some(o=>o.Tags.includes(availableTagsSorted[i]))
+
+        console.log('Tag ' + availableTagsSorted[i] + '? ' + tagExistInDisplayObjectives)
+
+        if(tagExistInDisplayObjectives){
+          listOfTags.push(
+            <Text key={availableTagsSorted[i]} style={[s.tag, isSelected? s.tagSelected:undefined]} onPress={()=>selectUnselectedTag(availableTagsSorted[i])}>{availableTagsSorted[i]}</Text>
+          )
+        }
       }
     }
     return (
@@ -343,7 +342,7 @@ const ObjsListView = (props: ObjsListViewProps) => {
     return (
       <View style={s.containerListTagsTitle}>
         <View style={gs.baseImageContainer}></View>
-        <Text style={[s.containerTagTitleText]}>{'TAGS'}</Text>
+        <Text style={[s.containerTagTitleText]}>{props.isArchivedView?'ARCHIVED TAGS':'TAGS'}</Text>
         {isTagsListFolded?
           <PressImage disable={isEditingPos} source={Images.UpChevron} onPress={()=>{setIsTagsListFolded(false)}}/>
           :
@@ -520,7 +519,6 @@ const ObjsListView = (props: ObjsListViewProps) => {
     containerListTag:{
       flexDirection: "column",
       width: '100%',
-      backgroundColor: t.backgroundcolordark,
     },
     containerListTagsTitle:{
       flexDirection: "row",
@@ -529,19 +527,18 @@ const ObjsListView = (props: ObjsListViewProps) => {
       width: '100%',
       minHeight: 40,
 
-      color: t.textcolor,
-      backgroundColor: t.backgroundcolordark,
+      backgroundColor: props.isArchivedView?t.backgroundcolorcontrast:t.backgroundcolordarker,
       textAlign: 'center',
     },
     containerTagTitleText:{
       flex: 1,
-      color: isTagsListFolded ? t.textcolorfade:t.textcolor,
+      color: isTagsListFolded ? t.textcolorfade:(props.isArchivedView?t.textcolorcontrast:t.textcolor),
       textAlign: 'center',
       fontWeight: 'bold',
     },
     containerObjectiveTitleText:{
       flex: 1,
-      color: isObjectiveListFolded ? t.textcolorfade:t.textcolor,
+      color: isObjectiveListFolded ? t.textcolorfade:(props.isArchivedView?t.textcolorcontrast:t.textcolor),
       textAlign: 'center',
       fontWeight: 'bold',
     },
@@ -550,16 +547,6 @@ const ObjsListView = (props: ObjsListViewProps) => {
       flexDirection: "column",
       width: '100%',
       backgroundColor: t.backgroundcolordark,
-    },
-    containerObjectivesListTitle:{
-      fontWeight: 'bold',
-      color: t.textcolor,
-      backgroundColor: t.backgroundcolordarker,
-      justifyContent: 'center',
-      alignItems: 'center',
-      textAlign: 'center',
-      padding: 10,
-      width: '100%',
     },
     tagList: {
       flexWrap: "wrap",
@@ -602,11 +589,6 @@ const ObjsListView = (props: ObjsListViewProps) => {
       borderColor: t.textcolorcontrast,
       borderWidth: 1,
       borderStyle: 'solid',
-    },
-    tagsList:{
-      paddingTop: 10,
-      paddingBottom: 15,
-      paddingHorizontal: 15,
     },
     objectivesList:{
       flex: 1,
@@ -670,54 +652,6 @@ const ObjsListView = (props: ObjsListViewProps) => {
       borderBottomWidth: 1,
       borderStyle: 'solid',
     },
-    allTextContainer:{
-      width: 100,
-      height: 30,
-      marginTop: 5,
-      marginBottom: 5,
-      marginRight: 10,
-      justifyContent: 'center',
-      alignItems: 'center',
-      borderColor: t.bordercolor,
-      borderWidth: 1,
-      borderStyle: 'solid',
-      borderRadius: 5,
-    },
-    allText:{
-      color: t.textcolor,
-    },
-    imageContainerSelected:{
-      ...gs.baseImageContainer,
-      backgroundColor: t.backgroundcolordarker,
-    },
-    imageNoTint:{
-      ...gs.baseSmallImage,
-    },
-    image:{
-      ...gs.baseSmallImage,
-      tintColor: t.icontint,
-    },
-    imageCancel:{
-      ...gs.baseSmallImage,
-      tintColor: t.cancelicontint,
-    },
-    imageNewFile:{
-      ...gs.baseImage,
-      tintColor: t.icontint,
-    },
-    imageUpDown:{
-      ...gs.baseSmallImage,
-      tintColor: t.icontint,
-    },
-    redImageColor:{
-      tintColor: t.trashicontint,
-    },
-    greenImageColor:{
-      tintColor: t.doneicontint,
-    },
-    imageFade:{
-      tintColor: t.icontintfade,
-    },
     objectiveContainer:{
       flexDirection: 'row',
       marginBottom: 5,
@@ -769,67 +703,11 @@ const ObjsListView = (props: ObjsListViewProps) => {
       borderStyle: 'solid',
       borderColor: 'red',
     },
-    tagButtonContainer:{
-      display:'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      minHeight: 40,
-      marginBottom: 5,
-
-      borderRadius: 30,
-      borderColor: t.bordercolorfade,
-      borderWidth: 1,
-      borderStyle: 'solid',
-    },
-    tagButtonContainerSelected:{
-      justifyContent: 'center',
-      alignItems: 'center',
-      borderColor: t.bordercolor,
-      backgroundColor: t.backgroundcolordarker,
-    },
-    allNoneTagContainer:{
-      display:'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      minHeight: 40,
-      marginTop: 10,
-      marginHorizontal: 15,
-
-      borderRadius: 30,
-      borderWidth: 1,
-      borderStyle: 'solid',
-      borderColor: t.bordercolor,
-      backgroundColor: t.backgroundcolorcontrast,
-    },
-    allNoneTagText:{
-      fontSize: 16,
-      padding: 10,
-      color: t.textcolorcontrast,
-    },
     text: {
       padding: 10,
       fontSize: 16,
       color: t.textcolor,
       textAlign: "center",
-    },
-    textSelected:{
-      color: t.textcolor,
-    },
-    textDark:{
-      color: 'black',
-      fontWeight: 'bold',
-    },
-    imageMoveContainer:{
-      justifyContent: 'center',
-      alignItems: 'center',
-      width: 50,
-      marginVertical: 5,
-      marginRight: 10,
-    },
-    imageMove:{
-      height: 20,
-      width: 20,
-      tintColor: t.icontint,
     },
   });
 

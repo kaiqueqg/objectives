@@ -1,7 +1,7 @@
 
 import { View, StyleSheet, Text, Pressable, Animated } from "react-native";
 import { useUserContext } from "../Contexts/UserContext";
-import { MessageType, PopMessage, PopMessageOptions } from "../Types";
+import { HandPosition, MessageType, PopMessage, PopMessageOptions } from "../Types";
 import { useEffect, useState } from "react";
 import { useLogContext } from "../Contexts/LogContext";
 import { cp } from "../ColorPalette";
@@ -12,7 +12,7 @@ export interface PopMessageViewProps {
 }
 const PopMessageView = (props: PopMessageViewProps) => {
   const { removeMessage, log } = useLogContext();
-  const { theme: t, fontTheme: f } = useUserContext();
+  const { theme: t, fontTheme: f, userPrefs } = useUserContext();
   const { message } = props;
 
   const [scale, setScale] = useState<number>(1);
@@ -71,15 +71,15 @@ const PopMessageView = (props: PopMessageViewProps) => {
   const s = StyleSheet.create({
     messageContainer:{
       opacity: scale,
-      alignSelf: 'flex-end',
       flexDirection: 'column',
+      alignSelf: userPrefs.handPosition === HandPosition.Left?'flex-start':'flex-end',
       
       borderColor: 'black',
       borderWidth: 1,
       borderTopLeftRadius: 15,
-      borderBottomLeftRadius: 15,
+      borderBottomLeftRadius: userPrefs.handPosition === HandPosition.Left? 0:15,
       borderTopRightRadius: 15,
-      borderBottomRightRadius: 0,
+      borderBottomRightRadius: userPrefs.handPosition !== HandPosition.Left? 0:15,
       borderStyle: 'solid',
 
       marginVertical: 3,

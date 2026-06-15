@@ -334,12 +334,16 @@ export const LogProvider: React.FC<LogProviderProps> = ({ children }) => {
 
   
   const popMessage = (text: string, options?: PopMessageOptions) => {
+    //Calculate display time
     const words = text.split(/\s+/).length;
     const displayTime = Math.max(5, words * 0.8);
-
     let timeout = (options && options.TimeoutInSeconds)??displayTime;
     timeout = Math.min(Math.max(timeout, 1), 30);
     timeout *= 1000;
+
+    const adjustedList:PopMessage[] = messageList.filter((e: PopMessage) => {
+      return e.text !== text;
+    });
 
     const date = new Date();
     const msg: PopMessage = {
@@ -352,7 +356,7 @@ export const LogProvider: React.FC<LogProviderProps> = ({ children }) => {
     };
 
     setMessageListLogs([...messageListLogs, msg]);
-    setMessageList(prev => [...prev, msg]);
+    setMessageList([...adjustedList, msg]);
   }
   const removeMessage = (removeId: string) => {
     setMessageList(prevMessages => prevMessages.filter(msg => msg.id !== removeId));

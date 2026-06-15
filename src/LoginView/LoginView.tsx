@@ -96,7 +96,7 @@ export const LoginView = (props: LoginViewProps = { viewType: 'Full' }) => {
     writeSelectedTags([...selectedTagsStillOnAvailable, ...downloadTagsNotInAvailable]);
   }
 
-  const syncObjectivesList = async (handleRequestError?: () => void) => {
+  const syncObjectivesList = async () => {
     try {
       if(userPrefs.vibrate) Vibration.vibrate(Pattern.Ok);
 
